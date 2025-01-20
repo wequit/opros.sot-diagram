@@ -15,7 +15,6 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Radar, Bar, Pie } from 'react-chartjs-2';
-import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
   RadialLinearScale,
@@ -28,9 +27,34 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement,
-  ChartDataLabels
+  ArcElement
 );
+
+interface RatingScaleProps {
+  value: number;
+  votes: number;
+}
+
+const RatingScale = ({ value, votes }: RatingScaleProps) => {
+  const safeValue = value || 0;
+  const indicatorPosition = (safeValue / 5) * 100;
+
+  return (
+    <div className="relative w-full">
+      <div className="h-4 flex rounded-full overflow-hidden">
+        <div className="w-1/5 bg-[#FF8B8B]" />
+        <div className="w-1/5 bg-[#FFB088]" />
+        <div className="w-1/5 bg-[#FFE183]" />
+        <div className="w-1/5 bg-[#B8E986]" />
+        <div className="w-1/5 bg-[#7BC86C]" />
+      </div>
+      <div 
+        className="absolute top-0 bottom-0 w-0.5 bg-black"
+        style={{ left: `${indicatorPosition}%` }}
+      />
+    </div>
+  );
+};
 
 const EvaluationResults = () => {
   const [activeTab, setActiveTab] = useState('gender');
@@ -190,15 +214,22 @@ const EvaluationResults = () => {
         enabled: true
       },
       datalabels: {
-        color: '#FFFFFF',
+        color: '#000000',
         font: {
-          weight: 'bold' as const,
-          size: 16
+          weight: 'bold',
+          size: 13
         },
-        formatter: (value: number) => `${value}%`,
+        formatter: (value: number, context: any) => {
+          const label = context.chart.data.labels[context.dataIndex];
+          return [label, value + '%'];
+        },
+        anchor: 'center',
+        align: 'center',
         display: true,
-        anchor: 'center' as const,
-        align: 'center' as const
+        textAlign: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        borderRadius: 4,
+        padding: 4
       }
     },
     maintainAspectRatio: false,
@@ -211,18 +242,7 @@ const EvaluationResults = () => {
   const barOptions = {
     indexAxis: 'y' as const,
     plugins: { 
-      legend: { display: false },
-      datalabels: {
-        color: '#000000',
-        font: {
-          weight: 'bold' as const,
-          size: 14
-        },
-        anchor: 'end' as const,
-        align: 'end' as const,
-        formatter: (value: number) => `${value}%`,
-        display: true
-      }
+      legend: { display: false }
     },
     scales: {
       x: {
@@ -304,80 +324,95 @@ const EvaluationResults = () => {
   // Данные для оценок судьи
   const judgeRatings = [
     {
-      title: 'Разъяснение прав и обязанностей в судебном процессе',
-      rating: 3.0
+      title: "Разъяснение прав и обязанностей в судебном процессе",
+      value: 3.0,
+      votes: 999
     },
     {
-      title: 'Обеспечению равных условий для сторон в процессе',
-      rating: 4.1
+      title: "Обеспечению равных условий для сторон в процессе",
+      value: 4.1,
+      votes: 999
     },
     {
-      title: 'Проявление уважения к участникам судебного процесса',
-      rating: 3.5
+      title: "Проявление уважения к участникам судебного процесса",
+      value: 3.5,
+      votes: 999
     },
     {
-      title: 'Контроль судьи за порядком в зале суда',
-      rating: 2.0
+      title: "Контроль судьи за порядком в зале суда",
+      value: 2.0,
+      votes: 999
     },
     {
-      title: 'Разъяснение судебного решение',
-      rating: 2.0
+      title: "Разъяснение судебного решение",
+      value: 2.0,
+      votes: 999
     }
   ];
 
   // Данные для оценок помощника и секретаря
   const secretaryRatings = [
     {
-      title: 'Вежливость при общении',
-      rating: 3.8
+      title: "Вежливость при общении",
+      value: 3.8,
+      votes: 999
     },
     {
-      title: 'Доступность информации о процессе',
-      rating: 3.2
+      title: "Доступность информации о процессе",
+      value: 3.2,
+      votes: 999
     },
     {
-      title: 'Своевременность оформления документов',
-      rating: 4.0
+      title: "Своевременность оформления документов",
+      value: 4.0,
+      votes: 999
     }
   ];
 
   // Обновленные данные для оценок канцелярии
   const officeRatings = [
     {
-      title: 'Взаимодействие с судебной канцелярией',
-      rating: 3.0
+      title: "Взаимодействие с судебной канцелярией",
+      value: 3.0,
+      votes: 999
     },
     {
-      title: 'Предоставление всей необходимой информации',
-      rating: 4.1
+      title: "Предоставление всей необходимой информации",
+      value: 4.1,
+      votes: 999
     }
   ];
 
   // Данные для оценок доступности
   const accessibilityRatings = [
     {
-      title: 'Доступность здания суда для людей с инвалидностью и маломобильных категорий',
-      rating: 3.0
+      title: "Доступность здания суда для людей с инвалидностью и маломобильных категорий",
+      value: 0.0,
+      votes: 999
     },
     {
-      title: 'Оцените удобство и комфорт зала суда',
-      rating: 4.1
+      title: "Оцените удобство и комфорт зала суда",
+      value: 0.0,
+      votes: 999
     },
     {
-      title: 'Навигация внутри здания суда',
-      rating: 3.5
+      title: "Навигация внутри здания суда",
+      value: 0.0,
+      votes: 999
     }
   ];
 
   // Данные для оценок судебных приставов
   const bailiffRatings = [
     {
-      title: 'Профессионализм судебных приставов',
-      rating: 3.0
+      title: "Профессионализм судебных приставов",
+      value: 0.0,
+      votes: 999
     },
     {
-      title: 'Уровень безопасности в здании суда, на процессах',
-      rating: 4.1
+      title: "Уровень безопасности в здании суда, на процессах",
+      value: 0.0,
+      votes: 999
     }
   ];
 
@@ -409,24 +444,6 @@ const EvaluationResults = () => {
       data: [45, 30, 20, 55, 60],
       backgroundColor: 'rgba(121, 82, 179, 0.8)',
     }]
-  };
-
-  // Компонент для отображения цветной шкалы рейтинга
-  const RatingScale = ({ rating }: { rating: number }) => {
-    return (
-      <div className="flex items-center gap-3">
-        <div className="w-[200px] h-[6px] rounded-full overflow-hidden bg-[#E9ECEF]">
-          <div 
-            className="h-full rounded-full" 
-            style={{
-              width: `${(rating / 5) * 100}%`,
-              background: 'linear-gradient(90deg, #FF4D4D 0%, #FFC107 50%, #4CAF50 100%)'
-            }}
-          />
-        </div>
-        <span className="text-[16px] font-medium ml-2">{rating.toFixed(1)}</span>
-      </div>
-    );
   };
 
   return (
@@ -539,7 +556,7 @@ const EvaluationResults = () => {
               {judgeRatings.map((item, index) => (
                 <div key={index} className="flex items-center gap-4">
                   <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale rating={item.rating} />
+                  <RatingScale value={item.value} votes={item.votes} />
                 </div>
               ))}
             </div>
@@ -594,7 +611,7 @@ const EvaluationResults = () => {
               {secretaryRatings.map((item, index) => (
                 <div key={index} className="flex items-center gap-4">
                   <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale rating={item.rating} />
+                  <RatingScale value={item.value} votes={item.votes} />
                 </div>
               ))}
             </div>
@@ -621,7 +638,7 @@ const EvaluationResults = () => {
               {officeRatings.map((item, index) => (
                 <div key={index} className="flex items-center gap-4">
                   <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale rating={item.rating} />
+                  <RatingScale value={item.value} votes={item.votes} />
                 </div>
               ))}
             </div>
@@ -671,31 +688,40 @@ const EvaluationResults = () => {
       <div className="max-w-[1440px] mx-auto mt-6">
         <div className="grid grid-cols-2 gap-6">
           {/* Оценки доступности */}
-          <div>
-            <h2 className="text-xl font-bold text-[#212529] mb-4">Оценки доступности</h2>
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <div className="space-y-5">
-                {accessibilityRatings.map((item, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                    <RatingScale rating={item.rating} />
-                  </div>
-                ))}
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <h2 className="text-2xl font-bold mb-6">Оценки доступности</h2>
+            
+            <div className="space-y-8">
+              <div>
+                <div className="mb-4">Доступность здания суда для людей с инвалидностью и маломобильных категорий</div>
+                <RatingScale value={3.0} votes={999} />
+              </div>
+              
+              <div>
+                <div className="mb-4">Оцените удобство и комфорт зала суда</div>
+                <RatingScale value={4.1} votes={999} />
+              </div>
+              
+              <div>
+                <div className="mb-4">Навигация внутри здания суда</div>
+                <RatingScale value={3.5} votes={999} />
               </div>
             </div>
           </div>
 
           {/* Оценки судебных приставов */}
-          <div>
-            <h2 className="text-xl font-bold text-[#212529] mb-4">Оценки судебных приставов</h2>
-            <div className="bg-white rounded-lg p-6 shadow-sm">
-              <div className="space-y-5">
-                {bailiffRatings.map((item, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                    <RatingScale rating={item.rating} />
-                  </div>
-                ))}
+          <div className="bg-white rounded-lg p-6 shadow-sm">
+            <h2 className="text-2xl font-bold mb-6">Оценки судебных приставов</h2>
+            
+            <div className="space-y-8">
+              <div>
+                <div className="mb-4">Профессионализм судебных приставов</div>
+                <RatingScale value={3.0} votes={999} />
+              </div>
+              
+              <div>
+                <div className="mb-4">Уровень безопасности в здании суда, на процессах</div>
+                <RatingScale value={4.1} votes={999} />
               </div>
             </div>
           </div>
