@@ -1,78 +1,64 @@
 'use client';
-import React, { useState } from 'react';
-import EvaluationQuestions from '@/app/evaluations/page'; // Импорт компонента оценки
+import React, { useState, useCallback } from 'react';
+import EvaluationQuestions from '@/app/evaluations/page';
+
+// ... остальные импорты и интерфейсы ...
 
 export default function Home() {
-  // Состояния для выбранного месяца и квартала
-  const [activeMonth, setActiveMonth] = useState<number | null>(0); // Январь по умолчанию
-  const [activeQuarter, setActiveQuarter] = useState<number | null>(0); // I квартал по умолчанию
+  const [activeMonth, setActiveMonth] = useState<number>(0);
+  const [activeQuarter, setActiveQuarter] = useState<number>(0);
+  const [dateRange, setDateRange] = useState<DateRange>({
+    startDate: '2025-01-01',
+    endDate: '2025-01-15',
+    year: '2025'
+  });
+
+  const months: string[] = [
+    'янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.',
+    'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'
+  ];
+
+  const quarters = ['I', 'II', 'III', 'IV'];
+
+  // ... handleDateChange функция ...
 
   return (
-    <div>
-      <h1 className="text-xl font-semibold mb-4">Оценка деятельности районного суда за период</h1>
+    <div className="space-y-6">
+      <h1 className="text-2xl font-semibold text-gray-800">
+        Оценка деятельности районного суда за период
+      </h1>
 
-      {/* Период */}
-      <div className="grid grid-cols-12 gap-2 items-center">
-        <input
-          type="date"
-          className="col-span-3 border border-gray-300 rounded px-2 py-1"
-          defaultValue="2025-01-01"
-        />
-        <span className="col-span-1 text-center">По</span>
-        <input
-          type="date"
-          className="col-span-3 border border-gray-300 rounded px-2 py-1"
-          defaultValue="2025-01-15"
-        />
-        <input
-          type="number"
-          className="col-span-2 border border-gray-300 rounded px-2 py-1"
-          defaultValue="2025"
-        />
+      {/* Инпуты дат и года */}
+      <div className="grid grid-cols-12 gap-4 items-center">
+        {/* ... существующие инпуты ... */}
       </div>
 
-      {/* Кварталы */}
-      <div className="mt-4 flex gap-2 justify-start">
-        {['I', 'II', 'III', 'IV'].map((quarter, index) => (
+      {/* Объединенные кнопки кварталов и месяцев */}
+      <div className="flex">
+        {quarters.map((quarter, index) => (
           <button
             key={quarter}
-            onClick={() => setActiveQuarter(index)} // Устанавливаем активный квартал
-            className={`border border-gray-300 px-4 py-1 rounded ${
-              activeQuarter === index ? 'bg-blue-100 border-blue-400' : 'bg-white'
-            } hover:bg-gray-200`}>
+            onClick={() => setActiveQuarter(index)}
+            className={`month-button ${
+              activeQuarter === index ? 'active' : ''
+            }`}
+          >
             {quarter}
           </button>
         ))}
-      </div>
-
-      {/* Месяцы */}
-      <div className="mt-4 grid grid-cols-12 gap-2">
-        {[
-          'янв.',
-          'фев.',
-          'мар.',
-          'апр.',
-          'май',
-          'июн.',
-          'июл.',
-          'авг.',
-          'сен.',
-          'окт.',
-          'ноя.',
-          'дек.',
-        ].map((month, index) => (
+        {months.map((month, index) => (
           <button
-            key={index}
-            onClick={() => setActiveMonth(index)} // Устанавливаем активный месяц
-            className={`border border-gray-300 px-4 py-1 rounded ${
-              activeMonth === index ? 'bg-blue-100 border-blue-400' : 'bg-white'
-            } hover:bg-gray-200`}>
+            key={month}
+            onClick={() => setActiveMonth(index)}
+            className={`month-button ${
+              activeMonth === index ? 'active' : ''
+            }`}
+          >
             {month}
           </button>
         ))}
       </div>
 
-      {/* Добавьте компонент EvaluationQuestions */}
       <EvaluationQuestions />
     </div>
   );

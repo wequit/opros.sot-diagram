@@ -6,7 +6,10 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "test": "jest",
+    "lint:fix": "next lint --fix"
   },
   "dependencies": {
     "autoprefixer": "^10.4.20",
