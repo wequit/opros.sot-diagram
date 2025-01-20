@@ -15,6 +15,7 @@ import {
   ArcElement,
 } from 'chart.js';
 import { Radar, Bar, Pie } from 'react-chartjs-2';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
   RadialLinearScale,
@@ -27,7 +28,8 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
+  ChartDataLabels
 );
 
 const EvaluationResults = () => {
@@ -93,6 +95,9 @@ const EvaluationResults = () => {
         'rgba(75, 192, 192, 0.8)',
         'rgba(153, 102, 255, 0.8)',
       ],
+      datalabels: {
+        display: true
+      }
     }]
   };
 
@@ -114,6 +119,9 @@ const EvaluationResults = () => {
         'rgba(83, 166, 250, 1)',
         'rgba(255, 145, 159, 1)',
       ],
+      datalabels: {
+        display: true
+      }
     }]
   };
 
@@ -127,6 +135,9 @@ const EvaluationResults = () => {
         'rgba(220, 53, 69, 1)',
         'rgba(255, 153, 0, 1)'
       ],
+      datalabels: {
+        display: true
+      }
     }]
   };
 
@@ -174,16 +185,44 @@ const EvaluationResults = () => {
             size: 14
           }
         }
+      },
+      tooltip: {
+        enabled: true
+      },
+      datalabels: {
+        color: '#FFFFFF',
+        font: {
+          weight: 'bold' as const,
+          size: 16
+        },
+        formatter: (value: number) => `${value}%`,
+        display: true,
+        anchor: 'center' as const,
+        align: 'center' as const
       }
     },
-    maintainAspectRatio: false
+    maintainAspectRatio: false,
+    layout: {
+      padding: 20
+    }
   };
 
   // Общие опции для столбчатых диаграмм
   const barOptions = {
     indexAxis: 'y' as const,
     plugins: { 
-      legend: { display: false }
+      legend: { display: false },
+      datalabels: {
+        color: '#000000',
+        font: {
+          weight: 'bold' as const,
+          size: 14
+        },
+        anchor: 'end' as const,
+        align: 'end' as const,
+        formatter: (value: number) => `${value}%`,
+        display: true
+      }
     },
     scales: {
       x: {
