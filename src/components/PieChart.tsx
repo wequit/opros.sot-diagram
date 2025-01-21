@@ -36,8 +36,8 @@ export function PieChart({ data, title }: PieChartProps) {
           const label = context.chart.data.labels[context.dataIndex];
           return [label, value + '%'];
         },
-        anchor: 'center',
-        align: 'center',
+        anchor: 'center' as const,
+        align: 'center' as const,
       },
     },
     layout: {

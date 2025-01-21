@@ -6,58 +6,97 @@ import {
   PointElement,
   LineElement,
   Filler,
+  Tooltip,
+  Legend,
   CategoryScale,
   LinearScale,
   BarElement,
-  Title,
-  Tooltip,
-  Legend,
   ArcElement,
 } from 'chart.js';
 import { Radar, Bar, Pie } from 'react-chartjs-2';
+import { Box, Tab, Tabs } from '@mui/material';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
   RadialLinearScale,
   PointElement,
   LineElement,
   Filler,
+  Tooltip,
+  Legend,
   CategoryScale,
   LinearScale,
   BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
+  ArcElement,
+  ChartDataLabels
 );
 
 interface RatingScaleProps {
+  title: string;
   value: number;
-  votes: number;
 }
 
-const RatingScale = ({ value, votes }: RatingScaleProps) => {
-  const safeValue = value || 0;
-  const indicatorPosition = (safeValue / 5) * 100;
-
+// Единый компонент RatingScale для всех табов с цветными шкалами
+const RatingScale = ({ value }: { value: number }) => {
   return (
-    <div className="relative w-full">
-      <div className="h-4 flex rounded-full overflow-hidden">
-        <div className="w-1/5 bg-[#FF8B8B]" />
-        <div className="w-1/5 bg-[#FFB088]" />
-        <div className="w-1/5 bg-[#FFE183]" />
-        <div className="w-1/5 bg-[#B8E986]" />
-        <div className="w-1/5 bg-[#7BC86C]" />
+    <div className="flex items-center gap-4">
+      <div className="relative w-[300px]">
+        <div className="h-3 flex rounded-full overflow-hidden">
+          <div className="w-1/5 bg-[#FF8B8B]" />
+          <div className="w-1/5 bg-[#FFB088]" />
+          <div className="w-1/5 bg-[#FFE183]" />
+          <div className="w-1/5 bg-[#B8E986]" />
+          <div className="w-1/5 bg-[#7BC86C]" />
+        </div>
+        <div 
+          className="absolute top-0 bottom-0 w-0.5 bg-black"
+          style={{ left: `${(value / 5) * 100}%` }}
+        />
       </div>
-      <div 
-        className="absolute top-0 bottom-0 w-0.5 bg-black"
-        style={{ left: `${indicatorPosition}%` }}
-      />
+      <span className="text-lg font-bold">{value.toFixed(1)}</span>
     </div>
   );
 };
 
+// Компонент для строки с рейтингом
+const RatingRow = ({ title, value }: { title: string, value: number }) => {
+  return (
+    <div className="flex items-center gap-8 mb-6">
+      <div className="w-[400px]">
+        <span className="text-base">{title}</span>
+      </div>
+      <RatingScale value={value} />
+    </div>
+  );
+};
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
+
 const EvaluationResults = () => {
   const [activeTab, setActiveTab] = useState('gender');
+  const [value, setValue] = useState(0);
   
   // Данные для радарной диаграммы
   const radarData = {
@@ -80,7 +119,7 @@ const EvaluationResults = () => {
     ]
   };
 
-  // Опции для радарной диаграммы
+  // Опции для радарного графика
   const radarOptions = {
     scales: {
       r: {
@@ -88,17 +127,23 @@ const EvaluationResults = () => {
         max: 5,
         beginAtZero: true,
         ticks: {
-          stepSize: 1,
+          stepSize: 1
         }
       }
     },
     plugins: {
       legend: {
-        position: 'bottom',
+        position: 'top' as const,
         labels: {
           padding: 20,
-          usePointStyle: true,
+          usePointStyle: true
         }
+      },
+      datalabels: {
+        color: '#FFFFFF',
+        formatter: (value: number) => `${value}%`,
+        anchor: 'center' as const,
+        align: 'center' as const
       }
     }
   };
@@ -127,25 +172,28 @@ const EvaluationResults = () => {
 
   // Данные для источников трафика
   const trafficData = {
-    labels: ['Cross-network', 'Paid Search', 'Display', 'Direct', 'Organic Search', 'Organic Social'],
+    labels: [
+      'Самостоятельно отсканировал QR-код',
+      'Через сотрудников суда',
+      'Через независимых юристов',
+      'Через мероприятия (театр, кино, собрания и т.д.)',
+      'Через социальные сети (WhatsApp, и т.д.)'
+    ],
     datasets: [{
-      data: [4000, 3000, 2000, 1000, 500, 100],
+      data: [40, 30, 15, 10, 5],
       backgroundColor: 'rgba(54, 162, 235, 0.8)',
     }]
   };
 
   // Данные для круговой диаграммы пола
   const genderData = {
-    labels: ['Женский', 'Мужской'],
+    labels: ['Мужской', 'Женский'],
     datasets: [{
-      data: [37.5, 62.5],
+      data: [60, 40],
       backgroundColor: [
-        'rgba(83, 166, 250, 1)',
-        'rgba(255, 145, 159, 1)',
-      ],
-      datalabels: {
-        display: true
-      }
+        'rgba(54, 162, 235, 0.8)', // синий для мужского
+        'rgba(255, 182, 193, 0.8)', // розовый для женского
+      ]
     }]
   };
 
@@ -197,7 +245,7 @@ const EvaluationResults = () => {
     ]
   };
 
-  // Общие опции для круговых диаграмм
+  // Опции для круговой диаграммы
   const pieOptions = {
     plugins: {
       legend: {
@@ -206,65 +254,63 @@ const EvaluationResults = () => {
           usePointStyle: true,
           padding: 20,
           font: {
-            size: 14
+            size: 12
           }
         }
       },
       tooltip: {
-        enabled: true
+        enabled: false
       },
       datalabels: {
-        color: '#000000',
+        color: '#FFFFFF',
         font: {
-          weight: 'bold',
-          size: 13
+          weight: 'bold' as const,
+          size: 14
         },
-        formatter: (value: number, context: any) => {
-          const label = context.chart.data.labels[context.dataIndex];
-          return [label, value + '%'];
-        },
-        anchor: 'center',
-        align: 'center',
-        display: true,
-        textAlign: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.7)',
-        borderRadius: 4,
-        padding: 4
+        formatter: (value: number) => `${value}%`,
+        anchor: 'center' as const,
+        align: 'center' as const,
+        offset: 0,
+        padding: 0
       }
     },
     maintainAspectRatio: false,
     layout: {
-      padding: 20
+      padding: 0
     }
-  };
+  } as const;
 
-  // Общие опции для столбчатых диаграмм
+  // Опции для столбчатой диаграммы
   const barOptions = {
     indexAxis: 'y' as const,
-    plugins: { 
-      legend: { display: false }
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      datalabels: {
+        color: '#FFFFFF',
+        anchor: 'center' as const,
+        align: 'center' as const,
+        formatter: (value: number) => `${value}%`
+      }
     },
     scales: {
       x: {
+        type: 'linear' as const,
         beginAtZero: true,
         max: 100,
+        grid: { display: false },
         ticks: {
-          callback: (value: number) => `${value}%`,
-          font: {
-            size: 12
+          callback: function(tickValue: string | number) {
+            return `${tickValue}%`;
           }
         }
       },
       y: {
-        ticks: {
-          font: {
-            size: 12
-          }
-        }
+        grid: { display: false }
       }
     },
     maintainAspectRatio: false
-  };
+  } as const;
 
   // Опции для возрастной диаграммы
   const ageOptions = {
@@ -325,47 +371,39 @@ const EvaluationResults = () => {
   const judgeRatings = [
     {
       title: "Разъяснение прав и обязанностей в судебном процессе",
-      value: 3.0,
-      votes: 999
+      value: 3.0
     },
     {
       title: "Обеспечению равных условий для сторон в процессе",
-      value: 4.1,
-      votes: 999
+      value: 4.1
     },
     {
-      title: "Проявление уважения к участникам судебного процесса",
-      value: 3.5,
-      votes: 999
+      title: "Проявление уважения к участникам процесса",
+      value: 3.5
     },
     {
-      title: "Контроль судьи за порядком в зале суда",
-      value: 2.0,
-      votes: 999
+      title: "Контроль за порядком в зале суда",
+      value: 2.0
     },
     {
-      title: "Разъяснение судебного решение",
-      value: 2.0,
-      votes: 999
+      title: "Разъяснение судебного решения",
+      value: 2.0
     }
   ];
 
   // Данные для оценок помощника и секретаря
-  const secretaryRatings = [
+  const assistantRatings = [
     {
       title: "Вежливость при общении",
-      value: 3.8,
-      votes: 999
+      value: 3.8
     },
     {
       title: "Доступность информации о процессе",
-      value: 3.2,
-      votes: 999
+      value: 3.2
     },
     {
       title: "Своевременность оформления документов",
-      value: 4.0,
-      votes: 999
+      value: 4.0
     }
   ];
 
@@ -387,18 +425,15 @@ const EvaluationResults = () => {
   const accessibilityRatings = [
     {
       title: "Доступность здания суда для людей с инвалидностью и маломобильных категорий",
-      value: 0.0,
-      votes: 999
+      value: 3.0
     },
     {
       title: "Оцените удобство и комфорт зала суда",
-      value: 0.0,
-      votes: 999
+      value: 4.1
     },
     {
       title: "Навигация внутри здания суда",
-      value: 0.0,
-      votes: 999
+      value: 3.5
     }
   ];
 
@@ -406,13 +441,11 @@ const EvaluationResults = () => {
   const bailiffRatings = [
     {
       title: "Профессионализм судебных приставов",
-      value: 0.0,
-      votes: 999
+      value: 3.0
     },
     {
       title: "Уровень безопасности в здании суда, на процессах",
-      value: 0.0,
-      votes: 999
+      value: 4.1
     }
   ];
 
@@ -444,6 +477,27 @@ const EvaluationResults = () => {
       data: [45, 30, 20, 55, 60],
       backgroundColor: 'rgba(121, 82, 179, 0.8)',
     }]
+  };
+
+  // Компоненты для табов
+  const AccessibilityTab = () => (
+    <div className="space-y-6">
+      {accessibilityRatings.map((rating, index) => (
+        <RatingRow key={index} title={rating.title} value={rating.value} />
+      ))}
+    </div>
+  );
+
+  const BailiffTab = () => (
+    <div className="space-y-6">
+      {bailiffRatings.map((rating, index) => (
+        <RatingRow key={index} title={rating.title} value={rating.value} />
+      ))}
+    </div>
+  );
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
   };
 
   return (
@@ -537,9 +591,82 @@ const EvaluationResults = () => {
                 </button>
               </div>
               <div className="p-6 h-[300px]">
-                {activeTab === 'gender' && <Pie data={genderData} options={pieOptions} />}
-                {activeTab === 'genderAge' && <Bar data={genderAgeData} options={genderAgeOptions} />}
-                {activeTab === 'age' && <Bar data={ageData} options={ageOptions} />}
+                {activeTab === 'gender' && <Pie data={genderData} options={{
+                  plugins: {
+                    legend: {
+                      position: 'right' as const,
+                      labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                          size: 12
+                        }
+                      }
+                    },
+                    tooltip: {
+                      enabled: true
+                    },
+                    datalabels: {
+                      color: '#fff',
+                      font: {
+                        weight: 'bold',
+                        size: 12
+                      }
+                    }
+                  },
+                  maintainAspectRatio: false,
+                  layout: {
+                    padding: 20
+                  }
+                }} />}
+                {activeTab === 'genderAge' && <Bar data={genderAgeData} options={{
+                  indexAxis: 'y' as const,
+                  plugins: {
+                    legend: {
+                      position: 'bottom' as const
+                    }
+                  },
+                  scales: {
+                    x: {
+                      stacked: true,
+                      ticks: {
+                        callback: function(value: any) {
+                          return value + '%';
+                        }
+                      }
+                    },
+                    y: {
+                      stacked: true
+                    }
+                  },
+                  maintainAspectRatio: false
+                }} />}
+                {activeTab === 'age' && <Bar data={ageData} options={{
+                  plugins: {
+                    legend: {
+                      display: false
+                    }
+                  },
+                  scales: {
+                    x: {
+                      grid: {
+                        display: false
+                      }
+                    },
+                    y: {
+                      beginAtZero: true,
+                      ticks: {
+                        callback: function(value: any) {
+                          return value + '%';
+                        }
+                      },
+                      grid: {
+                        display: false
+                      }
+                    }
+                  },
+                  maintainAspectRatio: false
+                }} />}
               </div>
             </div>
           </div>
@@ -556,7 +683,7 @@ const EvaluationResults = () => {
               {judgeRatings.map((item, index) => (
                 <div key={index} className="flex items-center gap-4">
                   <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale value={item.value} votes={item.votes} />
+                  <RatingScale value={item.value} />
                 </div>
               ))}
             </div>
@@ -608,10 +735,10 @@ const EvaluationResults = () => {
           {/* Левая колонка с оценками */}
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <div className="space-y-5">
-              {secretaryRatings.map((item, index) => (
+              {assistantRatings.map((item, index) => (
                 <div key={index} className="flex items-center gap-4">
                   <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale value={item.value} votes={item.votes} />
+                  <RatingScale value={item.value} />
                 </div>
               ))}
             </div>
@@ -638,7 +765,7 @@ const EvaluationResults = () => {
               {officeRatings.map((item, index) => (
                 <div key={index} className="flex items-center gap-4">
                   <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale value={item.value} votes={item.votes} />
+                  <RatingScale value={item.value} />
                 </div>
               ))}
             </div>
@@ -689,40 +816,27 @@ const EvaluationResults = () => {
         <div className="grid grid-cols-2 gap-6">
           {/* Оценки доступности */}
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-2xl font-bold mb-6">Оценки доступности</h2>
-            
-            <div className="space-y-8">
-              <div>
-                <div className="mb-4">Доступность здания суда для людей с инвалидностью и маломобильных категорий</div>
-                <RatingScale value={3.0} votes={999} />
-              </div>
-              
-              <div>
-                <div className="mb-4">Оцените удобство и комфорт зала суда</div>
-                <RatingScale value={4.1} votes={999} />
-              </div>
-              
-              <div>
-                <div className="mb-4">Навигация внутри здания суда</div>
-                <RatingScale value={3.5} votes={999} />
-              </div>
+            <h2 className="text-xl font-bold text-[#212529] mb-4">Оценки доступности</h2>
+            <div className="space-y-5">
+              {accessibilityRatings.map((item, index) => (
+                <div key={index} className="flex items-center gap-4">
+                  <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
+                  <RatingScale value={item.value} />
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Оценки судебных приставов */}
           <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-2xl font-bold mb-6">Оценки судебных приставов</h2>
-            
-            <div className="space-y-8">
-              <div>
-                <div className="mb-4">Профессионализм судебных приставов</div>
-                <RatingScale value={3.0} votes={999} />
-              </div>
-              
-              <div>
-                <div className="mb-4">Уровень безопасности в здании суда, на процессах</div>
-                <RatingScale value={4.1} votes={999} />
-              </div>
+            <h2 className="text-xl font-bold text-[#212529] mb-4">Оценки судебных приставов</h2>
+            <div className="space-y-5">
+              {bailiffRatings.map((item, index) => (
+                <div key={index} className="flex items-center gap-4">
+                  <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
+                  <RatingScale value={item.value} />
+                </div>
+              ))}
             </div>
           </div>
         </div>
