@@ -99,10 +99,6 @@ function TabPanel(props: TabPanelProps) {
 
 const EvaluationResults = () => {
   const [activeTab, setActiveTab] = useState('gender');
-  const [value, setValue] = useState(0);
-  const [selectedQuarter, setSelectedQuarter] = useState<string | null>(null);
-  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
-  const [activeButtons, setActiveButtons] = useState<Set<string>>(new Set());
   
   // Данные для радарной диаграммы
   const radarData = {
@@ -540,65 +536,23 @@ const EvaluationResults = () => {
     }]
   };
 
-  // Компоненты для табов
-  const AccessibilityTab = () => (
-    <div className="space-y-6">
-      {accessibilityRatings.map((rating, index) => (
-        <RatingRow key={index} title={rating.title} value={rating.value} />
-      ))}
-    </div>
-  );
-
-  const BailiffTab = () => (
-    <div className="space-y-6">
-      {bailiffRatings.map((rating, index) => (
-        <RatingRow key={index} title={rating.title} value={rating.value} />
-      ))}
-    </div>
-  );
-
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  // Компонент для отображения цветной шкалы рейтинга
+  const RatingScale = ({ rating }: { rating: number }) => {
+    return (
+      <div className="flex items-center gap-3">
+        <div className="w-[200px] h-[6px] rounded-full overflow-hidden bg-[#E9ECEF]">
+          <div 
+            className="h-full rounded-full" 
+            style={{
+              width: `${(rating / 5) * 100}%`,
+              background: 'linear-gradient(90deg, #FF4D4D 0%, #FFC107 50%, #4CAF50 100%)'
+            }}
+          />
+        </div>
+        <span className="text-[16px] font-medium ml-2">{rating.toFixed(1)}</span>
+      </div>
+    );
   };
-
-  // Обработчик выбора квартала - просто переключаем состояние
-  const handleQuarterClick = (quarter: string) => {
-    if (selectedQuarter === quarter) {
-      // Если квартал уже выбран - снимаем выбор
-      setSelectedQuarter(null);
-    } else {
-      // Иначе выбираем новый квартал
-      setSelectedQuarter(quarter);
-    }
-  };
-
-  // Обработчик выбора месяца - просто переключаем состояние
-  const handleMonthClick = (month: string) => {
-    setSelectedMonths(prev => {
-      if (prev.includes(month)) {
-        // Если месяц уже выбран - убираем его из списка
-        return prev.filter(m => m !== month);
-      } else {
-        // Иначе добавляем месяц в список
-        return [...prev, month];
-      }
-    });
-  };
-
-  const toggleButton = (id: string) => {
-    setActiveButtons(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-      }
-      return newSet;
-    });
-  };
-
-  const quarters = ['I', 'II', 'III', 'IV'];
-  const months = ['янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.', 'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
 
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
@@ -907,51 +861,17 @@ const EvaluationResults = () => {
           {/* Оценки судебных приставов */}
           <div className="bg-white rounded-lg p-6 shadow-sm">
             <h2 className="text-xl font-bold text-[#212529] mb-4">Оценки судебных приставов</h2>
-            <div className="space-y-5">
-              {bailiffRatings.map((item, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale value={item.value} />
-                </div>
-              ))}
+            <div className="bg-white rounded-lg p-6 shadow-sm">
+              <div className="space-y-5">
+                {bailiffRatings.map((item, index) => (
+                  <div key={index} className="flex items-center gap-4">
+                    <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
+                    <RatingScale rating={item.rating} />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Кнопки выбора квартала и месяца */}
-      <div className="max-w-[1440px] mx-auto mt-6 p-4">
-        <div className="flex gap-2 mb-4">
-          {quarters.map(quarter => (
-            <button
-              key={quarter}
-              onClick={() => toggleButton(quarter)}
-              className={`px-4 py-2 border rounded transition-colors ${
-                activeButtons.has(quarter) ? 'bg-green-100' : 'bg-gray-100'
-              }`}
-            >
-              {quarter}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex gap-2">
-          {months.map(month => (
-            <button
-              key={month}
-              onClick={() => toggleButton(month)}
-              className={`px-4 py-2 border rounded transition-colors ${
-                activeButtons.has(month) ? 'bg-green-100' : 'bg-gray-100'
-              }`}
-            >
-              {month}
-            </button>
-          ))}
-        </div>
-
-        {/* Отладка */}
-        <div className="mt-4 text-sm">
-          <p>Активные кнопки: {Array.from(activeButtons).join(', ')}</p>
         </div>
       </div>
     </div>
