@@ -29,71 +29,66 @@ export default function Home() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-gray-800">
-        Оценка деятельности районного суда за период
-      </h1>
+    <h1 className="text-2xl font-semibold text-gray-800">
+      Оценка деятельности районного суда за период
+    </h1>
 
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <span className="text-gray-600">С</span>
-          <input
-            type="date"
-            value={dateRange.startDate}
-            onChange={(e) => handleDateChange('startDate', e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1.5 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <span className="text-gray-600">По</span>
-          <input
-            type="date"
-            value={dateRange.endDate}
-            onChange={(e) => handleDateChange('endDate', e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1.5 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
-          />
-        </div>
-
+    <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
+        <span className="text-gray-600">С</span>
         <input
-          type="text"
-          value={dateRange.year}
-          onChange={(e) => handleDateChange('year', e.target.value)}
-          className="border border-gray-300 rounded-md px-3 py-1.5 w-20 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
-          placeholder="Год"
+          type="date"
+          value={dateRange.startDate}
+          onChange={(e) => handleDateChange('startDate', e.target.value)}
+          className="border border-gray-300 rounded-md px-3 py-1.5 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
         />
       </div>
 
-      <div className="flex w-full">
-        <div className="flex gap-0.5">
-          {quarters.map((quarter, index) => (
-            <button
-              key={quarter}
-              onClick={() => setActiveQuarter(index)}
-              className={`month-button w-12 ${
-                activeQuarter === index ? 'active' : ''
-              }`}
-            >
-              {quarter}
-            </button>
-          ))}
-        </div>
-        <div className="h-full w-px bg-gray-300 mx-2" />
-        <div className="flex gap-0.5">
-          {months.map((month, index) => (
-            <button
-              key={month}
-              onClick={() => setActiveMonth(index)}
-              className={`month-button w-12 ${
-                activeMonth === index ? 'active' : ''
-              }`}
-            >
-              {month}
-            </button>
-          ))}
-        </div>
+      <div className="flex items-center gap-2">
+        <span className="text-gray-600">По</span>
+        <input
+          type="date"
+          value={dateRange.endDate}
+          onChange={(e) => handleDateChange('endDate', e.target.value)}
+          className="border border-gray-300 rounded-md px-3 py-1.5 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
+        />
       </div>
 
-      <EvaluationQuestions />
+      <input
+        type="text"
+        value={dateRange.year}
+        onChange={(e) => handleDateChange('year', e.target.value)}
+        className="border border-gray-300 rounded-md px-3 py-1.5 w-20 focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none"
+        placeholder="Год"
+      />
     </div>
+
+    <div className="flex w-full gap-0.5">
+      {quarters.map((quarter, index) => (
+        <button
+          key={quarter}
+          onClick={() => setActiveQuarter(index)}
+          className={`month-button flex-1 ${
+            activeQuarter === index ? 'active' : ''
+          }`}
+        >
+          {quarter}
+        </button>
+      ))}
+      {months.map((month, index) => (
+        <button
+          key={month}
+          onClick={() => setActiveMonth(index)}
+          className={`month-button flex-1 ${
+            activeMonth === index ? 'active' : ''
+          }`}
+        >
+          {month}
+        </button>
+      ))}
+    </div>
+
+    <EvaluationQuestions />
+  </div>
   );
 }
