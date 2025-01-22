@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useCallback } from 'react';
-import EvaluationQuestions from '@/app/evaluations/page';
+import EvaluationQuestions from '@/app/Evaluations/page';
 
 interface DateRange {
   startDate: string;
@@ -63,29 +63,34 @@ export default function Home() {
         />
       </div>
 
-      <div className="flex w-full gap-0.5">
-        {quarters.map((quarter, index) => (
-          <button
-            key={quarter}
-            onClick={() => setActiveQuarter(index)}
-            className={`month-button flex-1 ${
-              activeQuarter === index ? 'active' : ''
-            }`}
-          >
-            {quarter}
-          </button>
-        ))}
-        {months.map((month, index) => (
-          <button
-            key={month}
-            onClick={() => setActiveMonth(index)}
-            className={`month-button flex-1 ${
-              activeMonth === index ? 'active' : ''
-            }`}
-          >
-            {month}
-          </button>
-        ))}
+      <div className="flex w-full">
+        <div className="flex gap-0.5">
+          {quarters.map((quarter, index) => (
+            <button
+              key={quarter}
+              onClick={() => setActiveQuarter(index)}
+              className={`month-button w-12 ${
+                activeQuarter === index ? 'active' : ''
+              }`}
+            >
+              {quarter}
+            </button>
+          ))}
+        </div>
+        <div className="h-full w-px bg-gray-300 mx-2" />
+        <div className="flex gap-0.5">
+          {months.map((month, index) => (
+            <button
+              key={month}
+              onClick={() => setActiveMonth(index)}
+              className={`month-button w-12 ${
+                activeMonth === index ? 'active' : ''
+              }`}
+            >
+              {month}
+            </button>
+          ))}
+        </div>
       </div>
 
       <EvaluationQuestions />

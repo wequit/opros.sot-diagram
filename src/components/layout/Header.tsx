@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import Image from 'next/image';
+import { useAuth } from '@/lib/utils/AuthContext';
 
 const HEADER_BG_COLOR = '#AFF4C6';
 
@@ -19,6 +20,7 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({ onClick, isKyrgyz }) =>
 );
 
 const Header: React.FC = () => {
+  const { isAuthenticated, logout } = useAuth();
   const [isKyrgyz, setIsKyrgyz] = React.useState(false);
 
   return (
@@ -41,6 +43,16 @@ const Header: React.FC = () => {
         <span className="text-black font-medium">
           Председатель районного суда: Асанов Асан Асанович
         </span>
+        {isAuthenticated ? (
+          <button
+            onClick={logout}
+            className="text-sm text-gray-600 hover:text-gray-800"
+          >
+            Выйти
+          </button>
+        ) : (
+          <div>Welcome, guest!</div>
+        )}
       </div>
     </header>
   );
