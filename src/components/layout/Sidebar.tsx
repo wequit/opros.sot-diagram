@@ -12,7 +12,7 @@ const Sidebar: React.FC = () => {
           Оценки
         </Link>
         <Link 
-          href="/suggestions" 
+          href="/Remarks" 
           className="py-2 px-4 text-left bg-white rounded-md mb-2 hover:bg-gray-50 transition-colors duration-200 font-medium"
         >
           Замечания и предложения
