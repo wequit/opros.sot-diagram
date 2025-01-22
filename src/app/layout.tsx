@@ -3,12 +3,14 @@ import React from 'react';
 import './globals.css';
 import Header from '@/components/Header';
 import Link from 'next/link';
-import { Roboto } from 'next/font/google';
+import { Roboto, Inter } from 'next/font/google';
 
 const roboto = Roboto({
   weight: ['400', '500', '700'],
   subsets: ['latin', 'cyrillic'],
 });
+
+const inter = Inter({ subsets: ['latin', 'cyrillic'] });
 
 export const metadata = {
   title: 'Судебная оценка',
@@ -31,7 +33,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, children }) => (
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={roboto.className}>
+    <html lang="ru" className={inter.className}>
       <body className="min-h-screen bg-gray-50">
         <Header />
         

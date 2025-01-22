@@ -41,16 +41,19 @@ const RatingScale = ({ value }: { value: number }) => {
   return (
     <div className="flex items-center gap-4">
       <div className="relative w-[300px]">
-        <div className="h-3 flex rounded-full overflow-hidden">
-          <div className="w-1/5 bg-[#FF8B8B]" />
-          <div className="w-1/5 bg-[#FFB088]" />
-          <div className="w-1/5 bg-[#FFE183]" />
-          <div className="w-1/5 bg-[#B8E986]" />
-          <div className="w-1/5 bg-[#7BC86C]" />
+        <div className="h-[16px] flex overflow-hidden">
+          <div className="w-1/5 bg-[#FF8080]" />
+          <div className="w-1/5 bg-[#FFB366]" />
+          <div className="w-1/5 bg-[#FFE066]" />
+          <div className="w-1/5 bg-[#80CC80]" />
+          <div className="w-1/5 bg-[#47B347]" />
         </div>
         <div 
-          className="absolute top-0 bottom-0 w-0.5 bg-black"
-          style={{ left: `${(value / 5) * 100}%` }}
+          className="absolute top-[-3px] bottom-[-3px] w-1.5 bg-[#2C3E50] shadow-[0_0_6px_rgba(44,62,80,0.6)]"
+          style={{ 
+            left: `${(value / 5) * 100}%`,
+            transform: 'translateX(-50%)'
+          }}
         />
       </div>
       <span className="text-lg font-bold">{value.toFixed(1)}</span>
@@ -97,6 +100,9 @@ function TabPanel(props: TabPanelProps) {
 const EvaluationResults = () => {
   const [activeTab, setActiveTab] = useState('gender');
   const [value, setValue] = useState(0);
+  const [selectedQuarter, setSelectedQuarter] = useState<string | null>(null);
+  const [selectedMonths, setSelectedMonths] = useState<string[]>([]);
+  const [activeButtons, setActiveButtons] = useState<Set<string>>(new Set());
   
   // Данные для радарной диаграммы
   const radarData = {
@@ -176,13 +182,16 @@ const EvaluationResults = () => {
       'Самостоятельно отсканировал QR-код',
       'Через сотрудников суда',
       'Через независимых юристов',
-      'Через мероприятия (театр, кино, собрания и т.д.)',
-      'Через социальные сети (WhatsApp, и т.д.)'
+      'Через мероприятия (театр, кино и т.д.)',
+      'Через соц. сети (WhatsApp и т.д.)'
     ],
-    datasets: [{
-      data: [40, 30, 15, 10, 5],
-      backgroundColor: 'rgba(54, 162, 235, 0.8)',
-    }]
+    datasets: [
+      {
+        data: [40, 30, 15, 10, 5],
+        backgroundColor: '#74C0FC',
+        barThickness: 25,
+      }
+    ]
   };
 
   // Данные для круговой диаграммы пола
@@ -225,22 +234,20 @@ const EvaluationResults = () => {
   };
 
   // Данные для торнадо диаграммы (пол и возраст)
-  const genderAgeData = {
+  const demographicData = {
     labels: ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
     datasets: [
       {
         label: 'Женщины',
-        data: [-35, -28, -20, -10, -5, -2],
-        backgroundColor: 'rgba(83, 166, 250, 1)',
-        borderColor: 'rgba(83, 166, 250, 1)',
-        borderWidth: 1,
+        data: [-350, -280, -200, -100, -50, -20], // Абсолютные значения вместо процентов
+        backgroundColor: '#74C0FC',
+        barThickness: 25,
       },
       {
         label: 'Мужчины',
-        data: [30, 25, 18, 12, 8, 4],
-        backgroundColor: 'rgba(255, 145, 159, 1)',
-        borderColor: 'rgba(255, 145, 159, 1)',
-        borderWidth: 1,
+        data: [300, 250, 180, 120, 80, 40], // Абсолютные значения вместо процентов
+        backgroundColor: '#FFB0C1',
+        barThickness: 25,
       }
     ]
   };
@@ -280,36 +287,90 @@ const EvaluationResults = () => {
     }
   } as const;
 
-  // Опции для столбчатой диаграммы
-  const barOptions = {
+  // Для диаграммы-торнадо
+  const tornadoOptions = {
     indexAxis: 'y' as const,
     responsive: true,
     plugins: {
-      legend: { display: false },
+      legend: {
+        position: 'bottom' as const,
+      },
       datalabels: {
-        color: '#FFFFFF',
-        anchor: 'center' as const,
-        align: 'center' as const,
-        formatter: (value: number) => `${value}%`
+        color: '#000000',
+        anchor: 'end' as const,
+        align: 'end' as const,
+        formatter: (value: number) => Math.abs(value), // Просто число
+        font: {
+          family: "'SF Pro Display', 'Inter', sans-serif",
+          size: 13
+        }
       }
     },
     scales: {
       x: {
-        type: 'linear' as const,
-        beginAtZero: true,
-        max: 100,
-        grid: { display: false },
+        stacked: true,
+        grid: {
+          color: '#E2E8F0'
+        },
         ticks: {
-          callback: function(tickValue: string | number) {
-            return `${tickValue}%`;
-          }
+          display: false // Убираем метки на оси X
         }
       },
       y: {
-        grid: { display: false }
+        stacked: true,
+        grid: {
+          display: false
+        }
       }
     },
     maintainAspectRatio: false
+  };
+
+  // Для горизонтальных диаграмм (2 и 3 фото)
+  const barOptions = {
+    indexAxis: 'y' as const,
+    responsive: true,
+    plugins: {
+      legend: {
+        display: false
+      },
+      datalabels: {
+        color: '#000000',
+        anchor: 'end' as const,
+        align: 'end' as const,
+        formatter: (value: number) => value // Показываем просто количество голосов
+      },
+      title: {
+        display: true,
+        text: 'Количество голосов: 999',
+        position: 'bottom' as const,
+        padding: {
+          top: 20,
+          bottom: 0
+        },
+        font: {
+          size: 13,
+          family: "'SF Pro Display', 'Inter', sans-serif",
+        }
+      }
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        max: 100,
+        grid: {
+          display: false
+        },
+        ticks: {
+          display: false // Убираем проценты
+        }
+      },
+      y: {
+        grid: {
+          display: false
+        }
+      }
+    }
   } as const;
 
   // Опции для возрастной диаграммы
@@ -500,6 +561,45 @@ const EvaluationResults = () => {
     setValue(newValue);
   };
 
+  // Обработчик выбора квартала - просто переключаем состояние
+  const handleQuarterClick = (quarter: string) => {
+    if (selectedQuarter === quarter) {
+      // Если квартал уже выбран - снимаем выбор
+      setSelectedQuarter(null);
+    } else {
+      // Иначе выбираем новый квартал
+      setSelectedQuarter(quarter);
+    }
+  };
+
+  // Обработчик выбора месяца - просто переключаем состояние
+  const handleMonthClick = (month: string) => {
+    setSelectedMonths(prev => {
+      if (prev.includes(month)) {
+        // Если месяц уже выбран - убираем его из списка
+        return prev.filter(m => m !== month);
+      } else {
+        // Иначе добавляем месяц в список
+        return [...prev, month];
+      }
+    });
+  };
+
+  const toggleButton = (id: string) => {
+    setActiveButtons(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+
+  const quarters = ['I', 'II', 'III', 'IV'];
+  const months = ['янв.', 'фев.', 'мар.', 'апр.', 'май', 'июн.', 'июл.', 'авг.', 'сен.', 'окт.', 'ноя.', 'дек.'];
+
   return (
     <div className="min-h-screen bg-[#F8F9FA]">
       {/* Общие показатели */}
@@ -529,11 +629,9 @@ const EvaluationResults = () => {
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-[16px] font-medium text-[#212529] mb-6">
-                Источник трафика
-              </h3>
-              <div className="h-64">
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-neutral-200">
+              <h3 className="text-xl font-semibold text-primary mb-4">Источник трафика</h3>
+              <div className="h-72">
                 <Bar data={trafficData} options={barOptions} />
               </div>
             </div>
@@ -619,28 +717,7 @@ const EvaluationResults = () => {
                     padding: 20
                   }
                 }} />}
-                {activeTab === 'genderAge' && <Bar data={genderAgeData} options={{
-                  indexAxis: 'y' as const,
-                  plugins: {
-                    legend: {
-                      position: 'bottom' as const
-                    }
-                  },
-                  scales: {
-                    x: {
-                      stacked: true,
-                      ticks: {
-                        callback: function(value: any) {
-                          return value + '%';
-                        }
-                      }
-                    },
-                    y: {
-                      stacked: true
-                    }
-                  },
-                  maintainAspectRatio: false
-                }} />}
+                {activeTab === 'genderAge' && <Bar data={demographicData} options={tornadoOptions} />}
                 {activeTab === 'age' && <Bar data={ageData} options={{
                   plugins: {
                     legend: {
@@ -839,6 +916,42 @@ const EvaluationResults = () => {
               ))}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Кнопки выбора квартала и месяца */}
+      <div className="max-w-[1440px] mx-auto mt-6 p-4">
+        <div className="flex gap-2 mb-4">
+          {quarters.map(quarter => (
+            <button
+              key={quarter}
+              onClick={() => toggleButton(quarter)}
+              className={`px-4 py-2 border rounded transition-colors ${
+                activeButtons.has(quarter) ? 'bg-green-100' : 'bg-gray-100'
+              }`}
+            >
+              {quarter}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex gap-2">
+          {months.map(month => (
+            <button
+              key={month}
+              onClick={() => toggleButton(month)}
+              className={`px-4 py-2 border rounded transition-colors ${
+                activeButtons.has(month) ? 'bg-green-100' : 'bg-gray-100'
+              }`}
+            >
+              {month}
+            </button>
+          ))}
+        </div>
+
+        {/* Отладка */}
+        <div className="mt-4 text-sm">
+          <p>Активные кнопки: {Array.from(activeButtons).join(', ')}</p>
         </div>
       </div>
     </div>
