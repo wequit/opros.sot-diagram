@@ -20,7 +20,7 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({ onClick, isKyrgyz }) =>
 );
 
 const Header: React.FC = () => {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [isKyrgyz, setIsKyrgyz] = React.useState(false);
 
   return (
@@ -43,15 +43,13 @@ const Header: React.FC = () => {
         <span className="text-black font-medium">
           Председатель районного суда: Асанов Асан Асанович
         </span>
-        {isAuthenticated ? (
+        {isAuthenticated && (
           <button
-            onClick={logout}
+            // onClick={handleLogout}
             className="text-sm text-gray-600 hover:text-gray-800"
           >
             Выйти
           </button>
-        ) : (
-          <div>Welcome, guest!</div>
         )}
       </div>
     </header>
