@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import { loginApi } from '@/lib/api/login';
 import { useAuth } from '@/lib/utils/AuthContext';
@@ -16,14 +17,17 @@ const LoginForm: React.FC = () => {
 
     try {
       const result = await loginApi.login({ username, password });
-      console.log('Результат логина:', result);
+      console.log('Login result:', result);
     
-      if (result) {
+      if (result && result.token) {
         login(result.token);
       } else {
-        setError('token отсутствует');
+        setError('Токен отсутствует');
       }
-    }  finally {
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err instanceof Error ? err.message : 'Ошибка при входе');
+    } finally {
       setIsLoading(false);
     }
   };

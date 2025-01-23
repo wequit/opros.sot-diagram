@@ -1,8 +1,10 @@
+'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  token: string | null;
   login: (token: string) => void;
   logout: () => void;
 }
@@ -11,29 +13,34 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    const token = document.cookie.split('; ').find(row => row.startsWith('sessionid='));
-    if (token) {
+    const savedToken = localStorage.getItem('access_token');
+    if (savedToken) {
+      setToken(savedToken);
       setIsAuthenticated(true);
     }
   }, []);
 
-  const login = (token: string) => {
-    console.log('Установка токена:', token);
+  const login = (newToken: string) => {
+    console.log('Setting token:', newToken);
+    localStorage.setItem('access_token', newToken);
+    setToken(newToken);
     setIsAuthenticated(true);
     router.push('/');
   };
 
   const logout = () => {
-    //Очистить куки
+    localStorage.removeItem('access_token');
+    setToken(null);
     setIsAuthenticated(false);
     router.push('/login');
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
