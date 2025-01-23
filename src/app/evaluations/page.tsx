@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import { Radar, Bar, Pie, Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   RadialLinearScale,
@@ -13,8 +14,6 @@ import {
   BarElement,
   ArcElement,
 } from 'chart.js';
-import { Radar, Bar, Pie } from 'react-chartjs-2';
-import { Box, Tab, Tabs } from '@mui/material';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(
@@ -31,87 +30,25 @@ ChartJS.register(
   ChartDataLabels
 );
 
-interface RatingScaleProps {
-  title: string;
-  value: number;
-}
+export default function EvaluationResults() {
+  const [demographicsView, setDemographicsView] = useState('пол');
 
-// Единый компонент RatingScale для всех табов с цветными шкалами
-const RatingScale = ({ value }: { value: number }) => {
-  return (
-    <div className="flex items-center gap-4">
-      <div className="relative w-[300px]">
-        <div className="h-3 flex rounded-full overflow-hidden">
-          <div className="w-1/5 bg-[#FF8B8B]" />
-          <div className="w-1/5 bg-[#FFB088]" />
-          <div className="w-1/5 bg-[#FFE183]" />
-          <div className="w-1/5 bg-[#B8E986]" />
-          <div className="w-1/5 bg-[#7BC86C]" />
-        </div>
-        <div 
-          className="absolute top-0 bottom-0 w-0.5 bg-black"
-          style={{ left: `${(value / 5) * 100}%` }}
-        />
-      </div>
-      <span className="text-lg font-bold">{value.toFixed(1)}</span>
-    </div>
-  );
-};
-
-// Компонент для строки с рейтингом
-const RatingRow = ({ title, value }: { title: string, value: number }) => {
-  return (
-    <div className="flex items-center gap-8 mb-6">
-      <div className="w-[400px]">
-        <span className="text-base">{title}</span>
-      </div>
-      <RatingScale value={value} />
-    </div>
-  );
-};
-
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-}
-
-const EvaluationResults = () => {
-  const [activeTab, setActiveTab] = useState('gender');
-  const [value, setValue] = useState(0);
-  
   // Данные для радарной диаграммы
   const radarData = {
     labels: ['Судья', 'Секретарь, помощник', 'Канцелярия', 'Процесс', 'Пристав', 'Здание'],
     datasets: [
       {
         label: 'Ноокенский суд',
-        data: [4.5, 4.2, 3.8, 4.0, 3.9, 3.7],
+        data: [4.8, 4.6, 4.3, 4.5, 4.7, 4.4],
+        fill: true,
         backgroundColor: 'rgba(255, 206, 86, 0.2)',
         borderColor: 'rgba(255, 206, 86, 1)',
         borderWidth: 2,
       },
       {
         label: 'Средние оценки по республике',
-        data: [4.2, 3.9, 3.5, 3.8, 3.6, 3.4],
+        data: [4.5, 4.2, 4.0, 4.3, 4.4, 4.1],
+        fill: true,
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 2,
@@ -119,247 +56,204 @@ const EvaluationResults = () => {
     ]
   };
 
-  // Опции для радарного графика
-  const radarOptions = {
-    scales: {
-      r: {
-        min: 0,
-        max: 5,
-        beginAtZero: true,
-        ticks: {
-          stepSize: 1
-        }
-      }
-    },
+  // Обновленные цвета для диаграмм
+  const chartColors = {
+    blue: 'rgb(54, 162, 235)',
+    red: 'rgb(255, 99, 132)',
+    green: 'rgb(75, 192, 192)',
+    purple: 'rgb(153, 102, 255)',
+    yellow: 'rgb(255, 206, 86)',
+  };
+
+  // Общие настройки для всех диаграмм
+  const commonOptions = {
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: 'bottom' as const,
+        align: 'start' as const,
         labels: {
           padding: 20,
-          usePointStyle: true
-        }
-      },
-      datalabels: {
-        color: '#FFFFFF',
-        formatter: (value: number) => `${value}%`,
-        anchor: 'center' as const,
-        align: 'center' as const
-      }
-    }
-  };
-
-  // Данные для категорий респондентов
-  const respondentData = {
-    labels: [
-      'Сторона по делу (истец)',
-      'Сторона по делу (ответчик)',
-      'Свидетель',
-      'Посетитель',
-    ],
-    datasets: [{
-      data: [25, 25, 25, 25],
-      backgroundColor: [
-        'rgba(54, 162, 235, 0.8)',
-        'rgba(255, 99, 132, 0.8)',
-        'rgba(75, 192, 192, 0.8)',
-        'rgba(153, 102, 255, 0.8)',
-      ],
-      datalabels: {
-        display: true
-      }
-    }]
-  };
-
-  // Данные для источников трафика
-  const trafficData = {
-    labels: [
-      'Самостоятельно отсканировал QR-код',
-      'Через сотрудников суда',
-      'Через независимых юристов',
-      'Через мероприятия (театр, кино, собрания и т.д.)',
-      'Через социальные сети (WhatsApp, и т.д.)'
-    ],
-    datasets: [{
-      data: [40, 30, 15, 10, 5],
-      backgroundColor: 'rgba(54, 162, 235, 0.8)',
-    }]
-  };
-
-  // Данные для круговой диаграммы пола
-  const genderData = {
-    labels: ['Мужской', 'Женский'],
-    datasets: [{
-      data: [60, 40],
-      backgroundColor: [
-        'rgba(54, 162, 235, 0.8)', // синий для мужского
-        'rgba(255, 182, 193, 0.8)', // розовый для женского
-      ]
-    }]
-  };
-
-  // Данные для круговой диаграммы аудио/видео фиксации
-  const recordingData = {
-    labels: ['Да', 'Нет', 'Не знаю/Не уверен(а)'],
-    datasets: [{
-      data: [25, 37.5, 37.5],
-      backgroundColor: [
-        'rgba(13, 110, 253, 1)',
-        'rgba(220, 53, 69, 1)',
-        'rgba(255, 153, 0, 1)'
-      ],
-      datalabels: {
-        display: true
-      }
-    }]
-  };
-
-  // Данные для возрастной диаграммы
-  const ageData = {
-    labels: ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
-    datasets: [{
-      data: [35, 28, 20, 10, 5, 2],
-      backgroundColor: 'rgba(13, 110, 253, 1)',
-      borderColor: 'rgba(13, 110, 253, 1)',
-      borderWidth: 1,
-    }]
-  };
-
-  // Данные для торнадо диаграммы (пол и возраст)
-  const genderAgeData = {
-    labels: ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
-    datasets: [
-      {
-        label: 'Женщины',
-        data: [-35, -28, -20, -10, -5, -2],
-        backgroundColor: 'rgba(83, 166, 250, 1)',
-        borderColor: 'rgba(83, 166, 250, 1)',
-        borderWidth: 1,
-      },
-      {
-        label: 'Мужчины',
-        data: [30, 25, 18, 12, 8, 4],
-        backgroundColor: 'rgba(255, 145, 159, 1)',
-        borderColor: 'rgba(255, 145, 159, 1)',
-        borderWidth: 1,
-      }
-    ]
-  };
-
-  // Опции для круговой диаграммы
-  const pieOptions = {
-    plugins: {
-      legend: {
-        position: 'right' as const,
-        labels: {
-          usePointStyle: true,
-          padding: 20,
+          boxWidth: 15,
           font: {
             size: 12
           }
         }
-      },
-      tooltip: {
-        enabled: false
-      },
-      datalabels: {
-        color: '#FFFFFF',
-        font: {
-          weight: 'bold' as const,
-          size: 14
-        },
-        formatter: (value: number) => `${value}%`,
-        anchor: 'center' as const,
-        align: 'center' as const,
-        offset: 0,
-        padding: 0
       }
     },
-    maintainAspectRatio: false,
-    layout: {
-      padding: 0
-    }
-  } as const;
+    maintainAspectRatio: false
+  };
 
-  // Опции для столбчатой диаграммы
-  const barOptions = {
-    indexAxis: 'y' as const,
-    responsive: true,
-    plugins: {
-      legend: { display: false },
+  // Данные для круговой диаграммы категорий
+  const categoryData = {
+    labels: [
+      'Сторона по делу (истец, потерпевший)',
+      'Сторона по делу (ответчик, обвиняемый)',
+      'Свидетель',
+      'Посетитель'
+    ],
+    datasets: [{
+      data: [25, 25, 25, 25],
+      backgroundColor: [
+        'rgb(54, 162, 235)',
+        'rgb(255, 99, 132)',
+        'rgb(75, 192, 192)',
+        'rgb(153, 102, 255)',
+      ],
       datalabels: {
-        color: '#FFFFFF',
-        anchor: 'center' as const,
-        align: 'center' as const,
-        formatter: (value: number) => `${value}%`
+        color: "#FFFFFF",
+        display: true,
+        formatter: (value: number): string => value + '%',
       }
-    },
+    }]
+  };
+  const categoryDataCircle = {
+    labels: [
+      'Сторона по делу (истец, потерпевший)',
+      'Сторона по делу (ответчик, обвиняемый)',
+      'Свидетель',
+      'Посетитель'
+    ],
+    datasets: [{
+      data: [25, 25, 25, 25],
+      backgroundColor: [
+        'rgb(54, 162, 235)',
+        'rgb(255, 99, 132)',
+        'rgb(75, 192, 192)',
+        'rgb(153, 102, 255)',
+      ]
+    }]
+  };
+  // Данные для демографических показателей
+  const genderData = {
+    labels: ['Женский', 'Мужской'],
+    datasets: [{
+      data: [37.5, 62.5],
+      backgroundColor: [
+        'rgb(255, 99, 132)', // Розовый для женского
+        'rgb(54, 162, 235)'  // Синий для мужского
+      ],
+      datalabels: {
+        color: "#FFFFFF",
+        formatter: (value: number): string => value + '%',
+      }
+    }]
+  };
+
+  // Обновленные данные для торнадо-диаграммы
+  const ageGenderData = {
+    labels: ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
+    datasets: [
+      {
+        label: 'Мужчины',
+        data: [-35, -28, -20, -10, -5, -2],
+        backgroundColor: 'rgb(54, 162, 235)', // Синий для женщин
+        stack: 'Stack 0',
+        datalabels: {
+          color: "#FFFFFF",
+          formatter: (value: number): string => value + '%',
+        }
+      },
+      {
+        label: 'Женщины',
+        data: [30, 25, 18, 12, 8, 4],
+        backgroundColor: 'rgb(255, 192, 203)', // Светло-розовый для мужчин
+        stack: 'Stack 0',
+        datalabels: {
+          color: "#FFFFFF",
+          formatter: (value: number): string => value + '%',
+        }
+      },
+    ]
+
+  };
+
+  // Обновленные опции для торнадо-диаграммы
+  const ageGenderOptions = {
+    ...commonOptions,
+    indexAxis: 'y' as const,
     scales: {
       x: {
         type: 'linear' as const,
-        beginAtZero: true,
-        max: 100,
-        grid: { display: false },
+        stacked: true,
         ticks: {
-          callback: function(tickValue: string | number) {
-            return `${tickValue}%`;
+          callback: (value: number): number => Math.abs(value),
+          display: false
+        },
+        grid: {
+          display: true,
+          drawBorder: false,
+        }
+      },
+      y: {
+        stacked: true,
+        grid: {
+          display: true,
+          drawBorder: false,
+        }
+      }
+    },
+    plugins: {
+      ...commonOptions.plugins,
+      tooltip: {
+        callbacks: {
+          label: (context: any): string => {
+            const value = Math.abs(context.raw);
+            return `${context.dataset.label}: ${value}%`;
+          }
+        }
+      }
+    }
+  };
+
+  // Обновленные данные для возрастной диаграммы
+  const ageData = {
+    labels: ['18-24', '25-34', '35-44', '45-54', '55-64', '65+'],
+    datasets: [{
+      label: 'Количество человек',
+      data: [65, 53, 38, 22, 13, 6],
+      borderColor: 'rgb(75, 192, 192)',
+      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      tension: 0.3,
+      fill: true
+    }]
+  };
+
+  // Обновленные опции для возрастной диаграммы
+  const ageOptions = {
+    ...commonOptions,
+    scales: {
+      y: {
+        type: 'linear' as const,
+        beginAtZero: true,
+        grid: {
+          display: true,
+          drawBorder: false,
+        },
+        ticks: {
+          callback: function(value: number): string {
+            return `${value}%`;
           }
         }
       },
-      y: {
-        grid: { display: false }
-      }
-    },
-    maintainAspectRatio: false
-  } as const;
-
-  // Опции для возрастной диаграммы
-  const ageOptions = {
-    plugins: {
-      legend: { display: false }
-    },
-    scales: {
       x: {
         grid: {
-          display: false
-        }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: {
-          callback: (value: number) => `${Math.abs(value)}%`
-        },
-        grid: {
-          display: false
+          display: false,
+          drawBorder: false,
         }
       }
     },
-    maintainAspectRatio: false
-  };
-
-  // Опции для торнадо диаграммы
-  const genderAgeOptions = {
-    indexAxis: 'y' as const,
     plugins: {
-      legend: {
-        position: 'bottom' as const
-      }
-    },
-    scales: {
-      x: {
-        stacked: true,
-        ticks: {
-          callback: (value: number) => `${Math.abs(value)}%`
+      ...commonOptions.plugins,
+      tooltip: {
+        callbacks: {
+          label: (context: any): string => `${context.raw}%`
         }
-      },
-      y: {
-        stacked: true
       }
-    },
-    maintainAspectRatio: false
+    }
   };
 
-  // Данные для замечаний
-  const suggestions = [
+  // Замечания и предложения
+  const comments = [
     { id: 1, text: 'Туалет не работает' },
     { id: 2, text: 'Кресел нет' },
     { id: 3, text: 'Вежливые сотрудники' },
@@ -367,482 +261,650 @@ const EvaluationResults = () => {
     { id: 5, text: 'Работают очень медленно' },
   ];
 
-  // Данные для оценок судьи
-  const judgeRatings = [
-    {
-      title: "Разъяснение прав и обязанностей в судебном процессе",
-      value: 3.0
-    },
-    {
-      title: "Обеспечению равных условий для сторон в процессе",
-      value: 4.1
-    },
-    {
-      title: "Проявление уважения к участникам процесса",
-      value: 3.5
-    },
-    {
-      title: "Контроль за порядком в зале суда",
-      value: 2.0
-    },
-    {
-      title: "Разъяснение судебного решения",
-      value: 2.0
-    }
-  ];
-
-  // Данные для оценок помощника и секретаря
-  const assistantRatings = [
-    {
-      title: "Вежливость при общении",
-      value: 3.8
-    },
-    {
-      title: "Доступность информации о процессе",
-      value: 3.2
-    },
-    {
-      title: "Своевременность оформления документов",
-      value: 4.0
-    }
-  ];
-
-  // Обновленные данные для оценок канцелярии
-  const officeRatings = [
-    {
-      title: "Взаимодействие с судебной канцелярией",
-      value: 3.0,
-      votes: 999
-    },
-    {
-      title: "Предоставление всей необходимой информации",
-      value: 4.1,
-      votes: 999
-    }
-  ];
-
-  // Данные для оценок доступности
-  const accessibilityRatings = [
-    {
-      title: "Доступность здания суда для людей с инвалидностью и маломобильных категорий",
-      value: 3.0
-    },
-    {
-      title: "Оцените удобство и комфорт зала суда",
-      value: 4.1
-    },
-    {
-      title: "Навигация внутри здания суда",
-      value: 3.5
-    }
-  ];
-
-  // Данные для оценок судебных приставов
-  const bailiffRatings = [
-    {
-      title: "Профессионализм судебных приставов",
-      value: 3.0
-    },
-    {
-      title: "Уровень безопасности в здании суда, на процессах",
-      value: 4.1
-    }
-  ];
-
-  // Данные для графика помощника/секретаря
-  const secretaryBarData = {
+  // Обновленные данные для источников трафика
+  const trafficSourceData = {
     labels: [
-      'Грубость',
-      'Игнорирование',
-      'Перебивали речи',
-      'Не давали выступить',
-      'Сарказм и насмешки'
+      'Стенды с qr кодом',
+      'Через официальный сайт ВС',
+      'Через портал "Цифрового правосудия КР"',
+      'Через WhatsАpp',
+      'Через независимых юристов',
+      'Через мероприятия',
+      'Через сотрудников суда',
+      'Другое'
     ],
     datasets: [{
-      data: [50, 33.3, 16.7, 50, 66.7],
-      backgroundColor: 'rgba(121, 82, 179, 0.8)',
+      data: [1000, 800, 600, 400, 300, 200, 100, 100],
+      backgroundColor: 'rgb(54, 162, 235)',
+      barThickness: 20,
+      datalabels: {
+        color: "#FFFFFF",
+        formatter: (value: number): string => `${value}`
+      },
+      label: ''
     }]
   };
 
-  // Данные для графика канцелярии
-  const officeBarData = {
-    labels: [
-      'Грубость',
-      'Игнорирование',
-      'Перебивали речи',
-      'Не давали выступить',
-      'Сарказм и насмешки'
-    ],
+  const trafficSourceOptions = {
+    ...commonOptions,
+    indexAxis: 'y' as const,
+    scales: {
+      x: {
+        beginAtZero: true,
+        grid: {
+          display: false
+        }
+      },
+      y: {
+        grid: {
+          display: false
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false // Полностью скрываем легенду
+      }
+    }
+  };
+
+  const caseTypesData = {
+    labels: ['Уголовные', 'Гражданские', 'Административные', 'Иные'],
     datasets: [{
-      data: [45, 30, 20, 55, 60],
-      backgroundColor: 'rgba(121, 82, 179, 0.8)',
+      data: [25, 25, 25, 25],
+      backgroundColor: [
+        'rgb(54, 162, 235)',  // синий
+        'rgb(255, 99, 132)',  // красный
+        'rgb(75, 192, 192)',  // зеленый
+        'rgb(153, 102, 255)', // фиолетовый
+      ],
+      datalabels: {
+        color: "#FFFFFF",
+        display: true,
+        formatter: (value: number): string => value + '%',
+      }
     }]
   };
 
-  // Компоненты для табов
-  const AccessibilityTab = () => (
-    <div className="space-y-6">
-      {accessibilityRatings.map((rating, index) => (
-        <RatingRow key={index} title={rating.title} value={rating.value} />
-      ))}
-    </div>
-  );
+  const disrespectData = {
+    labels: [
+      'Сарказм и насмешки',
+      'Не давали выступить',
+      'Перебивали речи',
+      'Игнорирование',
+      'Грубость'
+    ],
+    datasets: [{
+      data: [4, 3, 1, 2, 3],
+      backgroundColor: 'rgb(139, 69, 19)',
+      barThickness: 20,
+      datalabels: {
+        color: "gray",
+        align: 'end' as const,
+        anchor: 'end' as const,
+        offset: 4,
+        formatter: (value: number, context: any): string => {
+          const dataset = context.dataset;
+          const sum = dataset.data.reduce((a: number, b: number) => a + b, 0);
+          const percentage = ((value / sum) * 100).toFixed(1);
+          return `${value} (${percentage}%)`;
+        },
+        font: {
+          size: 14,
+          weight: 'bold'
+        }
+      }
+    }]
+  };
 
-  const BailiffTab = () => (
-    <div className="space-y-6">
-      {bailiffRatings.map((rating, index) => (
-        <RatingRow key={index} title={rating.title} value={rating.value} />
-      ))}
-    </div>
-  );
+  const disrespectOptions = {
+    ...commonOptions,
+    indexAxis: 'y' as const,
+    scales: {
+      x: {
+        beginAtZero: true,
+        grid: {
+          display: false
+        },
+        ticks: {
+          display: false
+        }
+      },
+      y: {
+        grid: {
+          display: false
+        }
+      }
+    },
+    layout: {
+      padding: {
+        right: 80
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      }
+    }
+  };
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
+  // Компонент для прогресс-бара
+  const ProgressBar = ({ value }: { value: number }) => {
+    const getColor = (v: number) => {
+      if (v <= 1) return '#FF4B4B';
+      if (v <= 2) return '#FF9F40';
+      if (v <= 3) return '#FFE600';
+      if (v <= 4) return '#A8E05F';
+      return '#4BCE97';
+    };
+
+    return (
+      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          className="h-full transition-all duration-300"
+          style={{
+            width: `${(value / 5) * 100}%`,
+            backgroundColor: getColor(value)
+          }}
+        />
+      </div>
+    );
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] ">
-      {/* Общие показатели */}
-      <div className="max-w-[1440px] mx-auto СС">
-        <h2 className="text-xl font-bold text-[#212529] mb-4">Общие показатели</h2>
-        <div className="grid grid-cols-2 gap-6">
-          {/* Левая колонка */}
-          <div className="space-y-6">
-            <div>
-              <div className="bg-[#F8F9FA] px-4 py-3 rounded-t-lg">
-                <h2 className="text-[16px] font-medium text-[#212529]">Общие показатели</h2>
-                <span className="text-[14px] text-[#6C757D]">Количество ответов: 999</span>
-              </div>
-              <div className="bg-white p-6 rounded-b-lg shadow-sm min-w-[448px]">
-                <div className="h-[400px]">
-                  <Radar data={radarData} options={radarOptions} />
-                </div>
+    <div className="min-h-screen bg-[#F8F9FA]">
+      <div className="max-w-[1440px] mx-auto p-4">
+        <div className="grid grid-cols-2 gap-4">
+          {/* Общие показатели */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Общие показатели</h2>
+                <span className="text-gray-600">Количество ответов: 999</span>
               </div>
             </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-[16px] font-medium text-[#212529] mb-6">
-                Категории респондентов
-              </h3>
-              <div className="h-64">
-                <Pie data={respondentData} options={pieOptions} />
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm">
-              <h3 className="text-[16px] font-medium text-[#212529] mb-6">
-              Откуда Вы узнали об этой анкете? 
-              </h3>
-              <div className="h-64">
-                <Bar data={trafficData} options={barOptions} />
+            <div className="p-6">
+              <div className="h-[400px]">
+                <Radar data={radarData} options={commonOptions} />
               </div>
             </div>
           </div>
 
-          {/* Правая колонка */}
-          <div className="space-y-6">
-            <div>
-              <div className="bg-[#F8F9FA] px-4 py-3 rounded-t-lg">
-                <h2 className="text-[16px] font-medium text-[#212529]">
-                  Замечания и предложения
-                </h2>
-                <span className="text-[14px] text-[#6C757D]">Количество ответов: 999</span>
-              </div>
-              <div className="bg-white p-6 rounded-b-lg shadow-sm">
-                <div className="divide-y divide-[#DEE2E6]">
-                  {suggestions.map((item) => (
-                    <div key={item.id} className="py-3 first:pt-0 last:pb-0">
-                      <div className="flex items-center gap-4">
-                        <span className="text-[#6C757D]">{item.id}</span>
-                        <span className="text-[#212529]">{item.text}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <button className="mt-6 w-full bg-[#D1E7DD] text-[#0F5132] py-2 px-4 rounded hover:bg-[#B7DBCB] transition-colors">
-                  Все замечания и преложения
-                </button>
+          {/* Замечания и предложения */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Замечания и предложения</h2>
+                <span className="text-gray-600">Количество ответов: 999</span>
               </div>
             </div>
-
-            {/* Демографические показатели */}
-            <div className="bg-white rounded-lg shadow-sm">
-              <h3 className="px-6 py-4 text-[16px] font-medium text-[#212529] border-b border-[#DEE2E6]">
-                Демографические показатели
-              </h3>
-              <div className="flex border-b border-[#DEE2E6]">
-                <button 
-                  className={`flex-1 px-6 py-2 text-[14px] ${activeTab === 'gender' ? 'bg-[#E7F1FF] text-[#0D6EFD]' : 'hover:bg-gray-50'}`}
-                  onClick={() => setActiveTab('gender')}
-                >
-                  Пол
-                </button>
-                <button 
-                  className={`flex-1 px-6 py-2 text-[14px] ${activeTab === 'genderAge' ? 'bg-[#E7F1FF] text-[#0D6EFD]' : 'hover:bg-gray-50'}`}
-                  onClick={() => setActiveTab('genderAge')}
-                >
-                  Пол и возраст
-                </button>
-                <button 
-                  className={`flex-1 px-6 py-2 text-[14px] ${activeTab === 'age' ? 'bg-[#E7F1FF] text-[#0D6EFD]' : 'hover:bg-gray-50'}`}
-                  onClick={() => setActiveTab('age')}
-                >
-                  Возраст
-                </button>
+            <div className="p-6">
+              <div className="space-y-3">
+                {comments.map((comment) => (
+                  <div key={comment.id} className="flex gap-4 p-3 border rounded hover:bg-gray-50">
+                    <span className="text-gray-500 min-w-[24px]">{comment.id}</span>
+                    <span>{comment.text}</span>
+                  </div>
+                ))}
               </div>
-              <div className="p-6 h-[300px]">
-                {activeTab === 'gender' && <Pie data={genderData} options={{
-                  plugins: {
-                    legend: {
-                      position: 'right' as const,
-                      labels: {
-                        usePointStyle: true,
-                        padding: 20,
-                        font: {
-                          size: 12
-                        }
-                      }
-                    },
-                    tooltip: {
-                      enabled: true
-                    },
-                    datalabels: {
-                      color: '#fff',
-                      font: {
-                        weight: 'bold',
-                        size: 12
-                      }
-                    }
-                  },
-                  maintainAspectRatio: false,
-                  layout: {
-                    padding: 20
-                  }
-                }} />}
-                {activeTab === 'genderAge' && <Bar data={genderAgeData} options={{
-                  indexAxis: 'y' as const,
-                  plugins: {
-                    legend: {
-                      position: 'bottom' as const
-                    }
-                  },
-                  scales: {
-                    x: {
-                      stacked: true,
-                      ticks: {
-                        callback: function(value: any) {
-                          return value + '%';
-                        }
-                      }
-                    },
-                    y: {
-                      stacked: true
-                    }
-                  },
-                  maintainAspectRatio: false
-                }} />}
-                {activeTab === 'age' && <Bar data={ageData} options={{
-                  plugins: {
-                    legend: {
-                      display: false
-                    }
-                  },
-                  scales: {
-                    x: {
-                      grid: {
-                        display: false
-                      }
-                    },
-                    y: {
-                      beginAtZero: true,
-                      ticks: {
-                        callback: function(value: any) {
-                          return value + '%';
+              <button className="mt-6 w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors">
+                Все замечания и предложения
+              </button>
+            </div>
+          </div>
+
+          {/* Категории респондентов */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium">Категории респондентов</h2>
+            </div>
+            <div className="p-6">
+              <div className="h-[300px]">
+                <Pie data={categoryData} options={commonOptions} />
+              </div>
+            </div>
+          </div>
+
+          {/* Демографические показатели */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium text-start">Демографические показатели</h2>
+            </div>
+            <div className="p-6 flex flex-col items-center">
+              <div className="flex justify-center gap-4 mb-6 w-full">
+                {['Пол', 'Пол и возраст', 'Возраст'].map((tab) => (
+                  <button
+                    key={tab}
+                    className={`px-6 py-2 rounded-lg transition-colors ${demographicsView === tab.toLowerCase()
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-100 hover:bg-gray-200'
+                      }`}
+                    onClick={() => setDemographicsView(tab.toLowerCase())}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+              <div className="h-[300px] w-full flex justify-center items-center">
+                {demographicsView === 'пол' && (
+                  <Pie
+                    data={genderData}
+                    options={{
+                      ...commonOptions,
+                      plugins: {
+                        ...commonOptions.plugins,
+                        legend: {
+                          position: 'bottom',
+                          align: 'center',
+                          labels: {
+                            padding: 20,
+                            boxWidth: 15,
+                            font: { size: 12 },
+                            usePointStyle: true
+                          }
+                        },
+                        datalabels: {
+                          color: '#FFFFFF',
+                          font: { size: 16, weight: 'bold' },
+                          formatter: (value) => value + '%'
                         }
                       },
-                      grid: {
-                        display: false
+                      layout: {
+                        padding: {
+                          bottom: 20
+                        }
                       }
-                    }
-                  },
-                  maintainAspectRatio: false
-                }} />}
+                    }}
+                  />
+                )}
+                {demographicsView === 'пол и возраст' && (
+                  <Bar 
+                    data={ageGenderData} 
+                    options={{
+                      indexAxis: 'y',
+                      scales: {
+                        x: {
+                          type: 'linear' as const,
+                          stacked: true,
+                          ticks: {
+                            callback: function(this: any, value: string | number) {
+                              return Number(value);
+                            },
+                            display: false
+                          },
+                          grid: {
+                            display: false,
+                            drawBorder: false
+                          }
+                        },
+                        y: {
+                          stacked: true,
+                          grid: {
+                            display: false,
+                            drawOnChartArea: false
+                          }
+                        }
+                      },
+                      plugins: {
+                        legend: {
+                          position: 'bottom' as const
+                        }
+                      },
+                      maintainAspectRatio: false
+                    }}
+                  />
+                )}
+                {demographicsView === 'возраст' && (
+                  <Line 
+                    data={ageData} 
+                    options={{
+                      scales: {
+                        y: {
+                          type: 'linear' as const,
+                          beginAtZero: true,
+                          grid: {
+                            display: false,
+                            drawOnChartArea: false
+                          },
+                          ticks: {
+                            callback: function(this: any, value: string | number) {
+                              return value.toString();
+                            }
+                          }
+                        },
+                        x: {
+                          grid: {
+                            display: false,
+                            borderWidth: 0
+                          }
+                        }
+                      },
+                      plugins: {
+                        legend: {
+                          position: 'bottom' as const
+                        }
+                      },
+                      maintainAspectRatio: false
+                    }}
+                  />  
+                )}
               </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Оценки судьи */}
-      <div className="max-w-[1440px] mx-auto mt-6">
-        <h2 className="text-xl font-bold text-[#212529] mb-4">Оценки судьи</h2>
-        <div className="grid grid-cols-2 gap-6">
+          {/* Источники трафика */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium">Источник трафика</h2>
+            </div>
+            <div className="p-6">
+              <div className="h-[300px]">
+                <Bar data={trafficSourceData} options={trafficSourceOptions} />
+              </div>
+            </div>
+          </div>
+
+          {/* Категории судебных дел */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium">Категории судебных дел</h2>
+            </div>
+            <div className="p-6">
+              <div className="h-[300px]">
+                <Pie data={caseTypesData} options={commonOptions} />
+              </div>
+            </div>
+          </div>
+
           {/* Оценки судьи */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="space-y-5">
-              {judgeRatings.map((item, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale value={item.value} />
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium">Оценки судьи</h2>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Разъяснение прав и обязанности в судебном процессе</span>
+                  <span>3.0</span>
                 </div>
-              ))}
+                <ProgressBar value={3.0} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Проявление уважения к участникам судебного процесса</span>
+                  <span>3.5</span>
+                </div>
+                <ProgressBar value={3.5} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Контроль судьи за порядком в зале суда</span>
+                  <span>2.0</span>
+                </div>
+                <ProgressBar value={2.0} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Разъяснение судебного решение</span>
+                  <span>1.0</span>
+                </div>
+                <ProgressBar value={1.0} />
+              </div>
             </div>
           </div>
 
-          {/* Проявление неуважения */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-medium mb-4">
-              Проявление неуважения. Кол-во записей: 888
-            </h3>
-            <div className="h-64">
-              <Bar
-                data={{
-                  labels: [
-                    'Грубость',
-                    'Игнорирование',
-                    'Перебивали речи',
-                    'Не давали выступить',
-                    'Сарказм и насмешки'
-                  ],
-                  datasets: [{
-                    data: [50, 33.3, 16.7, 50, 66.7],
-                    backgroundColor: 'rgba(121, 82, 179, 0.8)',
-                  }]
-                }}
-                options={{
-                  indexAxis: 'y',
-                  plugins: { legend: { display: false } },
-                  scales: {
-                    x: {
-                      beginAtZero: true,
-                      max: 100,
-                      ticks: {
-                        callback: value => `${value}%`
+          {/* Проявления неуважения */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-medium">Проявление неуважения</h2>
+                <span className="text-gray-600">Кол-во записей: 888</span>
+              </div>
+            </div>
+            <div className="p-6">
+              <div className="h-[300px]">
+                <Bar 
+                  data={{
+                    ...disrespectData,
+                    datasets: disrespectData.datasets.map(dataset => ({
+                      ...dataset,
+                      datalabels: {
+                        ...dataset.datalabels,
+                        font: {
+                          ...dataset.datalabels.font,
+                          weight: 'bold' // Исправляем тип с string на допустимое значение
+                        }
+                      }
+                    }))
+                  }} 
+                  options={disrespectOptions}
+                />
+              </div>
+            </div>
+          </div>
+          {/* Оценки сотрудников */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium">Оценки сотрудников</h2>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Сотрудник 1</span>
+                  <span>3.0</span>
+                </div>
+                <ProgressBar value={3.0} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Сотрудник 2</span>
+                  <span>3.5</span>
+                </div>
+                <ProgressBar value={3.5} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Сотрудник 3</span>
+                  <span>2.0</span>
+                </div>
+                <ProgressBar value={2.0} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Сотрудник 4</span>
+                  <span>2.0</span>
+                </div>
+                <ProgressBar value={2.0} />
+              </div>
+            </div>
+          </div>
+
+          {/* Оценки процесса */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium">Оценки процесса</h2>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Скорость судебного процесса</span>
+                  <span>3.0</span>
+                </div>
+                <ProgressBar value={3.0} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Соблюдение сроков судебного процесса</span>
+                  <span>3.5</span>
+                </div>
+                <ProgressBar value={3.5} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Соблюдение процессуальных норм</span>
+                  <span>2.0</span>
+                </div>
+                <ProgressBar value={2.0} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Соблюдение законов и постановлений</span>
+                  <span>2.0</span>
+                </div>
+                <ProgressBar value={2.0} />
+              </div>
+            </div>
+          </div>
+          {/* Начало заседания в назначенное время */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium">Начало заседания в назначенное время</h2>
+            </div>
+            <div className="p-6">
+              <div className="h-[300px] w-[400px] mx-auto">
+                <Pie
+                  data={{
+                    labels: ['Да', 'Нет', 'Не знаю/Не уверен(а)'],
+                    datasets: [{
+                      data: [25, 37.5, 37.5],
+                      backgroundColor: [
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 99, 132)',
+                        'rgb(255, 159, 64)'
+                      ]
+                    }]
+                  }}
+                  options={{
+                    ...commonOptions,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      datalabels: {
+                        color: '#FFFFFF',
+                        font: {
+                          size: 16,
+                          weight: 'bold'
+                        },
+                        formatter: (value) => value + '%'
+                      },
+                      legend: {
+                        position: 'right',
+                        align: 'center',
+                        labels: {
+                          usePointStyle: true,
+                          padding: 20,
+                          font: { size: 14 }
+                        }
                       }
                     }
-                  }
-                }}
-              />
+                  }}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Оценки помощника и секретаря */}
-      <div className="max-w-[1440px] mx-auto mt-6">
-        <h2 className="text-xl font-bold text-[#212529] mb-4">Оценки помощника и секретаря</h2>
-        <div className="grid grid-cols-2 gap-6">
-          {/* Левая колонка с оценками */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="space-y-5">
-              {assistantRatings.map((item, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale value={item.value} />
-                </div>
-              ))}
+          {/* Использование средств аудио и видеофиксации */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium">Использование средств аудио и видеофиксации судебного заседания по уголовным делам</h2>
             </div>
-          </div>
-          {/* Правая колонка с круговой диаграммой */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-medium mb-4">
-              Использование средств аудио и видеофиксации судебного заседания по уголовным делам
-            </h3>
-            <div className="h-64">
-              <Pie data={recordingData} options={pieOptions} />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Оценки канцелярии */}
-      <div className="max-w-[1440px] mx-auto mt-6">
-        <h2 className="text-xl font-bold text-[#212529] mb-4">Оценки канцелярии</h2>
-        <div className="grid grid-cols-2 gap-6">
-          {/* Левая колонка с оценками */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <div className="space-y-5">
-              {officeRatings.map((item, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale value={item.value} />
-                </div>
-              ))}
-            </div>
-          </div>
-          {/* Правая колонка с графиком */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-medium mb-4">
-              Проявление неуважения. Кол-во записей: 888
-            </h3>
-            <div className="h-64">
-              <Bar
-                data={{
-                  labels: [
-                    'Грубость',
-                    'Игнорирование',
-                    'Перебивали речи',
-                    'Не давали выступить',
-                    'Сарказм и насмешки'
-                  ],
-                  datasets: [{
-                    data: [50, 33.3, 16.7, 50, 66.7],
-                    backgroundColor: 'rgba(121, 85, 72, 0.8)', // коричневый цвет
-                    borderColor: 'rgba(121, 85, 72, 1)',
-                    borderWidth: 1
-                  }]
-                }}
-                options={{
-                  indexAxis: 'y',
-                  plugins: { legend: { display: false } },
-                  scales: {
-                    x: {
-                      beginAtZero: true,
-                      max: 100,
-                      ticks: {
-                        callback: value => `${value}%`
+            <div className="p-6">
+              <div className="h-[300px] w-[400px] mx-auto">
+                <Pie
+                  data={{
+                    labels: ['Да', 'Нет', 'Не знаю/Не уверен(а)'],
+                    datasets: [{
+                      data: [25, 37.5, 37.5],
+                      backgroundColor: [
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 99, 132)',
+                        'rgb(255, 159, 64)'
+                      ]
+                    }]
+                  }}
+                  options={{
+                    ...commonOptions,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      datalabels: {
+                        color: '#FFFFFF',
+                        font: {
+                          size: 16,
+                          weight: 'bold'
+                        },
+                        formatter: (value) => value + '%'
+                      },
+                      legend: {
+                        position: 'right',
+                        align: 'center',
+                        labels: {
+                          usePointStyle: true,
+                          padding: 20,
+                          font: { size: 14 }
+                        }
                       }
                     }
-                  }
-                }}
-              />
+                  }}
+                />
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Оценки доступности и судебных приставов */}
-      <div className="max-w-[1440px] mx-auto mt-6">
-        <div className="grid grid-cols-2 gap-6">
+
+          {/* Оценки канцелярии */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium">Оценки канцелярии</h2>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Взаимодействие с судебной канцелярией</span>
+                  <span>3.0</span>
+                </div>
+                <ProgressBar value={3.0} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Предоставление всей необходимой информации</span>
+                  <span>4.1</span>
+                </div>
+                <ProgressBar value={4.1} />
+              </div>
+            </div>
+          </div>
+
           {/* Оценки доступности */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-[#212529] mb-4">Оценки доступности</h2>
-            <div className="space-y-5">
-              {accessibilityRatings.map((item, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale value={item.value} />
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b">
+              <h2 className="text-xl font-medium">Оценки доступности здания</h2>
+            </div>
+            <div className="p-6 space-y-6">
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Доступность здания суда для людей с инвалидностью и маломобильных категорий</span>
+                  <span>3.0</span>
                 </div>
-              ))}
+                <ProgressBar value={3.0} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Оцените удобство и комфорт зала суда</span>
+                  <span>4.1</span>
+                </div>
+                <ProgressBar value={4.1} />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span>Навигация внутри здания суда</span>
+                  <span>3.5</span>
+                </div>
+                <ProgressBar value={3.5} />
+              </div>
             </div>
           </div>
 
-          {/* Оценки судебных приставов */}
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h2 className="text-xl font-bold text-[#212529] mb-4">Оценки судебных приставов</h2>
-            <div className="space-y-5">
-              {bailiffRatings.map((item, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <span className="flex-1 text-[14px] text-[#212529]">{item.title}</span>
-                  <RatingScale value={item.value} />
-                </div>
-              ))}
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
   );
-};
-
-export default EvaluationResults;
+}

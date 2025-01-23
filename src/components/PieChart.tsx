@@ -52,7 +52,18 @@ export function PieChart({ data, title }: PieChartProps) {
       datalabels: {
         display: true
       }
-    }))
+    })),
+    newPieChart: {
+      labels: ['Категория 1', 'Категория 2', 'Категория 3'],
+      datasets: [{
+        data: [30, 40, 30],
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.8)',
+          'rgba(54, 162, 235, 0.8)',
+          'rgba(255, 206, 86, 0.8)'
+        ]
+      }]
+    }
   };
 
   return (

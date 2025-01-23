@@ -25,6 +25,24 @@ export default function data() {
       setDateRange(prev => ({ ...prev, [field]: value }));
     }, []);
 
+    const buttonStyles = `
+      px-4 py-2 
+      rounded-lg 
+      border border-gray-200
+      transition-all
+      hover:bg-gray-100
+      focus:outline-none
+      focus:ring-2 
+      focus:ring-blue-500
+    `;
+
+    const activeButtonStyles = `
+      bg-blue-500 
+      text-white
+      border-blue-500
+      hover:bg-blue-600
+    `;
+
     return (
         <div className="mt-6">
             <div className="flex items-center gap-4 ">
@@ -50,13 +68,14 @@ export default function data() {
               
             </div>
 
-            <div className="flex w-full gap-0.5" style={{marginTop: '12px'}}>
+            <div className="flex w-full gap-2 mt-4">
                 {quarters.map((quarter, index) => (
                     <button
                         key={quarter}
                         onClick={() => setActiveQuarter(index)}
-                        className={`month-button flex-1 ${activeQuarter === index ? 'active' : ''
-                            }`}
+                        className={`${buttonStyles} ${
+                            activeQuarter === index ? activeButtonStyles : ''
+                        }`}
                     >
                         {quarter}
                     </button>
@@ -65,8 +84,9 @@ export default function data() {
                     <button
                         key={month}
                         onClick={() => setActiveMonth(index)}
-                        className={`month-button flex-1 ${activeMonth === index ? 'active' : ''
-                            }`}
+                        className={`${buttonStyles} ${
+                            activeMonth === index ? activeButtonStyles : ''
+                        }`}
                     >
                         {month}
                     </button>
