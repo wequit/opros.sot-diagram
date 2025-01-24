@@ -67,7 +67,7 @@ export default function Data() {
     }, []);
 
     return (
-        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
+        <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
             {/* Верхняя строка с датами */}
             <div className="flex items-center gap-8 mb-6">
                 <div className="flex items-center gap-3">
@@ -96,18 +96,18 @@ export default function Data() {
             </div>
 
             {/* Объединенные кварталы и месяцы */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 w-full">
                 {periods.map((period) => (
                     <button
                         key={period.id}
                         onClick={() => setActivePeriod(period.id)}
                         className={`
-                            ${period.type === 'quarter' ? 'min-w-[50px]' : 'min-w-[60px]'}
-                            px-3 py-2 rounded-lg font-medium text-sm
-                            transition-all duration-200
+                            flex-1 min-w-[70px]
+                            px-3 py-2 rounded-lg font-medium text-base
+                            transition-all duration-200 border border-gray-200
                             ${activePeriod === period.id 
-                                ? 'bg-green-500 text-white shadow-sm' 
-                                : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                                ? 'bg-[#2563EB] text-white shadow-sm' 
+                                : 'bg-white text-gray-700 hover:bg-gray-50'
                             }
                         `}
                     >

@@ -35,29 +35,31 @@ const LoginForm: React.FC = () => {
 
   return (
     <div className="w-[500px] bg-white p-12 rounded-lg shadow-sm">
-      <h2 className="text-2xl font-bold text-center mb-6">Вход в систему</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-[28px] font-normal text-center mb-8">Вход в систему</h2>
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-base text-gray-600 mb-2">
             Имя пользователя
           </label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-4 py-3 bg-[#F8F9FF] rounded-lg text-base
+                     outline-none transition-all duration-200"
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-base text-gray-600 mb-2">
             Пароль
           </label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className="w-full px-4 py-3 bg-[#F8F9FF] rounded-lg text-base
+                     outline-none transition-all duration-200"
             required
           />
         </div>
@@ -67,7 +69,8 @@ const LoginForm: React.FC = () => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
+          className="w-full bg-[#2563EB] text-white py-3 px-4 rounded-lg text-base
+                   hover:bg-blue-600 transition-all duration-200 disabled:opacity-50"
         >
           {isLoading ? 'Вход...' : 'Войти'}
         </button>

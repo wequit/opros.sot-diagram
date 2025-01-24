@@ -351,21 +351,21 @@ export default function Evaluations() {
       {
         label: "Мужчины",
         data: [-35, -28, -20, -10, -5, -2],
-        backgroundColor: "rgb(54, 162, 235)", // Синий для женщин
+        backgroundColor: "rgb(54, 162, 235)",
         stack: "Stack 0",
         datalabels: {
           color: "#FFFFFF",
-          formatter: (value: number): string => value + "%",
+          formatter: (value: number): string => `${Math.abs(value)}%`,
         },
       },
       {
         label: "Женщины",
         data: [30, 25, 18, 12, 8, 4],
-        backgroundColor: "rgb(255, 192, 203)", // Светло-розовый для мужчин
+        backgroundColor: "rgb(255, 192, 203)",
         stack: "Stack 0",
         datalabels: {
           color: "#FFFFFF",
-          formatter: (value: number): string => value + "%",
+          formatter: (value: number): string => `${value}%`,
         },
       },
     ],
