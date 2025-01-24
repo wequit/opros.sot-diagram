@@ -195,159 +195,210 @@ export function processAudioVideoQuestion(questions: Question[]) {
   };
 }
 
-export function processJudgeRatings(questions:Question[]) {
-  // Номера вопросов, которые нас интересуют
-  const questionIds = [11, 14, 12, 17];
-  
-  // Объект для хранения средних оценок
-  const averageRatings: { [key: string]: number } = {};
-  
-  // Названия вопросов на русском
+export function processJudgeRatings(questions: Question[]): { [key: string]: number } {
+  // Маппинг ID вопросов к их заголовкам
   const questionTitles: { [key: number]: string } = {
     11: "Разъяснение прав и обязанности в судебном процессе",
-    12: "Проявление уважения к участникам судебного процесса",
-    14: "Контроль судьи за порядком в зале суда",
+    12: "Контроль судьи за порядком в зале суда",
+    14: "Проявление уважения к участникам судебного процесса",
     17: "Общая оценка работы судьи"
   };
 
-  // Обрабатываем каждый вопрос
-  questionIds.forEach(qId => {
-    const question = questions.find(q => q.id === qId);
-    if (question && question.question_responses) {
-      // Фильтруем валидные ответы
-      const validResponses = question.question_responses.filter(
-        (r: any) => r.selected_option && r.selected_option.text_kg
-      );
+  // Инициализируем объект для хранения сумм и количества ответов
+  const ratingSums: { [key: string]: { sum: number; count: number } } = {};
+  
+  // Инициализируем все заголовки с нулевыми значениями
+  Object.values(questionTitles).forEach(title => {
+    ratingSums[title] = { sum: 0, count: 0 };
+  });
 
-      if (validResponses.length > 0) {
-        // Вычисляем среднюю оценку
-        const sum = validResponses.reduce((acc: number, r: any) => {
-          return acc + Number(r.selected_option.text_kg);
-        }, 0);
-        
-        averageRatings[questionTitles[qId]] = Number((sum / validResponses.length).toFixed(1));
-      }
+  // Обрабатываем каждый вопрос
+  questions.forEach(question => {
+    if (questionTitles[question.id]) {
+      const title = questionTitles[question.id];
+      
+      question.question_responses.forEach(response => {
+        if (response.selected_option && response.selected_option.text_ru) {
+          const rating = Number(response.selected_option.text_ru);
+          if (!isNaN(rating) && rating >= 1 && rating <= 5) {
+            ratingSums[title].sum += rating;
+            ratingSums[title].count += 1;
+          }
+        }
+      });
     }
+  });
+
+  // Вычисляем средние значения
+  const averageRatings: { [key: string]: number } = {};
+  
+  Object.entries(ratingSums).forEach(([title, { sum, count }]) => {
+    averageRatings[title] = count > 0 ? Number((sum / count).toFixed(1)) : 0;
   });
 
   return averageRatings;
 }
 
-export function processStaffRatings(questions:Question[]) {
-  const questionIds = [7, 9];
-  const averageRatings: { [key: string]: number } = {};
-  
+export function processStaffRatings(questions: Question[]): { [key: string]: number } {
+  // Маппинг ID вопросов к их заголовкам
   const questionTitles: { [key: number]: string } = {
     7: "Отношение сотрудников",
     9: "Предоставление всей необходимой информации"
   };
 
-  questionIds.forEach(qId => {
-    const question = questions.find(q => q.id === qId);
-    if (question && question.question_responses) {
-      const validResponses = question.question_responses.filter(
-        (r: any) => r.selected_option && r.selected_option.text_kg
-      );
+  // Инициализируем объект для хранения сумм и количества ответов
+  const ratingSums: { [key: string]: { sum: number; count: number } } = {};
+  
+  // Инициализируем все заголовки с нулевыми значениями
+  Object.values(questionTitles).forEach(title => {
+    ratingSums[title] = { sum: 0, count: 0 };
+  });
 
-      if (validResponses.length > 0) {
-        const sum = validResponses.reduce((acc: number, r: any) => {
-          return acc + Number(r.selected_option.text_kg);
-        }, 0);
-        
-        averageRatings[questionTitles[qId]] = Number((sum / validResponses.length).toFixed(1));
-      }
+  // Обрабатываем каждый вопрос
+  questions.forEach(question => {
+    if (questionTitles[question.id]) {
+      const title = questionTitles[question.id];
+      
+      question.question_responses.forEach(response => {
+        if (response.selected_option && response.selected_option.text_ru) {
+          const rating = Number(response.selected_option.text_ru);
+          if (!isNaN(rating) && rating >= 1 && rating <= 5) {
+            ratingSums[title].sum += rating;
+            ratingSums[title].count += 1;
+          }
+        }
+      });
     }
+  });
+
+  // Вычисляем средние значения
+  const averageRatings: { [key: string]: number } = {};
+  Object.entries(ratingSums).forEach(([title, { sum, count }]) => {
+    averageRatings[title] = count > 0 ? Number((sum / count).toFixed(1)) : 0;
+  });
+
+  return averageRatings;
+}
+
+export function processProcessRatings(questions: Question[]): { [key: string]: number } {
+  // Маппинг ID вопросов к их заголовкам
+  const questionTitles: { [key: number]: string } = {
+    10: "Оценка судебного процесса"
+  };
+
+  // Инициализируем объект для хранения сумм и количества ответов
+  const ratingSums: { [key: string]: { sum: number; count: number } } = {};
+  
+  // Инициализируем все заголовки с нулевыми значениями
+  Object.values(questionTitles).forEach(title => {
+    ratingSums[title] = { sum: 0, count: 0 };
+  });
+
+  // Обрабатываем каждый вопрос
+  questions.forEach(question => {
+    if (questionTitles[question.id]) {
+      const title = questionTitles[question.id];
+      
+      question.question_responses.forEach(response => {
+        if (response.selected_option && response.selected_option.text_ru) {
+          const rating = Number(response.selected_option.text_ru);
+          if (!isNaN(rating) && rating >= 1 && rating <= 5) {
+            ratingSums[title].sum += rating;
+            ratingSums[title].count += 1;
+          }
+        }
+      });
+    }
+  });
+
+  // Вычисляем средние значения
+  const averageRatings: { [key: string]: number } = {};
+  Object.entries(ratingSums).forEach(([title, { sum, count }]) => {
+    averageRatings[title] = count > 0 ? Number((sum / count).toFixed(1)) : 0;
+  });
+
+  return averageRatings;
+}
+
+export function processOfficeRatings(questions: Question[]): { [key: string]: number } {
+  // Маппинг ID вопросов к их заголовкам
+  const questionTitles: { [key: number]: string } = {
+    8: "Предоставление всей необходимой информации"
+  };
+
+  // Инициализируем объект для хранения сумм и количества ответов
+  const ratingSums: { [key: string]: { sum: number; count: number } } = {};
+  
+  // Инициализируем все заголовки с нулевыми значениями
+  Object.values(questionTitles).forEach(title => {
+    ratingSums[title] = { sum: 0, count: 0 };
+  });
+
+  // Обрабатываем каждый вопрос
+  questions.forEach(question => {
+    if (questionTitles[question.id]) {
+      const title = questionTitles[question.id];
+      
+      question.question_responses.forEach(response => {
+        if (response.selected_option && response.selected_option.text_ru) {
+          const rating = Number(response.selected_option.text_ru);
+          if (!isNaN(rating) && rating >= 1 && rating <= 5) {
+            ratingSums[title].sum += rating;
+            ratingSums[title].count += 1;
+          }
+        }
+      });
+    }
+  });
+
+  // Вычисляем средние значения
+  const averageRatings: { [key: string]: number } = {};
+  Object.entries(ratingSums).forEach(([title, { sum, count }]) => {
+    averageRatings[title] = count > 0 ? Number((sum / count).toFixed(1)) : 0;
   });
 
   return averageRatings;
 } 
 
-export function processProcessRatings(questions: Question[]) {
-  // Ищем вопрос 10
-  const question = questions.find(q => q.id === 10);
-  const averageRating: { [key: string]: number } = {};
+export function processAccessibilityRatings(questions: Question[]): { [key: string]: number } {
+  // Маппинг ID вопросов к их заголовкам
+  const questionTitles: { [key: number]: string } = {
+    6: "Доступность здания суда для людей с инвалидностью и маломобильных категорий"
+  };
+
+  // Инициализируем объект для хранения сумм и количества ответов
+  const ratingSums: { [key: string]: { sum: number; count: number } } = {};
   
-  if (question && question.question_responses) {
-    // Фильтруем валидные ответы
-    const validResponses = question.question_responses.filter(
-      (r: any) => r.selected_option && r.selected_option.text_kg
-    );
+  // Инициализируем все заголовки с нулевыми значениями
+  Object.values(questionTitles).forEach(title => {
+    ratingSums[title] = { sum: 0, count: 0 };
+  });
 
-    if (validResponses.length > 0) {
-      // Вычисляем среднюю оценку
-      const sum = validResponses.reduce((acc: number, r: any) => {
-        return acc + Number(r.selected_option.text_kg);
-      }, 0);
+  // Обрабатываем каждый вопрос
+  questions.forEach(question => {
+    if (questionTitles[question.id]) {
+      const title = questionTitles[question.id];
       
-      averageRating["Оценка судебного процесса"] = Number((sum / validResponses.length).toFixed(1));
+      question.question_responses.forEach(response => {
+        if (response.selected_option && response.selected_option.text_ru) {
+          const rating = Number(response.selected_option.text_ru);
+          if (!isNaN(rating) && rating >= 1 && rating <= 5) {
+            ratingSums[title].sum += rating;
+            ratingSums[title].count += 1;
+          }
+        }
+      });
     }
-  }
+  });
 
-  return averageRating;
-} 
-
-export function processOfficeRatings(questions: Question[]) {
-  // Ищем вопрос 8
-  const question = questions.find(q => q.id === 8);
+  // Вычисляем средние значения
   const averageRatings: { [key: string]: number } = {};
-
-  if (question && question.question_responses) {
-    // Фильтруем валидные ответы
-    const validResponses = question.question_responses.filter(
-      (r: any) => r.selected_option && r.selected_option.text_kg
-    );
-
-    if (validResponses.length > 0) {
-      // Вычисляем среднюю оценку
-      const sum = validResponses.reduce((acc: number, r: any) => {
-        return acc + Number(r.selected_option.text_kg);
-      }, 0);
-      
-      averageRatings["Предоставление всей необходимой информации"] = 
-        Number((sum / validResponses.length).toFixed(1));
-    }
-  }
+  Object.entries(ratingSums).forEach(([title, { sum, count }]) => {
+    averageRatings[title] = count > 0 ? Number((sum / count).toFixed(1)) : 0;
+  });
 
   return averageRatings;
-} 
-
-export function processAccessibilityRatings(questions:Question[]) {
-  // Ищем вопрос 6
-  const question = questions.find(q => q.id === 6);
-  const averageRatings: { [key: string]: number } = {};
-
-  if (question && question.question_responses) {
-    // Фильтруем валидные ответы и проверяем, что text_kg это число
-    const validResponses = question.question_responses.filter(
-      (r: any) => r.selected_option && 
-                  r.selected_option.text_kg && 
-                  !isNaN(parseInt(r.selected_option.text_kg))
-    );
-
-    if (validResponses.length > 0) {
-      // Вычисляем среднюю оценку
-      const sum = validResponses.reduce((acc: number, r: any) => {
-        const value = parseInt(r.selected_option.text_kg);
-        return acc + value;
-      }, 0);
-      
-      const average = Number((sum / validResponses.length).toFixed(1));
-      
-      if (!isNaN(average)) {
-        averageRatings["Доступность здания суда для людей с инвалидностью и маломобильных категорий"] = average;
-      } else {
-        averageRatings["Доступность здания суда для людей с инвалидностью и маломобильных категорий"] = 0;
-      }
-    }
-  }
-
-  // Если нет данных, возвращаем 0
-  if (Object.keys(averageRatings).length === 0) {
-    averageRatings["Доступность здания суда для людей с инвалидностью и маломобильных категорий"] = 0;
-  }
-
-  return averageRatings;
-} 
+}
 
 export function processStartTimeQuestion(questions: Question[]) {
   // Ищем вопрос 16
