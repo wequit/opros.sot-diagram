@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #f8f9fa;
+    --foreground: #000000;
+  }
+}
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+  .month-button {
+    @apply py-1.5 bg-white border border-gray-200 transition-colors duration-200 text-center text-sm;
+    border-radius: 4px;
+  }
+
+  .month-button:hover {
+    @apply bg-gray-50;
+  }
+
+  .month-button.active {
+    @apply bg-green-100 border-green-400 text-green-700 font-medium;
+  }
+}
