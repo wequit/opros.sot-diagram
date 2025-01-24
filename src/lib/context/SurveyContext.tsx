@@ -1,10 +1,25 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface Question {
+interface SelectedOption {
   id: number;
+  text_ru: string;
+  text_kg: string;
+  value?: number;
+}
+
+export interface QuestionResponse {
+  question: number;
+  selected_option: SelectedOption | null;
+  custom_answer: string | null;
+}
+
+export interface Question {
+  id: number;
+  text: string;
   question_text: string;
   question_type: 'multiple_choice' | 'text' | 'rating';
   options?: string[];
+  question_responses: QuestionResponse[];
   responses: {
     answer: string | number;
     timestamp: string;

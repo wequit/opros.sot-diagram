@@ -15,9 +15,9 @@ import {
   ArcElement,
   ChartData,
   ChartDataset,
-  Context,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
+import type { Context as DataLabelsContext } from 'chartjs-plugin-datalabels';
 import { useSurveyData } from "@/lib/context/SurveyContext";
 import {
   processSecondQuestion,
@@ -32,6 +32,7 @@ import {
   processOfficeRatings,
   processStartTimeQuestion,
 } from "@/lib/utils/processData";
+import { Question } from '@/lib/context/SurveyContext';
 
 ChartJS.register(
   RadialLinearScale,
@@ -53,7 +54,7 @@ interface PieChartData extends ChartData<'pie', number[], string> {
     datalabels?: {
       color: string;
       display?: boolean;
-      formatter: (value: number, context?: Context<'pie'>) => string;
+      formatter: (value: number, context: DataLabelsContext) => string;
       font?: {
         size?: number;
         weight?: string | number;
@@ -67,7 +68,7 @@ interface BarChartData extends ChartData<'bar', number[], string> {
     datalabels?: {
       color: string;
       display?: boolean;
-      formatter: (value: number, context?: Context<'bar'>) => string;
+      formatter: (value: number, context: DataLabelsContext) => string;
       align?: 'end';
       anchor?: 'end';
       offset?: number;
@@ -245,8 +246,8 @@ export default function Evaluations() {
     if (surveyData?.questions) {
       // Функция для получения среднего значения из массива
       const getAverageFromData = (data: number[]) => {
-        if (data.length === 0) return 0;
-        const sum = data.reduce((acc, val) => acc + val, 0);
+        const sum = data.reduce((a: number, b: number) => a + b, 0);
+        if (sum === null || sum === undefined) return 0;
         return Number((sum / data.length).toFixed(1));
       };
 
@@ -307,7 +308,7 @@ export default function Evaluations() {
 
       const ratings = processJudgeRatings(surveyData.questions);
       setJudgeRatings(ratings);
-      const staffRatings = processStaffRatings(surveyData.questions);
+      const staffRatings = processStaffRatings(surveyData.questions); 
       setStaffRatings(staffRatings);
       const processRatings = processProcessRatings(surveyData.questions);
       setProcessRatings(processRatings);
@@ -415,7 +416,7 @@ export default function Evaluations() {
         },
         ticks: {
           padding: 1,
-          align: "start",
+          align: "center" as const,
           font: {
             size: 11,
           },
@@ -453,10 +454,15 @@ export default function Evaluations() {
           align: "end" as const,
           anchor: "end" as const,
           offset: 4,
-          formatter: (value: number, context: Context): string => {
+          formatter: (value: number, context: DataLabelsContext): string => {
             const dataset = context.dataset;
-            const sum = dataset.data.reduce((a: number, b: number) => a + b, 0);
-            const percentage = ((value / sum) * 100).toFixed(1);
+            const data = dataset.data as (number | null)[];
+            const sum = data
+              .filter((value): value is number => 
+                value !== null && !isNaN(value)
+              )
+              .reduce((a, b) => a + b, 0);
+            const percentage = sum > 0 ? ((value / sum) * 100).toFixed(1) : '0.0';
             return `${value} (${percentage}%)`;
           },
           font: {

@@ -367,7 +367,7 @@ export function processStartTimeQuestion(questions: Question[]) {
 
     // Группируем ответы
     const grouped = validResponses.reduce((acc: {[key: string]: number}, response) => {
-      const optionText = response.selected_option.text_ru;
+      const optionText = response.selected_option!.text_ru;
       acc[optionText] = (acc[optionText] || 0) + 1;
       return acc;
     }, {});
