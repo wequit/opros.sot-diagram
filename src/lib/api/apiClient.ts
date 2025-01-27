@@ -1,3 +1,6 @@
+import { getCookie } from './login';
+import { deleteCookie } from './login';
+
 interface ApiClientConfig {
   baseURL: string;
   endpoint: string;
@@ -14,7 +17,7 @@ export class ApiClient {
 
   async fetchData() {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = getCookie('access_token');
 
       if (!token) {
         throw new Error('Токен не найден');
@@ -34,7 +37,7 @@ export class ApiClient {
       });
 
       if (response.status === 401) {
-        localStorage.removeItem('access_token');
+        deleteCookie('access_token');
         throw new Error('Токен недействителен или просрочен');
       }
 

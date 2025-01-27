@@ -32,7 +32,6 @@ import {
   processOfficeRatings,
   processStartTimeQuestion,
 } from "@/lib/utils/processData";
-import { Question } from '@/lib/context/SurveyContext';
 
 ChartJS.register(
   RadialLinearScale,
@@ -204,126 +203,134 @@ export default function Evaluations() {
   const [totalResponses, setTotalResponses] = useState<number>(0);
 
   useEffect(() => {
-    if (surveyData && surveyData.questions && surveyData.questions[1]) {
-      const processedData = processSecondQuestion(
-        surveyData.questions[1].question_responses
-      );
-      setCategoryData(processedData);
-    }
-    if (surveyData && surveyData.questions && surveyData.questions[2]) {
-      console.log(
-        "Данные 3-го вопроса:",
-        surveyData.questions[2].question_responses
-      );
-      const processedData = processThirdQuestion(
-        surveyData.questions[2].question_responses
-      );
-      console.log("Обработанные данные:", processedData);
-      setGenderData(processedData);
-    }
-    if (surveyData && surveyData.questions && surveyData.questions[0]) {
-      console.log(
-        "Данные 1-го вопроса:",
-        surveyData.questions[0].question_responses
-      );
-      const processedData = processFirstQuestion(
-        surveyData.questions[0].question_responses
-      );
-      console.log("Обработанные данные:", processedData);
-      setTrafficSourceData(processedData);
-    }
-    if (surveyData && surveyData.questions && surveyData.questions[4]) {
-      console.log(
-        "Данные 5-го вопроса:",
-        surveyData.questions[4].question_responses
-      );
-      const processedData = processFifthQuestion(
-        surveyData.questions[4].question_responses
-      );
-      console.log("Обработанные данные:", processedData);
-      setCaseTypesData(processedData);
-    }
-    if (surveyData?.questions) {
-      // Функция для получения среднего значения из массива
-      const getAverageFromData = (data: number[]) => {
-        const sum = data.reduce((a: number, b: number) => a + b, 0);
-        if (sum === null || sum === undefined) return 0;
-        return Number((sum / data.length).toFixed(1));
-      };
+    const fetchData = async () => {
+      try {
+        if (surveyData && surveyData.questions && surveyData.questions[1]) {
+          const processedData = processSecondQuestion(
+            surveyData.questions[1].question_responses
+          );
+          setCategoryData(processedData);
+        }
+        if (surveyData && surveyData.questions && surveyData.questions[2]) {
+          console.log(
+            "Данные 3-го вопроса:",
+            surveyData.questions[2].question_responses
+          );
+          const processedData = processThirdQuestion(
+            surveyData.questions[2].question_responses
+          );
+          console.log("Обработанные данные:", processedData);
+          setGenderData(processedData);
+        }
+        if (surveyData && surveyData.questions && surveyData.questions[0]) {
+          console.log(
+            "Данные 1-го вопроса:",
+            surveyData.questions[0].question_responses
+          );
+          const processedData = processFirstQuestion(
+            surveyData.questions[0].question_responses
+          );
+          console.log("Обработанные данные:", processedData);
+          setTrafficSourceData(processedData);
+        }
+        if (surveyData && surveyData.questions && surveyData.questions[4]) {
+          console.log(
+            "Данные 5-го вопроса:",
+            surveyData.questions[4].question_responses
+          );
+          const processedData = processFifthQuestion(
+            surveyData.questions[4].question_responses
+          );
+          console.log("Обработанные данные:", processedData);
+          setCaseTypesData(processedData);
+        }
+        if (surveyData?.questions) {
+          // Функция для получения среднего значения из массива
+          const getAverageFromData = (data: number[]) => {
+            const sum = data.reduce((a: number, b: number) => a + b, 0);
+            if (sum === null || sum === undefined) return 0;
+            return Number((sum / data.length).toFixed(1));
+          };
 
-      // Получаем данные для каждой категории используя существующие функции
-      const judgeData = processJudgeRatings(surveyData.questions);
-      const staffData = processStaffRatings(surveyData.questions);
-      const processData = processProcessRatings(surveyData.questions);
-      const officeData = processOfficeRatings(surveyData.questions);
-      const accessibilityData = processAccessibilityRatings(surveyData.questions);
+          // Получаем данные для каждой категории используя существующие функции
+          const judgeData = processJudgeRatings(surveyData.questions);
+          const staffData = processStaffRatings(surveyData.questions);
+          const processData = processProcessRatings(surveyData.questions);
+          const officeData = processOfficeRatings(surveyData.questions);
+          const accessibilityData = processAccessibilityRatings(surveyData.questions);
 
-      // Рассчитываем средние значения
-      const currentCourtAverages = {
-        judge: getAverageFromData(Object.values(judgeData)),
-        secretary: getAverageFromData(Object.values(staffData)),
-        office: getAverageFromData(Object.values(officeData)),
-        process: getAverageFromData(Object.values(processData)),
-        bailiff: 0, // Если есть отдельная функция для пристава
-        building: getAverageFromData(Object.values(accessibilityData))
-      };
+          // Рассчитываем средние значения
+          const currentCourtAverages = {
+            judge: getAverageFromData(Object.values(judgeData)),
+            secretary: getAverageFromData(Object.values(staffData)),
+            office: getAverageFromData(Object.values(officeData)),
+            process: getAverageFromData(Object.values(processData)),
+            bailiff: 0, // Если есть отдельная функция для пристава
+            building: getAverageFromData(Object.values(accessibilityData))
+          };
 
-      console.log('Final averages:', currentCourtAverages);
+          console.log('Final averages:', currentCourtAverages);
 
-      setRadarData({
-        labels: [
-          "Судья",
-          "Секретарь, помощник",
-          "Канцелярия",
-          "Процесс",
-          "Пристав",
-          "Здание",
-        ],
-        datasets: [
-          {
-            label: "Ноокенский суд",
-            data: [
-              currentCourtAverages.judge || 0,
-              currentCourtAverages.secretary || 0,
-              currentCourtAverages.office || 0,
-              currentCourtAverages.process || 0,
-              currentCourtAverages.bailiff || 0,
-              currentCourtAverages.building || 0
+          setRadarData({
+            labels: [
+              "Судья",
+              "Секретарь, помощник",
+              "Канцелярия",
+              "Процесс",
+              "Пристав",
+              "Здание",
             ],
-            fill: true,
-            backgroundColor: "rgba(255, 206, 86, 0.2)",
-            borderColor: "rgba(255, 206, 86, 1)",
-            borderWidth: 2,
-          },
-          {
-            label: "Средние оценки по республике",
-            data: [4.5, 4.2, 4.0, 4.3, 4.4, 4.1], // Временные данные
-            fill: true,
-            backgroundColor: "rgba(54, 162, 235, 0.2)",
-            borderColor: "rgba(54, 162, 235, 1)",
-            borderWidth: 2,
-          },
-        ],
-      });
+            datasets: [
+              {
+                label: "Ноокенский суд",
+                data: [
+                  currentCourtAverages.judge || 0,
+                  currentCourtAverages.secretary || 0,
+                  currentCourtAverages.office || 0,
+                  currentCourtAverages.process || 0,
+                  currentCourtAverages.bailiff || 0,
+                  currentCourtAverages.building || 0
+                ],
+                fill: true,
+                backgroundColor: "rgba(255, 206, 86, 0.2)",
+                borderColor: "rgba(255, 206, 86, 1)",
+                borderWidth: 2,
+              },
+              {
+                label: "Средние оценки по республике",
+                data: [4.5, 4.2, 4.0, 4.3, 4.4, 4.1], // Временные данные
+                fill: true,
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 2,
+              },
+            ],
+          });
 
-      const ratings = processJudgeRatings(surveyData.questions);
-      setJudgeRatings(ratings);
-      const staffRatings = processStaffRatings(surveyData.questions); 
-      setStaffRatings(staffRatings);
-      const processRatings = processProcessRatings(surveyData.questions);
-      setProcessRatings(processRatings);
-      const audioVideoData = processAudioVideoQuestion(surveyData.questions);
-      setAudioVideoData(audioVideoData);
-      const officeRatings = processOfficeRatings(surveyData.questions);
-      setOfficeRatings(officeRatings);
-      const accessibilityRatings = processAccessibilityRatings(surveyData.questions);
-      setAccessibilityRatings(accessibilityRatings);
-      const startTimeData = processStartTimeQuestion(surveyData.questions);
-      setStartTimeData(startTimeData);
-    }
-    if (surveyData?.total_responses) {
-      setTotalResponses(surveyData.total_responses);
-    }
+          const ratings = processJudgeRatings(surveyData.questions);
+          setJudgeRatings(ratings);
+          const staffRatings = processStaffRatings(surveyData.questions); 
+          setStaffRatings(staffRatings);
+          const processRatings = processProcessRatings(surveyData.questions);
+          setProcessRatings(processRatings);
+          const audioVideoData = processAudioVideoQuestion(surveyData.questions);
+          setAudioVideoData(audioVideoData);
+          const officeRatings = processOfficeRatings(surveyData.questions);
+          setOfficeRatings(officeRatings);
+          const accessibilityRatings = processAccessibilityRatings(surveyData.questions);
+          setAccessibilityRatings(accessibilityRatings);
+          const startTimeData = processStartTimeQuestion(surveyData.questions);
+          setStartTimeData(startTimeData);
+        }
+        if (surveyData?.total_responses) {
+          setTotalResponses(surveyData.total_responses);
+        }
+      } catch (error) {
+        console.error('Ошибка при получении данных:', error);
+      }
+    };
+
+    fetchData();
   }, [surveyData]);
 
   // Общие настройки для всех диаграмм

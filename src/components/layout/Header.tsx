@@ -34,7 +34,7 @@ const Header: React.FC = () => {
           height={50}
           className="rounded-full shadow-sm"
         />
-        <span className="text-lg font-semibold text-gray-700">
+        <span className="text-lg font-semibold text-gray-700 uppercase">
           Ноокенский районный суд
         </span>
       </div>

@@ -407,7 +407,7 @@ export function processStartTimeQuestion(questions: Question[]) {
   if (question && question.question_responses) {
     // Фильтруем валидные ответы
     const validResponses = question.question_responses.filter(
-      (r: any) => r.selected_option !== null
+      (r: QuestionResponse) => r.selected_option !== null
     );
     
     const totalResponses = validResponses.length;

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { setCookie, getCookie, deleteCookie } from '@/lib/api/login';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -15,7 +16,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('access_token');
+    const token = getCookie('access_token');
     if (token) {
       setIsAuthenticated(true);
     }
@@ -24,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (token: string) => {
     try {
       setIsAuthenticated(true);
-      localStorage.setItem('access_token', token);
+      setCookie('access_token', token);
       await router.push('/');
       router.refresh();
     } catch (error) {
@@ -33,13 +34,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    localStorage.removeItem('access_token');
+    deleteCookie('access_token');
     setIsAuthenticated(false);
     router.push('/login');
   };
 
   const getToken = () => {
-    return localStorage.getItem('access_token');
+    return getCookie('access_token');
   };
 
   return (

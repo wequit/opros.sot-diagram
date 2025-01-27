@@ -1,27 +1,10 @@
 //Страница "Замечания и предложения"
 
 'use client';
-import Data from '@/lib/utils/Data';
-import React, { useState, useEffect, useMemo } from 'react';
-import { useComments } from '@/components/CommentsApi';
+import React, { useState, useEffect } from 'react';
 import { useRemarks } from '@/components/RemarksApi';
 
-// Обновляем интерфейс 
-interface RemarkType {
-  id: number;
-  custom_answer: string | null;
-  reply_to_comment: string | null;
-  comment_created_at: string;
-  author?: string;
-}
 
-type DataItem = {
-  id: number;
-  comment: string;
-  action: string;
-};
-
-// Добавляем компонент модального окна
 const CommentModal = ({ 
   isOpen, 
   onClose, 
@@ -84,46 +67,6 @@ const CommentModal = ({
   );
 };
 
-// Компонент модального окна подтверждения удаления
-const DeleteConfirmModal = ({ 
-  isOpen, 
-  onClose, 
-  onConfirm 
-}: { 
-  isOpen: boolean; 
-  onClose: () => void; 
-  onConfirm: () => void;
-}) => {
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
-        <h3 className="text-lg font-semibold mb-4">Подтверждение удаления</h3>
-        <p className="text-gray-600 mb-6">
-          Вы уверены, что хотите удалить этот комментарий?
-        </p>
-        <div className="flex justify-end gap-2">
-          <button
-            className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-            onClick={onClose}
-          >
-            Отмена
-          </button>
-          <button
-            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-            onClick={() => {
-              onConfirm();
-              onClose();
-            }}
-          >
-            Удалить
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 export default function RemarksPage() {
   const { remarks, isLoading, error } = useRemarks();
@@ -133,38 +76,16 @@ export default function RemarksPage() {
   const [localRemarks, setLocalRemarks] = useState<any[]>([]);
   const itemsPerPage = 35;
 
-  // Инициализируем localRemarks при загрузке данных
   useEffect(() => {
     if (remarks) {
       setLocalRemarks(remarks);
     }
   }, [remarks]);
 
-  const getToken = async () => {
-    try {
-      const response = await fetch('https://opros.sot.kg/api/v1/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: 'pred3',
-          password: 'predsedatel'
-        })
-      });
-
-      if (!response.ok) throw new Error('Ошибка авторизации');
-      const data = await response.json();
-      return data.access;
-    } catch (err) {
-      console.error('Ошибка получения токена:', err);
-      throw err;
-    }
-  };
 
   const handleCommentSubmit = async (comment: string) => {
     try {
-      const token = await getToken();
+      const token = localStorage.getItem('access_token');
       const response = await fetch('https://opros.sot.kg/api/v1/comments/respond/', {
         method: 'POST',
         headers: {

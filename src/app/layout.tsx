@@ -5,8 +5,9 @@ import Header from "@/components/layout/Header";
 import { Roboto } from "next/font/google";
 import { AuthProvider, useAuth } from "@/lib/utils/AuthContext";
 import Sidebar from "@/components/layout/Sidebar";
-import dynamic from "next/dynamic";
+// import dynamic from "next/dynamic";
 import { SurveyProvider } from '@/lib/context/SurveyContext';
+import dynamic from "next/dynamic";
 
 const roboto = Roboto({
   weight: ["400", "500", "700"],
