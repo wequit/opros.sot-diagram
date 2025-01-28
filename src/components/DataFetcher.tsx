@@ -1,37 +1,44 @@
 'use client';
-import  { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ApiClient } from '@/lib/api/apiClient';
 import { useSurveyData } from '@/lib/context/SurveyContext';
 
+export const apiClient = new ApiClient({
+  baseURL: 'https://opros.sot.kg',
+  endpoint: '/api/v1/results/'
+});
+
+// Выносим функцию fetchDataWithParams за пределы компонента
+export const fetchDataWithParams = async (params = {}) => {
+  try {
+    const response = await apiClient.fetchData(params);
+    return response;
+  } catch (err) {
+    console.error('Ошибка при получении данных:', err);
+    throw err;
+  }
+};
+
 export default function DataFetcher() {
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { setSurveyData } = useSurveyData();
+  const { setSurveyData, setIsLoading } = useSurveyData();
+
+  const fetchData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetchDataWithParams({ year: '2025' });
+      setSurveyData(response);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Произошла ошибка');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [setSurveyData, setIsLoading]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const apiClient = new ApiClient({
-          baseURL: 'https://opros.sot.kg',
-          endpoint: '/api/v1/results/'
-        });
-
-        const response = await apiClient.fetchData();
-        setSurveyData(response);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Произошла ошибка');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchData();
-  }, [setSurveyData]);
-
-  if (isLoading) {
-    return null;
-  }
+  }, [fetchData]);
 
   if (error) {
     return null;

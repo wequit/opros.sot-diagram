@@ -6,6 +6,14 @@ interface ApiClientConfig {
   endpoint: string;
 }
 
+interface FetchParams {
+  startDate?: string;
+  endDate?: string;
+  year?: string;
+  quarter?: number;
+  month?: number;
+}
+
 export class ApiClient {
   private baseURL: string;
   private endpoint: string;
@@ -15,7 +23,7 @@ export class ApiClient {
     this.endpoint = config.endpoint;
   }
 
-  async fetchData() {
+  async fetchData(params: FetchParams = { year: '2025' }) {
     try {
       const token = getCookie('access_token');
 
@@ -23,10 +31,21 @@ export class ApiClient {
         throw new Error('Токен не найден');
       }
 
-      const queryParams = new URLSearchParams({
-        start_date: '2025-01-01',
-        end_date: '2025-01-31'
-      });
+      const queryParams = new URLSearchParams();
+      
+      if (params.year && !params.quarter && !params.month && !params.startDate && !params.endDate) {
+        // Запрос только по году
+        queryParams.append('year', params.year);
+      } else if (params.quarter !== undefined) {
+        queryParams.append('year', params.year || '2025');
+        queryParams.append('quarter', params.quarter.toString());
+      } else if (params.month !== undefined) {
+        queryParams.append('year', params.year || '2025');
+        queryParams.append('month', params.month.toString());
+      } else {
+        queryParams.append('start_date', params.startDate || '2025-01-01');
+        queryParams.append('end_date', params.endDate || '2025-12-31');
+      }
 
       const response = await fetch(`${this.baseURL}${this.endpoint}?${queryParams}`, {
         method: 'GET',

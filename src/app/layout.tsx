@@ -4,10 +4,10 @@ import "@/styles/globals.css";
 import Header from "@/components/layout/Header";
 import { Roboto } from "next/font/google";
 import { AuthProvider, useAuth } from "@/lib/utils/AuthContext";
-import Sidebar from "@/components/layout/Sidebar";
-// import dynamic from "next/dynamic";
+// import Sidebar from "@/components/layout/Sidebar";
 import { SurveyProvider } from '@/lib/context/SurveyContext';
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 
 const roboto = Roboto({
   weight: ["400", "500", "700"],
@@ -24,7 +24,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ru" className={roboto.className}>
-      <body className="min-h-screen">
+      <body className="min-h-screen slate-100">
         <SurveyProvider>
           <AuthProvider>
             <AuthContent>{children}</AuthContent>
@@ -37,17 +37,26 @@ export default function RootLayout({
 
 function AuthContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
+  const pathname = usePathname();
 
   if (!isAuthenticated) {
-    return <LoginPage />;
+    return (
+      <div className="min-h-screen">
+        <LoginPage />
+      </div>
+    );
   }
 
+  // Определяем класс для main в зависимости от пути
+  const mainClassName = pathname === '/login' ? 'flex-1' : 'flex-1 p-6';
+
+  // Показываем Header и Sidebar только если пользователь авторизован
   return (
-    <div className="max-w-[1440px] mx-auto">
+    <div className="max-w-[1450px] mx-auto">
       <Header />
       <div className="flex min-h-[calc(100vh-48px)]">
-        <Sidebar />
-        <main className="flex-1 p-6">{children}</main>
+        {/* <Sidebar /> */}
+        <main className={`${mainClassName} `}>{children}</main>
       </div>
     </div>
   );

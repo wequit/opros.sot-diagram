@@ -3,6 +3,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRemarks } from '@/components/RemarksApi';
+import { getCookie } from '@/lib/api/login';
 
 
 const CommentModal = ({ 
@@ -85,7 +86,7 @@ export default function RemarksPage() {
 
   const handleCommentSubmit = async (comment: string) => {
     try {
-      const token = localStorage.getItem('access_token');
+      const token = getCookie('access_token');
       const response = await fetch('https://opros.sot.kg/api/v1/comments/respond/', {
         method: 'POST',
         headers: {

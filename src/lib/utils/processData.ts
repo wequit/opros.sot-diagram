@@ -1,4 +1,4 @@
-import { Question } from '@/lib/utils/Data';
+import { Question } from '@/lib/utils/Dates';
 
 interface QuestionResponse {
   question: number;
@@ -11,7 +11,6 @@ interface QuestionResponse {
 }
 
 export function processFirstQuestion(responses: QuestionResponse[]) {
-  // Фильтруем только валидные ответы
   const validResponses = responses.filter(r => 
     r.selected_option !== null && r.custom_answer !== "Необязательный вопрос"
   );
@@ -459,6 +458,66 @@ function getEmptyStartTimeData() {
     datasets: [{
       data: [],
       backgroundColor: []
+    }]
+  };
+}
+
+export function processDisrespectQuestion(questions: Question[]) {
+  // Ищем вопрос 15
+  const question = questions.find(q => q.id === 15);
+  
+  if (!question || !question.question_responses) {
+    return {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: [],
+        datalabels: {}
+      }]
+    };
+  }
+
+  // Фильтруем валидные ответы
+  const validResponses = question.question_responses.filter(
+    r => r.selected_option !== null
+  );
+  
+  const totalResponses = validResponses.length;
+  
+  // Группируем ответы
+  const grouped = validResponses.reduce((acc: {[key: string]: number}, response) => {
+    const optionText = response.selected_option!.text_ru;
+    acc[optionText] = (acc[optionText] || 0) + 1;
+    return acc;
+  }, {});
+
+  // Сортируем по количеству ответов (от большего к меньшему)
+  const sortedEntries = Object.entries(grouped)
+    .sort((a, b) => b[1] - a[1]);
+
+  return {
+    labels: sortedEntries.map(([label]) => label),
+    datasets: [{
+      data: sortedEntries.map(([_, value]) => value),
+      backgroundColor: "rgb(139, 69, 19)",
+      barThickness: 20,
+      datalabels: {
+        color: "gray",
+        align: "end",
+        anchor: "end",
+        offset: 4,
+        formatter: (value: number, context: any): string => {
+          const dataset = context.dataset;
+          const data = dataset.data as number[];
+          const sum = data.reduce((a, b) => a + b, 0);
+          const percentage = ((value / sum) * 100).toFixed(1);
+          return `${value} (${percentage}%)`;
+        },
+        font: {
+          size: 14,
+          weight: "bold"
+        }
+      }
     }]
   };
 } 

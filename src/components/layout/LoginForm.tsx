@@ -16,12 +16,8 @@ const LoginForm: React.FC = () => {
 
     try {
       const result = await loginApi.login({ username, password });
-      console.log('Полный ответ от сервера:', result);
-    
       if (result && result.access) {
-        console.log('Вызываем login с access токеном');
         await login(result.access);
-        console.log('Login выполнен успешно');
       } else {
         setError('Access токен отсутствует в ответе');
       }

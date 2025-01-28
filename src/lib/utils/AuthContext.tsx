@@ -9,23 +9,32 @@ interface AuthContextType {
   getToken: () => string | null;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: false,
+  login: () => {},
+  logout: () => {},
+  getToken: () => null
+});
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const token = getCookie('access_token');
-    if (token) {
-      setIsAuthenticated(true);
-    }
+    const checkAuth = () => {
+      const token = getCookie('access_token');
+      setIsAuthenticated(!!token);
+      setIsLoading(false);
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (token: string) => {
     try {
-      setIsAuthenticated(true);
       setCookie('access_token', token);
+      setIsAuthenticated(true);
       await router.push('/');
       router.refresh();
     } catch (error) {
@@ -42,6 +51,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const getToken = () => {
     return getCookie('access_token');
   };
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <AuthContext.Provider value={{ isAuthenticated, login, logout, getToken }}>
