@@ -192,7 +192,7 @@ export default function Evaluations() {
       },
       {
         label: "Средние оценки по республике",
-        data: [4.5, 4.2, 4.0, 4.3, 4.1],
+        data: [4.1, 4.2, 4.0, 4.3, 4.1],
         fill: true,
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
@@ -358,6 +358,27 @@ export default function Evaluations() {
       },
     },
     maintainAspectRatio: false,
+    scales: {
+      r: {
+        angleLines: {
+          display: true
+        },
+        suggestedMin: 0,
+        suggestedMax: 5,
+        ticks: {
+          display: false,
+          stepSize: 1
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.1)'
+        },
+        pointLabels: {
+          font: {
+            size: 12
+          }
+        }
+      }
+    }
   };
 
   // Обновленные данные для торнадо-диаграммы
