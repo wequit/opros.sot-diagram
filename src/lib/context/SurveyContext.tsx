@@ -1,3 +1,4 @@
+"use client";
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface SelectedOption {
@@ -36,15 +37,18 @@ interface SurveyData {
 interface SurveyContextType {
   surveyData: SurveyData | null;
   setSurveyData: (data: SurveyData) => void;
+  isLoading: boolean;
+  setIsLoading: (loading: boolean) => void;
 }
 
 const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
 
 export function SurveyProvider({ children }: { children: ReactNode }) {
   const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <SurveyContext.Provider value={{ surveyData, setSurveyData }}>
+    <SurveyContext.Provider value={{ surveyData, setSurveyData, isLoading, setIsLoading }}>
       {children}
     </SurveyContext.Provider>
   );
