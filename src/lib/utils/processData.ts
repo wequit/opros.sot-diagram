@@ -462,8 +462,7 @@ function getEmptyStartTimeData() {
   };
 }
 
-export function processDisrespectQuestion(questions: Question[]) {
-  // Ищем вопрос 15
+export function processDisrespectQuestion(questions: Question[]): BarChartData {
   const question = questions.find(q => q.id === 15);
   
   if (!question || !question.question_responses) {
@@ -471,8 +470,19 @@ export function processDisrespectQuestion(questions: Question[]) {
       labels: [],
       datasets: [{
         data: [],
-        backgroundColor: [],
-        datalabels: {}
+        backgroundColor: "rgb(139, 69, 19)",
+        barThickness: 20,
+        datalabels: {
+          color: "gray",
+          align: "end",
+          anchor: "end",
+          offset: 4,
+          formatter: (value: number): string => `${value}`,
+          font: {
+            size: 14,
+            weight: "bold"
+          }
+        }
       }]
     };
   }
@@ -481,8 +491,6 @@ export function processDisrespectQuestion(questions: Question[]) {
   const validResponses = question.question_responses.filter(
     r => r.selected_option !== null
   );
-  
-  const totalResponses = validResponses.length;
   
   // Группируем ответы
   const grouped = validResponses.reduce((acc: {[key: string]: number}, response) => {

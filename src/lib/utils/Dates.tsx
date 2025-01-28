@@ -253,9 +253,9 @@ export default function Dates() {
                             "px-5 py-2 rounded-xl font-medium transition-all duration-200 " +
                             (activePeriod === period.id
                                 ? "bg-indigo-950 text-white shadow-lg shadow-blue-900 scale-105"
-                                : "bg-white text-gray-600 hover:bg-blue-50 hover:scale-105")
+                                : "bg-white text-black hover:bg-[#003494] hover:text-white ")
                         } 
-                    > 
+                    >   
                         {period.label} квартал 
                     </button> 
                 ))} 
@@ -271,7 +271,7 @@ export default function Dates() {
                             "px-4 py-2 rounded-xl font-medium transition-all duration-200 " +
                             (activePeriod === period.id
                                 ? "bg-indigo-950 text-white shadow-lg shadow-blue-900    scale-105"
-                                : "bg-white text-gray-600 hover:bg-indigo-50 hover:scale-105")
+                                : "bg-white text-black hover:bg-[#003494]  hover:text-white ")
                         } 
                     > 
                         {period.label} 

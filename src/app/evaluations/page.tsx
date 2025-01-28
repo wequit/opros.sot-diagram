@@ -566,7 +566,7 @@ export default function Evaluations() {
                     </div>
                   ))}
                 </div>
-                <button className="mt-6 w-full py-3 bg-green-500 text-white rounded-lg hover:shadow-2xl transition-all duration-200bg-green-600 transition-colors">
+                <button className="mt-6 w-full py-3 bg-green-500 text-white rounded-lg hover:shadow-2xl duration-200bg-green-600 transition-colors">
                   Все замечания и предложения
                 </button>
               </div>
