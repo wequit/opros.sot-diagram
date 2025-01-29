@@ -1,12 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
+  images: {
+    domains: ['opros.sot.kg'],
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  output: 'standalone'
-}
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig; 

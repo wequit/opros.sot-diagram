@@ -462,7 +462,25 @@ function getEmptyStartTimeData() {
   };
 }
 
-export function processDisrespectQuestion(questions: Question[]): BarChartData {
+export function processDisrespectQuestion(questions: Question[]): {
+  labels: string[];
+  datasets: {
+    data: number[];
+    backgroundColor: string;
+    barThickness: number;
+    datalabels: {
+      color: string;
+      align: string;
+      anchor: string;
+      offset: number;
+      formatter: (value: number) => string;
+      font: {
+        size: number;
+        weight: string;
+      };
+    };
+  }[];
+} {
   const question = questions.find(q => q.id === 15);
   
   if (!question || !question.question_responses) {
@@ -514,11 +532,8 @@ export function processDisrespectQuestion(questions: Question[]): BarChartData {
         align: "end",
         anchor: "end",
         offset: 4,
-        formatter: (value: number, context: any): string => {
-          const dataset = context.dataset;
-          const data = dataset.data as number[];
-          const sum = data.reduce((a, b) => a + b, 0);
-          const percentage = ((value / sum) * 100).toFixed(1);
+        formatter: (value: number): string => {
+          const percentage = ((value / 100) * 100).toFixed(1);
           return `${value} (${percentage}%)`;
         },
         font: {

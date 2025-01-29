@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Link from 'next/link';
-import { MdAssessment, MdFeedback, MdClose } from 'react-icons/md';
+import { MdAssessment, MdFeedback, MdClose, MdMap } from 'react-icons/md';
 import { useAuth } from "@/lib/utils/AuthContext";
 import { usePathname } from "next/navigation";
 
@@ -64,6 +64,38 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <MdFeedback className="w-6 h-6" />
           <span>Замечания и предложения</span>
         </Link>
+
+        <Link 
+          href="/maps/oblast" 
+          onClick={onClose}
+          className={`
+            flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+            ${isActivePath('/maps/oblast') 
+              ? 'bg-green-50 text-green-700 font-medium shadow-sm' 
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            }
+          `}
+        >
+        <MdMap className="w-6 h-6" />
+          <span>Карта областей</span>
+        </Link>
+
+        <Link 
+          href="/maps/rayon" 
+          onClick={onClose}
+          className={`
+            flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+            ${isActivePath('/maps/rayon') 
+              ? 'bg-green-50 text-green-700 font-medium shadow-sm' 
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            }
+          `}
+        >
+          <MdMap className="w-6 h-6" />
+          <span>Карта районов</span>
+        </Link>
+
+        
       </nav>
     </div>
   );
