@@ -1,14 +1,13 @@
 {
   "builds": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build"
+      "src": "next.config.js",
+      "use": "@vercel/next"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
+  "build": {
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1"
     }
-  ]
-}
+  }
+} 
