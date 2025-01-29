@@ -355,7 +355,7 @@ export default function Evaluations() {
           const disrespectData = processDisrespectQuestion(
             surveyData.questions
           );
-          setDisrespectData(disrespectData);
+          setDisrespectData(disrespectData as BarChartData);
         }
         if (surveyData?.total_responses) {
           setTotalResponses(surveyData.total_responses);

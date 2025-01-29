@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import EvaluationQuestions from '@/app/Evaluations/page';
+import EvaluationQuestions from '@/app/evaluations/page';
 import Dates from '@/lib/utils/Dates';
 import DataFetcher from '@/components/DataFetcher';
 
