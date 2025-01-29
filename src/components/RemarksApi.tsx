@@ -36,8 +36,8 @@ export function useRemarks() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Ошибка ответа:', errorData); // Логируем ошибку
         throw new Error(errorData.detail || 'Ошибка при получении данных');
+        
       }
       
       const data = await response.json();

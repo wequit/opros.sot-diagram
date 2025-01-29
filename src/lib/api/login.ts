@@ -1,3 +1,5 @@
+import {jwtDecode } from 'jwt-decode';
+
 interface LoginCredentials {
   username: string;
   password: string;
@@ -24,7 +26,9 @@ export const loginApi = {
       throw new Error(error.message || 'Ошибка авторизации');
     }
 
-    return response.json();
+    const data = await response.json();
+    const userId = jwtDecode<{ user_id: string }>(data.access).user_id; // Извлечение user_id из токена
+    return { ...data, userId };
   },
 };
 
@@ -46,4 +50,19 @@ export const getCookie = (name: string): string | null => {
 
 export const deleteCookie = (name: string) => {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-}; 
+};
+
+export const getCurrentUser = async (token: string) => {
+  const response = await fetch('https://opros.sot.kg:443/api/v1/current_user/', {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Ошибка получения данных пользователя');
+  }
+
+  return response.json();
+};

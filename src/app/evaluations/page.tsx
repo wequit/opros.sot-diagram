@@ -17,7 +17,7 @@ import {
   ChartDataset,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
-import type { Context as DataLabelsContext } from 'chartjs-plugin-datalabels';
+import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels";
 import { useSurveyData } from "@/lib/context/SurveyContext";
 import {
   processSecondQuestion,
@@ -34,6 +34,9 @@ import {
   processDisrespectQuestion,
 } from "@/lib/utils/processData";
 import NoData from "@/lib/utils/NoData";
+import { FaStar } from "react-icons/fa";
+import Link from "next/link";
+import { useRemarks } from "@/components/RemarksApi";
 
 ChartJS.register(
   RadialLinearScale,
@@ -50,8 +53,8 @@ ChartJS.register(
 );
 
 // Определяем отдельные интерфейсы для каждого типа графика
-interface PieChartData extends ChartData<'pie', number[], string> {
-  datasets: (ChartDataset<'pie', number[]> & {
+interface PieChartData extends ChartData<"pie", number[], string> {
+  datasets: (ChartDataset<"pie", number[]> & {
     datalabels?: {
       color: string;
       display?: boolean;
@@ -64,14 +67,14 @@ interface PieChartData extends ChartData<'pie', number[], string> {
   })[];
 }
 
-interface BarChartData extends ChartData<'bar', number[], string> {
-  datasets: (ChartDataset<'bar', number[]> & {
+interface BarChartData extends ChartData<"bar", number[], string> {
+  datasets: (ChartDataset<"bar", number[]> & {
     datalabels?: {
       color: string;
       display?: boolean;
       formatter: (value: number, context: DataLabelsContext) => string;
-      align?: 'end';
-      anchor?: 'end';
+      align?: "end";
+      anchor?: "end";
       offset?: number;
       font?: {
         size?: number;
@@ -83,6 +86,7 @@ interface BarChartData extends ChartData<'bar', number[], string> {
 
 export default function Evaluations() {
   const { surveyData, isLoading } = useSurveyData();
+  const { remarks } = useRemarks();
   const [demographicsView, setDemographicsView] = useState("пол");
   const [categoryData, setCategoryData] = useState<PieChartData>({
     labels: [],
@@ -148,14 +152,15 @@ export default function Evaluations() {
   });
 
   const [audioVideoData, setAudioVideoData] = useState({
-    labels: ["Да", "Нет", "Не знаю/Не уверен(а)"],
+    labels: ["Да", "Нет", "Не знаю/Не уверен(а)", "Другое:"],
     datasets: [
       {
-        data: [0, 0, 0],
+        data: [0, 0, 0, 0],
         backgroundColor: [
           "rgb(54, 162, 235)",
           "rgb(255, 99, 132)",
           "rgb(255, 159, 64)",
+          "rgb(75, 192, 192)",
         ],
       },
     ],
@@ -169,18 +174,18 @@ export default function Evaluations() {
   const [processRatings, setProcessRatings] = useState<{
     [key: string]: number;
   }>({});
-  const [accessibilityRatings, setAccessibilityRatings] = useState<{[key: string]: number}>({});
-  const [officeRatings, setOfficeRatings] = useState<{[key: string]: number}>({});
-  const [startTimeData, setStartTimeData] = useState(processStartTimeQuestion(surveyData?.questions || []));
+  const [accessibilityRatings, setAccessibilityRatings] = useState<{
+    [key: string]: number;
+  }>({});
+  const [officeRatings, setOfficeRatings] = useState<{ [key: string]: number }>(
+    {}
+  );
+  const [startTimeData, setStartTimeData] = useState(
+    processStartTimeQuestion(surveyData?.questions || [])
+  );
 
   const [radarData, setRadarData] = useState({
-    labels: [
-      "Судья",
-      "Секретарь, помощник",
-      "Канцелярия",
-      "Процесс",
-      "Здание"
-    ],
+    labels: ["Судья", "Секретарь, помощник", "Канцелярия", "Процесс", "Здание"],
     datasets: [
       {
         label: "Ноокенский суд",
@@ -189,6 +194,8 @@ export default function Evaluations() {
         backgroundColor: "rgba(255, 206, 86, 0.2)",
         borderColor: "rgba(255, 206, 86, 1)",
         borderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
       },
       {
         label: "Средние оценки по республике",
@@ -197,11 +204,17 @@ export default function Evaluations() {
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
         borderWidth: 2,
+        pointRadius: 5,
+        pointHoverRadius: 7,
+        datalabels: {
+          display: false,
+        },
       },
     ],
   });
 
   const [totalResponses, setTotalResponses] = useState<number>(0);
+  const [totalResponsesAnswer, setTotalResponsesAnswer] = useState<number>(0);
   const [disrespectData, setDisrespectData] = useState<BarChartData>({
     labels: [],
     datasets: [
@@ -223,11 +236,11 @@ export default function Evaluations() {
           },
           font: {
             size: 14,
-            weight: "bold"
-          }
-        }
-      }
-    ]
+            weight: "bold",
+          },
+        },
+      },
+    ],
   });
 
   useEffect(() => {
@@ -240,14 +253,12 @@ export default function Evaluations() {
           setCategoryData(processedData);
         }
         if (surveyData && surveyData.questions && surveyData.questions[2]) {
-         
           const processedData = processThirdQuestion(
             surveyData.questions[2].question_responses
           );
           setGenderData(processedData);
         }
         if (surveyData && surveyData.questions && surveyData.questions[0]) {
-          
           const processedData = processFirstQuestion(
             surveyData.questions[0].question_responses
           );
@@ -270,14 +281,16 @@ export default function Evaluations() {
           const staffData = processStaffRatings(surveyData.questions);
           const processData = processProcessRatings(surveyData.questions);
           const officeData = processOfficeRatings(surveyData.questions);
-          const accessibilityData = processAccessibilityRatings(surveyData.questions);
+          const accessibilityData = processAccessibilityRatings(
+            surveyData.questions
+          );
 
           const currentCourtAverages = {
             judge: getAverageFromData(Object.values(judgeData)),
             secretary: getAverageFromData(Object.values(staffData)),
             office: getAverageFromData(Object.values(officeData)),
             process: getAverageFromData(Object.values(processData)),
-            building: getAverageFromData(Object.values(accessibilityData))
+            building: getAverageFromData(Object.values(accessibilityData)),
           };
 
           setRadarData({
@@ -286,7 +299,7 @@ export default function Evaluations() {
               "Секретарь, помощник",
               "Канцелярия",
               "Процесс",
-              "Здание"
+              "Здание",
             ],
             datasets: [
               {
@@ -296,12 +309,14 @@ export default function Evaluations() {
                   currentCourtAverages.secretary || 0,
                   currentCourtAverages.office || 0,
                   currentCourtAverages.process || 0,
-                  currentCourtAverages.building || 0
+                  currentCourtAverages.building || 0,
                 ],
                 fill: true,
                 backgroundColor: "rgba(255, 206, 86, 0.2)",
                 borderColor: "rgba(255, 206, 86, 1)",
                 borderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
               },
               {
                 label: "Средние оценки по республике",
@@ -310,37 +325,70 @@ export default function Evaluations() {
                 backgroundColor: "rgba(54, 162, 235, 0.2)",
                 borderColor: "rgba(54, 162, 235, 1)",
                 borderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                datalabels: {
+                  display: false,
+                },
               },
             ],
           });
 
           const ratings = processJudgeRatings(surveyData.questions);
           setJudgeRatings(ratings);
-          const staffRatings = processStaffRatings(surveyData.questions); 
+          const staffRatings = processStaffRatings(surveyData.questions);
           setStaffRatings(staffRatings);
           const processRatings = processProcessRatings(surveyData.questions);
           setProcessRatings(processRatings);
-          const audioVideoData = processAudioVideoQuestion(surveyData.questions);
+          const audioVideoData = processAudioVideoQuestion(
+            surveyData.questions
+          );
           setAudioVideoData(audioVideoData);
           const officeRatings = processOfficeRatings(surveyData.questions);
           setOfficeRatings(officeRatings);
-          const accessibilityRatings = processAccessibilityRatings(surveyData.questions);
+          const accessibilityRatings = processAccessibilityRatings(
+            surveyData.questions
+          );
           setAccessibilityRatings(accessibilityRatings);
           const startTimeData = processStartTimeQuestion(surveyData.questions);
           setStartTimeData(startTimeData);
-          const disrespectData = processDisrespectQuestion(surveyData.questions);
+          const disrespectData = processDisrespectQuestion(
+            surveyData.questions
+          );
           setDisrespectData(disrespectData);
         }
         if (surveyData?.total_responses) {
           setTotalResponses(surveyData.total_responses);
         }
       } catch (error) {
-        console.error('Ошибка при получении данных:', error);
+        console.error("Ошибка при получении данных:", error);
       }
     };
 
     fetchData();
   }, [surveyData]);
+
+  // Подсчитываем количество custom_answer
+  useEffect(() => {
+    if (remarks) {
+      const count = remarks.filter(
+        (remark: { custom_answer: string | null }) =>
+          remark.custom_answer &&
+          remark.custom_answer !== "Необязательный вопрос"
+      ).length;
+      setTotalResponsesAnswer(count);
+    }
+  }, [remarks]);
+
+  // Получаем последние 5 custom_answer
+  const comments =
+    remarks
+      ?.slice()
+      .reverse()
+      .slice(0, 5)
+      .map((remark) => ({
+        text: remark.custom_answer || "Нет текста",
+      })) || [];
 
   // Общие настройки для всех диаграмм
   const commonOptions = {
@@ -358,6 +406,27 @@ export default function Evaluations() {
       },
     },
     maintainAspectRatio: false,
+    scales: {
+      r: {
+        angleLines: {
+          display: true,
+        },
+        suggestedMin: 0,
+        suggestedMax: 5,
+        ticks: {
+          display: false,
+          stepSize: 1,
+        },
+        grid: {
+          color: "rgba(0, 0, 0, 0.1)",
+        },
+        pointLabels: {
+          font: {
+            size: 12,
+          },
+        },
+      },
+    },
   };
 
   // Обновленные данные для торнадо-диаграммы
@@ -403,13 +472,6 @@ export default function Evaluations() {
   };
 
   // Замечания и предложения
-  const comments = [
-    { id: 1, text: "Туалет не работает" },
-    { id: 2, text: "Кресел нет" },
-    { id: 3, text: "Вежливые сотрудники" },
-    { id: 4, text: "Нет парковки" },
-    { id: 5, text: "Работают очень медленно" },
-  ];
 
   // Обновленные данные для источников трафика
   const trafficSourceOptions = {
@@ -516,7 +578,10 @@ export default function Evaluations() {
   }
 
   // Проверяем отсутствие данных только после загрузки
-  if (!surveyData || (surveyData.questions.length === 0 && surveyData.total_responses === 0)) {
+  if (
+    !surveyData ||
+    (surveyData.questions.length === 0 && surveyData.total_responses === 0)
+  ) {
     return <NoData />;
   }
 
@@ -549,26 +614,27 @@ export default function Evaluations() {
                   <h2 className="text-xl font-medium">
                     Замечания и предложения
                   </h2>
-                  <span className="text-gray-600">Количество ответов: 999</span>
+                  <span className="text-gray-600">
+                    Количество ответов: {totalResponsesAnswer}
+                  </span>
                 </div>
               </div>
               <div className="p-6">
                 <div className="space-y-3">
-                  {comments.map((comment) => (
-                    <div
-                      key={comment.id}
-                      className="flex gap-4 p-3 border rounded hover:shadow-2xl transition-all duration-200bg-gray-50"
-                    >
+                  {comments.map((comment, index) => (
+                    <div className="flex gap-4 p-3 border rounded hover:shadow-2xl transition-all duration-200 bg-gray-50">
                       <span className="text-gray-500 min-w-[24px]">
-                        {comment.id}
+                        {index + 1} {/* Используем индекс дляпше отображения ID */}
                       </span>
                       <span>{comment.text}</span>
                     </div>
                   ))}
                 </div>
-                <button className="mt-6 w-full py-3 bg-green-500 text-white rounded-lg hover:shadow-2xl duration-200bg-green-600 transition-colors">
-                  Все замечания и предложения
-                </button>
+                <Link href="/Remarks">
+                  <button className="mt-6 w-full py-3  text-white rounded-lg hover:shadow-2xl duration-200 bg-green-600 transition-colors">
+                    Все замечания и предложения
+                  </button>
+                </Link>
               </div>
             </div>
 
@@ -649,9 +715,7 @@ export default function Evaluations() {
                             type: "linear" as const,
                             stacked: true,
                             ticks: {
-                              callback: function (
-                                value: string | number
-                              ) {
+                              callback: function (value: string | number) {
                                 return Number(value);
                               },
                               display: false,
@@ -690,9 +754,7 @@ export default function Evaluations() {
                               drawOnChartArea: false,
                             },
                             ticks: {
-                              callback: function (
-                                value: string | number
-                              ) {
+                              callback: function (value: string | number) {
                                 return value.toString();
                               },
                             },
@@ -746,14 +808,17 @@ export default function Evaluations() {
             {/* Оценки судьи */}
             <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
               <div className="px-6 py-4 border-b">
-                <h2 className="text-xl font-medium ">Оценки судьи</h2>
+                <h2 className="text-xl font-medium">Оценки судьи</h2>
               </div>
               <div className="p-6 space-y-6">
                 {Object.entries(judgeRatings).map(([title, rating]) => (
                   <div key={title} className="space-y-4">
-                    <div className="flex justify-between">
-                      <span className="text-sm">{title}</span>
-                      <span className="font-bold">{rating}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-md">{title}</span>
+                      <div className="flex items-center">
+                        <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
+                        <span className="font-bold">{rating}</span>
+                      </div>
                     </div>
                     <ProgressBar value={rating} />
                   </div>
@@ -770,24 +835,25 @@ export default function Evaluations() {
               </div>
               <div className="p-6">
                 <div className="h-[300px]">
-                  <Bar
-                    data={disrespectData}
-                    options={disrespectOptions}
-                  />
+                  <Bar data={disrespectData} options={disrespectOptions} />
                 </div>
               </div>
             </div>
+
             {/* Оценки сотрудников */}
             <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
               <div className="px-6 py-4 border-b">
                 <h2 className="text-xl font-medium">Оценки сотрудников</h2>
               </div>
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-6 mb-8">
                 {Object.entries(staffRatings).map(([title, rating]) => (
                   <div key={title} className="space-y-2 mb-12">
-                    <div className="flex justify-between">
-                      <span>{title}</span>
-                      <span className="font-bold">{rating}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-md">{title}</span>
+                      <div className="flex items-center">
+                        <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
+                        <span className="font-bold">{rating}</span>
+                      </div>
                     </div>
                     <ProgressBar value={rating} />
                   </div>
@@ -803,9 +869,12 @@ export default function Evaluations() {
               <div className="p-6 space-y-6">
                 {Object.entries(processRatings).map(([title, rating]) => (
                   <div key={title} className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>{title}</span>
-                      <span className="font-bold">{rating}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-md">{title}</span>
+                      <div className="flex items-center">
+                        <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
+                        <span className="font-bold">{rating}</span>
+                      </div>
                     </div>
                     <ProgressBar value={rating} />
                   </div>
@@ -892,18 +961,20 @@ export default function Evaluations() {
               </div>
             </div>
 
+            {/* Оценки канцелярии */}
             <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
               <div className="px-6 py-4 border-b">
-                <h2 className="text-xl font-medium">
-                Оценки канцелярии
-                </h2>
+                <h2 className="text-xl font-medium">Оценки канцелярии</h2>
               </div>
               <div className="p-6 space-y-6">
                 {Object.entries(officeRatings).map(([title, rating]) => (
                   <div key={title} className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>{title}</span>
-                      <span className="font-bold">{rating}</span>
+                    <div className="flex justify-between items-center mb-8">
+                      <span className="text-md">{title}</span>
+                      <div className="flex items-center">
+                        <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
+                        <span className="font-bold">{rating}</span>
+                      </div>
                     </div>
                     <ProgressBar value={rating} />
                   </div>
@@ -920,10 +991,13 @@ export default function Evaluations() {
               </div>
               <div className="p-6 space-y-6">
                 {Object.entries(accessibilityRatings).map(([title, rating]) => (
-                  <div key={title} className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>{title}</span>
-                      <span className="font-bold">{rating}</span>
+                  <div key={title} className="space-y-2 mb-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-md">{title}</span>
+                      <div className="flex items-center">
+                        <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
+                        <span className="font-bold">{rating}</span>
+                      </div>
                     </div>
                     <ProgressBar value={rating} />
                   </div>
