@@ -45,12 +45,6 @@ export default function OblastPage() {
       coordinates: [70.00, 39.90] },
     { id: 8, name: 'Суды Иссык-Кульской области', ratings: [3.3, 3.7, 3.8, 3.9, 4.0, 4.1, 333], 
       coordinates: [78.70, 42.20] },
-      { 
-        id: 9, 
-        name: 'Ош', 
-        ratings: [4.8, 4.7, 4.6, 4.8, 4.7, 4.9, 180],
-        coordinates: [74.60, 42.85] as [number, number]
-      },
   ];
 
   const handleSort = (field: SortField) => {
