@@ -187,7 +187,7 @@ export default function Dates() {
   );
 
   return (
-    <div className="bg-gradient-to-r from-blue-700 to-indigo-300 p-6 rounded-2xl">
+    <div className="w-[55rem] bg-gradient-to-r from-blue-700 to-indigo-300 p-6 rounded-2xl">
       {/* Даты */}
       <div className="flex flex-wrap gap-6 mb-6">
         <div className="flex items-center bg-white rounded-xl shadow-sm p-2">

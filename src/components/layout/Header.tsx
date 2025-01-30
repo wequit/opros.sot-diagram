@@ -2,11 +2,12 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "@/lib/utils/AuthContext";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { CgProfile } from "react-icons/cg";
 import { HiMenu, HiOutlineLogout } from "react-icons/hi";
 import Sidebar from "./Sidebar";
 import { GrLanguage } from "react-icons/gr";
+import { useSurveyData } from '@/lib/context/SurveyContext';
 
 interface LanguageToggleProps {
   onClick: () => void;
@@ -32,9 +33,11 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({
 const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [isKyrgyz, setIsKyrgyz] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const {  courtName} = useSurveyData();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -72,13 +75,14 @@ const Header: React.FC = () => {
             <Image
               src="/logo.png"
               alt="Логотип"
-              width={50}
-              height={50}
+              width={45}
+              height={45}
               className="rounded-full shadow-sm"
             />
-            <span className="text-lg font-semibold text-black uppercase">
-              {user ? user.court : "Загрузка..."}
+                    <span className="text-lg font-semibold text-black uppercase">
+                    {user?.role === "Председатель 2 инстанции" ? (courtName || user.court) : user ? user.court : "Загрузка..."}
             </span>
+
           </div>
         </div>
 

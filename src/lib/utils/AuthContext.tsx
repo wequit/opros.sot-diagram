@@ -1,3 +1,4 @@
+'use client'
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { setCookie, getCookie, deleteCookie } from '@/lib/api/login';
@@ -8,7 +9,7 @@ interface AuthContextType {
   login: (token: string) => void;
   logout: () => void;
   getToken: () => string | null;
-  user: { first_name: string; last_name: string; court: string } | null;
+  user: { first_name: string; last_name: string; court: string; role: string } | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -21,7 +22,7 @@ const AuthContext = createContext<AuthContextType>({
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<{ first_name: string; last_name: string; court: string } | null>(null);
+  const [user, setUser] = useState<{ first_name: string; last_name: string; court: string; role: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 

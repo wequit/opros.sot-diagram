@@ -44,11 +44,11 @@ const LoginForm: React.FC = () => {
             alt="Логотип"
             width={160}
             height={160}
-            className="rounded-2xl mb-8 transform  transition-transform duration-300"
+            className="rounded-2xl mb-4 transform  transition-transform duration-300"
           />
 
-          <p className="text-2xl text-white font-medium font-inter text-center max-w-md">
-            Система мониторинга качества судебных услуг
+          <p className="text-xl text-gray-200 font-medium uppercase font-inter text-center max-w-md">
+          Мониторинг оценки деятельности судов
           </p>
         </div>
         <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-900/50 to-transparent"></div>
