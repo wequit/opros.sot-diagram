@@ -1,171 +1,135 @@
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import rayonData from '@/app/maps/gadm41_KGZ_2.json';
+import { courts } from '../page'; // Импортируем данные из page.tsx
 
-// Данные о судах
-const courts = [
-  { id: 1, name: 'Верховный суд Кыргызской Республики', instance: '3-я инстанция (кассационная)', 
-    ratings: [4.8, 4.7, 4.6, 4.8, 4.7, 4.9, 180] },
-
-  // Чуйская область
-  { id: 2, name: 'Аламудунский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.2, 3.8, 4.1, 4.3, 4.0, 4.2, 95] },
-  { id: 3, name: 'Сокулукский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.9, 4.1, 3.8, 4.0, 4.2, 3.9, 88] },
-  { id: 4, name: 'Московский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.7, 4.2, 3.9, 4.1, 4.0, 76] },
-  { id: 5, name: 'Жайылский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.8, 4.0, 3.9, 4.1, 3.8, 4.2, 82] },
-  { id: 6, name: 'Панфиловский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 3.9, 4.1, 3.8, 4.0, 3.9, 71] },
-  { id: 7, name: 'Кеминский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.7, 4.1, 3.8, 4.0, 3.9, 4.1, 68] },
-  { id: 8, name: 'Ысык-Атинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.8, 4.0, 4.2, 3.9, 4.0, 92] },
-  { id: 9, name: 'Чуйский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.9, 4.0, 3.8, 4.1, 4.0, 3.9, 87] },
-
-  // Иссык-Кульская область
-  { id: 10, name: 'Ак-Суйский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 3.9, 4.1, 3.8, 4.0, 3.9, 77] },
-  { id: 11, name: 'Джети-Огузский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.8, 4.1, 3.9, 4.0, 3.8, 4.1, 81] },
-  { id: 12, name: 'Тонский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.9, 3.8, 4.0, 3.9, 4.1, 3.8, 72] },
-  { id: 13, name: 'Тюпский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 3.8, 4.0, 3.9, 4.1, 69] },
-  { id: 14, name: 'Иссык-Кульский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 4.1, 3.9, 4.0, 3.8, 4.2, 83] },
-
-  // Нарынская область
-  { id: 15, name: 'Ак-Талинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.8, 4.0, 3.9, 4.1, 3.8, 4.0, 71] },
-  { id: 16, name: 'Ат-Башинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.8, 4.0, 3.9, 4.1, 3.8, 74] },
-  { id: 17, name: 'Жумгальский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.9, 4.1, 3.8, 4.0, 3.9, 4.1, 67] },
-  { id: 18, name: 'Кочкорский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 3.9, 4.1, 3.8, 4.0, 3.9, 73] },
-  { id: 19, name: 'Нарынский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.8, 4.1, 3.9, 4.0, 3.8, 4.1, 78] },
-
-  // Таласская область
-  { id: 20, name: 'Таласский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 4.0, 4.2, 3.9, 4.1, 85] },
-  { id: 21, name: 'Бакай-Атинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.9, 4.0, 3.8, 4.1, 4.0, 3.9, 75] },
-  { id: 22, name: 'Кара-Буринский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 3.8, 4.1, 3.9, 4.0, 3.8, 70] },
-  { id: 23, name: 'Манасский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.8, 4.1, 3.9, 4.0, 3.8, 4.1, 72] },
-
-  // Ошская область
-  { id: 24, name: 'Алайский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.8, 4.0, 3.9, 4.1, 3.8, 76] },
-  { id: 25, name: 'Араванский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.9, 4.1, 3.8, 4.0, 3.9, 4.1, 79] },
-  { id: 26, name: 'Кара-Кулджинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 3.9, 4.1, 3.8, 4.0, 3.9, 71] },
-  { id: 27, name: 'Кара-Сууский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.8, 4.0, 3.9, 4.1, 3.8, 4.0, 84] },
-  { id: 28, name: 'Ноокатский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.8, 4.0, 3.9, 4.1, 3.8, 77] },
-  { id: 29, name: 'Узгенский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.9, 4.1, 3.8, 4.0, 3.9, 4.1, 82] },
-  { id: 30, name: 'Чон-Алайский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 3.9, 4.1, 3.8, 4.0, 3.9, 69] },
-
-  // Баткенская область
-  { id: 31, name: 'Баткенский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.8, 4.0, 3.9, 4.1, 3.8, 75] },
-  { id: 32, name: 'Кадамжайский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.9, 4.1, 3.8, 4.0, 3.9, 4.1, 73] },
-  { id: 33, name: 'Лейлекский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 3.9, 4.1, 3.8, 4.0, 3.9, 70] },
-
-  // Города республиканского значения
-  { id: 34, name: 'Ленинский районный суд г. Бишкек', instance: '1-я инстанция (местный)',
-    ratings: [4.2, 4.0, 4.1, 4.3, 4.2, 4.4, 120] },
-  { id: 35, name: 'Октябрьский районный суд г. Бишкек', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 4.0, 4.2, 4.1, 4.3, 110] },
-  { id: 36, name: 'Первомайский районный суд г. Бишкек', instance: '1-я инстанция (местный)',
-    ratings: [4.2, 4.0, 4.1, 4.3, 4.2, 4.4, 115] },
-  { id: 37, name: 'Свердловский районный суд г. Бишкек', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 4.0, 4.2, 4.1, 4.3, 105] }
-];
-
+// Обновленный маппинг районов к судам
 const rayonToCourtMapping: { [key: string]: string } = {
+  // Бишкек
+  'Biškek': 'Бишкекский межрайонный суд',
   // Баткенская область
   'Batken': 'Баткенский районный суд',
-  'Kadamjay': 'Кадамжайский районный суд',
-  'Leylek': 'Лейлекский районный суд',
-  
+  'Lailak': 'Лейлекский районный суд',
+  'Kadamjai': 'Кадамжайский районный суд',
+
   // Чуйская область
-  'Alamudun': 'Аламудунский районный суд',
+  'Alamüdün': 'Аламудунский районный суд',
   'Sokuluk': 'Сокулукский районный суд',
-  'Moscow': 'Московский районный суд',
-  'Jayyl': 'Жайылский районный суд',
+  'Moskovsky': 'Московский районный суд',
+  'Jaiyl': 'Жайылский районный суд',
   'Panfilov': 'Панфиловский районный суд',
   'Kemin': 'Кеминский районный суд',
   'Ysyk-Ata': 'Ысык-Атинский районный суд',
-  'Chuy': 'Чуйский районный суд',
-  
+  'Chui': 'Чуйский районный суд',
+
   // Иссык-Кульская область
   'Ak-Suu': 'Ак-Суйский районный суд',
-  'Jeti-Oguz': 'Джети-Огузский районный суд',
+  'Djety-Oguz': 'Джети-Огузский районный суд',
   'Ton': 'Тонский районный суд',
-  'Tup': 'Тюпский районный суд',
-  'Ysyk-Kol': 'Иссык-Кульский районный суд',
-  
+  'Tüp': 'Тюпский районный суд',
+  'Ysyk-Köl': 'Иссык-Кульский районный суд',
+
   // Нарынская область
   'Ak-Talaa': 'Ак-Талинский районный суд',
-  'At-Bashy': 'Ат-Башинский районный суд',
+  'At-Bashi': 'Ат-Башинский районный суд',
   'Jumgal': 'Жумгальский районный суд',
   'Kochkor': 'Кочкорский районный суд',
   'Naryn': 'Нарынский районный суд',
-  
+
   // Таласская область
   'Talas': 'Таласский районный суд',
-  'Bakay-Ata': 'Бакай-Атинский районный суд',
+  'Bakai-Ata': 'Бакай-Атинский районный суд',
   'Kara-Buura': 'Кара-Буринский районный суд',
   'Manas': 'Манасский районный суд',
-  
+
   // Ошская область
-  'Alay': 'Алайский районный суд',
+  'Alai': 'Алайский районный суд',
   'Aravan': 'Араванский районный суд',
-  'Kara-Kulja': 'Кара-Кулджинский районный суд',
+  'Kara-Kuldja': 'Кара-Кулджинский районный суд',
   'Kara-Suu': 'Кара-Сууский районный суд',
   'Nookat': 'Ноокатский районный суд',
   'Uzgen': 'Узгенский районный суд',
-  'Chon-Alay': 'Чон-Алайский районный суд'
+  'Chong-Alay': 'Чон-Алайский районный суд',
+
+  // Джалал-Абадская область
+  'Aksyi': 'Аксыйский районный суд',
+  'Ala-Buka': 'Ала-Букинский районный суд',
+  'Bazar-Korgon': 'Базар-Коргонский районный суд',
+  'Chatkal': 'Чаткальский районный суд',
+  'Nooken': 'Ноокенский районный суд',
+  'Suzak': 'Сузакский районный суд',
+  'Togus-Toro': 'Тогуз-Тороуский районный суд',
+  'Toktogul': 'Токтогульский районный суд'
 };
 
-export default function Map_rayon() {
-  const svgRef = useRef<SVGSVGElement | null>(null);
-  const tooltipRef = useRef<HTMLDivElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+
+
+// В функции getRayonRating добавим проверку на существование маппинга
+const getRayonRating = (rayonName: string): number => {
+  const courtName = rayonToCourtMapping[rayonName];
+  if (!courtName) {
+    console.log(`Нет маппинга для района: ${rayonName}`);
+    return 0;
+  }
+  const court = courts.find(c => c.name === courtName);
+  return court ? court.ratings[0] : 0;
+};
+
+interface MapProps {
+  selectedRayon: string | null;
+}
+
+export default function Map({ selectedRayon }: MapProps) {
+  const svgRef = useRef<SVGSVGElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!svgRef.current) return;
+    if (!svgRef.current || !containerRef.current) return;
 
-    d3.select(svgRef.current).selectAll("*").remove();
+    const svg = d3.select(svgRef.current);
+    svg.selectAll("*").remove();
 
     const width = 800;
-    const height = 400; // Уменьшили высоту до такой же как у карты областей
-
-    const svg = d3.select(svgRef.current)
-      .attr('width', width)
-      .attr('height', height)
-      .attr('viewBox', `0 0 ${width} ${height}`)
-      .attr('preserveAspectRatio', 'xMidYMid meet');
+    const height = 400;
+    
+    svg.attr('width', width)
+       .attr('height', height)
+       .attr('viewBox', `0 0 ${width} ${height}`)
+       .attr('preserveAspectRatio', 'xMidYMid meet');
 
     const projection = d3.geoMercator()
       .center([74.5, 41.5])
-      .scale(3200) // Немного уменьшили масштаб для соответствия новой высоте
+      .scale(3200)
       .translate([width / 2, height / 2]);
 
     const path = d3.geoPath().projection(projection);
+
+    const tooltip = d3.select(tooltipRef.current);
+
+    const getColor = (properties: any): string => {
+      if (properties.NAME_2 === 'Ysyk-Köl(lake)' || 
+          properties.NAME_2 === 'Ysyk-Kol' || 
+          properties.NAME_2 === 'Issyk-Kul') {
+        return '#7CC9F0';
+      } 
+
+      if (properties.NAME_2 === 'Song-Kol' || 
+        properties.NAME_2 === 'Song-Kol(lake)' || 
+        properties.NAME_2 === 'Song-kol') {
+       return '#7CC9F0';
+    }
+      
+      const rating = getRayonRating(properties.NAME_2);
+      
+      if (rating >= 4.5) return '#8fce00';     
+      if (rating >= 4.0) return '#38761d';     
+      if (rating >= 3.5) return '#ffe599';     
+      if (rating >= 3.0) return '#bf9000';     
+      if (rating === 0) return '#999999';      
+      return '#FF7074';                        
+    };
 
     svg.selectAll('path')
       .data((rayonData as any).features)
@@ -173,88 +137,114 @@ export default function Map_rayon() {
       .append('path')
       .attr('d', path as any)
       .attr('fill', (d: any) => getColor(d.properties))
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 1)
+      .attr('stroke', 'white')
+      .attr('stroke-width', '0.5')
       .on('mouseover', function(event, d: any) {
+        // Пропускаем тултип для озера
+        if (d.properties.NAME_2 === 'Ysyk-Köl(lake)' || 
+            d.properties.NAME_2 === 'Ysyk-Kol' || 
+            d.properties.NAME_2 === 'Issyk-Kul') {
+          return;
+        }
+        if (d.properties.NAME_2 === 'Song-Kol' || 
+          d.properties.NAME_2 === 'Song-Kol(lake)' || 
+          d.properties.NAME_2 === 'Song-kol') {
+        return;
+      }
+
         d3.select(this)
           .attr('fill-opacity', 0.7);
 
-        const tooltip = d3.select(tooltipRef.current);
-        
-        // Используем clientX и clientY вместо pageX и pageY
-        const mouseX = event.clientX;
-        const mouseY = event.clientY;
-        
-        // Получаем позицию контейнера
+        const [mouseX, mouseY] = d3.pointer(event);
         const containerRect = containerRef.current?.getBoundingClientRect();
         const tooltipNode = tooltipRef.current;
-        
-        if (containerRect && tooltipNode) {
-          // Вычисляем позицию относительно контейнера
-          let tooltipX = mouseX - containerRect.left;
-          let tooltipY = mouseY - containerRect.top;
-          
-          // Проверяем границы
-          const tooltipWidth = tooltipNode.offsetWidth;
-          const tooltipHeight = tooltipNode.offsetHeight;
-          
-          // Если тултип выходит за правый край
-          if (tooltipX + tooltipWidth > containerRect.width) {
-            tooltipX = tooltipX - tooltipWidth - 10;
-          } else {
-            tooltipX = tooltipX + 10;
-          }
-          
-          // Если тултип выходит за нижний край
-          if (tooltipY + tooltipHeight > containerRect.height) {
-            tooltipY = tooltipY - tooltipHeight - 10;
-          } else {
-            tooltipY = tooltipY + 10;
-          }
 
-          const rating = getRayonRating(d.properties.NAME_2);
-          
+        if (containerRect && tooltipNode) {
+          let tooltipX = mouseX;
+          let tooltipY = mouseY;
+
           tooltip
             .style('display', 'block')
-            .style('left', `${tooltipX}px`)
-            .style('top', `${tooltipY}px`)
-            .html(`
-              <div class="font-medium">${d.properties.NAME_2}</div>
-              <div class="text-sm text-gray-600">Общая оценка: ${rating.toFixed(1)}</div>
-            `);
+            .style('left', `${tooltipX + 10}px`)
+            .style('top', `${tooltipY + 10}px`)
+            .html(() => {
+              const rating = getRayonRating(d.properties.NAME_2);
+              return `
+                <div class="font-medium">${d.properties.NAME_2}</div>
+                <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
+              `;
+            });
         }
       })
       .on('mouseout', function() {
         d3.select(this)
           .attr('fill-opacity', 1);
-
-        d3.select(tooltipRef.current)
-          .style('display', 'none');
+        tooltip.style('display', 'none');
       });
 
+    // Добавляем легенду
+    const legend = svg.append('g')
+      .attr('class', 'legend')
+      .attr('transform', `translate(20, 20)`); // Позиция легенды (левый верхний угол)
+
+    const legendData = [
+      { color: '#8fce00', label: '4.5 и выше' },
+      { color: '#38761d', label: '4.0 - 4.4' },
+      { color: '#ffe599', label: '3.5 - 3.9' },
+      { color: '#bf9000', label: '3.0 - 3.4' },
+      { color: '#FF7074', label: 'Ниже 3.0' },
+      { color: '#999999', label: 'Нет данных' }
+    ];
+
+    // Создаем элементы легенды
+    const legendItems = legend.selectAll('.legend-item')
+      .data(legendData)
+      .enter()
+      .append('g')
+      .attr('class', 'legend-item')
+      .attr('transform', (d, i) => `translate(0, ${i * 20})`);
+
+    // Добавляем цветные прямоугольники
+    legendItems.append('rect')
+      .attr('width', 15)
+      .attr('height', 15)
+      .attr('fill', d => d.color);
+
+    // Добавляем текст
+    legendItems.append('text')
+      .attr('x', 20)
+      .attr('y', 12)
+      .text(d => d.label)
+      .attr('class', 'text-sm fill-gray-700');
+
+    // Добавляем оценки на карту
+    svg.selectAll('.rating-label')
+      .data((rayonData as any).features)
+      .enter()
+      .append('text')
+      .attr('class', 'rating-label')
+      .attr('transform', function(d: any) {
+        const centroid = path.centroid(d);
+        return `translate(${centroid[0]},${centroid[1]})`;
+      })
+      .text((d: any) => {
+        if (d.properties.NAME_2 === 'Ysyk-Köl(lake)' || 
+            d.properties.NAME_2 === 'Ysyk-Kol' || 
+            d.properties.NAME_2 === 'Issyk-Kul') {
+          return '';
+        }
+        const rating = getRayonRating(d.properties.NAME_2);
+        return rating ? rating.toFixed(1) : '';
+      })
+      .attr('text-anchor', 'middle')
+      .attr('dy', '.35em')
+      .attr('fill', 'black')
+      .attr('font-size', '10px')
+      .attr('font-weight', 'bold')
+      .attr('stroke', 'white')
+      .attr('stroke-width', '0.5px');
+
   }, []);
-
-  const getRayonRating = (rayonName: string): number => {
-    const courtName = rayonToCourtMapping[rayonName];
-    const court = courts.find(c => c.name === courtName);
-    return court ? court.ratings[0] : 0;
-  };
-
-  const getColor = (properties: any): string => {
-    if (properties.NAME_2 === 'Ysyk-Köl(lake)' || 
-        properties.NAME_2 === 'Ysyk-Kol' || 
-        properties.NAME_2 === 'Issyk-Kul') {
-      return '#4FA1E3';  // Синий для озера
-    }
-    
-    const rating = getRayonRating(properties.NAME_2);
-    
-    if (rating >= 4.5) return '#00FFFF';      // Темно-зеленый
-    if (rating >= 4.0) return '#4ade80';      // Зеленый
-    if (rating >= 3.5) return '#FFFF00';      // Светло-зеленый
-    if (rating >= 3.0) return '#bbf7d0';      // Очень светло-зеленый
-    return '#FF7074';                         // Почти белый
-  };
 
   return (
     <div ref={containerRef} className="relative w-full flex justify-center items-center">

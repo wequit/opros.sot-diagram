@@ -11,51 +11,37 @@ interface GeoFeature extends Feature<MultiPolygon, GeoJsonProperties> {
   } & GeoJsonProperties;
 }
 
-// Добавляем типизацию для координат
-type Oblast = {
+// Добавляем интерфейс для данных области
+interface OblastData {
   id: number;
   name: string;
   ratings: number[];
-  coordinates: [number, number]; // Явно указываем, что это кортеж из двух чисел
-};
+  coordinates: [number, number]; // Добавляем тип для координат
+}
 
-// Данные об областях с координатами центров для точек
-const oblasts: Oblast[] = [
-  { id: 1, name: 'г. Бишкек', ratings: [0, 0, 0, 0, 0, 0, 0], 
-    coordinates: [74.09, 42.50] },
-  { id: 2, name: 'Чуйская область', ratings: [0, 0, 0, 0, 0, 0, 0], 
-    coordinates: [74.70, 42.70] },
-  { id: 3, name: 'Таласская область', ratings: [3.5, 2.5, 2.1, 1.3, 2.5, 2.1, 888], 
-    coordinates: [72.00, 42.50] },
-  { id: 4, name: 'Иссык-Кульская область', ratings: [0, 0, 0, 0, 0, 0, 0], 
-    coordinates: [77.50, 42.20] },
-  { id: 5, name: 'Нарынская область', ratings: [4.3, 3.8, 3.9, 4.0, 4.1, 4.2, 555], 
-    coordinates: [75.50, 41.50] },
-  { id: 6, name: 'Джалал-Абадская область', ratings: [4.1, 3.7, 3.8, 3.9, 4.0, 4.1, 444], 
-    coordinates: [72.50, 41.50] },
-  { id: 7, name: 'Ошская область', ratings: [3.3, 3.7, 3.8, 3.9, 4.0, 4.1, 333], 
-      coordinates: [73.50, 40.50] },
-  { id: 7, name: 'Баткенская область', ratings: [3.3, 3.7, 3.8, 3.9, 4.0, 4.1, 333], 
-    coordinates: [70.00, 39.80] }
-];
+interface MapProps {
+  selectedOblast: string | null;
+  oblastData: OblastData[]; // Используем новый интерфейс
+}
 
-const oblastMapping: { [key: string]: string } = {
-  'Bishkek': 'г. Бишкек',
-  'Chuy': 'Чуйская область',
-  'Talas': 'Таласская область',
-  'Issyk-Kul': 'Иссык-Кульская область',
-  'Naryn': 'Нарынская область',
-  'Jalal-Abad': 'Джалал-Абадская область',
-  'Batken': 'Баткенская область',
-  'Osh': 'Ошская область'
-};
-
-export default function Map_oblast() {
+export default function Map_oblast({ selectedOblast, oblastData }: MapProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
+
+  // Маппинг для соответствия названий из JSON и наших данных
+  const oblastMapping: { [key: string]: string } = {
+    'Biškek': 'Верховный суд Кыргызской Республики',
+    'Chüy': 'Суды Чуйской области',
+    'Talas': 'Суды Таласской области',
+    'Ysyk-Köl': 'Суды Иссык-Кульской области',
+    'Naryn': 'Суды Нарынской области',
+    'Jalal-Abad': 'Суды Жалал-Абадской области',
+    'Batken': 'Суды Баткенской области',
+    'Osh': 'Суды Ошской области'
+  };
 
   const getOblastRating = (oblastName: string): number => {
     const mappedName = oblastMapping[oblastName];
-    const oblast = oblasts.find(o => o.name === mappedName);
+    const oblast = oblastData.find(o => o.name === mappedName);
     return oblast ? oblast.ratings[0] : 0;
   };
 
@@ -68,11 +54,12 @@ export default function Map_oblast() {
     
     const rating = getOblastRating(properties.NAME_1);
     
-    if (rating >= 4.5) return '#00FFFF';      // Темно-зеленый
-    if (rating >= 4.0) return '#4ade80';      // Зеленый
-    if (rating >= 3.5) return '#FFFF00';      // Светло-зеленый
-    if (rating >= 3.0) return '#bbf7d0';      // Очень светло-зеленый
-    return '#FF7074';                         // Почти белый
+      if (rating >= 4.5) return '#8fce00';     
+      if (rating >= 4.0) return '#38761d';     
+      if (rating >= 3.5) return '#ffe599';     
+      if (rating >= 3.0) return '#bf9000';     
+      if (rating === 0) return '#999999';      
+      return '#FF7074';                        
   };
 
   useEffect(() => {
@@ -112,7 +99,7 @@ export default function Map_oblast() {
       .on('mouseover', function(event: MouseEvent, d: any) { // Исправлено: добавлен тип для параметра event
         d3.select(this)
           .attr('stroke-width', '2')
-          .attr('stroke', '#000');
+          .attr('stroke', '#b45f06');
 
         const [x, y] = d3.pointer(event, document.body);
         const rating = getOblastRating(d.properties.NAME_1);
@@ -135,7 +122,7 @@ export default function Map_oblast() {
       });
 
     // Добавляем точки и рейтинги
-    oblasts.forEach(oblast => {
+    oblastData.forEach((oblast: OblastData) => {
       const coordinates = projection(oblast.coordinates);
       if (coordinates && Array.isArray(coordinates)) {
         const [x, y] = coordinates;
@@ -144,10 +131,10 @@ export default function Map_oblast() {
         svg.append('circle')
           .attr('cx', x)
           .attr('cy', y)
-          .attr('r', 4)
-          .attr('fill', '#ef4444')
+          .attr('r', 3)
+          .attr('fill', '#990000')
           .attr('stroke', '#fff')
-          .attr('stroke-width', 1);
+          .attr('stroke-width', 1.5);
 
         // Добавляем текст с рейтингом
         svg.append('text')
@@ -155,11 +142,43 @@ export default function Map_oblast() {
           .attr('y', y - 10)
           .attr('text-anchor', 'middle')
           .attr('fill', '#000')
-          .attr('font-size', '12px')
-          .attr('font-weight', 'bold')
+          .attr('font-size', '10px')
+          .attr('font-weight', 'normal')
           .text(oblast.ratings[0].toFixed(1));
       }
     });
+
+    // Добавляем легенду
+    const legend = svg.append('g')
+      .attr('class', 'legend')
+      .attr('transform', `translate(20, 20)`);
+
+    const legendData = [
+      { color: '#8fce00', label: '4.5 и выше' },
+      { color: '#38761d', label: '4.0 - 4.4' },
+      { color: '#ffe599', label: '3.5 - 3.9' },
+      { color: '#bf9000', label: '3.0 - 3.4' },
+      { color: '#FF7074', label: 'Ниже 3.0' },
+      { color: '#999999', label: 'Нет данных' }
+    ];
+
+    const legendItems = legend.selectAll('.legend-item')
+      .data(legendData)
+      .enter()
+      .append('g')
+      .attr('class', 'legend-item')
+      .attr('transform', (d, i) => `translate(0, ${i * 15})`); // Уменьшил отступ между строками
+
+    legendItems.append('rect')
+      .attr('width', 12) // Уменьшил размер прямоугольников
+      .attr('height', 12)
+      .attr('fill', d => d.color);
+
+    legendItems.append('text')
+      .attr('x', 16)
+      .attr('y', 9)
+      .text(d => d.label)
+      .attr('class', 'text-xs fill-gray-700'); // Уменьшил размер текста
 
   }, []);
 
