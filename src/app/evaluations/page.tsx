@@ -192,7 +192,7 @@ export default function Evaluations() {
     labels: ["Судья", "Секретарь, помощник", "Канцелярия", "Процесс", "Здание"],
     datasets: [
       {
-        label:  user?.role === "Председатель 2 инстанции" ? courtName : user ? user.court : "Загрузка...",
+        label:  user ? user.court : "Загрузка...",
         data: [0, 0, 0, 0, 0],
         fill: true,
         backgroundColor: "rgba(255, 206, 86, 0.2)",
