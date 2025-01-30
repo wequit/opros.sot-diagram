@@ -19,6 +19,7 @@ import {
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels";
 import { useSurveyData } from "@/lib/context/SurveyContext";
+
 import {
   processSecondQuestion,
   processThirdQuestion,
@@ -37,6 +38,7 @@ import NoData from "@/lib/utils/NoData";
 import { FaStar } from "react-icons/fa";
 import Link from "next/link";
 import { useRemarks } from "@/components/RemarksApi";
+import { useAuth } from "@/lib/utils/AuthContext";
 
 ChartJS.register(
   RadialLinearScale,
@@ -88,6 +90,8 @@ export default function Evaluations() {
   const { surveyData, isLoading } = useSurveyData();
   const { remarks } = useRemarks();
   const [demographicsView, setDemographicsView] = useState("пол");
+  const {  user } = useAuth();
+  const {  courtName} = useSurveyData();
   const [categoryData, setCategoryData] = useState<PieChartData>({
     labels: [],
     datasets: [
@@ -188,7 +192,7 @@ export default function Evaluations() {
     labels: ["Судья", "Секретарь, помощник", "Канцелярия", "Процесс", "Здание"],
     datasets: [
       {
-        label: "Ноокенский суд",
+        label:  user?.role === "Председатель 2 инстанции" ? courtName : user ? user.court : "Загрузка...",
         data: [0, 0, 0, 0, 0],
         fill: true,
         backgroundColor: "rgba(255, 206, 86, 0.2)",
@@ -303,7 +307,7 @@ export default function Evaluations() {
             ],
             datasets: [
               {
-                label: "Ноокенский суд",
+                label:  user?.role === "Председатель 2 инстанции" ? (courtName || user.court) : user ? user.court : "Загрузка...",
                 data: [
                   currentCourtAverages.judge || 0,
                   currentCourtAverages.secretary || 0,
@@ -548,21 +552,18 @@ export default function Evaluations() {
   // Компонент для прогресс-бара
   const ProgressBar = ({ value }: { value: number }) => {
     const getColor = (v: number) => {
-      if (v <= 1) return "#EF4444"; // Красный (более глубокий)
-      if (v <= 2) return "#F97316"; // Оранжевый (более насыщенный)
-      if (v <= 3) return "#FACC15"; // Желтый (более теплый)
-      if (v <= 4) return "#84CC16"; // Светло-зеленый (более свежий)
-      return "#22C55E"; // Зеленый (более яркий)
+      if (v < 2) return "bg-red-500";       // До 2 - красный
+      if (v < 3) return "bg-orange-500";    // 2-2.9 - оранжевый
+      if (v < 4) return "bg-yellow-500";    // 3-3.9 - желтый
+      if (v < 4.5) return "bg-lime-500";    // 4-4.4 - светло-зеленый
+      return "bg-green-500";                // 4.5-5 - ярко-зеленый
     };
 
     return (
-      <div className="w-full h-6 bg-gray-200 rounded-lg overflow-hidden">
+      <div className="w-full bg-gray-200 rounded-full h-6">
         <div
-          className="h-full transition-all duration-200nsition-all duration-300"
-          style={{
-            width: `${(value / 5) * 100}%`,
-            backgroundColor: getColor(value),
-          }}
+          className={`h-6 rounded-full ${getColor(value)}`}
+          style={{ width: `${(value / 5) * 100}%` }}
         />
       </div>
     );
@@ -572,7 +573,7 @@ export default function Evaluations() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
-        <p className="text-xl text-gray-600 font-medium">Загрузка данных...</p>
+        <p className="text-xl text-gray-600 font-medium">Загрузка данных..</p>
       </div>
     );
   }
@@ -588,7 +589,7 @@ export default function Evaluations() {
   return (
     <div className="min-h-screen ">
       <div className="max-w-[1440px] mx-auto ">
-        {surveyData ? (
+      
           <div className="grid grid-cols-2 gap-4">
             {/* Общие показатели */}
             <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
@@ -622,7 +623,7 @@ export default function Evaluations() {
               <div className="p-6">
                 <div className="space-y-3">
                   {comments.map((comment, index) => (
-                    <div className="flex gap-4 p-3 border rounded hover:shadow-2xl transition-all duration-200 bg-gray-50">
+                    <div className="flex gap-4 p-3 border rounded  bg-gray-50">
                       <span className="text-gray-500 min-w-[24px]">
                         {index + 1} {/* Используем индекс дляпше отображения ID */}
                       </span>
@@ -665,7 +666,7 @@ export default function Evaluations() {
                       className={`px-6 py-2 rounded-lg transition-colors ${
                         demographicsView === tab.toLowerCase()
                           ? "bg-blue-500 text-white"
-                          : "bg-gray-100 hover:shadow-2xl transition-all duration-200bg-gray-200"
+                          : " bg-gray-100"
                       }`}
                       onClick={() => setDemographicsView(tab.toLowerCase())}
                     >
@@ -1005,11 +1006,7 @@ export default function Evaluations() {
               </div>
             </div>
           </div>
-        ) : (
-          <div className="flex justify-center items-center h-screen">
-            <p>Загрузка данных.....</p>
-          </div>
-        )}
+       
       </div>
     </div>
   );

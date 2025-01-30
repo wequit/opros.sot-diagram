@@ -39,6 +39,10 @@ interface SurveyContextType {
   setSurveyData: (data: SurveyData) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
+  userCourt: string | null;
+  setUserCourt: (court: string | null) => void;
+  courtName: string | null;
+  setCourtName: (name: string | null) => void;
 }
 
 const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
@@ -46,9 +50,11 @@ const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
 export function SurveyProvider({ children }: { children: ReactNode }) {
   const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userCourt, setUserCourt] = useState<string | null>(null);
+  const [courtName, setCourtName] = useState<string | null>(null);
 
   return (
-    <SurveyContext.Provider value={{ surveyData, setSurveyData, isLoading, setIsLoading }}>
+    <SurveyContext.Provider value={{ surveyData, setSurveyData, isLoading, setIsLoading, userCourt, setUserCourt, courtName, setCourtName }}>
       {children}
     </SurveyContext.Provider>
   );

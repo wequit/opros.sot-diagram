@@ -10,7 +10,7 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onClose }: SidebarProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const pathname = usePathname();
 
   // Не показываем сайдбар на странице логина
@@ -21,7 +21,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const isActivePath = (path: string) => pathname === path;
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col ">
       {/* Шапка сайдбара */}
       <div className="p-4 border-b flex justify-between items-center">
         <h2 className="text-lg font-semibold text-gray-800">Меню</h2>
@@ -47,7 +47,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           `}
         >
           <MdAssessment className="w-6 h-6" />
-          <span>Оценки</span>
+          <span>Оценки по судам</span>
         </Link>
 
         <Link 
@@ -65,7 +65,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <span>Замечания и предложения</span>
         </Link>
 
-        <Link 
+        {user?.role !== "Председатель 2 инстанции" && user?.role !== "Председатель 1 инстанции" ? (
+          <>
+          <Link 
           href="/maps/oblast" 
           onClick={onClose}
           className={`
@@ -94,8 +96,10 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <MdMap className="w-6 h-6" />
           <span>Оценка по судам</span>
         </Link>
-
-        
+        </>
+        ): (
+          ''
+        )}
       </nav>
     </div>
   );

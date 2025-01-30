@@ -65,7 +65,7 @@ export function processSecondQuestion(responses: QuestionResponse[]) {
       backgroundColor: [
         'rgb(54, 162, 235)',
         'rgb(255, 99, 132)',
-        'rgb(75, 192, 192)',
+        'rgb(255, 159, 64)',   // оранжевый
         'rgb(153, 102, 255)',
       ],
       datalabels: {
@@ -100,10 +100,8 @@ export function processThirdQuestion(responses: QuestionResponse[]) {
     datasets: [{
       data,
       backgroundColor: [
-        'rgb(54, 162, 235)',  // синий
-        'rgb(255, 99, 132)',  // красный
-        'rgb(75, 192, 192)',  // зеленый
-        'rgb(153, 102, 255)', // фиолетовый
+        'rgb(255, 99, 132)',  // Жензина
+        'rgb(51, 153, 255)',  // Мужчина
       ],
       datalabels: {
         color: "#FFFFFF",
@@ -179,7 +177,8 @@ export function processAudioVideoQuestion(questions: Question[]) {
         backgroundColor: [
           'rgb(54, 162, 235)',  // Blue
           'rgb(255, 99, 132)',  // Red
-          'rgb(255, 159, 64)'   // Orange
+          'rgb(255, 159, 64)',   // Orange
+          'rgb(153, 102, 255)', // фиолетовый
         ]
       }]
     };
@@ -437,7 +436,8 @@ export function processStartTimeQuestion(questions: Question[]) {
     const colors = labels.map((_, index) => [
       'rgb(54, 162, 235)',  // синий
       'rgb(255, 99, 132)',  // красный
-      'rgb(255, 159, 64)'   // оранжевый
+      'rgb(255, 159, 64)',   // оранжевый
+      'rgb(153, 102, 255)', // фиолетовый
     ][index]);
 
     return {

@@ -4,7 +4,6 @@ import "@/styles/globals.css";
 import Header from "@/components/layout/Header";
 import {  Inter } from "next/font/google";
 import { AuthProvider, useAuth } from "@/lib/utils/AuthContext";
-// import Sidebar from "@/components/layout/Sidebar";
 import { SurveyProvider } from '@/lib/context/SurveyContext';
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
@@ -56,7 +55,6 @@ function AuthContent({ children }: { children: React.ReactNode }) {
     <div className="max-w-[1450px] mx-auto">
       <Header />
       <div className="flex min-h-[calc(100vh-48px)]">
-        {/* <Sidebar /> */}
         <main className={`${mainClassName} `}>{children}</main>
       </div>
     </div>
