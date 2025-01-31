@@ -92,10 +92,20 @@ export default function Map_oblast({ selectedOblast, oblastData }: MapProps) {
       .data(geoData.features)
       .enter()
       .append('path')
-      .attr('d', (d: any) => path(d)) // Исправлено: добавлен тип для параметра d
-      .attr('fill', (d: any) => getColor(d.properties)) // Исправлено: добавлен тип для параметра d
+      .attr('d', (d: any) => path(d))
+      .attr('fill', (d: any) => {
+        // Если область выбрана, делаем все остальные прозрачными
+        if (selectedOblast) {
+          const mappedName = oblastMapping[d.properties.NAME_1];
+          return mappedName === selectedOblast ? 
+            getColor(d.properties) : 
+            'rgba(200, 200, 200, 0.3)';
+        }
+        return getColor(d.properties);
+      })
       .attr('stroke', '#fff')
       .attr('stroke-width', '1')
+      .attr('transition', 'fill 0.3s ease')
       .on('mouseover', function(event: MouseEvent, d: any) { // Исправлено: добавлен тип для параметра event
         d3.select(this)
           .attr('stroke-width', '2')
@@ -180,7 +190,7 @@ export default function Map_oblast({ selectedOblast, oblastData }: MapProps) {
       .text(d => d.label)
       .attr('class', 'text-xs fill-gray-700'); // Уменьшил размер текста
 
-  }, []);
+  }, [selectedOblast, oblastData]);
 
   return (
     <svg ref={svgRef} className="w-full h-auto"></svg>
