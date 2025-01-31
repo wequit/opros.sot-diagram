@@ -99,14 +99,24 @@ export default function Map_rayon({ selectedRayon }: MapProps) {
        .attr('viewBox', `0 0 ${width} ${height}`)
        .attr('preserveAspectRatio', 'xMidYMid meet');
 
-    // Добавляем группу для зума
     const g = svg.append('g');
 
-    // Создаем функцию зума
+    // Создаем функцию зума с ограничениями
     const zoom = d3.zoom()
       .scaleExtent([1, 8])
+      .translateExtent([[0, 0], [width, height]]) // Ограничиваем область перемещения
+      .extent([[0, 0], [width, height]])
       .on('zoom', (event) => {
-        g.attr('transform', event.transform);
+        // Получаем текущую трансформацию
+        const transform = event.transform;
+        
+        // Ограничиваем перемещение в зависимости от масштаба
+        const scale = transform.k;
+        const tx = Math.min(0, Math.max(transform.x, width * (1 - scale)));
+        const ty = Math.min(0, Math.max(transform.y, height * (1 - scale)));
+        
+        // Применяем ограниченную трансформацию
+        g.attr('transform', `translate(${tx},${ty}) scale(${scale})`);
       });
 
     // Применяем зум к SVG
@@ -261,7 +271,7 @@ export default function Map_rayon({ selectedRayon }: MapProps) {
   }, [selectedRayon]);
 
   return (
-    <div ref={containerRef} className="relative w-full flex justify-center items-center">
+    <div ref={containerRef} className="relative w-full flex justify-center items-center overflow-hidden">
       <div className="w-full max-w-[1200px]">
         <svg 
           ref={svgRef} 
