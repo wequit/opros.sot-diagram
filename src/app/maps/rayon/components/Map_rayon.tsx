@@ -80,10 +80,10 @@ interface MapProps {
   selectedRayon: string | null;
 }
 
-export default function Map({ selectedRayon }: MapProps) {
-  const svgRef = useRef<SVGSVGElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const tooltipRef = useRef<HTMLDivElement>(null);
+export default function Map_rayon({ selectedRayon }: MapProps) {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current) return;
@@ -98,6 +98,29 @@ export default function Map({ selectedRayon }: MapProps) {
        .attr('height', height)
        .attr('viewBox', `0 0 ${width} ${height}`)
        .attr('preserveAspectRatio', 'xMidYMid meet');
+
+    const g = svg.append('g');
+
+    // Создаем функцию зума с ограничениями
+    const zoom = d3.zoom()
+      .scaleExtent([1, 8])
+      .translateExtent([[0, 0], [width, height]]) // Ограничиваем область перемещения
+      .extent([[0, 0], [width, height]])
+      .on('zoom', (event) => {
+        // Получаем текущую трансформацию
+        const transform = event.transform;
+        
+        // Ограничиваем перемещение в зависимости от масштаба
+        const scale = transform.k;
+        const tx = Math.min(0, Math.max(transform.x, width * (1 - scale)));
+        const ty = Math.min(0, Math.max(transform.y, height * (1 - scale)));
+        
+        // Применяем ограниченную трансформацию
+        g.attr('transform', `translate(${tx},${ty}) scale(${scale})`);
+      });
+
+    // Применяем зум к SVG
+    svg.call(zoom as any);
 
     const projection = d3.geoMercator()
       .center([74.5, 41.5])
@@ -131,7 +154,8 @@ export default function Map({ selectedRayon }: MapProps) {
       return '#FF7074';                        
     };
 
-    svg.selectAll('path')
+    // Перемещаем отрисовку в группу g
+    g.selectAll('path')
       .data((rayonData as any).features)
       .enter()
       .append('path')
@@ -182,10 +206,10 @@ export default function Map({ selectedRayon }: MapProps) {
         tooltip.style('display', 'none');
       });
 
-    // Добавляем легенду
-    const legend = svg.append('g')
+    // Перемещаем легенду и метки в группу g
+    const legend = g.append('g')
       .attr('class', 'legend')
-      .attr('transform', `translate(20, 20)`); // Позиция легенды (левый верхний угол)
+      .attr('transform', `translate(20, 20)`);
 
     const legendData = [
       { color: '#8fce00', label: '4.5 и выше' },
@@ -218,7 +242,7 @@ export default function Map({ selectedRayon }: MapProps) {
       .attr('class', 'text-sm fill-gray-700');
 
     // Добавляем оценки на карту
-    svg.selectAll('.rating-label')
+    g.selectAll('.rating-label')
       .data((rayonData as any).features)
       .enter()
       .append('text')
@@ -244,12 +268,16 @@ export default function Map({ selectedRayon }: MapProps) {
       .attr('stroke', 'white')
       .attr('stroke-width', '0.5px');
 
-  }, []);
+  }, [selectedRayon]);
 
   return (
-    <div ref={containerRef} className="relative w-full flex justify-center items-center">
+    <div ref={containerRef} className="relative w-full flex justify-center items-center overflow-hidden">
       <div className="w-full max-w-[1200px]">
-        <svg ref={svgRef} className="w-full h-auto"></svg>
+        <svg 
+          ref={svgRef} 
+          className="w-full h-auto"
+          style={{ cursor: 'grab' }}
+        ></svg>
         <div
           ref={tooltipRef}
           className="absolute hidden bg-white px-2 py-1 rounded-md shadow-lg border border-gray-200 z-10"

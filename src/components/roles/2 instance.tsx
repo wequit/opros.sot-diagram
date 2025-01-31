@@ -3,7 +3,7 @@ import { getCookie } from "@/lib/api/login";
 import { getAssessmentData } from "@/lib/api/login";
 import Dates from "@/lib/utils/Dates";
 import DataFetcher from "@/components/DataFetcher";
-import EvaluationQuestions from "@/app/evaluations/page";
+import EvaluationQuestions from "@/app/Evaluations/page";
 import { useSurveyData } from '@/lib/context/SurveyContext';
 
 interface Assessment {
