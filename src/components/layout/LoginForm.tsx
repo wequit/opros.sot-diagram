@@ -69,7 +69,7 @@ const LoginForm: React.FC = () => {
             </h2>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8 space-y-6">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 space-y-6">
             <h3 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
               Вход в систему
             </h3>

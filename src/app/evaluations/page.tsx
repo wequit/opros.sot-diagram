@@ -91,7 +91,6 @@ export default function Evaluations() {
   const { remarks } = useRemarks();
   const [demographicsView, setDemographicsView] = useState("пол");
   const {  user } = useAuth();
-  const {  courtName} = useSurveyData();
   const [categoryData, setCategoryData] = useState<PieChartData>({
     labels: [],
     datasets: [
@@ -103,8 +102,11 @@ export default function Evaluations() {
           "rgb(75, 192, 192)",
           "rgb(153, 102, 255)",
         ],
+       
       },
+      
     ],
+  
   });
   const [genderData, setGenderData] = useState<PieChartData>({
     labels: [],
@@ -192,8 +194,8 @@ export default function Evaluations() {
     labels: ["Судья", "Секретарь, помощник", "Канцелярия", "Процесс", "Здание"],
     datasets: [
       {
-        label:  user?.role === "Председатель 2 инстанции" ? courtName : user ? user.court : "Загрузка...",
-        data: [0, 0, 0, 0, 0],
+        label: user ? user.court : "Загрузка...",
+        data: [0, 0, 0, 0, 0],  
         fill: true,
         backgroundColor: "rgba(255, 206, 86, 0.2)",
         borderColor: "rgba(255, 206, 86, 1)",
@@ -307,7 +309,7 @@ export default function Evaluations() {
             ],
             datasets: [
               {
-                label:  user?.role === "Председатель 2 инстанции" ? (courtName || user.court) : user ? user.court : "Загрузка...",
+                label: user ? user.court : "Загрузка...",
                 data: [
                   currentCourtAverages.judge || 0,
                   currentCourtAverages.secretary || 0,
@@ -823,6 +825,8 @@ export default function Evaluations() {
                       <div className="flex items-center">
                         <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
                         <span className="font-bold">{rating}</span>
+                        <span className="font-bold text-gray-900 ml-1">/</span>
+                        <span className="font-bold text-gray-900 ml-1">5</span>
                       </div>
                     </div>
                     <ProgressBar value={rating} />
@@ -858,6 +862,8 @@ export default function Evaluations() {
                       <div className="flex items-center">
                         <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
                         <span className="font-bold">{rating}</span>
+                        <span className="font-bold text-gray-900 ml-1">/</span>
+                        <span className="font-bold text-gray-900 ml-1">5</span>
                       </div>
                     </div>
                     <ProgressBar value={rating} />
@@ -879,6 +885,8 @@ export default function Evaluations() {
                       <div className="flex items-center">
                         <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
                         <span className="font-bold">{rating}</span>
+                        <span className="font-bold text-gray-900 ml-1">/</span>
+                        <span className="font-bold text-gray-900 ml-1">5</span>
                       </div>
                     </div>
                     <ProgressBar value={rating} />
@@ -979,6 +987,8 @@ export default function Evaluations() {
                       <div className="flex items-center">
                         <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
                         <span className="font-bold">{rating}</span>
+                        <span className="font-bold text-gray-900 ml-1">/</span>
+                        <span className="font-bold text-gray-900 ml-1">5</span>
                       </div>
                     </div>
                     <ProgressBar value={rating} />
@@ -1002,6 +1012,8 @@ export default function Evaluations() {
                       <div className="flex items-center">
                         <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
                         <span className="font-bold">{rating}</span>
+                        <span className="font-bold text-gray-900 ml-1">/</span>
+                        <span className="font-bold text-gray-900 ml-1">5</span>
                       </div>
                     </div>
                     <ProgressBar value={rating} />
