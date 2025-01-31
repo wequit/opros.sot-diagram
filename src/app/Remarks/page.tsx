@@ -175,8 +175,7 @@ export default function RemarksPage() {
         </table>
       </div>
 
-      {/* Пагинация */}
-      <div className="flex justify-center mt-4 gap-2">
+      {/* <div className="flex justify-center mt-4 gap-2">
         <button
           onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
@@ -191,7 +190,7 @@ export default function RemarksPage() {
           className="px-3 py-1 border rounded bg-white">
           Вперед
         </button>
-      </div>
+      </div> */}
 
       {/* Модальное окно для комментариев */}
       <CommentModal

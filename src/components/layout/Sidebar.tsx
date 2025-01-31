@@ -79,7 +79,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           `}
         >
         <MdMap className="w-6 h-6" />
-          <span>Карта областей</span>
+          <span>Оценка по областям</span>
         </Link>
 
         <Link 
@@ -94,7 +94,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           `}
         >
           <MdMap className="w-6 h-6" />
-          <span>Карта районов</span>
+          <span>Оценка по судам</span>
         </Link>
         </>
         ): (

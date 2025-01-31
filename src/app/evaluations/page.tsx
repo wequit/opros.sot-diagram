@@ -194,8 +194,8 @@ export default function Evaluations() {
     labels: ["Судья", "Секретарь, помощник", "Канцелярия", "Процесс", "Здание"],
     datasets: [
       {
-        label: user ? user.court : "Загрузка...",
-        data: [0, 0, 0, 0, 0],  
+        label:  user ? user.court : "Загрузка...",
+        data: [0, 0, 0, 0, 0],
         fill: true,
         backgroundColor: "rgba(255, 206, 86, 0.2)",
         borderColor: "rgba(255, 206, 86, 1)",
@@ -554,22 +554,18 @@ export default function Evaluations() {
   // Компонент для прогресс-бара
   const ProgressBar = ({ value }: { value: number }) => {
     const getColor = (v: number) => {
-      if (v <= 1) return "#EF4444"; // Красный (более глубокий)
-      if (v <= 2) return "#F97316"; // Оранжевый (более насыщенный)
-      if (v <= 3) return "#FACC15"; // Желтый (более теплый)
-      if (v <= 4) return "#84CC16"; // Светло-зеленый (более свежий)
-      return "#22C55E"; // Зеленый (более яркий)
+      if (v < 2) return "bg-red-500";       // До 2 - красный
+      if (v < 3) return "bg-orange-500";    // 2-2.9 - оранжевый
+      if (v < 4) return "bg-yellow-500";    // 3-3.9 - желтый
+      if (v < 4.5) return "bg-lime-500";    // 4-4.4 - светло-зеленый
+      return "bg-green-500";                // 4.5-5 - ярко-зеленый
     };
 
-    
     return (
-      <div className="w-full h-6 bg-gray-200 rounded-lg overflow-hidden">
+      <div className="w-full bg-gray-200 rounded-full h-6">
         <div
-          className="h-full transition-all duration-200nsition-all duration-300"
-          style={{
-            width: `${(value / 5) * 100}%`,
-            backgroundColor: getColor(value),
-          }}
+          className={`h-6 rounded-full ${getColor(value)}`}
+          style={{ width: `${(value / 5) * 100}%` }}
         />
       </div>
     );
