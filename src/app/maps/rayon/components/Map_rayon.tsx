@@ -7,7 +7,7 @@ import { courts } from '../page'; // Импортируем данные из pa
 // Обновленный маппинг районов к судам
 const rayonToCourtMapping: { [key: string]: string } = {
   // Бишкек
-  'Biškek': 'Бишкекский межрайонный суд',
+  'Biskek': 'Бишкекский межрайонный суд',
   // Баткенская область
   'Batken': 'Баткенский районный суд',
   'Lailak': 'Лейлекский районный суд',
@@ -154,7 +154,7 @@ export default function Map_rayon({ selectedRayon }: MapProps) {
       return '#FF7074';                        
     };
 
-    // Перемещаем отрисовку в группу g
+    // Отрисовка районов
     g.selectAll('path')
       .data((rayonData as any).features)
       .enter()
@@ -167,14 +167,12 @@ export default function Map_rayon({ selectedRayon }: MapProps) {
         // Пропускаем тултип для озера
         if (d.properties.NAME_2 === 'Ysyk-Köl(lake)' || 
             d.properties.NAME_2 === 'Ysyk-Kol' || 
-            d.properties.NAME_2 === 'Issyk-Kul') {
+            d.properties.NAME_2 === 'Issyk-Kul' ||
+            d.properties.NAME_2 === 'Song-Kol' || 
+            d.properties.NAME_2 === 'Song-Kol(lake)' || 
+            d.properties.NAME_2 === 'Song-kol') {
           return;
         }
-        if (d.properties.NAME_2 === 'Song-Kol' || 
-          d.properties.NAME_2 === 'Song-Kol(lake)' || 
-          d.properties.NAME_2 === 'Song-kol') {
-        return;
-      }
 
         d3.select(this)
           .attr('fill-opacity', 0.7);
@@ -239,34 +237,47 @@ export default function Map_rayon({ selectedRayon }: MapProps) {
       .attr('x', 20)
       .attr('y', 12)
       .text(d => d.label)
-      .attr('class', 'text-sm fill-gray-700');
+      .style('pointer-events', 'none')
+      .attr('class', 'text-sm fill-gray-900');
 
-    // Добавляем оценки на карту
-    g.selectAll('.rating-label')
+    // Добавляем текст оценок поверх карты
+    const textGroup = g.append('g')
+      .attr('class', 'rating-labels');
+
+    textGroup.selectAll('text')
       .data((rayonData as any).features)
       .enter()
       .append('text')
-      .attr('class', 'rating-label')
-      .attr('transform', function(d: any) {
+      .attr('x', (d: any) => {
         const centroid = path.centroid(d);
-        return `translate(${centroid[0]},${centroid[1]})`;
+        return centroid[0];
       })
+      .attr('y', (d: any) => {
+        const centroid = path.centroid(d);
+        return centroid[1];
+      })
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'middle')
+      .attr('fill', '#000')
+      .attr('font-size', '8px')
+      .attr('font-weight', '500')
+      .attr('paint-order', 'stroke')
+      .attr('stroke-width', '1px')
+      .attr('stroke-linecap', 'round')
+      .attr('stroke-linejoin', 'round')
+      .style('pointer-events', 'none') // Отключаем все взаимодействия с текстом
       .text((d: any) => {
         if (d.properties.NAME_2 === 'Ysyk-Köl(lake)' || 
             d.properties.NAME_2 === 'Ysyk-Kol' || 
-            d.properties.NAME_2 === 'Issyk-Kul') {
+            d.properties.NAME_2 === 'Issyk-Kul' ||
+            d.properties.NAME_2 === 'Song-Kol' || 
+            d.properties.NAME_2 === 'Song-Kol(lake)' || 
+            d.properties.NAME_2 === 'Song-kol') {
           return '';
         }
         const rating = getRayonRating(d.properties.NAME_2);
         return rating ? rating.toFixed(1) : '';
-      })
-      .attr('text-anchor', 'middle')
-      .attr('dy', '.35em')
-      .attr('fill', 'black')
-      .attr('font-size', '10px')
-      .attr('font-weight', 'bold')
-      .attr('stroke', 'white')
-      .attr('stroke-width', '0.5px');
+      });
 
   }, [selectedRayon]);
 
