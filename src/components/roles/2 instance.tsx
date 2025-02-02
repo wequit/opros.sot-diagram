@@ -19,6 +19,7 @@ interface CourtData {
   overall_assessment: number;
   assessment: Assessment[];
   assessment_count: string;
+  total_survey_responses: number;
 }
 
 const RegionalChairman = () => {
@@ -34,7 +35,7 @@ const RegionalChairman = () => {
           throw new Error("Token is null");
         }
         const data = await getAssessmentData(token);
-        setAssessmentData(data.assessment_data);
+        setAssessmentData(data.courts);
       } catch (error) {
         console.error("Ошибка при получении данных оценки:", error);
       }
@@ -86,7 +87,7 @@ const RegionalChairman = () => {
     ): (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 max-w-[1300px] mx-auto px-4 py-4">
       <div className="overflow-x-auto">
-        <table className="mb-16 min-w-full border-collapse border border-gray-300 shadow-lg rounded-lg overflow-hidden">
+        <table className="min-w-full border-collapse border border-gray-300 shadow-lg rounded-lg overflow-hidden">
           <thead className="bg-gray-200">
             <tr>
               <th className="border border-gray-300 px-4 py-2 text-left">№</th>
@@ -113,7 +114,7 @@ const RegionalChairman = () => {
                 <td className="border border-gray-300 px-4 py-2">{court.assessment.find(a => a.aspect === "Сотрудники")?.court_avg || 0}</td>
                 <td className="border border-gray-300 px-4 py-2">{court.assessment.find(a => a.aspect === "Канцелярия")?.court_avg || 0}</td>
                 <td className="border border-gray-300 px-4 py-2">{court.assessment.find(a => a.aspect === "Доступность")?.court_avg || 0}</td>
-                <td className="border border-gray-300 px-4 py-2">{court.assessment_count || 0}</td>
+                <td className="border border-gray-300 px-4 py-2">{court.total_survey_responses || 0}</td>
               </tr>
             ))}
           </tbody>
