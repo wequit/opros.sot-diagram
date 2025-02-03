@@ -22,7 +22,7 @@ interface CourtData {
   total_survey_responses: number;
 }
 
-const RegionalChairman = () => {
+const SecondInstance = () => {
   const [assessmentData, setAssessmentData] = useState<CourtData[]>([]);
   const [selectedCourt, setSelectedCourt] = useState<CourtData | null>(null);
   const { setCourtName, setSurveyData, setIsLoading } = useSurveyData();
@@ -127,4 +127,4 @@ const RegionalChairman = () => {
   );
 };
 
-export default RegionalChairman;
+export default SecondInstance;

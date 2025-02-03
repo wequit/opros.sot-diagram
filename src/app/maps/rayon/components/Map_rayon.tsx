@@ -1,8 +1,8 @@
 'use client';
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
-import rayonData from '@/app/maps/gadm41_KGZ_2.json';
-import { courts } from '../page'; // Импортируем данные из page.tsx
+import rayonData from '../../../../../public/gadm41_KGZ_2.json';
+import { courts } from '../District-Courts/page'; // Импортируем данные из page.tsx
 
 // Обновленный маппинг районов к судам
 const rayonToCourtMapping: { [key: string]: string } = {

@@ -1,6 +1,6 @@
 'use client';
 import React, { useRef, useEffect } from 'react';
-import geoData from '../../gadm41_KGZ_1.json';
+import geoData from '../../../../../public/gadm41_KGZ_1.json';
 import type { FeatureCollection, Feature, Geometry, MultiPolygon, GeoJsonProperties } from 'geojson';
 import * as d3 from 'd3';
 
@@ -17,6 +17,7 @@ interface OblastData {
   name: string;
   ratings: number[];
   coordinates: [number, number]; // Добавляем тип для координат
+  overall: number; // Общая оценка
 }
 
 interface MapProps {
@@ -131,8 +132,8 @@ export default function Map_oblast({ selectedOblast, oblastData }: MapProps) {
         tooltip.style('display', 'none');
       });
 
-    // Добавляем точки и рейтинги
-    oblastData.forEach((oblast: OblastData) => {
+    // Добавляем точки и общие оценки
+    oblastData.forEach(oblast => {
       const coordinates = projection(oblast.coordinates);
       if (coordinates && Array.isArray(coordinates)) {
         const [x, y] = coordinates;
@@ -141,12 +142,12 @@ export default function Map_oblast({ selectedOblast, oblastData }: MapProps) {
         svg.append('circle')
           .attr('cx', x)
           .attr('cy', y)
-          .attr('r', 3)
+          .attr('r', 5) // Увеличиваем радиус точки для лучшей видимости
           .attr('fill', '#990000')
           .attr('stroke', '#fff')
           .attr('stroke-width', 1.5);
 
-        // Добавляем текст с рейтингом
+        // Добавляем текст с общей оценкой
         svg.append('text')
           .attr('x', x)
           .attr('y', y - 10)
@@ -154,7 +155,7 @@ export default function Map_oblast({ selectedOblast, oblastData }: MapProps) {
           .attr('fill', '#000')
           .attr('font-size', '10px')
           .attr('font-weight', 'normal')
-          .text(oblast.ratings[0].toFixed(1));
+          .text(oblast.overall.toFixed(1)); // Используем общую оценку
       }
     });
 

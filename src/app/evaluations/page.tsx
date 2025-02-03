@@ -625,7 +625,7 @@ export default function Evaluations() {
               <div className="p-6">
                 <div className="space-y-3">
                   {comments.map((comment, index) => (
-                    <div className="flex gap-4 p-3 border rounded  bg-gray-50">
+                    <div key={index} className="flex gap-4 p-3 border rounded  bg-gray-50">
                       <span className="text-gray-500 min-w-[24px]">
                         {index + 1} {/* Используем индекс дляпше отображения ID */}
                       </span>
