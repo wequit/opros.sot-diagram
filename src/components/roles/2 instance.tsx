@@ -3,7 +3,7 @@ import { getCookie } from "@/lib/api/login";
 import { getAssessmentData } from "@/lib/api/login";
 import Dates from "@/lib/utils/Dates";
 import DataFetcher from "@/components/DataFetcher";
-import EvaluationQuestions from "@/app/Evaluations/page";
+import {Evaluations} from "@/app/Evaluations/page";
 import { useSurveyData } from '@/lib/context/SurveyContext';
 
 interface Assessment {
@@ -82,7 +82,7 @@ const SecondInstance = () => {
        <div className="space-y-6">
         <Dates />
         {/* <DataFetcher /> */}
-        <EvaluationQuestions/>
+        <Evaluations/>
       </div>
     ): (
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 max-w-[1300px] mx-auto px-4 py-4">

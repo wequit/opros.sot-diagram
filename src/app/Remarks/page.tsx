@@ -79,6 +79,7 @@ export default function RemarksPage() {
 
   useEffect(() => {
     if (remarks) {
+      console.log(remarks); // Проверяем данные
       setLocalRemarks(remarks);
     }
   }, [remarks]);
@@ -123,7 +124,9 @@ export default function RemarksPage() {
   const getCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    return localRemarks.slice(startIndex, endIndex);
+    const currentData = localRemarks.slice(startIndex, endIndex);
+    console.log(currentData); // Проверяем, какие данные возвращаются
+    return currentData;
   };
 
   const handleCommentClick = (item: any) => {
@@ -150,6 +153,7 @@ export default function RemarksPage() {
               <th className="border p-2 w-16">№</th>
               <th className="border p-2">ЗАМЕЧАНИЯ</th>
               <th className="border p-2">КОММЕНТАРИИ/ПРИНЯТЫЕ МЕРЫ</th>
+              <th className="border p-2">СУД</th>
               <th className="border p-2">ДЕЙСТВИЯ</th>
             </tr>
           </thead>
@@ -161,6 +165,7 @@ export default function RemarksPage() {
                   <td className="border p-2 text-center">{absoluteIndex}</td>
                   <td className="border p-2">{item.custom_answer || ''}</td>
                   <td className="border p-2">{item.reply_to_comment || ''}</td>
+                  <td className="border p-2">{item.court || 'Не указано'}</td>
                   <td className="border p-2 text-center">
                     <button
                       onClick={() => handleCommentClick(item)}

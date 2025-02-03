@@ -89,7 +89,7 @@ const Header: React.FC = () => {
                       : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}
               >
-                Верховный суд
+                Общий свод
               </Link>
             
               <Link
@@ -114,6 +114,18 @@ const Header: React.FC = () => {
                   }`}
               >
                 Районные суды
+              </Link>
+
+              <Link
+                href="/maps/General"
+                className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  ${
+                    pathname === "/maps/General"
+                      ? "bg-purple-100/40 text-indigo-600"
+                      : "text-gray-700 hover:bg-purple-50 hover:text-indigo-600"
+                  }`}
+              >
+                Верховный суд
               </Link>
             </div>
             

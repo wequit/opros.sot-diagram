@@ -24,6 +24,7 @@ interface SelectedOption {
 
 // Define the structure of a question response
 interface QuestionResponse {
+  multiple_selected_options: null;
   question: number;
   selected_option: SelectedOption | null;
   custom_answer: string | null;

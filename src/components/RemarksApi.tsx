@@ -9,6 +9,7 @@ export interface Remark {
   comment_created_at: string;
   author?: string;
   question_id?: number;
+  court: string
 }
 
 export interface AddCommentParams {
@@ -51,7 +52,8 @@ export function useRemarks() {
         reply_to_comment: item.reply_to_comment,
         comment_created_at: item.comment_created_at,
         author: item.author,
-        question_id: item.question_id
+        question_id: item.question_id,
+        court: item.court
       }));
 
       setRemarks(filteredData);
