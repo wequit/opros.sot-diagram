@@ -1,0 +1,32 @@
+.region-path {
+  transition: all 0.3s ease;
+}
+
+.region-path:hover {
+  filter: brightness(0.95);
+}
+
+.region-label {
+  font-size: 11px;
+  font-weight: 700;
+  fill: #000000;
+  pointer-events: none;
+}
+
+/* Стили для тултипа */
+.tooltip {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  font-size: 14px;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* Стили для легенды */
+.legend-item text {
+  font-size: 12px;
+  font-weight: 500;
+}

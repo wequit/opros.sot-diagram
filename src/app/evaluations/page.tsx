@@ -39,6 +39,15 @@ import { FaStar } from "react-icons/fa";
 import Link from "next/link";
 import { useRemarks } from "@/components/RemarksApi";
 import { useAuth } from "@/lib/utils/AuthContext";
+import type { 
+  Question as SurveyQuestion, 
+  QuestionResponse as SurveyQuestionResponse, 
+  SelectedOption 
+} from '@/lib/context/SurveyContext';
+import type { 
+  DatesQuestion, 
+  DatesQuestionResponse 
+} from '@/lib/utils/Dates';
 
 ChartJS.register(
   RadialLinearScale,
@@ -86,12 +95,30 @@ interface BarChartData extends ChartData<"bar", number[], string> {
   })[];
 }
 
+interface Question {
+  id: number;
+  text: string;
+  question_text: string;
+  question_type: string;
+  question_responses: QuestionResponse[];
+  options?: string[];
+}
+
+interface QuestionResponse {
+  id: number;
+  selected_option: SelectedOption | string;
+  multiple_selected_options?: string[];
+  text_response?: string;
+  created_at: string;
+  question: number;
+  custom_answer: string | null;
+}
+
 export default function Evaluations() {
   const { surveyData, isLoading } = useSurveyData();
   const { remarks } = useRemarks();
   const [demographicsView, setDemographicsView] = useState("пол");
-  const {  user } = useAuth();
-  const {  courtName} = useSurveyData();
+  const { user } = useAuth();
   const [categoryData, setCategoryData] = useState<PieChartData>({
     labels: [],
     datasets: [
@@ -103,8 +130,11 @@ export default function Evaluations() {
           "rgb(75, 192, 192)",
           "rgb(153, 102, 255)",
         ],
+       
       },
+      
     ],
+  
   });
   const [genderData, setGenderData] = useState<PieChartData>({
     labels: [],
@@ -251,118 +281,100 @@ export default function Evaluations() {
     const fetchData = async () => {
       try {
         if (surveyData && surveyData.questions && surveyData.questions[1]) {
+          const questions = surveyData.questions as SurveyQuestion[];
+          
           const processedData = processSecondQuestion(
-            surveyData.questions[1].question_responses
+            questions[1].question_responses as unknown as DatesQuestionResponse[]
           );
           setCategoryData(processedData);
-        }
-        if (surveyData && surveyData.questions && surveyData.questions[2]) {
-          const processedData = processThirdQuestion(
-            surveyData.questions[2].question_responses
-          );
-          setGenderData(processedData);
-        }
-        if (surveyData && surveyData.questions && surveyData.questions[0]) {
-          const processedData = processFirstQuestion(
-            surveyData.questions[0].question_responses
-          );
-          setTrafficSourceData(processedData as unknown as BarChartData);
-        }
-        if (surveyData && surveyData.questions && surveyData.questions[4]) {
-          const processedData = processFifthQuestion(
-            surveyData.questions[4].question_responses
-          );
-          setCaseTypesData(processedData);
-        }
-        if (surveyData?.questions) {
-          const getAverageFromData = (data: number[]) => {
-            const sum = data.reduce((a: number, b: number) => a + b, 0);
-            if (sum === null || sum === undefined) return 0;
-            return Number((sum / data.length).toFixed(1));
-          };
-
-          const judgeData = processJudgeRatings(surveyData.questions);
-          const staffData = processStaffRatings(surveyData.questions);
-          const processData = processProcessRatings(surveyData.questions);
-          const officeData = processOfficeRatings(surveyData.questions);
-          const accessibilityData = processAccessibilityRatings(
-            surveyData.questions
-          );
-
-          const currentCourtAverages = {
-            judge: getAverageFromData(Object.values(judgeData)),
-            secretary: getAverageFromData(Object.values(staffData)),
-            office: getAverageFromData(Object.values(officeData)),
-            process: getAverageFromData(Object.values(processData)),
-            building: getAverageFromData(Object.values(accessibilityData)),
-          };
-
-          setRadarData({
-            labels: [
-              "Судья",
-              "Секретарь, помощник",
-              "Канцелярия",
-              "Процесс",
-              "Здание",
-            ],
-            datasets: [
-              {
-                label:  user?.role === "Председатель 2 инстанции" ? (courtName || user.court) : user ? user.court : "Загрузка...",
-                data: [
-                  currentCourtAverages.judge || 0,
-                  currentCourtAverages.secretary || 0,
-                  currentCourtAverages.office || 0,
-                  currentCourtAverages.process || 0,
-                  currentCourtAverages.building || 0,
-                ],
-                fill: true,
-                backgroundColor: "rgba(255, 206, 86, 0.2)",
-                borderColor: "rgba(255, 206, 86, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-              },
-              {
-                label: "Средние оценки по республике",
-                data: [4.5, 4.2, 4.0, 4.3, 4.1],
-                fill: true,
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-                datalabels: {
-                  display: false,
-                },
-              },
-            ],
-          });
-
-          const ratings = processJudgeRatings(surveyData.questions);
+          
+          const ratings = processJudgeRatings(questions as unknown as DatesQuestion[]);
           setJudgeRatings(ratings);
-          const staffRatings = processStaffRatings(surveyData.questions);
+          
+          const staffRatings = processStaffRatings(questions as unknown as DatesQuestion[]);
           setStaffRatings(staffRatings);
-          const processRatings = processProcessRatings(surveyData.questions);
-          setProcessRatings(processRatings);
-          const audioVideoData = processAudioVideoQuestion(
-            surveyData.questions
-          );
-          setAudioVideoData(audioVideoData);
-          const officeRatings = processOfficeRatings(surveyData.questions);
-          setOfficeRatings(officeRatings);
-          const accessibilityRatings = processAccessibilityRatings(
-            surveyData.questions
-          );
-          setAccessibilityRatings(accessibilityRatings);
-          const startTimeData = processStartTimeQuestion(surveyData.questions);
-          setStartTimeData(startTimeData);
-          const disrespectData = processDisrespectQuestion(
-            surveyData.questions
-          );
-          setDisrespectData(disrespectData as BarChartData);
-        }
-        if (surveyData?.total_responses) {
-          setTotalResponses(surveyData.total_responses);
+          
+          if (surveyData && surveyData.questions && surveyData.questions[0]) {
+            const processedData = processFirstQuestion(
+              questions[0].question_responses
+            );
+            setTrafficSourceData(processedData as unknown as BarChartData);
+          }
+          if (surveyData && surveyData.questions && surveyData.questions[4]) {
+            const processedData = processFifthQuestion(
+              questions[4].question_responses
+            );
+            setCaseTypesData(processedData);
+          }
+          if (surveyData?.questions) {
+            const getAverageFromData = (data: number[]) => {
+              const sum = data.reduce((a: number, b: number) => a + b, 0);
+              if (sum === null || sum === undefined) return 0;
+              return Number((sum / data.length).toFixed(1));
+            };
+
+            const currentCourtAverages = {
+              judge: getAverageFromData(Object.values(ratings)),
+              secretary: getAverageFromData(Object.values(staffRatings)),
+              office: getAverageFromData(Object.values(processRatings)),
+              process: getAverageFromData(Object.values(processRatings)),
+              building: getAverageFromData(Object.values(accessibilityRatings)),
+            };
+
+            setRadarData({
+              labels: [
+                "Судья",
+                "Секретарь, помощник",
+                "Канцелярия",
+                "Процесс",
+                "Здание",
+              ],
+              datasets: [
+                {
+                  label: user ? user.court : "Загрузка...",
+                  data: [
+                    currentCourtAverages.judge || 0,
+                    currentCourtAverages.secretary || 0,
+                    currentCourtAverages.office || 0,
+                    currentCourtAverages.process || 0,
+                    currentCourtAverages.building || 0,
+                  ],
+                  fill: true,
+                  backgroundColor: "rgba(255, 206, 86, 0.2)",
+                  borderColor: "rgba(255, 206, 86, 1)",
+                  borderWidth: 2,
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                },
+                {
+                  label: "Средние оценки по республике",
+                  data: [4.5, 4.2, 4.0, 4.3, 4.1],
+                  fill: true,
+                  backgroundColor: "rgba(54, 162, 235, 0.2)",
+                  borderColor: "rgba(54, 162, 235, 1)",
+                  borderWidth: 2,
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                  datalabels: {
+                    display: false,
+                  },
+                },
+              ],
+            });
+
+            const processData = processProcessRatings(questions as unknown as DatesQuestion[]);
+            const officeData = processOfficeRatings(questions as unknown as DatesQuestion[]);
+            const accessibilityData = processAccessibilityRatings(
+              questions as unknown as DatesQuestion[]
+            );
+
+            setProcessRatings(processData);
+            setAccessibilityRatings(accessibilityData);
+            setOfficeRatings(officeData);
+          }
+          if (surveyData?.total_responses) {
+            setTotalResponses(surveyData.total_responses);
+          }
         }
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
@@ -623,7 +635,7 @@ export default function Evaluations() {
               <div className="p-6">
                 <div className="space-y-3">
                   {comments.map((comment, index) => (
-                    <div className="flex gap-4 p-3 border rounded  bg-gray-50">
+                    <div key={index} className="flex gap-4 p-3 border rounded  bg-gray-50">
                       <span className="text-gray-500 min-w-[24px]">
                         {index + 1} {/* Используем индекс дляпше отображения ID */}
                       </span>
@@ -819,6 +831,8 @@ export default function Evaluations() {
                       <div className="flex items-center">
                         <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
                         <span className="font-bold">{rating}</span>
+                        <span className="font-bold text-gray-900 ml-1">/</span>
+                        <span className="font-bold text-gray-900 ml-1">5</span>
                       </div>
                     </div>
                     <ProgressBar value={rating} />
@@ -854,6 +868,8 @@ export default function Evaluations() {
                       <div className="flex items-center">
                         <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
                         <span className="font-bold">{rating}</span>
+                        <span className="font-bold text-gray-900 ml-1">/</span>
+                        <span className="font-bold text-gray-900 ml-1">5</span>
                       </div>
                     </div>
                     <ProgressBar value={rating} />
@@ -875,6 +891,8 @@ export default function Evaluations() {
                       <div className="flex items-center">
                         <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
                         <span className="font-bold">{rating}</span>
+                        <span className="font-bold text-gray-900 ml-1">/</span>
+                        <span className="font-bold text-gray-900 ml-1">5</span>
                       </div>
                     </div>
                     <ProgressBar value={rating} />
@@ -975,6 +993,8 @@ export default function Evaluations() {
                       <div className="flex items-center">
                         <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
                         <span className="font-bold">{rating}</span>
+                        <span className="font-bold text-gray-900 ml-1">/</span>
+                        <span className="font-bold text-gray-900 ml-1">5</span>
                       </div>
                     </div>
                     <ProgressBar value={rating} />
@@ -998,6 +1018,8 @@ export default function Evaluations() {
                       <div className="flex items-center">
                         <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
                         <span className="font-bold">{rating}</span>
+                        <span className="font-bold text-gray-900 ml-1">/</span>
+                        <span className="font-bold text-gray-900 ml-1">5</span>
                       </div>
                     </div>
                     <ProgressBar value={rating} />

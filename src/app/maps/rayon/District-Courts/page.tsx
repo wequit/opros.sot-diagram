@@ -1,7 +1,9 @@
 'use client';
-import Map from './components/Map_rayon';
+import Link from 'next/link';
+import Map from '../components/Map_rayon';
 import { useState } from 'react';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
+import { usePathname } from 'next/navigation';
 
 type SortDirection = 'asc' | 'desc' | null;
 type SortField = 'overall' | 'judge' | 'process' | 'staff' | 'office' | 'accessibility' | 'count' | null;
@@ -244,6 +246,7 @@ export default function RayonPage() {
   const [selectedRayon, setSelectedRayon] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const pathname = usePathname()
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -286,8 +289,30 @@ export default function RayonPage() {
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-[1200px] mx-auto px-4 py-4">
-        <div className="mb-4">
+        <div className="mb-4   flex justify-between items-center">
           <h2 className="text-xl font-medium">Оценки по судам</h2>
+          <div className="flex space-x-4">
+            <Link
+              href="/maps/rayon/District-Courts"
+              className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  ${
+                    pathname === "/maps/rayon/District-Courts"
+                      ? "bg-blue-100/40 text-blue-600"
+                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  }`}
+            >
+              Оценки
+            </Link>
+            <Link href="/Remarks"  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  ${
+                    pathname === "/Remarks"
+                      ? "bg-blue-100/40 text-blue-600"
+                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  }`}
+            >
+              Замечания и предложения
+            </Link>
+          </div>
         </div>
 
         <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">

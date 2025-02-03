@@ -15,25 +15,24 @@ interface Period {
   label: string;
 }
 
-// Define the structure of a question's selected option
-interface SelectedOption {
+// Экспортируем интерфейсы
+export interface SelectedOption {
   id: number;
   text_ru: string;
   text_kg: string;
 }
 
-// Define the structure of a question response
-interface QuestionResponse {
+export interface DatesQuestionResponse {
+  multiple_selected_options: null;
   question: number;
   selected_option: SelectedOption | null;
   custom_answer: string | null;
 }
 
-// Define the structure of a question
-export interface Question {
+export interface DatesQuestion {
   id: number;
   text: string;
-  question_responses: QuestionResponse[];
+  question_responses: DatesQuestionResponse[];
 }
 
 export default function Dates() {

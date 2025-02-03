@@ -47,8 +47,44 @@ export default function Sidebar({ onClose }: SidebarProps) {
           `}
         >
           <MdAssessment className="w-6 h-6" />
-          <span>Оценки по судам</span>
+          <span>{user?.role === "Председатель 3 инстанции" ? "Верховный суд" : "Оценки по судам"}</span>
         </Link>
+
+        {user?.role !== "Председатель 2 инстанции" && user?.role !== "Председатель 1 инстанции" ? (
+          <>
+          <Link 
+          href="/maps/oblast/Regional-Courts" 
+          onClick={onClose}
+          className={`
+            flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+            ${isActivePath('/maps/oblast') 
+              ? 'bg-green-50 text-green-700 font-medium shadow-sm' 
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            }
+          `}
+        >
+        <MdMap className="w-6 h-6" />
+          <span>Областные суды</span>
+        </Link>
+
+        <Link 
+          href="/maps/rayon/District-Courts" 
+          onClick={onClose}
+          className={`
+            flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+            ${isActivePath('/maps/rayon') 
+              ? 'bg-green-50 text-green-700 font-medium shadow-sm' 
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            }
+          `}
+        >
+          <MdMap className="w-6 h-6" />
+          <span>Районные суды</span>
+        </Link>
+        </>
+        ): (
+          ''
+        )}
 
         <Link 
           href="/Remarks" 
@@ -65,41 +101,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <span>Замечания и предложения</span>
         </Link>
 
-        {user?.role !== "Председатель 2 инстанции" && user?.role !== "Председатель 1 инстанции" ? (
-          <>
-          <Link 
-          href="/maps/oblast" 
-          onClick={onClose}
-          className={`
-            flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
-            ${isActivePath('/maps/oblast') 
-              ? 'bg-green-50 text-green-700 font-medium shadow-sm' 
-              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            }
-          `}
-        >
-        <MdMap className="w-6 h-6" />
-          <span>Оценка по областям</span>
-        </Link>
-
-        <Link 
-          href="/maps/rayon" 
-          onClick={onClose}
-          className={`
-            flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
-            ${isActivePath('/maps/rayon') 
-              ? 'bg-green-50 text-green-700 font-medium shadow-sm' 
-              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-            }
-          `}
-        >
-          <MdMap className="w-6 h-6" />
-          <span>Оценка по судам</span>
-        </Link>
-        </>
-        ): (
-          ''
-        )}
+        
       </nav>
     </div>
   );
