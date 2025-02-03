@@ -42,7 +42,7 @@ export default function OblastPage() {
           throw new Error("Token is null");
         }
         const data = await getAssessmentData(token);
-        const processedRegions = data.regions.map(region => ({
+        const processedRegions = data.regions.map((region: { region_id: number; region_name: string; average_scores: Record<string, number>; overall_region_assessment: number; total_assessments: number; }) => ({
           id: region.region_id,
           name: region.region_name,
           ratings: [
