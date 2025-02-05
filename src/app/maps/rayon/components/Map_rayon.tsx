@@ -78,9 +78,10 @@ const getRayonRating = (rayonName: string): number => {
 
 interface MapProps {
   selectedRayon: string | null;
+  onSelectRayon?: (courtName: string) => void;
 }
 
-export default function Map_rayon({ selectedRayon }: MapProps) {
+export default function Map_rayon({ selectedRayon, onSelectRayon }: MapProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
@@ -131,38 +132,51 @@ export default function Map_rayon({ selectedRayon }: MapProps) {
 
     const tooltip = d3.select(tooltipRef.current);
 
-    const getColor = (properties: any): string => {
+    const getColor = (rating: number, isSelected: boolean, properties: any): string => {
+      // Сначала проверяем озера
       if (properties.NAME_2 === 'Ysyk-Köl(lake)' || 
           properties.NAME_2 === 'Ysyk-Kol' || 
-          properties.NAME_2 === 'Issyk-Kul') {
+          properties.NAME_2 === 'Issyk-Kul' ||
+          properties.NAME_2 === 'Song-Kol' || 
+          properties.NAME_2 === 'Song-Kol(lake)' || 
+          properties.NAME_2 === 'Song-kol') {
         return '#7CC9F0';
-      } 
+      }
 
-      if (properties.NAME_2 === 'Song-Kol' || 
-        properties.NAME_2 === 'Song-Kol(lake)' || 
-        properties.NAME_2 === 'Song-kol') {
-       return '#7CC9F0';
-    }
-      
-      const rating = getRayonRating(properties.NAME_2);
-      
-      if (rating >= 4.5) return '#8fce00';     
-      if (rating >= 4.0) return '#38761d';     
-      if (rating >= 3.5) return '#ffe599';     
-      if (rating >= 3.0) return '#bf9000';     
-      if (rating === 0) return '#999999';      
-      return '#FF7074';                        
+      // Затем обычная логика цветов
+      if (!isSelected && selectedRayon) return '#E5E7EB';
+      if (rating === 0) return '#999999';
+      if (rating >= 4.5) return '#66C266';
+      if (rating >= 4.0) return '#B4D330';
+      if (rating >= 3.5) return '#FFC04D';
+      if (rating >= 3.0) return '#F4A460';
+      if (rating >= 2.5) return '#E57357';
+      if (rating >= 2.0) return '#CD5C5C';
+      if (rating >= 1.5) return '#A52A2A';
+      if (rating >= 1.0) return '#8B0000';
+      return '#999999';
     };
 
-    // Отрисовка районов
+    
+    // Обновляем отрисовку районов
     g.selectAll('path')
       .data((rayonData as any).features)
-      .enter()
-      .append('path')
+      .join('path')
       .attr('d', path as any)
-      .attr('fill', (d: any) => getColor(d.properties))
+      .attr('fill', (d: any) => {
+        const rating = getRayonRating(d.properties.NAME_2);
+        const isSelected = !selectedRayon || rayonToCourtMapping[d.properties.NAME_2] === selectedRayon;
+        return getColor(rating, isSelected, d.properties);
+      })
       .attr('stroke', 'white')
       .attr('stroke-width', '0.5')
+      .style('cursor', 'pointer')
+      .on('click', (event: any, d: any) => {
+        const courtName = rayonToCourtMapping[d.properties.NAME_2];
+        if (courtName) {
+          onSelectRayon?.(courtName);
+        }
+      })
       .on('mouseover', function(event, d: any) {
         // Пропускаем тултип для озера
         if (d.properties.NAME_2 === 'Ysyk-Köl(lake)' || 
@@ -204,41 +218,7 @@ export default function Map_rayon({ selectedRayon }: MapProps) {
         tooltip.style('display', 'none');
       });
 
-    // Перемещаем легенду и метки в группу g
-    const legend = g.append('g')
-      .attr('class', 'legend')
-      .attr('transform', `translate(20, 20)`);
 
-    const legendData = [
-      { color: '#8fce00', label: '4.5 и выше' },
-      { color: '#38761d', label: '4.0 - 4.4' },
-      { color: '#ffe599', label: '3.5 - 3.9' },
-      { color: '#bf9000', label: '3.0 - 3.4' },
-      { color: '#FF7074', label: 'Ниже 3.0' },
-      { color: '#999999', label: 'Нет данных' }
-    ];
-
-    // Создаем элементы легенды
-    const legendItems = legend.selectAll('.legend-item')
-      .data(legendData)
-      .enter()
-      .append('g')
-      .attr('class', 'legend-item')
-      .attr('transform', (d, i) => `translate(0, ${i * 20})`);
-
-    // Добавляем цветные прямоугольники
-    legendItems.append('rect')
-      .attr('width', 15)
-      .attr('height', 15)
-      .attr('fill', d => d.color);
-
-    // Добавляем текст
-    legendItems.append('text')
-      .attr('x', 20)
-      .attr('y', 12)
-      .text(d => d.label)
-      .style('pointer-events', 'none')
-      .attr('class', 'text-sm fill-gray-900');
 
     // Добавляем текст оценок поверх карты
     const textGroup = g.append('g')
@@ -246,26 +226,13 @@ export default function Map_rayon({ selectedRayon }: MapProps) {
 
     textGroup.selectAll('text')
       .data((rayonData as any).features)
-      .enter()
-      .append('text')
-      .attr('x', (d: any) => {
-        const centroid = path.centroid(d);
-        return centroid[0];
-      })
-      .attr('y', (d: any) => {
-        const centroid = path.centroid(d);
-        return centroid[1];
-      })
+      .join('text')
+      .attr('x', (d: any) => path.centroid(d)[0])
+      .attr('y', (d: any) => path.centroid(d)[1])
       .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .attr('fill', '#000')
-      .attr('font-size', '8px')
-      .attr('font-weight', '500')
-      .attr('paint-order', 'stroke')
-      .attr('stroke-width', '1px')
-      .attr('stroke-linecap', 'round')
-      .attr('stroke-linejoin', 'round')
-      .style('pointer-events', 'none') // Отключаем все взаимодействия с текстом
+      .style('pointer-events', 'none') // Отключаем события мыши для текста
+      .attr('font-weight', 'bold')
+      .attr('font-size', '10px')
       .text((d: any) => {
         if (d.properties.NAME_2 === 'Ysyk-Köl(lake)' || 
             d.properties.NAME_2 === 'Ysyk-Kol' || 
@@ -279,7 +246,7 @@ export default function Map_rayon({ selectedRayon }: MapProps) {
         return rating ? rating.toFixed(1) : '';
       });
 
-  }, [selectedRayon]);
+  }, [selectedRayon, onSelectRayon]);
 
   return (
     <div ref={containerRef} className="relative w-full flex justify-center items-center overflow-hidden">

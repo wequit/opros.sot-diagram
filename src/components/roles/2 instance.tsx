@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { getCookie } from "@/lib/api/login";
 import { getAssessmentData } from "@/lib/api/login";
 import Dates from "@/lib/utils/Dates";
-import DataFetcher from "@/components/DataFetcher";
-import Evaluations from "@/app/Evaluations/page";
+import Evaluations from "@/app/evaluations/page";
 import { useSurveyData } from '@/lib/context/SurveyContext';
+import DataFetcher from "@/components/DataFetcher";
 
 interface Assessment {
   aspect: string;
@@ -81,7 +81,7 @@ const SecondInstance = () => {
     {selectedCourt ? (
        <div className="space-y-6">
         <Dates />
-        {/* <DataFetcher /> */}
+        <DataFetcher />
         <Evaluations/>
       </div>
     ): (

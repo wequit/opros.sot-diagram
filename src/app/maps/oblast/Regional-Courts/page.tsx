@@ -2,9 +2,9 @@
 import Map from "../components/Map_oblast";
 import { useState, useEffect } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa"; 
-import Link from "next/link"; 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getAssessmentData, getCookie } from "@/lib/api/login"; 
+import { getAssessmentData, getCookie } from "@/lib/api/login";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -27,7 +27,17 @@ interface OblastData {
   totalAssessments: number;
 }
 
-export default function OblastPage() {
+interface Region {
+  region_id: number;
+  region_name: string;
+  average_scores: {
+    [key: string]: number;
+  };
+  overall_region_assessment: number;
+  total_assessments: number;
+}
+
+export default function RegionalCourts() {
   const [regions, setRegions] = useState<OblastData[]>([]); // Состояние для хранения данных о регионах
   const [selectedOblast, setSelectedOblast] = useState<string | null>(null);
   const [sortField, setSortField] = useState<SortField>(null);
@@ -42,7 +52,7 @@ export default function OblastPage() {
           throw new Error("Token is null");
         }
         const data = await getAssessmentData(token);
-        const processedRegions = data.regions.map((region: { region_id: number; region_name: string; average_scores: Record<string, number>; overall_region_assessment: number; total_assessments: number; }) => ({
+        const processedRegions = data.regions.map((region: Region) => ({
           id: region.region_id,
           name: region.region_name,
           ratings: [
@@ -54,7 +64,7 @@ export default function OblastPage() {
           ],
           overall: region.overall_region_assessment,
           totalAssessments: region.total_assessments,
-          coordinates: [0, 0], // Замените на реальные координаты, если они доступны
+          coordinates: [0, 0],
         }));
         setRegions(processedRegions);
       } catch (error) {
@@ -91,23 +101,28 @@ export default function OblastPage() {
   const sortedData = [...regions].sort((a, b) => {
     if (!sortField || !sortDirection) return 0;
 
-    const getValueByField = (item: OblastData) => {
-      const index = {
-        overall: 0,
-        judge: 1,
-        process: 2,
-        staff: 3,
-        office: 4,
-        accessibility: 5,
-        count: 6,
-      }[sortField];
-      return item.ratings[index];
-    };
+    let aValue, bValue;
 
-    const aValue = getValueByField(a);
-    const bValue = getValueByField(b);
+    switch (sortField) {
+      case 'judge':
+        aValue = a.ratings[4]; // Индекс для судьи
+        bValue = b.ratings[4];
+        break;
+      case 'count':
+        aValue = a.totalAssessments;
+        bValue = b.totalAssessments;
+        break;
+      case 'overall':
+        aValue = a.overall;
+        bValue = b.overall;
+        break;
+      // ... остальные случаи ...
+      default:
+        return 0;
+    }
 
-    return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+    if (aValue === undefined || bValue === undefined) return 0;
+    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
   });
 
   return (
@@ -148,7 +163,11 @@ export default function OblastPage() {
         </div>
 
         <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
-          <Map selectedOblast={selectedOblast} oblastData={regions} />
+          <Map 
+            selectedOblast={selectedOblast} 
+            oblastData={regions} 
+            onSelectOblast={setSelectedOblast}
+          />
         </div>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-100">
@@ -162,60 +181,66 @@ export default function OblastPage() {
                   <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                     Наименование области
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("overall")}
+                  >
                     <div className="flex items-center justify-between px-2">
                       <span>Общая оценка</span>
-                      <span onClick={() => handleSort("overall")}>
-                        {getSortIcon("overall")}
-                      </span>
+                      {getSortIcon("overall")}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("judge")}
+                  >
                     <div className="flex items-center justify-between px-2">
                       <span>Здание</span>
-                      <span onClick={() => handleSort("judge")}>
-                        {getSortIcon("judge")}
-                      </span>
+                      {getSortIcon("judge")}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("process")}
+                  >
                     <div className="flex items-center justify-between px-2">
                       <span>Канцелярия</span>
-                      <span onClick={() => handleSort("process")}>
-                        {getSortIcon("process")}
-                      </span>
+                      {getSortIcon("process")}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("staff")}
+                  >
                     <div className="flex items-center justify-between px-2">
                       <span>Процесс</span>
-                      <span onClick={() => handleSort("staff")}>
-                        {getSortIcon("staff")}
-                      </span>
+                      {getSortIcon("staff")}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("office")}
+                  >
                     <div className="flex items-center justify-between px-2">
                       <span>Сотрудники</span>
-                      <span onClick={() => handleSort("office")}>
-                        {getSortIcon("office")}
-                      </span>
+                      {getSortIcon("office")}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("accessibility")}
+                  >
                     <div className="flex items-center justify-between px-2">
                       <span>Судья</span>
-                      <span onClick={() => handleSort("accessibility")}>
-                        {getSortIcon("accessibility")}
-                      </span>
+                      {getSortIcon("accessibility")}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 cursor-pointer">
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("count")} >
                     <div className="flex items-center justify-between px-2">
                       <span>Кол-во оценок</span>
-                      <span onClick={() => handleSort("count")}>
-                        {getSortIcon("count")}
-                      </span>
+                      {getSortIcon("count")}
                     </div>
                   </th>
                 </tr>
