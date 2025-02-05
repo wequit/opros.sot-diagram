@@ -18,7 +18,7 @@ import {
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels";
-import { useSurveyData } from "@/lib/context/SurveyContext";
+import { useSurveyData } from "@/context/SurveyContext";
 
 import {
   processSecondQuestion,

@@ -7,7 +7,7 @@ import { CgProfile } from "react-icons/cg";
 import { HiMenu, HiOutlineLogout } from "react-icons/hi";
 import Sidebar from "./Sidebar";
 import { GrLanguage } from "react-icons/gr";
-import { useSurveyData } from "@/lib/context/SurveyContext";
+import { useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
 
 interface LanguageToggleProps {
@@ -70,6 +70,7 @@ const Header: React.FC = () => {
           </button>
 
           <div className="flex items-center gap-3">
+            <Link href='/'>
             <Image
               src="/logo.png"
               alt="Логотип"
@@ -77,6 +78,7 @@ const Header: React.FC = () => {
               height={45}
               className="rounded-full shadow-sm"
             />
+            </Link>
 
             {user?.role === "Председатель 3 инстанции" ? (
               <div className="flex space-x-4  p-2 rounded-lg">

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa"; 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getAssessmentData, getCookie } from "@/lib/api/login";
+import { getAssessmentData, getCookie } from "@/api/login";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =

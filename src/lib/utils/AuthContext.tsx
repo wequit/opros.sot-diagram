@@ -1,8 +1,8 @@
 'use client'
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { setCookie, getCookie, deleteCookie } from '@/lib/api/login';
-import { getCurrentUser } from '@/lib/api/login';
+import { setCookie, getCookie, deleteCookie } from '@/api/login';
+import { getCurrentUser } from '@/api/login';
 
 interface AuthContextType {
   isAuthenticated: boolean;

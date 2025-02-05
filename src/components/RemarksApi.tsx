@@ -1,5 +1,5 @@
 'use client';
-import { getCookie } from '@/lib/api/login';
+import { getCookie } from '@/api/login';
 import { useState, useEffect } from 'react';
 
 export interface Remark {

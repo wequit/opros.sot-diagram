@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { getCookie } from '@/lib/api/login';
+import { getCookie } from '@/api/login';
 
 interface Comment {
   id: number;

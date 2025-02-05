@@ -4,7 +4,7 @@ import "@/styles/globals.css";
 import Header from "@/components/layout/Header";
 import {  Inter } from "next/font/google";
 import { AuthProvider, useAuth } from "@/lib/utils/AuthContext";
-import { SurveyProvider } from '@/lib/context/SurveyContext';
+import { SurveyProvider } from '@/context/SurveyContext';
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 

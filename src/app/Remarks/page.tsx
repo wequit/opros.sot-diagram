@@ -3,7 +3,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRemarks } from '@/components/RemarksApi';
-import { getCookie } from '@/lib/api/login';
+import { getCookie } from '@/api/login';
 
 
 const CommentModal = ({ 
@@ -124,8 +124,7 @@ export default function RemarksPage() {
   const getCurrentPageData = () => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentData = localRemarks.slice(startIndex, endIndex);
-    console.log(currentData); // Проверяем, какие данные возвращаются
+    const currentData = localRemarks.slice().reverse().slice(startIndex, endIndex);
     return currentData;
   };
 
@@ -151,21 +150,21 @@ export default function RemarksPage() {
           <thead>
             <tr className="bg-gray-100">
               <th className="border p-2 w-16">№</th>
-              <th className="border p-2">ЗАМЕЧАНИЯ</th>
-              <th className="border p-2">КОММЕНТАРИИ/ПРИНЯТЫЕ МЕРЫ</th>
               <th className="border p-2">СУД</th>
+              <th className="border p-2">КОММЕНТАРИИ/ПРИНЯТЫЕ МЕРЫ</th>
+              <th className="border p-2">ЗАМЕЧАНИЯ</th>
               <th className="border p-2">ДЕЙСТВИЯ</th>
             </tr>
           </thead>
           <tbody>
             {getCurrentPageData().map((item, index) => {
-              const absoluteIndex = (currentPage - 1) * itemsPerPage + index + 1;
+              const absoluteIndex = localRemarks.length - (currentPage - 1) * itemsPerPage - index;
               return (
                 <tr key={item.id}>
                   <td className="border p-2 text-center">{absoluteIndex}</td>
+                  <td className="border p-2">{item.court || 'Не указано'}</td>
                   <td className="border p-2">{item.custom_answer || ''}</td>
                   <td className="border p-2">{item.reply_to_comment || ''}</td>
-                  <td className="border p-2">{item.court || 'Не указано'}</td>
                   <td className="border p-2 text-center">
                     <button
                       onClick={() => handleCommentClick(item)}
@@ -180,7 +179,7 @@ export default function RemarksPage() {
         </table>
       </div>
 
-      {/* <div className="flex justify-center mt-4 gap-2">
+      <div className="flex justify-center mt-4 gap-2">
         <button
           onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
@@ -195,7 +194,7 @@ export default function RemarksPage() {
           className="px-3 py-1 border rounded bg-white">
           Вперед
         </button>
-      </div> */}
+      </div>
 
       {/* Модальное окно для комментариев */}
       <CommentModal

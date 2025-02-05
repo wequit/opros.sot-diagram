@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Dates from "@/lib/utils/Dates";
-import Evaluations from "@/app/evaluations/page";
+import Evaluations from "@/components/Evaluations/page";
 import DataFetcher from "@/components/DataFetcher";
 import { useAuth } from "@/lib/utils/AuthContext";
 import SecondInstance from "@/components/roles/2 instance";

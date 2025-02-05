@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { fetchDataWithParams } from "@/components/DataFetcher";
-import { useSurveyData } from "@/lib/context/SurveyContext";
+import { useSurveyData } from "@/context/SurveyContext";
 
 interface DateRange {
   startDate: string;

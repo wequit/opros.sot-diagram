@@ -46,7 +46,8 @@ export const loginApi = {
     }
 
     const data = await response.json();
-    const userId = jwtDecode<{ user_id: string }>(data.access).user_id; // Извлечение user_id из токена
+    const userId = jwtDecode<{ user_id: string }>(data.access).user_id;
+    setCookie('refresh_token', data.refresh);
     return { ...data, userId };
   },
 };
@@ -99,4 +100,29 @@ export const getAssessmentData = async (token: string) => {
   }
 
   return response.json();
+};
+
+export const refreshAccessToken = async (): Promise<string> => {
+  const refreshToken = getCookie('refresh_token');
+  if (!refreshToken) {
+    throw new Error("Refresh token is not available");
+  }
+
+  const response = await fetch('https://opros.sot.kg:443/api/v1/login/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ refresh: refreshToken }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Ошибка обновления токена');
+  }
+
+  const data = await response.json();
+  setCookie('access_token', data.access); // Сохраняем новый access_token
+  return data.access; // Возвращаем новый access_token
 };

@@ -3,8 +3,8 @@ import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react'
 import * as d3 from 'd3';
 import geoData from '../../../../../public/gadm41_KGZ_1.json';
 import type { FeatureCollection, Feature, Geometry, MultiPolygon, GeoJsonProperties } from 'geojson';
-import { getAssessmentData } from '@/lib/api/login';
-import { getCookie } from '@/lib/api/login';
+import { getAssessmentData } from '@/api/login';
+import { getCookie } from '@/api/login';
 
 interface SVGFeature {
   type: string;
