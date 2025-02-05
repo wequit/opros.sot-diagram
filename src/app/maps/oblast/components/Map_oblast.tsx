@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useEffect, useMemo, useState } from 'react';
+import React, { useRef, useEffect, useMemo, useState, useCallback } from 'react';
 import * as d3 from 'd3';
 import geoData from '../../../../../public/gadm41_KGZ_1.json';
 import type { FeatureCollection, Feature, Geometry, MultiPolygon, GeoJsonProperties } from 'geojson';
@@ -73,13 +73,13 @@ export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast 
     'Osh': 'Ошская область'
   }), []);
 
-  const getOblastRating = (oblastName: string): number => {
+  const getOblastRating = useCallback((oblastName: string) => {
     const mappedName = oblastMapping[oblastName] || oblastName;
     const oblast = oblastData.find(o => o.name === mappedName);
     return oblast?.overall || 0;
-  };
+  }, [oblastData, oblastMapping]);
 
-  const getColor = (rating: number, isSelected: boolean): string => {
+  const getColor = useCallback((rating: number, isSelected: boolean) => {
     if (!isSelected && selectedOblast) return '#E5E7EB';
     if (rating === 0) return '#999999';
     if (rating >= 5.0) return '#66C266';
@@ -93,7 +93,7 @@ export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast 
     if (rating >= 1.0) return '#fa5d5d';
     if (rating >= 0.5) return '#640202';
     return '#999999';
-  };
+  }, [selectedOblast, oblastData, oblastMapping]);
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current || !oblastData.length) return;
