@@ -79,7 +79,6 @@ export default function RemarksPage() {
 
   useEffect(() => {
     if (remarks) {
-      console.log(remarks); // Проверяем данные
       setLocalRemarks(remarks);
     }
   }, [remarks]);

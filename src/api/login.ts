@@ -1,4 +1,4 @@
-import {jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 
 interface LoginCredentials {
   username: string;
@@ -47,6 +47,7 @@ export const loginApi = {
 
     const data = await response.json();
     const userId = jwtDecode<{ user_id: string }>(data.access).user_id;
+    setCookie('access_token', data.access);
     setCookie('refresh_token', data.refresh);
     return { ...data, userId };
   },
@@ -72,19 +73,37 @@ export const deleteCookie = (name: string) => {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
 };
 
-export const getCurrentUser = async (token: string) => {
-  const response = await fetch('https://opros.sot.kg:443/api/v1/current_user/', {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error('Ошибка получения данных пользователя');
+export const redirectToLoginIfTokenExpired = () => {
+  if (typeof window !== 'undefined') {
+    window.location.href = '/login';
   }
+};
 
-  return response.json();
+export const getCurrentUser = async (token: string) => {
+  try {
+    const response = await fetch('https://opros.sot.kg:443/api/v1/current_user/', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (response.status === 401) {
+      // Если токен истек, выполняем редирект
+      redirectToLoginIfTokenExpired();
+      throw new Error('Unauthorized');
+    }
+
+    if (!response.ok) {
+      throw new Error('Ошибка получения данных пользователя');
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Ошибка при получении текущего пользователя:', error);
+    redirectToLoginIfTokenExpired();
+    throw error;
+  }
 };
 
 export const getAssessmentData = async (token: string) => {
@@ -95,34 +114,14 @@ export const getAssessmentData = async (token: string) => {
     },
   });
 
+  if (response.status === 401) {
+    redirectToLoginIfTokenExpired();
+    throw new Error('Unauthorized');
+  }
+
   if (!response.ok) {
     throw new Error('Ошибка получения данных оценки');
   }
 
   return response.json();
-};
-
-export const refreshAccessToken = async (): Promise<string> => {
-  const refreshToken = getCookie('refresh_token');
-  if (!refreshToken) {
-    throw new Error("Refresh token is not available");
-  }
-
-  const response = await fetch('https://opros.sot.kg:443/api/v1/login/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify({ refresh: refreshToken }),
-  });
-
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Ошибка обновления токена');
-  }
-
-  const data = await response.json();
-  setCookie('access_token', data.access); // Сохраняем новый access_token
-  return data.access; // Возвращаем новый access_token
 };

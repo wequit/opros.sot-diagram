@@ -54,7 +54,7 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="max-w-[1450px] mx-auto">
       <Header />
-      <div className="flex min-h-[calc(100vh-48px)]">
+      <div className={`flex min-h-[calc(100vh-48px)] ${pathname === '/login' ? 'mt-0': 'mt-16' }`}>
         <main className={`${mainClassName} `}>{children}</main>
       </div>
     </div>

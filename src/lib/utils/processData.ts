@@ -11,6 +11,19 @@ interface QuestionResponse {
 }
 
 export function processFirstQuestion(responses: QuestionResponse[]) {
+  // Определяем все возможные ответы для первого вопроса
+  const allCategories = [
+    "Стенды с qr кодом",
+    "Через официальный сайт ВС",
+    "Через портал “Цифрового правосудия КР”",
+    "Через WhatsАpp",
+    "Через независимых юристов",
+    "Через мероприятия, соцролики и соцсети.",
+    "Через сотрудников суда",
+    "Другое:"
+  ];
+
+  // Фильтруем ответы, исключая null и необязательные ответы
   const validResponses = responses.filter(r => 
     r.selected_option !== null && r.custom_answer !== "Необязательный вопрос"
   );
@@ -22,14 +35,32 @@ export function processFirstQuestion(responses: QuestionResponse[]) {
     return acc;
   }, {} as Record<string, number>);
 
-  // Сортируем данные по количеству (опционально)
-  const sortedEntries = Object.entries(grouped).sort((a, b) => b[1] - a[1]);
+  // Инициализируем массив данных с нулями для всех категорий
+  const labels = allCategories;
+  const data = labels.map(label => {
+    const count = grouped[label] || 0; // Если категории нет в grouped, ставим 0
+    return count;
+  });
+
+  // Сортируем по количеству (опционально)
+  const sortedEntries = labels
+    .map((label, index) => [label, data[index]] as [string, number])
+    .sort((a, b) => b[1] - a[1]);
 
   return {
     labels: sortedEntries.map(([label]) => label),
     datasets: [{
       data: sortedEntries.map(([_, value]) => value),
-      backgroundColor: 'rgb(54, 162, 235)',
+      backgroundColor: [
+        'rgb(54, 162, 235)', // Стенды с qr кодом
+        'rgb(255, 99, 132)', // Через официальный сайт ВС
+        'rgb(75, 192, 192)', // Через портал “Цифрового правосудия КР”
+        'rgb(153, 102, 255)', // Через WhatsАpp
+        'rgb(255, 159, 64)', // Через независимых юристов
+        'rgb(255, 205, 86)', // Через мероприятия, соцролики и соцсети
+        'rgb(231, 76, 60)', // Через сотрудников суда
+        'rgb(142, 68, 173)', // Другое
+      ],
       barThickness: 20,
       datalabels: {
         color: "#FFFFFF",
@@ -40,8 +71,15 @@ export function processFirstQuestion(responses: QuestionResponse[]) {
   };
 }
 
+
 export function processSecondQuestion(responses: QuestionResponse[]) {
-  // Фильтруем ответы только для второго вопроса и убираем null значения
+  const allCategories = [
+    "Сторона по делу (истец, ответчик, потерпевший, обвиняемый)",
+    "Адвокат или представитель стороны",
+    "Свидетель",
+    "Посетитель (родственник, друг, сосед, коллега одной из сторон и др.)"
+  ];
+
   const validResponses = responses.filter(r => r.selected_option !== null);
   const totalResponses = validResponses.length;
 
@@ -52,10 +90,10 @@ export function processSecondQuestion(responses: QuestionResponse[]) {
     return acc;
   }, {} as Record<string, number>);
 
-  // Преобразуем в проценты
-  const labels = Object.keys(grouped);
+  // Создаем массив данных с учетом всех категорий
+  const labels = allCategories;
   const data = labels.map(label => 
-    Math.round((grouped[label] / totalResponses) * 100)
+    grouped[label] ? Math.round((grouped[label] / totalResponses) * 100) : 0
   );
 
   return {
@@ -66,7 +104,7 @@ export function processSecondQuestion(responses: QuestionResponse[]) {
         'rgb(54, 162, 235)',
         'rgb(255, 99, 132)',
         'rgb(255, 159, 64)',   // оранжевый
-        'rgb(153, 102, 255)',
+        'rgb(153, 102, 255)'
       ],
       datalabels: {
         color: "#FFFFFF",
@@ -76,32 +114,39 @@ export function processSecondQuestion(responses: QuestionResponse[]) {
     }]
   };
 }
+
 
 export function processThirdQuestion(responses: QuestionResponse[]) {
-  // Фильтруем ответы только для третьего вопроса и убираем null значения
+  // Задаем заранее категории
+  const allCategories = ["Женский", "Мужской"];
+
+  // Фильтруем только ответы, где выбран вариант
   const validResponses = responses.filter(r => r.selected_option !== null);
   const totalResponses = validResponses.length;
 
-  // Группируем ответы по вариантам
+  // Группируем ответы по выбранным вариантам
   const grouped = validResponses.reduce((acc, response) => {
     const optionText = response.selected_option!.text_ru;
     acc[optionText] = (acc[optionText] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  // Преобразуем в проценты
-  const labels = Object.keys(grouped);
-  const data = labels.map(label => 
-    Math.round((grouped[label] / totalResponses) * 100)
-  );
+  // Инициализируем массив данных с нулями для всех категорий
+  const labels = allCategories;
+  const data = labels.map(label => {
+    // Если категория есть в grouped, то берем ее процентное соотношение
+    // Если нет, то ставим 0
+    const count = grouped[label] || 0;
+    return totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0;
+  });
 
   return {
     labels,
     datasets: [{
       data,
       backgroundColor: [
-        'rgb(255, 99, 132)',  // Жензина
-        'rgb(51, 153, 255)',  // Мужчина
+        'rgb(255, 99, 132)',  // Женщина
+        'rgb(51, 153, 255)'   // Мужчина
       ],
       datalabels: {
         color: "#FFFFFF",
@@ -111,11 +156,20 @@ export function processThirdQuestion(responses: QuestionResponse[]) {
     }]
   };
 }
+
 
 export function processFifthQuestion(responses: QuestionResponse[]) {
-  // Фильтруем ответы только для пятого вопроса и убираем null значения
+  // Все возможные ответы для пятого вопроса
+  const allCategories = [
+    "Гражданские",
+    "Уголовные",
+    "Административные",
+    "Другое :"
+  ];
+
+  // Фильтруем ответы, исключая null значения
   const validResponses = responses.filter(r => r.selected_option !== null);
-  const totalResponses = validResponses.length;
+  const totalResponses = validResponses.length; // Общее количество ответов
 
   // Группируем ответы по вариантам
   const grouped = validResponses.reduce((acc, response) => {
@@ -124,30 +178,40 @@ export function processFifthQuestion(responses: QuestionResponse[]) {
     return acc;
   }, {} as Record<string, number>);
 
-  // Преобразуем в проценты
-  const labels = Object.keys(grouped);
-  const data = labels.map(label => 
-    Math.round((grouped[label] / totalResponses) * 100)
-  );
+  // Инициализируем массив данных с нулями для всех категорий
+  const labels = allCategories;
+  const data = labels.map(label => {
+    const count = grouped[label] || 0; // Если категории нет в grouped, ставим 0
+    // Рассчитываем процент для каждого варианта
+    const percentage = totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0;
+    return percentage;
+  });
+
+  // Сортируем данные по процентам
+  const sortedEntries = labels
+    .map((label, index) => [label, data[index]] as [string, number])
+    .sort((a, b) => b[1] - a[1]);
 
   return {
-    labels,
+    labels: sortedEntries.map(([label]) => label),
     datasets: [{
-      data,
+      data: sortedEntries.map(([_, value]) => value),
       backgroundColor: [
-        'rgb(54, 162, 235)',  // синий
-        'rgb(255, 99, 132)',  // красный
-        'rgb(75, 192, 192)',  // зеленый
-        'rgb(153, 102, 255)', // фиолетовый
+        'rgb(54, 162, 235)', // Гражданские
+        'rgb(255, 99, 132)', // Уголовные
+        'rgb(75, 192, 192)', // Административные
+        'rgb(153, 102, 255)', // Другое
       ],
       datalabels: {
         color: "#FFFFFF",
-        display: true,
-        formatter: (value: number): string => value + '%',
-      }
+        formatter: (value: number): string => `${value}%`, // Показываем проценты
+      },
+      label: ''
     }]
   };
 }
+
+
 
 export function processAudioVideoQuestion(questions: Question[]) {
   const question = questions.find(q => q.id === 13);

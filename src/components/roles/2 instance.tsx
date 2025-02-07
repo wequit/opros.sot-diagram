@@ -4,7 +4,7 @@ import { getAssessmentData } from "@/api/login";
 import Dates from "@/lib/utils/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { useSurveyData } from '@/context/SurveyContext';
-import DataFetcher from "@/components/DataFetcher";
+// import DataFetcher from "@/components/DataFetcher";
 
 interface Assessment {
   aspect: string;
@@ -81,7 +81,7 @@ const SecondInstance = () => {
     {selectedCourt ? (
        <div className="space-y-6">
         <Dates />
-        <DataFetcher />
+        {/* <DataFetcher /> */}
         <Evaluations/>
       </div>
     ): (

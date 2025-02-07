@@ -74,7 +74,7 @@ const LoginForm: React.FC = () => {
               Вход в систему
             </h3>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form className="space-y-6">
               <div className="relative">
                 <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -114,6 +114,7 @@ const LoginForm: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
+                onClick={handleSubmit}
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white 
                          py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300
                          hover:from-blue-700 hover:to-blue-800 focus:outline-none 

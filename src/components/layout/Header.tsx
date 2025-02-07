@@ -31,7 +31,6 @@ const LanguageToggle: React.FC<LanguageToggleProps> = ({
 const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
   const [isKyrgyz, setIsKyrgyz] = useState(false);
   const [isSticky, setIsSticky] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -56,8 +55,8 @@ const Header: React.FC = () => {
         className={`${
           isSticky
             ? "fixed top-0 left-0 right-0 z-40 backdrop-blur-lg bg-white/40 border-b border-gray-200 shadow-md"
-            : "relative bg-white"
-        } h-16 flex items-center justify-between px-6 transition-all duration-300 ${
+            : "fixed top-0 left-0 right-0 bg-white w-full"
+        } h-16 flex items-center justify-between px-6 transition-all duration-500 ${
           isSidebarOpen ? "backdrop-blur-lg" : ""
         }`}
       >
