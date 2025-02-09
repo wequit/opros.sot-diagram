@@ -33,6 +33,8 @@ import {
   processOfficeRatings,
   processStartTimeQuestion,
   processDisrespectQuestion,
+  processAgeData 
+  // processAgeGenderData
 } from "@/lib/utils/processData";
 import NoData from "@/lib/utils/NoData";
 import { FaStar } from "react-icons/fa";
@@ -246,6 +248,8 @@ export default function Evaluations() {
     ],
   });
 
+  const [ageData, setAgeData] = useState<any>(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -363,6 +367,13 @@ export default function Evaluations() {
         if (surveyData?.total_responses) {
           setTotalResponses(surveyData.total_responses);
         }
+        if (surveyData && surveyData.questions) {
+          const ageQuestion = surveyData.questions.find(q => q.id === 4);
+          if (ageQuestion) {
+            const processedAgeData = processAgeData(ageQuestion.question_responses);
+            setAgeData(processedAgeData);
+          }
+        }
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
       }
@@ -460,19 +471,19 @@ export default function Evaluations() {
   };
 
   // Обновленные данные для возрастной диаграммы
-  const ageData = {
-    labels: ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"],
-    datasets: [
-      {
-        label: "Количество человек",
-        data: [65, 53, 38, 22, 13, 6],
-        borderColor: "rgb(75, 192, 192)",
-        backgroundColor: "rgba(75, 192, 192, 0.2)",
-        tension: 0.3,
-        fill: true,
-      },
-    ],
-  };
+  // const ageData = {
+  //   labels: ["18–29", "30–44", "45–59", "60+"],
+  //   datasets: [
+  //     {
+  //       label: "Количество пользователей",
+  //       data: [25, 40, 35, 10],  // Эти данные можно подставить из API
+  //       backgroundColor: "rgb(54, 162, 235)",  // Цвет столбцов
+  //       borderColor: "rgb(54, 162, 235)",
+  //       borderWidth: 1,
+  //     },
+  //   ],
+  // };
+  
 
   // Замечания и предложения
 
@@ -710,7 +721,7 @@ export default function Evaluations() {
                 )}
                 {demographicsView === "пол и возраст" && (
                   <Bar
-                    data={ageGenderData}
+                  data={ageGenderData}
                     options={{
                       indexAxis: "y",
                       scales: {
@@ -744,22 +755,15 @@ export default function Evaluations() {
                     }}
                   />
                 )}
-                {demographicsView === "возраст" && (
-                  <Line
+                {demographicsView === "возраст" && ageData && (
+                  <Bar
                     data={ageData}
                     options={{
                       scales: {
                         y: {
-                          type: "linear" as const,
                           beginAtZero: true,
                           grid: {
                             display: false,
-                            drawOnChartArea: false,
-                          },
-                          ticks: {
-                            callback: function (value: string | number) {
-                              return value.toString();
-                            },
                           },
                         },
                         x: {
@@ -769,9 +773,7 @@ export default function Evaluations() {
                         },
                       },
                       plugins: {
-                        legend: {
-                          position: "bottom" as const,
-                        },
+                        legend:  { display: false }
                       },
                       maintainAspectRatio: false,
                     }}

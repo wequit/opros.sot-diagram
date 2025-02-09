@@ -1,4 +1,7 @@
+'use client'
 import {jwtDecode} from 'jwt-decode';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 
 interface LoginCredentials {
   username: string;
@@ -73,12 +76,50 @@ export const deleteCookie = (name: string) => {
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
 };
 
-export const redirectToLoginIfTokenExpired = () => {
-  if (typeof window !== 'undefined') {
-    window.location.href = '/login';
+export const useRedirectIfTokenExpired = () => {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    const redirectFlag = localStorage.getItem('redirected');
+
+    // Если токен отсутствует, истек или редирект уже был выполнен
+    if (!token || isTokenExpired(token)) {
+      if (!redirectFlag) {
+        // Устанавливаем флаг редиректа
+        localStorage.setItem('redirected', 'true');
+        router.push('/login');
+      }
+    }
+  }, [router]);
+};
+
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1])); // Декодируем токен
+    const currentTime = Math.floor(Date.now() / 1000);
+    return payload.exp < currentTime;
+  } catch (error) {
+    return true; // Если произошла ошибка, токен считается недействительным
   }
 };
 
+// Функция для редиректа (без хуков)
+const redirectToLoginIfTokenExpired = () => {
+  const token = localStorage.getItem('token');
+  const redirectFlag = localStorage.getItem('redirected');
+
+  if (!token || isTokenExpired(token)) {
+    if (!redirectFlag) {
+      // Устанавливаем флаг редиректа
+      localStorage.setItem('redirected', 'true');
+      window.location.href = '/login';
+    }
+  }
+};
+
+
+// Функция получения текущего пользователя
 export const getCurrentUser = async (token: string) => {
   try {
     const response = await fetch('https://opros.sot.kg:443/api/v1/current_user/', {
@@ -89,7 +130,7 @@ export const getCurrentUser = async (token: string) => {
     });
 
     if (response.status === 401) {
-      // Если токен истек, выполняем редирект
+      // Если токен истек, перенаправляем пользователя
       redirectToLoginIfTokenExpired();
       throw new Error('Unauthorized');
     }
@@ -105,6 +146,7 @@ export const getCurrentUser = async (token: string) => {
     throw error;
   }
 };
+
 
 export const getAssessmentData = async (token: string) => {
   const response = await fetch('https://opros.sot.kg:443/api/v1/assessment/', {

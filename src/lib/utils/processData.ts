@@ -1,5 +1,4 @@
 import { Question } from '@/lib/utils/Dates';
-
 interface QuestionResponse {
   question: number;
   selected_option: {
@@ -7,8 +6,15 @@ interface QuestionResponse {
     text_ru: string;
     text_kg: string;
   } | null;
+  multiple_selected_options?: {
+    id: number;
+    text_ru: string;
+    text_kg: string;
+  }[];
   custom_answer: string | null;
 }
+
+
 
 export function processFirstQuestion(responses: QuestionResponse[]) {
   // Определяем все возможные ответы для первого вопроса
@@ -54,7 +60,7 @@ export function processFirstQuestion(responses: QuestionResponse[]) {
       backgroundColor: [
         'rgb(54, 162, 235)', // Стенды с qr кодом
         'rgb(255, 99, 132)', // Через официальный сайт ВС
-        'rgb(75, 192, 192)', // Через портал “Цифрового правосудия КР”
+        'rgb(75, 192, 192)', // Через портал "Цифрового правосудия КР"
         'rgb(153, 102, 255)', // Через WhatsАpp
         'rgb(255, 159, 64)', // Через независимых юристов
         'rgb(255, 205, 86)', // Через мероприятия, соцролики и соцсети
@@ -215,35 +221,49 @@ export function processFifthQuestion(responses: QuestionResponse[]) {
 
 export function processAudioVideoQuestion(questions: Question[]) {
   const question = questions.find(q => q.id === 13);
-  
+
   if (question && question.question_responses) {
+    // Все возможные ответы для вопроса
+    const allCategories = [
+      "Да",
+      "Нет",
+      "Не знаю/Не уверен(а)",
+      "Другое:"
+    ];
+
     const validResponses = question.question_responses.filter(
       r => r.selected_option !== null
     );
-    
+
     const totalResponses = validResponses.length;
-    
-    const grouped = validResponses.reduce((acc: {[key: string]: number}, response) => {
+
+    // Группируем ответы по вариантам
+    const grouped = validResponses.reduce((acc: Record<string, number>, response) => {
       const optionText = response.selected_option!.text_ru;
       acc[optionText] = (acc[optionText] || 0) + 1;
       return acc;
     }, {});
 
-    const percentages = Object.entries(grouped).reduce((acc: {[key: string]: number}, [key, value]) => {
-      acc[key] = Math.round((value / totalResponses) * 100);
-      return acc;
-    }, {});
+    // Рассчитываем проценты и приводим порядок категорий к allCategories
+    const data = allCategories.map(category => {
+      const count = grouped[category] || 0;
+      return totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0;
+    });
 
     return {
-      labels: Object.keys(grouped),
+      labels: allCategories,
       datasets: [{
-        data: Object.values(percentages),
+        data,
         backgroundColor: [
-          'rgb(54, 162, 235)',  // Blue
-          'rgb(255, 99, 132)',  // Red
-          'rgb(255, 159, 64)',   // Orange
-          'rgb(153, 102, 255)', // фиолетовый
-        ]
+          'rgb(54, 162, 235)',  // Да - Blue
+          'rgb(255, 99, 132)',  // Нет - Red
+          'rgb(255, 159, 64)',  // Не знаю/Не уверен(а) - Orange
+          'rgb(153, 102, 255)'  // Другое - Purple
+        ],
+        datalabels: {
+          color: "#FFFFFF",
+          formatter: (value: number): string => `${value}%`,
+        }
       }]
     };
   }
@@ -256,6 +276,7 @@ export function processAudioVideoQuestion(questions: Question[]) {
     }]
   };
 }
+
 
 export function processJudgeRatings(questions: Question[]): { [key: string]: number } {
   // Маппинг ID вопросов к их заголовкам
@@ -463,10 +484,11 @@ export function processAccessibilityRatings(questions: Question[]): { [key: stri
 }
 
 export function processStartTimeQuestion(questions: Question[]) {
-  // Ищем вопрос 16
   const question = questions.find(q => q.id === 16);
-  
+
   if (question && question.question_responses) {
+    const allCategories = ["Да", "Нет", "Другое:"];
+    
     // Фильтруем валидные ответы
     const validResponses = question.question_responses.filter(
       (r: QuestionResponse) => r.selected_option !== null
@@ -479,42 +501,41 @@ export function processStartTimeQuestion(questions: Question[]) {
     }
 
     // Группируем ответы
-    const grouped = validResponses.reduce((acc: {[key: string]: number}, response) => {
+    const grouped = validResponses.reduce((acc: Record<string, number>, response) => {
       const optionText = response.selected_option!.text_ru;
       acc[optionText] = (acc[optionText] || 0) + 1;
       return acc;
     }, {});
 
-    // Преобразуем в проценты и фильтруем нулевые значения
-    const percentages = Object.entries(grouped).reduce((acc: {[key: string]: number}, [key, value]) => {
-      const percentage = Math.round((value / totalResponses) * 100);
-      if (percentage > 0) {
-        acc[key] = percentage;
-      }
-      return acc;
-    }, {});
+    // Рассчитываем проценты для каждой категории
+    const data = allCategories.map(category => {
+      const count = grouped[category] || 0;
+      return Math.round((count / totalResponses) * 100);
+    });
 
-    // Получаем только ненулевые значения
-    const labels = Object.keys(percentages);
-    const data = labels.map(label => percentages[label]);
-    const colors = labels.map((_, index) => [
-      'rgb(54, 162, 235)',  // синий
-      'rgb(255, 99, 132)',  // красный
-      'rgb(255, 159, 64)',   // оранжевый
-      'rgb(153, 102, 255)', // фиолетовый
-    ][index]);
+    // Цвета для каждой категории
+    const colors = [
+      'rgb(54, 162, 235)',  // Да — синий
+      'rgb(255, 99, 132)',  // Нет — красный
+      'rgb(153, 102, 255)'  // Другое — фиолетовый
+    ];
 
     return {
-      labels,
+      labels: allCategories,
       datasets: [{
         data,
-        backgroundColor: colors
+        backgroundColor: colors,
+        datalabels: {
+          color: "#FFFFFF",
+          formatter: (value: number): string => `${value}%`,
+        }
       }]
     };
   }
 
   return getEmptyStartTimeData();
 }
+
 
 function getEmptyStartTimeData() {
   return {
@@ -526,42 +547,51 @@ function getEmptyStartTimeData() {
   };
 }
 
-export function processDisrespectQuestion(questions: Question[]): {
-  labels: string[];
-  datasets: {
-    data: number[];
-    backgroundColor: string;
-    barThickness: number;
-    datalabels: {
-      color: string;
-      align: string;
-      anchor: string;
-      offset: number;
-      formatter: (value: number) => string;
-      font: {
-        size: number;
-        weight: string;
-      };
-    };
-  }[];
-} {
-  const question = questions.find(q => q.id === 15);
-  
-  if (!question || !question.question_responses) {
+export function processDisrespectQuestion(questions: Question[]) {
+  const question = questions.find(q => q.id === 15); // Предполагаем, что id вопроса 17
+
+  if (question && question.question_responses) {
+    const allCategories = ["Грубость", "Игнорирование", "Не давали выступить", "Другое"];
+
+    const validResponses = question.question_responses.filter(r => r.multiple_selected_options?.length);
+
+    const grouped = validResponses.reduce((acc: Record<string, number>, response) => {
+      response.multiple_selected_options!.forEach((option: { id: number; text_ru: string; text_kg: string })=> {
+        const optionText = option.text_ru;
+        acc[optionText] = (acc[optionText] || 0) + 1;
+      });
+      return acc;
+    }, {});
+
+    const totalResponses = Object.values(grouped).reduce((sum, count) => sum + count, 0);
+
+    if (totalResponses === 0) {
+      return getEmptyDisrespectData();
+    }
+
+    const data = allCategories.map(category => {
+      const count = grouped[category] || 0;
+      const percentage = Math.round((count / totalResponses) * 100);
+      return { count, percentage };
+    });
+
     return {
-      labels: [],
+      labels: allCategories,
       datasets: [{
-        data: [],
-        backgroundColor: "rgb(139, 69, 19)",
+        data: data.map(d => d.count),
+        backgroundColor: 'rgb(54, 162, 235)',
         barThickness: 20,
         datalabels: {
-          color: "gray",
-          align: "end",
-          anchor: "end",
-          offset: 4,
-          formatter: (value: number): string => `${value}`,
+          color: "#FFFFFF",
+          align: "end", // Выравнивание по правому краю
+          anchor: "start", // Подпись будет отображаться справа
+          offset: 10, // Расстояние от линии диаграммы
+          formatter: (value: number, context: any): string => {
+            const percentage = data[context.dataIndex].percentage;
+            return `${value} (${percentage}%)`;
+          },
           font: {
-            size: 14,
+            size: 12,
             weight: "bold"
           }
         }
@@ -569,42 +599,101 @@ export function processDisrespectQuestion(questions: Question[]): {
     };
   }
 
-  // Фильтруем валидные ответы
-  const validResponses = question.question_responses.filter(
-    r => r.selected_option !== null
-  );
-  
-  // Группируем ответы
-  const grouped = validResponses.reduce((acc: {[key: string]: number}, response) => {
-    const optionText = response.selected_option!.text_ru;
-    acc[optionText] = (acc[optionText] || 0) + 1;
-    return acc;
-  }, {});
+  return getEmptyDisrespectData();
+}
 
-  // Сортируем по количеству ответов (от большего к меньшему)
-  const sortedEntries = Object.entries(grouped)
-    .sort((a, b) => b[1] - a[1]);
-
+function getEmptyDisrespectData() {
   return {
-    labels: sortedEntries.map(([label]) => label),
+    labels: ["Грубость", "Игнорирование", "Не давали выступить", "Другое :"],
     datasets: [{
-      data: sortedEntries.map(([_, value]) => value),
-      backgroundColor: "rgb(139, 69, 19)",
+      data: [0, 0, 0, 0],
+      backgroundColor: 'rgb(200, 200, 200)',
       barThickness: 20,
       datalabels: {
-        color: "gray",
+        color: "#000000",
         align: "end",
-        anchor: "end",
-        offset: 4,
-        formatter: (value: number): string => {
-          const percentage = ((value / 100) * 100).toFixed(1);
-          return `${value} (${percentage}%)`;
-        },
+        anchor: "start",
+        offset: 10,
+        formatter: () => "0 (0%)",
         font: {
-          size: 14,
+          size: 12,
           weight: "bold"
         }
       }
     }]
   };
-} 
+}
+
+export function processAgeData(responses: QuestionResponse[]) {
+  const ageGroups = ["18–29", "30–44", "45–59", "60+"];
+  const ageCounts = new Array(ageGroups.length).fill(0);
+
+  responses.forEach((response) => {
+    if (response.selected_option) {
+      const ageGroupIndex = response.selected_option.id - 13; // Измените 13 на минимальный id для возрастных групп
+      if (ageGroupIndex >= 0 && ageGroupIndex < ageCounts.length) {
+        ageCounts[ageGroupIndex]++;
+      }
+    }
+  });
+
+  return {
+    labels: ageGroups,
+    datasets: [
+      {
+        label: "", // Пустая строка убирает "undefined" в легенде
+        data: ageCounts,
+        backgroundColor: [
+          "rgb(54, 162, 235)",
+          "rgb(255, 99, 132)",
+          "rgb(75, 192, 192)",
+          "rgb(153, 102, 255)",
+        ],
+        datalabels: {
+          color: "#FFFFFF",
+          formatter: (value: number): string => `${value}`,
+        },
+      },
+    ],
+  };
+}
+
+export function processAgeGenderData(genderResponses: QuestionResponse[]) {
+  const ageGroups = ["18–24", "25–34", "35–44", "45–54", "55–64", "65+"];
+  const genderCounts = {
+    male: new Array(ageGroups.length).fill(0),
+    female: new Array(ageGroups.length).fill(0),
+  };
+
+  const totalResponses = genderResponses.length;
+
+  // Подсчет по возрастным группам
+  genderResponses.forEach((genderResponse) => {
+    const gender = genderResponse.selected_option?.text_ru === "Мужчина" ? "male" : "female";
+    const ageGroupIndex = Math.floor(Math.random() * ageGroups.length); // Замените на реальную логику для определения возраста
+
+    if (genderCounts[gender]) {
+      genderCounts[gender][ageGroupIndex]++;
+    }
+  });
+
+  // Преобразуем количество в проценты
+  const malePercentages = genderCounts.male.map(count => totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0);
+  const femalePercentages = genderCounts.female.map(count => totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0);
+
+  return {
+    labels: ageGroups,
+    datasets: [
+      {
+        label: "Мужчины",
+        data: malePercentages.map(value => -value), // Отрицательные значения для отображения слева
+        backgroundColor: "rgb(54, 162, 235)",
+      },
+      {
+        label: "Женщины",
+        data: femalePercentages,
+        backgroundColor: "rgb(255, 192, 203)",
+      },
+    ],
+  };
+}

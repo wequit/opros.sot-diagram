@@ -11,12 +11,14 @@ export interface SelectedOption {
 export interface QuestionResponse {
   id: number;
   selected_option: SelectedOption | null;
-  multiple_selected_options?: string[];
+  multiple_selected_options?: SelectedOption[]; // Измени тип на массив объектов SelectedOption
   text_response?: string;
   created_at: string;
   question: number;
   custom_answer: string | null;
+  gender: string;
 }
+
 
 export interface Question {
   id: number;

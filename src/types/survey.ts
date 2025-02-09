@@ -4,6 +4,7 @@ export interface QuestionResponse {
   multiple_selected_options?: string[];
   text_response?: string;
   created_at: string;
+  gender: string;
 }
 
 export interface Question {
