@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState, useCallback } from 'react';
-import { ApiClient } from '@/lib/api/apiClient';
-import { useSurveyData } from '@/lib/context/SurveyContext';
+import { ApiClient } from '@/api/apiClient';
+import { useSurveyData } from '@/context/SurveyContext';
 
 export const apiClient = new ApiClient({
   baseURL: 'https://opros.sot.kg',

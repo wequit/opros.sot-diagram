@@ -1,10 +1,11 @@
 "use client";
 import React from "react";
 import "@/styles/globals.css";
+import "@/styles/skeleton.css"
 import Header from "@/components/layout/Header";
 import {  Inter } from "next/font/google";
 import { AuthProvider, useAuth } from "@/lib/utils/AuthContext";
-import { SurveyProvider } from '@/lib/context/SurveyContext';
+import { SurveyProvider } from '@/context/SurveyContext';
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 
@@ -54,7 +55,7 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="max-w-[1450px] mx-auto">
       <Header />
-      <div className="flex min-h-[calc(100vh-48px)]">
+      <div className={`flex min-h-[calc(100vh-48px)] ${pathname === '/login' ? 'mt-0': 'mt-16' }`}>
         <main className={`${mainClassName} `}>{children}</main>
       </div>
     </div>

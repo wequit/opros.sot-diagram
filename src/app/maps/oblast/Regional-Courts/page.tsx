@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa"; 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getAssessmentData, getCookie } from "@/lib/api/login";
+import { getAssessmentData, getCookie } from "@/api/login";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -51,7 +51,7 @@ export default function RegionalCourts() {
         if (!token) {
           throw new Error("Token is null");
         }
-        const data = await getAssessmentData(token);
+        const data = await getAssessmentData();
         const processedRegions = data.regions.map((region: Region) => ({
           id: region.region_id,
           name: region.region_name,

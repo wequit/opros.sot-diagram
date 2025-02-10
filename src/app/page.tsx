@@ -1,18 +1,19 @@
+// Home.tsx
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Dates from "@/lib/utils/Dates";
-import Evaluations from "@/app/evaluations/page";
+import Evaluations from "@/components/Evaluations/page";
 import DataFetcher from "@/components/DataFetcher";
 import { useAuth } from "@/lib/utils/AuthContext";
 import SecondInstance from "@/components/roles/2 instance";
 import ThirdInstance from "@/components/roles/3 instance ";
+import { withAuth } from "@/api/withAuth"; // Импортируем HOC
 
-export default function Home() {
+function Home() {
   const { user } = useAuth();
 
   return (
     <div className="space-y-6">
-      
       {user?.role === "Председатель 1 инстанции" ? (
         <>
           <Dates />
@@ -27,3 +28,6 @@ export default function Home() {
     </div>
   );
 }
+
+// Оборачиваем компонент в HOC для защиты
+export default withAuth(Home);

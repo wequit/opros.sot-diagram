@@ -1,7 +1,7 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { fetchDataWithParams } from "@/components/DataFetcher";
-import { useSurveyData } from "@/lib/context/SurveyContext";
+import { useSurveyData } from "@/context/SurveyContext";
 
 interface DateRange {
   startDate: string;
@@ -15,24 +15,27 @@ interface Period {
   label: string;
 }
 
-// Экспортируем интерфейсы
-export interface SelectedOption {
+// Define the structure of a question's selected option
+interface SelectedOption {
   id: number;
   text_ru: string;
   text_kg: string;
 }
 
-export interface DatesQuestionResponse {
-  multiple_selected_options: null;
+// Define the structure of a question response
+interface QuestionResponse {
+  multiple_selected_options?: any;
   question: number;
   selected_option: SelectedOption | null;
   custom_answer: string | null;
+  gender: string;
 }
 
-export interface DatesQuestion {
+// Define the structure of a question
+export interface Question {
   id: number;
   text: string;
-  question_responses: DatesQuestionResponse[];
+  question_responses: QuestionResponse[];
 }
 
 export default function Dates() {
@@ -197,6 +200,7 @@ export default function Dates() {
               value={dateRange.startDate}
               onChange={(e) => handleDateChange("startDate", e.target.value)}
               className="border-0 focus:ring-0 text-gray-600 font-medium w-24"
+              readOnly
             />
           </div>
           <div className="w-px h-6 bg-gray-200 mx-2"></div>
@@ -207,6 +211,7 @@ export default function Dates() {
               value={dateRange.endDate}
               onChange={(e) => handleDateChange("endDate", e.target.value)}
               className="border-0 focus:ring-0 text-gray-600 font-medium w-24"
+              readOnly
             />
           </div>
         </div>

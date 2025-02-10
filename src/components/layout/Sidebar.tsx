@@ -81,6 +81,16 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <MdMap className="w-6 h-6" />
           <span>Районные суды</span>
         </Link>
+
+        <Link
+          href="/maps/oblast-courts/chuy"
+          className={`flex items-center space-x-2 p-2 rounded-lg transition-colors ${
+            pathname === '/maps/oblast-courts/chuy' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
+          }`}
+        >
+          <MdMap className="w-6 h-6" />
+          <span>Чуйская область</span>
+        </Link>
         </>
         ): (
           ''
@@ -101,6 +111,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <span>Замечания и предложения</span>
         </Link>
 
+        
         
       </nav>
     </div>

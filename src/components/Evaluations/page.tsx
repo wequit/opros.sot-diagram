@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { Radar, Bar, Pie, Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -18,8 +18,7 @@ import {
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels";
-import { useSurveyData } from "@/lib/context/SurveyContext";
-import type { Question, QuestionResponse } from "@/lib/utils/Dates";
+import { useSurveyData } from "@/context/SurveyContext";
 
 import {
   processSecondQuestion,
@@ -34,14 +33,15 @@ import {
   processOfficeRatings,
   processStartTimeQuestion,
   processDisrespectQuestion,
+  processAgeData 
+  // processAgeGenderData
 } from "@/lib/utils/processData";
 import NoData from "@/lib/utils/NoData";
 import { FaStar } from "react-icons/fa";
 import Link from "next/link";
 import { useRemarks } from "@/components/RemarksApi";
 import { useAuth } from "@/lib/utils/AuthContext";
-import { AnimatedDiv } from '@/app/anim/DiagrammAnimation';
-import { EvaluationsSkeleton } from '@/components/ui/Skeleton';
+import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
 ChartJS.register(
   RadialLinearScale,
@@ -90,10 +90,10 @@ interface BarChartData extends ChartData<"bar", number[], string> {
 }
 
 export default function Evaluations() {
-  const { surveyData } = useSurveyData();
+  const { surveyData, isLoading } = useSurveyData();
   const { remarks } = useRemarks();
   const [demographicsView, setDemographicsView] = useState("пол");
-  const {  user } = useAuth();
+  const { user } = useAuth();
   const [categoryData, setCategoryData] = useState<PieChartData>({
     labels: [],
     datasets: [
@@ -105,11 +105,8 @@ export default function Evaluations() {
           "rgb(75, 192, 192)",
           "rgb(153, 102, 255)",
         ],
-       
       },
-      
     ],
-  
   });
   const [genderData, setGenderData] = useState<PieChartData>({
     labels: [],
@@ -197,7 +194,7 @@ export default function Evaluations() {
     labels: ["Судья", "Секретарь, помощник", "Канцелярия", "Процесс", "Здание"],
     datasets: [
       {
-        label:  user ? user.court : "Загрузка...",
+        label: user ? user.court : "Загрузка...",
         data: [0, 0, 0, 0, 0],
         fill: true,
         backgroundColor: "rgba(255, 206, 86, 0.2)",
@@ -252,13 +249,7 @@ export default function Evaluations() {
     ],
   });
 
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (surveyData) {
-      setIsLoading(false);
-    }
-  }, [surveyData]);
+  const [ageData, setAgeData] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -294,20 +285,12 @@ export default function Evaluations() {
             return Number((sum / data.length).toFixed(1));
           };
 
-          const questions = surveyData.questions.map(q => ({
-            ...q,
-            question_responses: q.question_responses.map(r => ({
-              ...r,
-              multiple_selected_options: null
-            }))
-          })) as Question[];
-
-          const judgeData = processJudgeRatings(questions);
-          const staffData = processStaffRatings(questions);
-          const processData = processProcessRatings(questions);
-          const officeData = processOfficeRatings(questions);
+          const judgeData = processJudgeRatings(surveyData.questions);
+          const staffData = processStaffRatings(surveyData.questions);
+          const processData = processProcessRatings(surveyData.questions);
+          const officeData = processOfficeRatings(surveyData.questions);
           const accessibilityData = processAccessibilityRatings(
-            questions
+            surveyData.questions
           );
 
           const currentCourtAverages = {
@@ -359,31 +342,38 @@ export default function Evaluations() {
             ],
           });
 
-          const ratings = processJudgeRatings(questions);
+          const ratings = processJudgeRatings(surveyData.questions);
           setJudgeRatings(ratings);
-          const staffRatings = processStaffRatings(questions);
+          const staffRatings = processStaffRatings(surveyData.questions);
           setStaffRatings(staffRatings);
-          const processRatings = processProcessRatings(questions);
+          const processRatings = processProcessRatings(surveyData.questions);
           setProcessRatings(processRatings);
           const audioVideoData = processAudioVideoQuestion(
-            questions
+            surveyData.questions
           );
           setAudioVideoData(audioVideoData);
-          const officeRatings = processOfficeRatings(questions);
+          const officeRatings = processOfficeRatings(surveyData.questions);
           setOfficeRatings(officeRatings);
           const accessibilityRatings = processAccessibilityRatings(
-            questions as Question[]
+            surveyData.questions
           );
           setAccessibilityRatings(accessibilityRatings);
-          const startTimeData = processStartTimeQuestion(questions as Question[]);
+          const startTimeData = processStartTimeQuestion(surveyData.questions);
           setStartTimeData(startTimeData);
           const disrespectData = processDisrespectQuestion(
-            questions
+            surveyData.questions
           );
           setDisrespectData(disrespectData as BarChartData);
         }
         if (surveyData?.total_responses) {
           setTotalResponses(surveyData.total_responses);
+        }
+        if (surveyData && surveyData.questions) {
+          const ageQuestion = surveyData.questions.find(q => q.id === 4);
+          if (ageQuestion) {
+            const processedAgeData = processAgeData(ageQuestion.question_responses);
+            setAgeData(processedAgeData);
+          }
         }
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
@@ -482,19 +472,19 @@ export default function Evaluations() {
   };
 
   // Обновленные данные для возрастной диаграммы
-  const ageData = {
-    labels: ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"],
-    datasets: [
-      {
-        label: "Количество человек",
-        data: [65, 53, 38, 22, 13, 6],
-        borderColor: "rgb(75, 192, 192)",
-        backgroundColor: "rgba(75, 192, 192, 0.2)",
-        tension: 0.3,
-        fill: true,
-      },
-    ],
-  };
+  // const ageData = {
+  //   labels: ["18–29", "30–44", "45–59", "60+"],
+  //   datasets: [
+  //     {
+  //       label: "Количество пользователей",
+  //       data: [25, 40, 35, 10],  // Эти данные можно подставить из API
+  //       backgroundColor: "rgb(54, 162, 235)",  // Цвет столбцов
+  //       borderColor: "rgb(54, 162, 235)",
+  //       borderWidth: 1,
+  //     },
+  //   ],
+  // };
+  
 
   // Замечания и предложения
 
@@ -573,11 +563,11 @@ export default function Evaluations() {
   // Компонент для прогресс-бара
   const ProgressBar = ({ value }: { value: number }) => {
     const getColor = (v: number) => {
-      if (v < 2) return "bg-red-500";       // До 2 - красный
-      if (v < 3) return "bg-orange-500";    // 2-2.9 - оранжевый
-      if (v < 4) return "bg-yellow-500";    // 3-3.9 - желтый
-      if (v < 4.5) return "bg-lime-500";    // 4-4.4 - светло-зеленый
-      return "bg-green-500";                // 4.5-5 - ярко-зеленый
+      if (v < 2) return "bg-red-500"; // До 2 - красный
+      if (v < 3) return "bg-orange-500"; // 2-2.9 - оранжевый
+      if (v < 4) return "bg-yellow-500"; // 3-3.9 - желтый
+      if (v < 4.5) return "bg-lime-500"; // 4-4.4 - светло-зеленый
+      return "bg-green-500"; // 4.5-5 - ярко-зеленый
     };
 
     return (
@@ -590,17 +580,27 @@ export default function Evaluations() {
     );
   };
 
+  // Показываем сообщение о загрузке
   if (isLoading) {
-    return <EvaluationsSkeleton />;
+    return (
+        <SkeletonDashboard/>
+    );
+  }
+
+  // Проверяем отсутствие данных только после загрузки
+  if (
+    !surveyData ||
+    (surveyData.questions.length === 0 && surveyData.total_responses === 0)
+  ) {
+    return <NoData />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          
+    <div className="min-h-screen ">
+      <div className="max-w-[1440px] mx-auto ">
+        <div className="grid grid-cols-2 gap-4">
           {/* Общие показатели */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Общие показатели</h2>
@@ -614,15 +614,13 @@ export default function Evaluations() {
                 <Radar data={radarData} options={commonOptions} />
               </div>
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Замечания и предложения */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">
-                  Замечания и предложения
-                </h2>
+                <h2 className="text-xl font-medium">Замечания и предложения</h2>
                 <span className="text-gray-600">
                   Количество ответов: {totalResponsesAnswer}
                 </span>
@@ -630,25 +628,31 @@ export default function Evaluations() {
             </div>
             <div className="p-6">
               <div className="space-y-3">
-                {comments.map((comment, index) => (
-                  <div key={index} className="flex gap-4 p-3 border rounded  bg-gray-50">
-                    <span className="text-gray-500 min-w-[24px]">
-                      {index + 1} {/* Используем индекс дляпше отображения ID */}
-                    </span>
-                    <span>{comment.text}</span>
-                  </div>
-                ))}
+                {comments.map((comment, index) => {
+                  const absoluteIndex = totalResponsesAnswer - index;
+                  return (
+                    <div
+                      key={index}
+                      className="flex gap-4 p-3 border rounded bg-gray-50"
+                    >
+                      <span className="text-gray-500 min-w-[24px]">
+                        {absoluteIndex}
+                      </span>
+                      <span>{comment.text}</span>
+                    </div>
+                  );
+                })}
               </div>
               <Link href="/Remarks">
-                <button className="mt-6 w-full py-3  text-white rounded-lg hover:shadow-2xl duration-200 bg-green-600 transition-colors">
+                <button className="mt-6 w-full py-3 text-white rounded-lg hover:shadow-2xl duration-200 bg-green-600 transition-colors">
                   Все замечания и предложения
                 </button>
               </Link>
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Категории респондентов */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">Категории респондентов</h2>
             </div>
@@ -657,10 +661,10 @@ export default function Evaluations() {
                 <Pie data={categoryData} options={commonOptions} />
               </div>
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Демографические показатели */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium text-start">
                 Демографические показатели
@@ -716,7 +720,7 @@ export default function Evaluations() {
                 )}
                 {demographicsView === "пол и возраст" && (
                   <Bar
-                    data={ageGenderData}
+                  data={ageGenderData}
                     options={{
                       indexAxis: "y",
                       scales: {
@@ -750,22 +754,15 @@ export default function Evaluations() {
                     }}
                   />
                 )}
-                {demographicsView === "возраст" && (
-                  <Line
+                {demographicsView === "возраст" && ageData && (
+                  <Bar
                     data={ageData}
                     options={{
                       scales: {
                         y: {
-                          type: "linear" as const,
                           beginAtZero: true,
                           grid: {
                             display: false,
-                            drawOnChartArea: false,
-                          },
-                          ticks: {
-                            callback: function (value: string | number) {
-                              return value.toString();
-                            },
                           },
                         },
                         x: {
@@ -775,9 +772,7 @@ export default function Evaluations() {
                         },
                       },
                       plugins: {
-                        legend: {
-                          position: "bottom" as const,
-                        },
+                        legend:  { display: false }
                       },
                       maintainAspectRatio: false,
                     }}
@@ -785,25 +780,22 @@ export default function Evaluations() {
                 )}
               </div>
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Источники трафика */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">Источник трафика</h2>
             </div>
             <div className="p-6">
               <div className="h-[300px]">
-                <Bar
-                  data={trafficSourceData}
-                  options={trafficSourceOptions}
-                />
+                <Bar data={trafficSourceData} options={trafficSourceOptions} />
               </div>
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Категории судебных дел */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">Категории судебных дел</h2>
             </div>
@@ -812,10 +804,10 @@ export default function Evaluations() {
                 <Pie data={caseTypesData} options={commonOptions} />
               </div>
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Оценки судьи */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">Оценки судьи</h2>
             </div>
@@ -835,10 +827,10 @@ export default function Evaluations() {
                 </div>
               ))}
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Проявления неуважения */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-medium">Проявление неуважения</h2>
@@ -849,10 +841,10 @@ export default function Evaluations() {
                 <Bar data={disrespectData} options={disrespectOptions} />
               </div>
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Оценки сотрудников */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">Оценки сотрудников</h2>
             </div>
@@ -872,10 +864,10 @@ export default function Evaluations() {
                 </div>
               ))}
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Оценки процесса */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">Оценки процесса</h2>
             </div>
@@ -895,14 +887,14 @@ export default function Evaluations() {
                 </div>
               ))}
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Использование средств аудио и видеофиксации */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">
-                Использование средств аудио и видеофиксации судебного
-                заседания по уголовным делам
+                Использование средств аудио и видеофиксации судебного заседания
+                по уголовным делам
               </h2>
             </div>
             <div className="p-6">
@@ -935,10 +927,10 @@ export default function Evaluations() {
                 />
               </div>
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Начало заседания в назначенное время */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b min-h-[90px]">
               <h2 className="text-xl font-medium">
                 Начало заседания в назначенное время
@@ -974,10 +966,10 @@ export default function Evaluations() {
                 />
               </div>
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Оценки канцелярии */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">Оценки канцелярии</h2>
             </div>
@@ -997,14 +989,12 @@ export default function Evaluations() {
                 </div>
               ))}
             </div>
-          </AnimatedDiv>
+          </div>
 
           {/* Оценки доступности */}
-          <AnimatedDiv className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">
-                Оценки доступности здания
-              </h2>
+              <h2 className="text-xl font-medium">Оценки доступности здания</h2>
             </div>
             <div className="p-6 space-y-6">
               {Object.entries(accessibilityRatings).map(([title, rating]) => (
@@ -1022,7 +1012,7 @@ export default function Evaluations() {
                 </div>
               ))}
             </div>
-          </AnimatedDiv>
+          </div>
         </div>
       </div>
     </div>
