@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import "@/styles/globals.css";
+import "@/styles/skeleton.css"
 import Header from "@/components/layout/Header";
 import {  Inter } from "next/font/google";
 import { AuthProvider, useAuth } from "@/lib/utils/AuthContext";

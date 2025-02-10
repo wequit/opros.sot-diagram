@@ -200,6 +200,7 @@ export default function Dates() {
               value={dateRange.startDate}
               onChange={(e) => handleDateChange("startDate", e.target.value)}
               className="border-0 focus:ring-0 text-gray-600 font-medium w-24"
+              readOnly
             />
           </div>
           <div className="w-px h-6 bg-gray-200 mx-2"></div>
@@ -210,6 +211,7 @@ export default function Dates() {
               value={dateRange.endDate}
               onChange={(e) => handleDateChange("endDate", e.target.value)}
               className="border-0 focus:ring-0 text-gray-600 font-medium w-24"
+              readOnly
             />
           </div>
         </div>

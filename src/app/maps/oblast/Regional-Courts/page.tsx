@@ -51,7 +51,7 @@ export default function RegionalCourts() {
         if (!token) {
           throw new Error("Token is null");
         }
-        const data = await getAssessmentData(token);
+        const data = await getAssessmentData();
         const processedRegions = data.regions.map((region: Region) => ({
           id: region.region_id,
           name: region.region_name,

@@ -41,6 +41,7 @@ import { FaStar } from "react-icons/fa";
 import Link from "next/link";
 import { useRemarks } from "@/components/RemarksApi";
 import { useAuth } from "@/lib/utils/AuthContext";
+import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
 ChartJS.register(
   RadialLinearScale,
@@ -582,9 +583,7 @@ export default function Evaluations() {
   // Показываем сообщение о загрузке
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8F9FA] flex items-center justify-center">
-        <p className="text-xl text-gray-600 font-medium">Загрузка данных..</p>
-      </div>
+        <SkeletonDashboard/>
     );
   }
 

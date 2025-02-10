@@ -74,7 +74,7 @@ const LoginForm: React.FC = () => {
               Вход в систему
             </h3>
 
-            <form className="space-y-6">
+            <div className="space-y-6">
               <div className="relative">
                 <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -144,7 +144,7 @@ const LoginForm: React.FC = () => {
                   "Войти в систему"
                 )}
               </button>
-            </form>
+            </div>
           </div>
         </div>
       </div>
