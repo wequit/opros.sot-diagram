@@ -628,7 +628,7 @@ export function processAgeData(responses: QuestionResponse[]) {
   const ageGroups = ["18–29", "30–44", "45–59", "60+"];
   const ageCounts = new Array(ageGroups.length).fill(0);
 
-  responses.forEach((response) => {
+  responses.forEach(response => {
     if (response.selected_option) {
       const ageGroupIndex = response.selected_option.id - 13; // Измените 13 на минимальный id для возрастных групп
       if (ageGroupIndex >= 0 && ageGroupIndex < ageCounts.length) {
@@ -641,7 +641,7 @@ export function processAgeData(responses: QuestionResponse[]) {
     labels: ageGroups,
     datasets: [
       {
-        label: "", // Пустая строка убирает "undefined" в легенде
+        label: "Количество пользователей",
         data: ageCounts,
         backgroundColor: [
           "rgb(54, 162, 235)",

@@ -1,5 +1,7 @@
 "use client";
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import ru from '@/locales/ru.json'
+import ky from '@/locales/ky.json'
 
 export interface SelectedOption {
   id: number;
@@ -95,6 +97,16 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   
   );
 }
+
+export function getTranslation(key: keyof typeof ru, language: Language): string {
+  const translations: Record<Language, typeof ru> = {
+    ru,
+    ky,
+  };
+
+  return translations[language][key] || key;
+}
+
 
 export function useSurveyData() {
   const context = useContext(SurveyContext);

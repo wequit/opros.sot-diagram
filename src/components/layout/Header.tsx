@@ -7,7 +7,7 @@ import { CgProfile } from "react-icons/cg";
 import { HiMenu, HiOutlineLogout } from "react-icons/hi";
 import Sidebar from "./Sidebar";
 import { GrLanguage } from "react-icons/gr";
-import { useSurveyData } from "@/context/SurveyContext";
+import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
 
 const Header: React.FC = () => {
@@ -42,12 +42,12 @@ const Header: React.FC = () => {
         }`}
       >
         <div className="flex items-center gap-4">
-          <button
+          {/* <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
           >
             <HiMenu className="w-6 h-6 text-gray-600" />
-          </button>
+          </button> */}
 
           <div className="flex items-center gap-3">
             <Link href="/">
@@ -71,31 +71,7 @@ const Header: React.FC = () => {
                       : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}
                 >
-                  Общий свод
-                </Link>
-
-                <Link
-                  href="/maps/oblast/Regional-Courts"
-                  className={`px-4 py-2 rounded-md font-medium transition duration-200
-                  ${
-                    pathname === "/maps/oblast/Regional-Courts"
-                      ? "bg-green-100/40 text-green-600"
-                      : "text-gray-700 hover:bg-green-50 hover:text-green-600"
-                  }`}
-                >
-                  Областные суды
-                </Link>
-
-                <Link
-                  href="/maps/rayon/District-Courts"
-                  className={`px-4 py-2 rounded-md font-medium transition duration-200
-                  ${
-                    pathname === "/maps/rayon/District-Courts"
-                      ? "bg-purple-100/40 text-purple-600"
-                      : "text-gray-700 hover:bg-purple-50 hover:text-purple-600"
-                  }`}
-                >
-                  Районные суды
+                  {getTranslation("HeaderNavOne", language)}
                 </Link>
 
                 <Link
@@ -107,8 +83,34 @@ const Header: React.FC = () => {
                       : "text-gray-700 hover:bg-purple-50 hover:text-indigo-600"
                   }`}
                 >
-                  Верховный суд
+                   {getTranslation("HeaderNavTwo", language)}
                 </Link>
+
+                <Link
+                  href="/maps/oblast/Regional-Courts"
+                  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  ${
+                    pathname === "/maps/oblast/Regional-Courts"
+                      ? "bg-green-100/40 text-green-600"
+                      : "text-gray-700 hover:bg-green-50 hover:text-green-600"
+                  }`}
+                >
+                   {getTranslation("HeaderNavThree", language)}
+                </Link>
+
+                <Link
+                  href="/maps/rayon/District-Courts"
+                  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  ${
+                    pathname === "/maps/rayon/District-Courts"
+                      ? "bg-purple-100/40 text-purple-600"
+                      : "text-gray-700 hover:bg-purple-50 hover:text-purple-600"
+                  }`}
+                >
+                  {getTranslation("HeaderNavFour", language)}
+                </Link>
+
+                
               </div>
             ) : (
               <span className="text-lg font-semibold text-black uppercase">
@@ -123,15 +125,16 @@ const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
-        <div
-  className="flex gap-2 items-center px-3 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100 
-  transition-all duration-200 cursor-pointer"
-  onClick={toggleLanguage}
->
-  <GrLanguage className="w-4 h-4 text-blue-600" />
-  <span className="text-blue-700 font-medium text-sm">{language === "ru" ? "Кыргызча" : "Русский"}</span>
-</div>
-
+          <div
+            className="flex gap-2 items-center px-3 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100 
+              transition-all duration-200 cursor-pointer"
+            onClick={toggleLanguage}
+          >
+            <GrLanguage className="w-4 h-4 text-blue-600" />
+            <span className="text-blue-700 font-medium text-sm">
+              {language === "ru" ? "Кыргызча" : "Русский"}
+            </span>
+          </div>
 
           <div className="flex items-center gap-3 px-4 py-2 rounded-lg ">
             <div className="flex items-center gap-2">
@@ -147,7 +150,7 @@ const Header: React.FC = () => {
                           transition-all duration-300 text-red-700 font-medium text-sm"
             >
               <HiOutlineLogout className="w-5 h-5" />
-              Выйти
+              {getTranslation("HeaderNavExit", language)}
             </button>
           </div>
         </div>

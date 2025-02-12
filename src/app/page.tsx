@@ -1,4 +1,3 @@
-// Home.tsx
 "use client";
 import React from "react";
 import Dates from "@/lib/utils/Dates";
@@ -29,5 +28,4 @@ function Home() {
   );
 }
 
-// Оборачиваем компонент в HOC для защиты
 export default withAuth(Home);

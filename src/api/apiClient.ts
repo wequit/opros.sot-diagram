@@ -34,7 +34,6 @@ export class ApiClient {
       const queryParams = new URLSearchParams();
       
       if (params.year && !params.quarter && !params.month && !params.startDate && !params.endDate) {
-        // Запрос только по году
         queryParams.append('year', params.year);
       } else if (params.quarter !== undefined) {
         queryParams.append('year', params.year || '2025');

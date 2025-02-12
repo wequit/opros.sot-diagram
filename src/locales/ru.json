@@ -1,0 +1,29 @@
+{
+    "HeaderNavOne": "Общий свод",
+    "HeaderNavTwo": "Верховный суд",
+    "HeaderNavThree": "Областные суды",
+    "HeaderNavFour": "Районные суды",
+    "HeaderNavExit": "Выйти",
+    "HeaderNavRemarks": "Замечания и предложения",
+
+
+    "DiagrammOne": "Общие показатели",
+    "DiagrammOneTotal": "Количество ответов:",
+
+    "DiagrammTwo": "Замечания и предложения",
+    "DiagrammTwoTotal": "Количество ответов:",
+
+    "DiagrammThree": "Категории респондентов",
+    "DiagrammFour": "Демографические показатели",
+    "DiagrammFive": "Источник трафика",
+    "DiagrammSix": "Категории судебных дел",
+    "DiagrammSeven": "Оценки судьи",
+    "DiagrammEight": "Проявление неуважения",
+    "DiagrammNine": "Оценки сотрудников",
+    "DiagrammTen": "Оценки процесса",
+    "DiagrammEleven": "Использование средств аудио и видеофиксации судебного заседания по уголовным делам",
+    "DiagrammTwelve": "Начало заседания в назначенное время",
+    "DiagrammThirteen": "Оценки канцелярии",
+    "DiagrammFourteen": "Оценки доступности здания"
+    
+}

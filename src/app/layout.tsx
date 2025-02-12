@@ -15,7 +15,6 @@ const inter = Inter({
   variable: '--font-inter',
 });
 
-// Динамическое импортирование LoginPage
 const LoginPage = dynamic(() => import("@/app/login/page"));
 
 export default function RootLayout({
@@ -48,10 +47,8 @@ function AuthContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Определяем класс для main в зависимости от пути
   const mainClassName = pathname === '/login' ? 'flex-1' : 'flex-1 p-6';
 
-  // Показываем Header и Sidebar только если пользователь авторизован
   return (
     <div className="max-w-[1450px] mx-auto">
       <Header />

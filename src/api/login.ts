@@ -36,11 +36,10 @@ export const isTokenExpired = (token: string): boolean => {
     const currentTime = Math.floor(Date.now() / 1000);
     return payload.exp < currentTime;
   } catch (error) {
-    return true; // Если произошла ошибка, токен считается недействительным
+    return true;
   }
 };
 
-// Функция для перезагрузки токенов
 export const reLogin = async (refreshToken: string): Promise<string | null> => {
   try {
     const response = await fetch('https://opros.sot.kg:443/api/v1/login/', {
@@ -67,11 +66,10 @@ export const reLogin = async (refreshToken: string): Promise<string | null> => {
   }
 };
 
-// Универсальная функция для запросов
 const handleUnauthorized = () => {
   deleteCookie('access_token');
   deleteCookie('refresh_token');
-  window.location.href = '/login'; // Мгновенно отправляем пользователя на страницу логина
+  window.location.href = '/login';
 };
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
@@ -112,9 +110,6 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
   return response.json();
 };
-
-
-// Пример использования fetchWithAuth для ваших других запросов:
 
 export const getAssessmentData = async () => {
   return await fetchWithAuth('https://opros.sot.kg:443/api/v1/assessment/');

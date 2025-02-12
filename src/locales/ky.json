@@ -1,0 +1,28 @@
+{
+    "HeaderNavOne": "Жалпы сактагыч",
+    "HeaderNavTwo": "Жогорку сот",
+    "HeaderNavThree": "Облустук соттор",
+    "HeaderNavFour": "Райондук соттор",
+    "HeaderNavExit": "Чыгуу",
+    "HeaderNavRemarks": "Эскертүүлөр жана сунуштар",
+
+
+    "DiagrammOne": "Жалпы көрсөткүчтөр",
+    "DiagrammOneTotal": "Жооптордун саны:",
+
+    "DiagrammTwo": "Эскертүүлөр жана сунуштар",
+    "DiagrammTwoTotal": "Жооптордун саны:",
+
+    "DiagrammThree": "Респонденттердин категориялары",
+    "DiagrammFour": "Демографиялык көрсөткүчтөр",
+    "DiagrammFive": "Трафиктин булагы",
+    "DiagrammSix": "Сот иштеринин категориялары",
+    "DiagrammSeven": "Судьянын баалары",
+    "DiagrammEight": "Урмат көрсөтпөө",
+    "DiagrammNine": "Кызматкерлерди баалоо",
+    "DiagrammTen": "Процессти баалоо",
+    "DiagrammEleven": "Жазык иштери боюнча сот отурумун аудио жана видеофиксациялоо каражаттарын пайдалануу",
+    "DiagrammTwelve": "Жыйналыштын белгиленген убакытта башталышы",
+    "DiagrammThirteen": "Канцелярияны баалоо",
+    "DiagrammFourteen": "Имараттын жеткиликтүүлүгүн баалоо"
+}

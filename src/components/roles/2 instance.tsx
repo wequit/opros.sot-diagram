@@ -34,7 +34,7 @@ const SecondInstance = () => {
         if (!token) {
           throw new Error("Token is null");
         }
-        const data = await getAssessmentData(token);
+        const data = await getAssessmentData();
         setAssessmentData(data.courts);
       } catch (error) {
         console.error("Ошибка при получении данных оценки:", error);

@@ -250,8 +250,13 @@ export default function RayonPage() {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : sortDirection === 'desc' ? null : 'asc');
-      if (sortDirection === 'desc') setSortField(null);
+      setSortDirection(
+        sortDirection === 'asc' ? 'desc' : 
+        sortDirection === 'desc' ? null : 'asc'
+      );
+      if (sortDirection === 'desc') {
+        setSortField(null);
+      }
     } else {
       setSortField(field);
       setSortDirection('asc');
@@ -267,7 +272,7 @@ export default function RayonPage() {
   const sortedCourts = [...courts].sort((a, b) => {
     if (!sortField || !sortDirection) return 0;
     
-    const getValueByField = (item: typeof courts[0]) => {
+    const getValueByField = (item: typeof courts[0]): number => {
       const index = {
         'overall': 0,
         'judge': 1,
@@ -277,11 +282,17 @@ export default function RayonPage() {
         'accessibility': 5,
         'count': 6
       }[sortField];
-      return item.ratings[index];
+      
+      const value = item.ratings[index];
+      return value === 0 ? -Infinity : value;
     };
 
     const aValue = getValueByField(a);
     const bValue = getValueByField(b);
+    
+    if (aValue === -Infinity && bValue === -Infinity) return 0;
+    if (aValue === -Infinity) return sortDirection === 'asc' ? 1 : -1;
+    if (bValue === -Infinity) return sortDirection === 'asc' ? -1 : 1;
     
     return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
   });
@@ -328,46 +339,67 @@ export default function RayonPage() {
                   <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                     Наименование суда
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                    <div className="flex items-center justify-between px-2">
-                      <span>Общая оценка</span>
-                      <span onClick={() => handleSort('overall')}>{getSortIcon('overall')}</span>
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort('overall')}
+                  >
+                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
+                      <span className="cursor-pointer">Общая оценка</span>
+                      {getSortIcon('overall')}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                    <div className="flex items-center justify-between px-2">
-                      <span>Судья</span>
-                      <span onClick={() => handleSort('judge')}>{getSortIcon('judge')}</span>
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort('judge')}
+                  >
+                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
+                      <span className="cursor-pointer">Судья</span>
+                      {getSortIcon('judge')}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                    <div className="flex items-center justify-between px-2">
-                      <span>Процесс</span>
-                      <span onClick={() => handleSort('process')}>{getSortIcon('process')}</span>
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort('process')}
+                  >
+                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
+                      <span className="cursor-pointer">Процесс</span>
+                      {getSortIcon('process')}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                    <div className="flex items-center justify-between px-2">
-                      <span>Сотрудники</span>
-                      <span onClick={() => handleSort('staff')}>{getSortIcon('staff')}</span>
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort('staff')}
+                  >
+                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
+                      <span className="cursor-pointer">Сотрудники</span>
+                      {getSortIcon('staff')}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                    <div className="flex items-center justify-between px-2">
-                      <span>Канцелярия</span>
-                      <span onClick={() => handleSort('office')}>{getSortIcon('office')}</span>
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort('office')}
+                  >
+                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
+                      <span className="cursor-pointer">Канцелярия</span>
+                      {getSortIcon('office')}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                    <div className="flex items-center justify-between px-2">
-                      <span>Доступность</span>
-                      <span onClick={() => handleSort('accessibility')}>{getSortIcon('accessibility')}</span>
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort('accessibility')}
+                  >
+                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
+                      <span className="cursor-pointer">Доступность</span>
+                      {getSortIcon('accessibility')}
                     </div>
                   </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 cursor-pointer">
-                    <div className="flex items-center justify-between px-2">
-                      <span>Кол-во оценок</span>
-                      <span onClick={() => handleSort('count')}>{getSortIcon('count')}</span>
+                  <th 
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 cursor-pointer"
+                    onClick={() => handleSort('count')}
+                  >
+                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
+                      <span className="cursor-pointer">Кол-во оценок</span>
+                      {getSortIcon('count')}
                     </div>
                   </th>
                 </tr>
