@@ -24,7 +24,7 @@ import {
   processSecondQuestion,
   processThirdQuestion,
   processFirstQuestion,
-  processJudgeRatings,
+  processProgressRatings,
   processFifthQuestion,
   processStaffRatings,
   processAudioVideoQuestion,
@@ -187,7 +187,7 @@ export default function Evaluations() {
     {}
   );
   const [startTimeData, setStartTimeData] = useState(
-    processStartTimeQuestion(surveyData?.questions || [])
+    processStartTimeQuestion(surveyData?.questions || [], "ru") // Добавляем "ru" как язык по умолчанию
   );
 
   const [radarData, setRadarData] = useState({
@@ -256,25 +256,29 @@ export default function Evaluations() {
       try {
         if (surveyData && surveyData.questions && surveyData.questions[1]) {
           const processedData = processSecondQuestion(
-            surveyData.questions[1].question_responses
+            surveyData.questions[1].question_responses,
+            language
           );
           setCategoryData(processedData);
         }
         if (surveyData && surveyData.questions && surveyData.questions[2]) {
           const processedData = processThirdQuestion(
-            surveyData.questions[2].question_responses
+            surveyData.questions[2].question_responses, 
+            language
           );
           setGenderData(processedData);
         }
         if (surveyData && surveyData.questions && surveyData.questions[0]) {
           const processedData = processFirstQuestion(
-            surveyData.questions[0].question_responses
+            surveyData.questions[0].question_responses,
+            language  // Передаем текущий язык ("ru" или "ky")
           );
           setTrafficSourceData(processedData as unknown as BarChartData);
         }
         if (surveyData && surveyData.questions && surveyData.questions[4]) {
           const processedData = processFifthQuestion(
-            surveyData.questions[4].question_responses
+            surveyData.questions[4].question_responses,
+            language
           );
           setCaseTypesData(processedData);
         }
@@ -285,12 +289,13 @@ export default function Evaluations() {
             return Number((sum / data.length).toFixed(1));
           };
 
-          const judgeData = processJudgeRatings(surveyData.questions);
-          const staffData = processStaffRatings(surveyData.questions);
-          const processData = processProcessRatings(surveyData.questions);
-          const officeData = processOfficeRatings(surveyData.questions);
+          const judgeData = processProgressRatings(surveyData.questions, language);
+          const staffData = processStaffRatings(surveyData.questions, language);
+          const processData = processProcessRatings(surveyData.questions, language);
+          const officeData = processOfficeRatings(surveyData.questions, language);
           const accessibilityData = processAccessibilityRatings(
-            surveyData.questions
+            surveyData.questions,
+            language
           );
 
           const currentCourtAverages = {
@@ -342,26 +347,29 @@ export default function Evaluations() {
             ],
           });
 
-          const ratings = processJudgeRatings(surveyData.questions);
+          const ratings = processProgressRatings(surveyData.questions, language);
           setJudgeRatings(ratings);
-          const staffRatings = processStaffRatings(surveyData.questions);
+          const staffRatings = processStaffRatings(surveyData.questions, language);
           setStaffRatings(staffRatings);
-          const processRatings = processProcessRatings(surveyData.questions);
+          const processRatings = processProcessRatings(surveyData.questions, language);
           setProcessRatings(processRatings);
           const audioVideoData = processAudioVideoQuestion(
-            surveyData.questions
+            surveyData.questions,
+            language
           );
           setAudioVideoData(audioVideoData);
-          const officeRatings = processOfficeRatings(surveyData.questions);
+          const officeRatings = processOfficeRatings(surveyData.questions, language);
           setOfficeRatings(officeRatings);
           const accessibilityRatings = processAccessibilityRatings(
-            surveyData.questions
+            surveyData.questions, 
+            language
           );
           setAccessibilityRatings(accessibilityRatings);
-          const startTimeData = processStartTimeQuestion(surveyData.questions);
+          const startTimeData = processStartTimeQuestion(surveyData.questions, language);
           setStartTimeData(startTimeData);
           const disrespectData = processDisrespectQuestion(
-            surveyData.questions
+            surveyData.questions, 
+            language
           );
           setDisrespectData(disrespectData as BarChartData);
         }
@@ -381,7 +389,7 @@ export default function Evaluations() {
     };
 
     fetchData();
-  }, [surveyData]);
+  }, [surveyData, language]);
 
   // Подсчитываем количество custom_answer
   useEffect(() => {
@@ -653,7 +661,7 @@ export default function Evaluations() {
               </div>
               <Link href="/Remarks">
                 <button className="mt-6 w-full py-3 text-white rounded-lg hover:shadow-2xl duration-200 bg-green-600 transition-colors">
-                  Все замечания и предложения
+                {getTranslation("DiagrammTwoButton", language)}
                 </button>
               </Link>
             </div>

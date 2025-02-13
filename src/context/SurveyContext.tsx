@@ -1,7 +1,7 @@
 "use client";
-import React, { createContext, useContext, useState, ReactNode } from 'react';
-import ru from '@/locales/ru.json'
-import ky from '@/locales/ky.json'
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import ru from '@/locales/ru.json';
+import ky from '@/locales/ky.json';
 
 export interface SelectedOption {
   id: number;
@@ -13,14 +13,13 @@ export interface SelectedOption {
 export interface QuestionResponse {
   id: number;
   selected_option: SelectedOption | null;
-  multiple_selected_options?: SelectedOption[]; // Измени тип на массив объектов SelectedOption
+  multiple_selected_options?: SelectedOption[];
   text_response?: string;
   created_at: string;
   question: number;
   custom_answer: string | null;
   gender: string;
 }
-
 
 export interface Question {
   id: number;
@@ -38,6 +37,8 @@ interface SurveyData {
   total_responses: number;
 }
 
+type Language = "ky" | "ru";
+
 interface SurveyContextType {
   surveyData: SurveyData | null;
   setSurveyData: (data: SurveyData) => void;
@@ -52,15 +53,6 @@ interface SurveyContextType {
   toggleLanguage: () => void;
 }
 
-
-type Language = "ky" | "ru";
-
-interface LanguageContextProps {
-  language: Language;
-  setLanguage: (lang: Language) => void;
-  toggleLanguage: () => void;
-}
-
 const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
 
 export function SurveyProvider({ children }: { children: ReactNode }) {
@@ -70,6 +62,16 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   const [courtName, setCourtName] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("ru");
 
+  // При монтировании считываем сохранённый язык из localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedLanguage = localStorage.getItem("language");
+      if (savedLanguage === "ky" || savedLanguage === "ru") {
+        setLanguage(savedLanguage);
+      }
+    }
+  }, []);
+
   const toggleLanguage = () => {
     const newLanguage = language === "ru" ? "ky" : "ru";
     setLanguage(newLanguage);
@@ -78,23 +80,22 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
 
   return (
     <SurveyContext.Provider
-    value={{
-      surveyData,
-      setSurveyData,
-      isLoading,
-      setIsLoading,
-      userCourt,
-      setUserCourt,
-      courtName,
-      setCourtName,
-      language,
-      setLanguage,
-      toggleLanguage,
-    }}
-  >
-    {children}
-  </SurveyContext.Provider>
-  
+      value={{
+        surveyData,
+        setSurveyData,
+        isLoading,
+        setIsLoading,
+        userCourt,
+        setUserCourt,
+        courtName,
+        setCourtName,
+        language,
+        setLanguage,
+        toggleLanguage,
+      }}
+    >
+      {children}
+    </SurveyContext.Provider>
   );
 }
 
@@ -107,11 +108,10 @@ export function getTranslation(key: keyof typeof ru, language: Language): string
   return translations[language][key] || key;
 }
 
-
 export function useSurveyData() {
   const context = useContext(SurveyContext);
   if (context === undefined) {
     throw new Error('useSurveyData must be used within a SurveyProvider');
   }
   return context;
-} 
+}

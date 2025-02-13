@@ -161,7 +161,7 @@ export default function RegionalCourts() {
                     : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}
             >
-              Средние оценки по областям
+              Средние оценки по областным судам
             </Link>
             <Link href="/Remarks"  className={`px-4 py-2 rounded-md font-medium transition duration-200
                   ${
