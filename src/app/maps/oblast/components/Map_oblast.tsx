@@ -136,16 +136,16 @@ export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast 
       .attr('stroke', '#fff')
       .attr('stroke-width', '1')
       .style('cursor', 'pointer')
-      .on('mouseover', function(event: MouseEvent, d: SVGFeature) {
+      .on('mouseover', function(event: any, d: SVGFeature) {
         d3.select(this).attr('stroke-width', '2');
         
-        // Получаем координаты курсора относительно страницы
-        const [mouseX, mouseY] = d3.pointer(event, document.body);
-        
-        const tooltip = d3.select(tooltipRef.current)
+        const coordinates = getEventCoordinates(event);
+        const tooltip = d3.select(tooltipRef.current);
+        tooltip
           .style('display', 'block')
-          .style('left', `${mouseX + 10}px`) // Смещаем тултип на 10px вправо от курсора
-          .style('top', `${mouseY + 10}px`); // Смещаем тултип на 10px вниз от курсора
+          .style('position', 'fixed')
+          .style('left', `${coordinates.x + 10}px`)
+          .style('top', `${coordinates.y + 10}px`);
 
         const mappedName = oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
         const rating = getOblastRating(d.properties.NAME_1);
@@ -154,11 +154,49 @@ export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast 
           <div>Общая оценка: ${rating.toFixed(1)}</div>
         `);
       })
+      .on('mousemove', function(event: any) {
+        const coordinates = getEventCoordinates(event);
+        const tooltip = d3.select(tooltipRef.current);
+        tooltip
+          .style('left', `${coordinates.x + 10}px`)
+          .style('top', `${coordinates.y + 10}px`);
+      })
       .on('mouseout', function() {
         d3.select(this).attr('stroke-width', '1');
         d3.select(tooltipRef.current).style('display', 'none');
       })
-      .on('click', function(event: MouseEvent, d: SVGFeature) {
+      .on('touchstart', function(event: any, d: SVGFeature) {
+        event.preventDefault();
+        d3.select(this).attr('stroke-width', '2');
+        
+        const coordinates = getEventCoordinates(event);
+        const tooltip = d3.select(tooltipRef.current);
+        tooltip
+          .style('display', 'block')
+          .style('position', 'fixed')
+          .style('left', `${coordinates.x + 10}px`)
+          .style('top', `${coordinates.y + 10}px`);
+
+        const mappedName = oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
+        const rating = getOblastRating(d.properties.NAME_1);
+        tooltip.html(`
+          <div class="font-medium">${mappedName}</div>
+          <div>Общая оценка: ${rating.toFixed(1)}</div>
+        `);
+      })
+      .on('touchmove', function(event: any) {
+        event.preventDefault();
+        const coordinates = getEventCoordinates(event);
+        const tooltip = d3.select(tooltipRef.current);
+        tooltip
+          .style('left', `${coordinates.x + 10}px`)
+          .style('top', `${coordinates.y + 10}px`);
+      })
+      .on('touchend', function() {
+        d3.select(this).attr('stroke-width', '1');
+        d3.select(tooltipRef.current).style('display', 'none');
+      })
+      .on('click', function(event: MouseEvent | TouchEvent, d: SVGFeature) {
         const mappedName = oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
         onSelectOblast?.(mappedName);
       });
@@ -222,11 +260,27 @@ export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast 
       <div
         ref={tooltipRef}
         className="hidden absolute bg-white border border-gray-200 rounded-md shadow-lg p-2 z-50"
-        style={{ 
-          pointerEvents: 'none',
-          position: 'fixed' // Меняем position на fixed для корректного позиционирования
-        }}
+        style={{ pointerEvents: 'none' }}
       ></div>
     </div>
   );
+}
+
+function getEventCoordinates(event: any) {
+  if (event.touches && event.touches[0]) {
+    return {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY
+    };
+  }
+  if (event.changedTouches && event.changedTouches[0]) {
+    return {
+      x: event.changedTouches[0].clientX,
+      y: event.changedTouches[0].clientY
+    };
+  }
+  return {
+    x: event.clientX,
+    y: event.clientY
+  };
 }

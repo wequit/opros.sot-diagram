@@ -1,262 +1,156 @@
 'use client';
+
 import Link from 'next/link';
 import Map from '../components/Map_rayon';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
+import { getRayonAssessmentData } from "@/api/login";
+import Evaluations from "@/components/Evaluations/page";
+import { useSurveyData } from '@/context/SurveyContext';
+import { getCookie } from '@/api/login';
+import Dates from '@/lib/utils/Dates';
+// Типы для данных API
+interface Assessment {
+  aspect: string;
+  court_avg: number;
+}
 
+interface Court {
+  id: number;
+  name: string;
+  instance: string;
+  overall_assessment: number;
+  assessment: {
+    judge: number;
+    process: number;
+    staff: number;
+    office: number;
+    building: number;
+  };
+  total_survey_responses: number;
+}
+
+// Добавляем тип для направления сортировки
 type SortDirection = 'asc' | 'desc' | null;
-type SortField = 'overall' | 'judge' | 'process' | 'staff' | 'office' | 'accessibility' | 'count' | null;
 
-export const courts = [
-  {
-    id: 1, name: 'Верховный суд Кыргызской Республики', instance: '3-я инстанция (кассационная)',
-    ratings: [4.8, 4.7, 4.6, 4.8, 4.7, 4.9, 180]
-  },
+// Обновляем тип для полей сортировки
+type SortField = 'number' | 'overall' | 'judge' | 'process' | 'staff' | 'office' | 'building' | 'count' | 'name' | null;
 
-  // Чуйская область
-  {
-    id: 2, name: 'Аламудунский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [2, 3.8, 4.1, 4.3, 4.0, 4.2, 95]
-  },
-  {
-    id: 3, name: 'Сокулукский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3, 4.1, 3.8, 4.0, 4.2, 3.9, 88]
-  },
-  {
-    id: 4, name: 'Московский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.7, 4.2, 3.9, 4.1, 4.0, 76]
-  },
-  {
-    id: 5, name: 'Жайылский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [1, 4.0, 3.9, 4.1, 3.8, 4.2, 82]
-  },
-  {
-    id: 6, name: 'Панфиловский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.5, 3.9, 4.1, 3.8, 4.0, 3.9, 71]
-  },
-  {
-    id: 7, name: 'Кеминский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5, 4.1, 3.8, 4.0, 3.9, 4.1, 68]
-  },
-  {
-    id: 8, name: 'Ысык-Атинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5, 3.8, 4.0, 4.2, 3.9, 4.0, 92]
-  },
-  {
-    id: 9, name: 'Чуйский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [2.5, 4.0, 3.8, 4.1, 4.0, 3.9, 87]
-  },
+// Улучшенная функция рендеринга ячеек
+const renderTableCell = (value: number) => {
+  if (value === undefined || value === null) return '-';
+  if (value === 0) return '0';
+  return value.toFixed(1);
+};
 
-  // Иссык-Кульская область
-  {
-    id: 10, name: 'Ак-Суйский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.0, 3.9, 4.1, 3.8, 4.0, 3.9, 77]
-  },
-  {
-    id: 11, name: 'Джети-Огузский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [1.8, 4.1, 3.9, 4.0, 3.8, 4.1, 81]
-  },
-  {
-    id: 12, name: 'Тонский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [1.9, 3.8, 4.0, 3.9, 4.1, 3.8, 72]
-  },
-  {
-    id: 13, name: 'Тюпский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [2.1, 3.9, 3.8, 4.0, 3.9, 4.1, 69]
-  },
-  {
-    id: 14, name: 'Иссык-Кульский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.0, 4.1, 3.9, 4.0, 3.8, 4.2, 83]
-  },
+// Добавляем обработку ошибок в трансформацию данных
+const transformApiData = (apiData: any): Court[] => {
+  if (!apiData?.rayon_courts) {
+    console.error('Invalid API data format');
+    return [];
+  }
 
-  // Нарынская область
-  {
-    id: 15, name: 'Ак-Талинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.8, 4.0, 3.9, 4.1, 3.8, 4.0, 71]
-  },
-  {
-    id: 16, name: 'Ат-Башинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.1, 3.8, 4.0, 3.9, 4.1, 3.8, 74]
-  },
-  {
-    id: 17, name: 'Жумгальский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [1.9, 4.1, 3.8, 4.0, 3.9, 4.1, 67]
-  },
-  {
-    id: 18, name: 'Кочкорский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [1.0, 3.9, 4.1, 3.8, 4.0, 3.9, 73]
-  },
-  {
-    id: 19, name: 'Нарынский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [2.8, 4.1, 3.9, 4.0, 3.8, 4.1, 78]
-  },
+  return apiData.rayon_courts.map((court: any) => {
+    try {
+      const assessmentMap = court.assessment.reduce((acc: any, curr: Assessment) => {
+        if (!curr.aspect || typeof curr.court_avg !== 'number') {
+          console.warn(`Invalid assessment data for court ${court.court_id}`);
+          return acc;
+        }
 
-  // Таласская область
-  {
-    id: 20, name: 'Таласский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5, 3.9, 4.0, 4.2, 4.1, 4.3, 75]
-  },
-  {
-    id: 21, name: 'Бакай-Атинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.0, 3.8, 4.1, 4.2, 4.0, 4.2, 70]
-  },
-  {
-    id: 22, name: 'Кара-Буринский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5, 3.7, 4.1, 4.0, 4.2, 4.1, 65]
-  },
-  {
-    id: 23, name: 'Манасский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5.0, 3.8, 4.2, 4.1, 4.0, 4.2, 70]
-  },
+        const key = curr.aspect.toLowerCase() === 'здание' ? 'building' :
+                   curr.aspect.toLowerCase() === 'канцелярия' ? 'office' :
+                   curr.aspect.toLowerCase() === 'процесс' ? 'process' :
+                   curr.aspect.toLowerCase() === 'сотрудники' ? 'staff' :
+                   curr.aspect.toLowerCase() === 'судья' ? 'judge' : '';
+        
+        if (key) acc[key] = curr.court_avg;
+        return acc;
+      }, {});
 
-  // Ошская область
-  {
-    id: 24, name: 'Алайский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3.5, 3.8, 4.1, 4.2, 4.0, 4.2, 75]
-  },
-  {
-    id: 25, name: 'Араванский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4, 3.9, 4.0, 4.2, 4.1, 4.3, 80]
-  },
-  {
-    id: 26, name: 'Кара-Кулджинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.9, 3.7, 4.1, 4.0, 4.2, 4.1, 70]
-  },
-  {
-    id: 27, name: 'Кара-Сууский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4, 4.0, 4.1, 4.3, 4.2, 4.0, 85]
-  },
-  {
-    id: 28, name: 'Ноокатский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5., 3.9, 4.0, 4.2, 4.1, 4.3, 80]
-  },
-  {
-    id: 29, name: 'Узгенский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5, 3.8, 4.2, 4.1, 4.0, 4.2, 75]
-  },
-  {
-    id: 30, name: 'Чон-Алайский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [3, 3.7, 4.1, 4.0, 4.2, 4.1, 65]
-  },
+      return {
+        id: court.court_id,
+        name: court.court || 'Неизвестный суд',
+        instance: court.instantiation || 'Не указано',
+        overall_assessment: court.overall_assessment || 0,
+        assessment: {
+          judge: assessmentMap.judge || 0,
+          process: assessmentMap.process || 0,
+          staff: assessmentMap.staff || 0,
+          office: assessmentMap.office || 0,
+          building: assessmentMap.building || 0
+        },
+        total_survey_responses: court.total_survey_responses || 0
+      };
+    } catch (error) {
+      console.error(`Error transforming court data for ID ${court.court_id}:`, error);
+      return null;
+    }
+  }).filter(Boolean);
+};
 
-  // Джалал-Абадская область
-  {
-    id: 31, name: 'Аксыйский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [2.0, 3.8, 4.1, 4.2, 4.0, 4.2, 75]
-  },
-  {
-    id: 32, name: 'Ала-Букинский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5, 3.9, 4.0, 4.2, 4.1, 4.3, 70]
-  },
-  {
-    id: 33, name: 'Базар-Коргонский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 3.8, 4.2, 4.1, 4.0, 4.2, 80]
-  },
-  {
-    id: 34, name: 'Ноокенский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5, 3.7, 4.1, 4.0, 4.2, 4.1, 75]
-  },
-  {
-    id: 35, name: 'Сузакский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.2, 4.0, 4.1, 4.3, 4.2, 4.0, 85]
-  },
-  {
-    id: 36, name: 'Тогуз-Тороуский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 3.8, 4.1, 4.2, 4.0, 4.2, 65]
-  },
-  {
-    id: 37, name: 'Токтогульский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5, 3.9, 4.0, 4.2, 4.1, 4.3, 70]
-  },
-  {
-    id: 38, name: 'Чаткальский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [5, 3.7, 4.1, 4.0, 4.2, 4.1, 60]
-  },
-
-  // Баткенская область
-  {
-    id: 39, name: 'Баткенский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.0, 3.8, 4.1, 4.2, 4.0, 4.2, 75]
-  },
-  {
-    id: 40, name: 'Кадамжайский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 4.0, 4.2, 4.1, 4.3, 70]
-  },
-  {
-    id: 41, name: 'Лейлекский районный суд', instance: '1-я инстанция (местный)',
-    ratings: [2, 3.8, 4.2, 4.1, 4.0, 4.2, 65]
-  },
-
-
-  // Города республиканского значения
-  {
-    id: 42, name: 'Ленинский районный суд г. Бишкек', instance: '1-я инстанция (местный)',
-    ratings: [4.2, 4.0, 4.1, 4.3, 4.2, 4.4, 120]
-  },
-  {
-    id: 43, name: 'Октябрьский районный суд г. Бишкек', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 4.0, 4.2, 4.1, 4.3, 110]
-  },
-  {
-    id: 44, name: 'Первомайский районный суд г. Бишкек', instance: '1-я инстанция (местный)',
-    ratings: [0, 4.0, 4.1, 4.3, 4.2, 4.4, 115]
-  },
-  {
-    id: 45, name: 'Свердловский районный суд г. Бишкек', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 4.0, 4.2, 4.1, 4.3, 105]
-  },
-
-  // Межрайонные суды
-  {
-    id: 46, name: 'Бишкекский межрайонный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.2, 4.0, 4.1, 4.3, 4.2, 4.4, 120]
-  },
-  {
-    id: 47, name: 'Баткенский межрайонный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 4.0, 4.2, 4.1, 4.3, 110]
-  },
-  {
-    id: 48, name: 'Таласский межрайонный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.2, 4.0, 4.1, 4.3, 4.2, 4.4, 115]
-  },
-  {
-    id: 49, name: 'Нарынский межрайонный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 4.0, 4.2, 4.1, 4.3, 105]
-  },
-  {
-    id: 50, name: 'Ошский межрайонный суд', instance: '1-я инстанция (местный)',
-    ratings: [0, 4.0, 4.1, 4.3, 4.2, 4.4, 120]
-  },
-  {
-    id: 51, name: 'Жалал-Абадский межрайонный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 4.0, 4.2, 4.1, 4.3, 110]
-  },
-  {
-    id: 52, name: 'Иссык-Кульский межрайонный суд', instance: '1-я инстанция (местный)',
-    ratings: [0, 4.0, 4.1, 4.3, 4.2, 4.4, 115]
-  },
-  {
-    id: 53, name: 'Чуйский межрайонный суд', instance: '1-я инстанция (местный)',
-    ratings: [4.1, 3.9, 4.0, 4.2, 4.1, 4.3, 105]
-  },
-];
-
-export default function RayonPage() {
-  const [selectedRayon, setSelectedRayon] = useState<string | null>(null);
+export default function Courts() {
+  const [courts, setCourts] = useState<Court[]>([]);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-  const pathname = usePathname()
+  const { setCourtName, setSurveyData, setIsLoading } = useSurveyData();
+  const [showEvaluations, setShowEvaluations] = useState(false);
+
+  const token = getCookie('access_token');
+
+  // Функция для получения цвета оценки
+  const getRatingColor = (rating: number) => {
+    if (rating === 0) return 'bg-gray-100';
+    if (rating <= 2) return 'bg-red-100';
+    if (rating <= 3.5) return 'bg-yellow-100';
+    return 'bg-green-100';
+  };
+
+  // Обработчик клика по названию суда
+  const handleCourtClick = async (court: Court) => {
+    try {
+      setIsLoading(true);
+      setCourtName(court.name);
+      
+      const response = await fetch(`https://opros.sot.kg/api/v1/results/${court.id}/?year=2025`, {
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      setSurveyData(data);
+      setShowEvaluations(true);
+    } catch (error) {
+      console.error('Error fetching court details:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const fetchCourts = async () => {
+      try {
+        const data = await getRayonAssessmentData();
+        const transformedCourts = transformApiData(data);
+        setCourts(transformedCourts);
+      } catch (error) {
+        console.error('Error fetching courts:', error);
+      }
+    };
+
+    fetchCourts();
+  }, []);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(
-        sortDirection === 'asc' ? 'desc' : 
-        sortDirection === 'desc' ? null : 'asc'
-      );
-      if (sortDirection === 'desc') {
-        setSortField(null);
-      }
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortDirection('asc');
@@ -271,161 +165,160 @@ export default function RayonPage() {
 
   const sortedCourts = [...courts].sort((a, b) => {
     if (!sortField || !sortDirection) return 0;
-    
-    const getValueByField = (item: typeof courts[0]): number => {
-      const index = {
-        'overall': 0,
-        'judge': 1,
-        'process': 2,
-        'staff': 3,
-        'office': 4,
-        'accessibility': 5,
-        'count': 6
-      }[sortField];
-      
-      const value = item.ratings[index];
-      return value === 0 ? -Infinity : value;
-    };
 
-    const aValue = getValueByField(a);
-    const bValue = getValueByField(b);
-    
-    if (aValue === -Infinity && bValue === -Infinity) return 0;
-    if (aValue === -Infinity) return sortDirection === 'asc' ? 1 : -1;
-    if (bValue === -Infinity) return sortDirection === 'asc' ? -1 : 1;
-    
+    let aValue: any, bValue: any;
+
+    switch (sortField) {
+      case 'overall':
+        aValue = a.overall_assessment;
+        bValue = b.overall_assessment;
+        break;
+      case 'judge':
+        aValue = a.assessment.judge;
+        bValue = b.assessment.judge;
+        break;
+      case 'process':
+        aValue = a.assessment.process;
+        bValue = b.assessment.process;
+        break;
+      case 'staff':
+        aValue = a.assessment.staff;
+        bValue = b.assessment.staff;
+        break;
+      case 'office':
+        aValue = a.assessment.office;
+        bValue = b.assessment.office;
+        break;
+      case 'building':
+        aValue = a.assessment.building;
+        bValue = b.assessment.building;
+        break;
+      case 'count':
+        aValue = a.total_survey_responses;
+        bValue = b.total_survey_responses;
+        break;
+      default:
+        return 0;
+    }
+
+    if (aValue === 0) aValue = -Infinity;
+    if (bValue === 0) bValue = -Infinity;
+
     return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
   });
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-[1200px] mx-auto px-4 py-4">
-        <div className="mb-4   flex justify-between items-center">
-          <h2 className="text-xl font-medium">Оценки по судам</h2>
-          <div className="flex space-x-4">
-            <Link
-              href="/maps/rayon/District-Courts"
-              className={`px-4 py-2 rounded-md font-medium transition duration-200
-                  ${
-                    pathname === "/maps/rayon/District-Courts"
-                      ? "bg-blue-100/40 text-blue-600"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  }`}
-            >
-              Оценки
-            </Link>
-            <Link href="/Remarks"  className={`px-4 py-2 rounded-md font-medium transition duration-200
-                  ${
-                    pathname === "/Remarks"
-                      ? "bg-blue-100/40 text-blue-600"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  }`}
-            >
-              Замечания и предложения
-            </Link>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
-          <Map selectedRayon={selectedRayon} />
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">№</th>
-                  <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                    Наименование суда
-                  </th>
-                  <th 
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort('overall')}
+    <>
+      {showEvaluations ? (
+        <>
+        <Dates />
+        <Evaluations />
+        </>
+      ) : (
+        
+        <div className="container mx-auto px-4 py-8">
+          <h2 className="text-2xl font-bold mb-4">Районные суды</h2>
+          <Map selectedRayon={null} onSelectRayon={() => {}} courts={courts}/>
+          <table className="min-w-full border-collapse border border-gray-300 mt-8">
+            <thead className="bg-gray-100 select-none">
+              <tr>
+                <th 
+                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap text-center"
+                  onClick={() => handleSort('number')}
+                >
+                  № {sortField === 'number' }
+                </th>
+                <th 
+                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap text-center"
+                  onClick={() => handleSort('name')}
+                >
+                  Наименование суда 
+                </th>
+                <th className="border border-gray-300 px-4 py-2 whitespace-nowrap">
+                  Инстанция
+                </th>
+                <th 
+                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  onClick={() => handleSort('overall')}
+                >
+                  Общая оценка {sortField === 'overall' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  onClick={() => handleSort('judge')}
+                >
+                  Судья {sortField === 'judge' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  onClick={() => handleSort('process')}
+                >
+                  Процесс {sortField === 'process' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  onClick={() => handleSort('staff')}
+                >
+                  Сотрудники {sortField === 'staff' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  onClick={() => handleSort('office')}
+                >
+                  Канцелярия {sortField === 'office' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  onClick={() => handleSort('building')}
+                >
+                  Здание {sortField === 'building' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+                <th 
+                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  onClick={() => handleSort('count')}
+                >
+                  Кол-во оценок {sortField === 'count' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedCourts.map((court, index) => (
+                <tr key={court.id} className="hover:bg-gray-50">
+                  <td className="border border-gray-300 px-4 py-2 text-center">{index + 1}</td>
+                  <td 
+                    className="border border-gray-300 px-4 py-2 cursor-pointer text-blue-600 hover:text-blue-800 hover:underline text-center"
+                    onClick={() => handleCourtClick(court)}
                   >
-                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
-                      <span className="cursor-pointer">Общая оценка</span>
-                      {getSortIcon('overall')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort('judge')}
-                  >
-                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
-                      <span className="cursor-pointer">Судья</span>
-                      {getSortIcon('judge')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort('process')}
-                  >
-                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
-                      <span className="cursor-pointer">Процесс</span>
-                      {getSortIcon('process')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort('staff')}
-                  >
-                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
-                      <span className="cursor-pointer">Сотрудники</span>
-                      {getSortIcon('staff')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort('office')}
-                  >
-                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
-                      <span className="cursor-pointer">Канцелярия</span>
-                      {getSortIcon('office')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort('accessibility')}
-                  >
-                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
-                      <span className="cursor-pointer">Доступность</span>
-                      {getSortIcon('accessibility')}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 cursor-pointer"
-                    onClick={() => handleSort('count')}
-                  >
-                    <div className="flex items-center justify-between px-2 hover:text-blue-600">
-                      <span className="cursor-pointer">Кол-во оценок</span>
-                      {getSortIcon('count')}
-                    </div>
-                  </th>
+                    {court.name}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2 text-center">{court.instance}</td>
+                  <td className={`border border-gray-300 px-4 py-2 ${getRatingColor(court.overall_assessment)}`}>
+                    {renderTableCell(court.overall_assessment)}
+                  </td>
+                  <td className={`border border-gray-300 px-4 py-2 ${getRatingColor(court.assessment.judge)}`}>
+                    {renderTableCell(court.assessment.judge)}
+                  </td>
+                  <td className={`border border-gray-300 px-4 py-2 ${getRatingColor(court.assessment.process)}`}>
+                    {renderTableCell(court.assessment.process)}
+                  </td>
+                  <td className={`border border-gray-300 px-4 py-2 ${getRatingColor(court.assessment.staff)}`}>
+                    {renderTableCell(court.assessment.staff)}
+                  </td>
+                  <td className={`border border-gray-300 px-4 py-2 ${getRatingColor(court.assessment.office)}`}>
+                    {renderTableCell(court.assessment.office)}
+                  </td>
+                  <td className={`border border-gray-300 px-4 py-2 ${getRatingColor(court.assessment.building)}`}>
+                    {renderTableCell(court.assessment.building)}
+                  </td>
+                  <td className="border border-gray-300 px-4 py-2">
+                    {court.total_survey_responses}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {sortedCourts.map((court) => (
-                  <tr key={court.id} className="hover:bg-gray-50/50 border-b border-gray-200">
-                    <td className="px-3 py-2.5 text-sm text-gray-900 text-center border-r border-gray-200">{court.id}</td>
-                    <td 
-                      className="px-3 py-2.5 text-sm text-gray-900 border-r border-gray-200 cursor-pointer hover:text-blue-600"
-                      onClick={() => setSelectedRayon(court.name)}
-                    >
-                      {court.name}
-                    </td>
-                    {court.ratings.map((rating, index) => (
-                      <td key={index} className="px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200">
-                        {rating}
-                      </td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

@@ -33,7 +33,7 @@ import {
   processOfficeRatings,
   processStartTimeQuestion,
   processDisrespectQuestion,
-  processAgeData 
+  processAgeData,
   // processAgeGenderData
 } from "@/lib/utils/processData";
 import NoData from "@/lib/utils/NoData";
@@ -263,7 +263,7 @@ export default function Evaluations() {
         }
         if (surveyData && surveyData.questions && surveyData.questions[2]) {
           const processedData = processThirdQuestion(
-            surveyData.questions[2].question_responses, 
+            surveyData.questions[2].question_responses,
             language
           );
           setGenderData(processedData);
@@ -271,7 +271,7 @@ export default function Evaluations() {
         if (surveyData && surveyData.questions && surveyData.questions[0]) {
           const processedData = processFirstQuestion(
             surveyData.questions[0].question_responses,
-            language  // Передаем текущий язык ("ru" или "ky")
+            language // Передаем текущий язык ("ru" или "ky")
           );
           setTrafficSourceData(processedData as unknown as BarChartData);
         }
@@ -289,10 +289,19 @@ export default function Evaluations() {
             return Number((sum / data.length).toFixed(1));
           };
 
-          const judgeData = processProgressRatings(surveyData.questions, language);
+          const judgeData = processProgressRatings(
+            surveyData.questions,
+            language
+          );
           const staffData = processStaffRatings(surveyData.questions, language);
-          const processData = processProcessRatings(surveyData.questions, language);
-          const officeData = processOfficeRatings(surveyData.questions, language);
+          const processData = processProcessRatings(
+            surveyData.questions,
+            language
+          );
+          const officeData = processOfficeRatings(
+            surveyData.questions,
+            language
+          );
           const accessibilityData = processAccessibilityRatings(
             surveyData.questions,
             language
@@ -347,28 +356,43 @@ export default function Evaluations() {
             ],
           });
 
-          const ratings = processProgressRatings(surveyData.questions, language);
+          const ratings = processProgressRatings(
+            surveyData.questions,
+            language
+          );
           setJudgeRatings(ratings);
-          const staffRatings = processStaffRatings(surveyData.questions, language);
+          const staffRatings = processStaffRatings(
+            surveyData.questions,
+            language
+          );
           setStaffRatings(staffRatings);
-          const processRatings = processProcessRatings(surveyData.questions, language);
+          const processRatings = processProcessRatings(
+            surveyData.questions,
+            language
+          );
           setProcessRatings(processRatings);
           const audioVideoData = processAudioVideoQuestion(
             surveyData.questions,
             language
           );
           setAudioVideoData(audioVideoData);
-          const officeRatings = processOfficeRatings(surveyData.questions, language);
+          const officeRatings = processOfficeRatings(
+            surveyData.questions,
+            language
+          );
           setOfficeRatings(officeRatings);
           const accessibilityRatings = processAccessibilityRatings(
-            surveyData.questions, 
+            surveyData.questions,
             language
           );
           setAccessibilityRatings(accessibilityRatings);
-          const startTimeData = processStartTimeQuestion(surveyData.questions, language);
+          const startTimeData = processStartTimeQuestion(
+            surveyData.questions,
+            language
+          );
           setStartTimeData(startTimeData);
           const disrespectData = processDisrespectQuestion(
-            surveyData.questions, 
+            surveyData.questions,
             language
           );
           setDisrespectData(disrespectData as BarChartData);
@@ -377,9 +401,11 @@ export default function Evaluations() {
           setTotalResponses(surveyData.total_responses);
         }
         if (surveyData && surveyData.questions) {
-          const ageQuestion = surveyData.questions.find(q => q.id === 4);
+          const ageQuestion = surveyData.questions.find((q) => q.id === 4);
           if (ageQuestion) {
-            const processedAgeData = processAgeData(ageQuestion.question_responses);
+            const processedAgeData = processAgeData(
+              ageQuestion.question_responses
+            );
             setAgeData(processedAgeData);
           }
         }
@@ -492,7 +518,6 @@ export default function Evaluations() {
   //     },
   //   ],
   // };
-  
 
   // Замечания и предложения
 
@@ -587,9 +612,9 @@ export default function Evaluations() {
       <div className="w-full bg-gray-200 rounded-full h-6">
         <div
           className="h-6 rounded-full transition-all duration-300"
-          style={{ 
+          style={{
             width: `${(value / 5) * 100}%`,
-            backgroundColor: getColor(value)
+            backgroundColor: getColor(value),
           }}
         />
       </div>
@@ -598,9 +623,7 @@ export default function Evaluations() {
 
   // Показываем сообщение о загрузке
   if (isLoading) {
-    return (
-        <SkeletonDashboard/>
-    );
+    return <SkeletonDashboard />;
   }
 
   // Проверяем отсутствие данных только после загрузки
@@ -619,9 +642,12 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">{getTranslation("DiagrammOne", language)}</h2>
+                <h2 className="text-xl font-medium">
+                  {getTranslation("DiagrammOne", language)}
+                </h2>
                 <span className="text-gray-600">
-                {getTranslation("DiagrammOneTotal", language)} {totalResponses}
+                  {getTranslation("DiagrammOneTotal", language)}{" "}
+                  {totalResponses}
                 </span>
               </div>
             </div>
@@ -633,35 +659,51 @@ export default function Evaluations() {
           </div>
 
           {/* Замечания и предложения */}
-          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+          <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex flex-col justify-between h-full">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">{getTranslation("DiagrammTwo", language)}</h2>
+                <h2 className="text-xl font-medium">
+                  {getTranslation("DiagrammTwo", language)}
+                </h2>
                 <span className="text-gray-600">
-                {getTranslation("DiagrammTwoTotal", language)} {totalResponsesAnswer}
+                  {getTranslation("DiagrammTwoTotal", language)}{" "}
+                  {totalResponsesAnswer}
                 </span>
               </div>
             </div>
-            <div className="p-6">
-              <div className="space-y-3">
-                {comments.map((comment, index) => {
-                  const absoluteIndex = totalResponsesAnswer - index;
-                  return (
-                    <div
-                      key={index}
-                      className="flex gap-4 p-3 border rounded bg-gray-50"
-                    >
-                      <span className="text-gray-500 min-w-[24px]">
-                        {absoluteIndex}
-                      </span>
-                      <span>{comment.text}</span>
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="p-6 flex-1">
+              {comments.length > 0 ? (
+                <div className="space-y-3">
+                  {comments.map((comment, index) => {
+                    const absoluteIndex = totalResponsesAnswer - index;
+                    return (
+                      <div
+                        key={index}
+                        className="flex gap-4 p-3 border rounded bg-gray-50"
+                      >
+                        <span className="text-gray-500 min-w-[24px]">
+                          {absoluteIndex}
+                        </span>
+                        <span>{comment.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full bg-gray-50 border border-gray-200 rounded-lg">
+                  <p className="text-gray-700 text-lg font-medium">
+                    Нет доступных комментариев.
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    Пока что комментарии отсутствуют.
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="px-6 pb-6">
               <Link href="/Remarks">
-                <button className="mt-6 w-full py-3 text-white rounded-lg hover:shadow-2xl duration-200 bg-green-600 transition-colors">
-                {getTranslation("DiagrammTwoButton", language)}
+                <button className="mt-4 w-full py-3 text-white rounded-lg bg-green-600 hover:shadow-2xl transition-all duration-200">
+                  {getTranslation("DiagrammTwoButton", language)}
                 </button>
               </Link>
             </div>
@@ -670,7 +712,9 @@ export default function Evaluations() {
           {/* Категории респондентов */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">{getTranslation("DiagrammThree", language)}</h2>
+              <h2 className="text-xl font-medium">
+                {getTranslation("DiagrammThree", language)}
+              </h2>
             </div>
             <div className="p-6">
               <div className="w-[400px] h-[400px] mx-auto">
@@ -683,7 +727,7 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium text-start">
-              {getTranslation("DiagrammFour", language)}
+                {getTranslation("DiagrammFour", language)}
               </h2>
             </div>
             <div className="p-6 flex flex-col items-center">
@@ -736,7 +780,7 @@ export default function Evaluations() {
                 )}
                 {demographicsView === "пол и возраст" && (
                   <Bar
-                  data={ageGenderData}
+                    data={ageGenderData}
                     options={{
                       indexAxis: "y",
                       scales: {
@@ -788,7 +832,7 @@ export default function Evaluations() {
                         },
                       },
                       plugins: {
-                        legend:  { display: false }
+                        legend: { display: false },
                       },
                       maintainAspectRatio: false,
                     }}
@@ -801,7 +845,9 @@ export default function Evaluations() {
           {/* Источники трафика */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">{getTranslation("DiagrammFive", language)}</h2>
+              <h2 className="text-xl font-medium">
+                {getTranslation("DiagrammFive", language)}
+              </h2>
             </div>
             <div className="p-6">
               <div className="h-[300px]">
@@ -813,7 +859,9 @@ export default function Evaluations() {
           {/* Категории судебных дел */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">{getTranslation("DiagrammSix", language)}</h2>
+              <h2 className="text-xl font-medium">
+                {getTranslation("DiagrammSix", language)}
+              </h2>
             </div>
             <div className="p-6">
               <div className="h-[300px]">
@@ -825,7 +873,9 @@ export default function Evaluations() {
           {/* Оценки судьи */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">{getTranslation("DiagrammSeven", language)}</h2>
+              <h2 className="text-xl font-medium">
+                {getTranslation("DiagrammSeven", language)}
+              </h2>
             </div>
             <div className="p-6 space-y-6">
               {Object.entries(judgeRatings).map(([title, rating]) => (
@@ -849,7 +899,9 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">{getTranslation("DiagrammEight", language)}</h2>
+                <h2 className="text-xl font-medium">
+                  {getTranslation("DiagrammEight", language)}
+                </h2>
               </div>
             </div>
             <div className="p-6">
@@ -862,7 +914,9 @@ export default function Evaluations() {
           {/* Оценки сотрудников */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">{getTranslation("DiagrammNine", language)}</h2>
+              <h2 className="text-xl font-medium">
+                {getTranslation("DiagrammNine", language)}
+              </h2>
             </div>
             <div className="p-6 space-y-6 mb-8">
               {Object.entries(staffRatings).map(([title, rating]) => (
@@ -885,7 +939,9 @@ export default function Evaluations() {
           {/* Оценки процесса */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">{getTranslation("DiagrammTen", language)}</h2>
+              <h2 className="text-xl font-medium">
+                {getTranslation("DiagrammTen", language)}
+              </h2>
             </div>
             <div className="p-6 space-y-6">
               {Object.entries(processRatings).map(([title, rating]) => (
@@ -909,7 +965,7 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">
-              {getTranslation("DiagrammEleven", language)}
+                {getTranslation("DiagrammEleven", language)}
               </h2>
             </div>
             <div className="p-6">
@@ -948,7 +1004,7 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b min-h-[90px]">
               <h2 className="text-xl font-medium">
-              {getTranslation("DiagrammTwelve", language)}
+                {getTranslation("DiagrammTwelve", language)}
               </h2>
             </div>
             <div className="p-6">
@@ -986,7 +1042,9 @@ export default function Evaluations() {
           {/* Оценки канцелярии */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">{getTranslation("DiagrammThirteen", language)}</h2>
+              <h2 className="text-xl font-medium">
+                {getTranslation("DiagrammThirteen", language)}
+              </h2>
             </div>
             <div className="p-6 space-y-6">
               {Object.entries(officeRatings).map(([title, rating]) => (
@@ -1009,7 +1067,9 @@ export default function Evaluations() {
           {/* Оценки доступности */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">{getTranslation("DiagrammFourteen", language)}</h2>
+              <h2 className="text-xl font-medium">
+                {getTranslation("DiagrammFourteen", language)}
+              </h2>
             </div>
             <div className="p-6 space-y-6">
               {Object.entries(accessibilityRatings).map(([title, rating]) => (

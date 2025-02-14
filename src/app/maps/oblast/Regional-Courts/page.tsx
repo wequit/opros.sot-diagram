@@ -147,6 +147,7 @@ export default function RegionalCourts() {
   });
 
   return (
+    
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-[1200px] mx-auto px-4 py-4">
         <div className="mb-4 flex justify-between items-center">
@@ -161,7 +162,7 @@ export default function RegionalCourts() {
                     : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}
             >
-              Средние оценки по областным судам
+              Средние оценки по областям
             </Link>
             <Link href="/Remarks"  className={`px-4 py-2 rounded-md font-medium transition duration-200
                   ${

@@ -25,5 +25,18 @@
     "DiagrammEleven": "Жазык иштери боюнча сот отурумун аудио жана видеофиксациялоо каражаттарын пайдалануу",
     "DiagrammTwelve": "Жыйналыштын белгиленген убакытта башталышы",
     "DiagrammThirteen": "Канцелярияны баалоо",
-    "DiagrammFourteen": "Имараттын жеткиликтүүлүгүн баалоо"
+    "DiagrammFourteen": "Имараттын жеткиликтүүлүгүн баалоо",
+
+    "OblastMapTittle": "Облустук соттор боюнча баалар",
+    "OblastMapLinkOne": "Аймактар боюнча орточо баалар",
+    "OblastMapLinkTwo": "Эскертүүлөр жана сунуштар",
+    "OblastMapClearFilter": "Кайтаруу чыпкасы",
+    "OblastMapNameCourt": "Облустун аталышы",
+    "OblastMapOverallAssessment": "Жалпы баа",
+    "OblastMapBuilding": "Имарат",
+    "OblastMapChancellery": "Кеңсе",
+    "OblastMapProcess": "Иштетүү",
+    "OblastMapStaff": "Кызматкерлер",
+    "OblastMapJudge": "Судья",
+    "OblastMapRatings": "Баалардын саны"
 }

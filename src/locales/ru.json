@@ -25,6 +25,18 @@
     "DiagrammEleven": "Использование средств аудио и видеофиксации судебного заседания по уголовным делам",
     "DiagrammTwelve": "Начало заседания в назначенное время",
     "DiagrammThirteen": "Оценки канцелярии",
-    "DiagrammFourteen": "Оценки доступности здания"
+    "DiagrammFourteen": "Оценки доступности здания",
     
+    "OblastMapTittle": "Оценки по областным судам",
+    "OblastMapLinkOne": "Средние оценки по областям",
+    "OblastMapLinkTwo": "Замечания и предложения",
+    "OblastMapClearFilter": "Сбросить фильтр",
+    "OblastMapNameCourt": "Наименование области",
+    "OblastMapOverallAssessment": "Общая оценка",
+    "OblastMapBuilding": "Здание",
+    "OblastMapChancellery": "Канцелярия",
+    "OblastMapProcess": "Процесс",
+    "OblastMapStaff": "Сотрудники",
+    "OblastMapJudge": "Судья",
+    "OblastMapRatings": "Кол-во оценок"
 }

@@ -9,6 +9,7 @@ import Sidebar from "./Sidebar";
 import { GrLanguage } from "react-icons/gr";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
+import { LogoutButton } from "@/lib/utils/Logout";
 
 const Header: React.FC = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -16,6 +17,7 @@ const Header: React.FC = () => {
   const [isSticky, setIsSticky] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { courtName, language, toggleLanguage } = useSurveyData();
+  
 
   useEffect(() => {
     const handleScroll = () => {
@@ -144,14 +146,7 @@ const Header: React.FC = () => {
               </span>
             </div>
             <div className="h-4 w-px bg-gray-300"></div>
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg  hover:bg-red-50 
-                          transition-all duration-300 text-red-700 font-medium text-sm"
-            >
-              <HiOutlineLogout className="w-5 h-5" />
-              {getTranslation("HeaderNavExit", language)}
-            </button>
+            <LogoutButton/>
           </div>
         </div>
       </header>

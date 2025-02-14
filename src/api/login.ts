@@ -119,6 +119,30 @@ export const getCurrentUser = async () => {
   return await fetchWithAuth('https://opros.sot.kg:443/api/v1/current_user/');
 };
 
+export const getRayonAssessmentData = async () => {
+  const token = getCookie('access_token');
+  
+  try { 
+    const response = await fetch('https://opros.sot.kg/api/v1/assessment/rayon/', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching rayon assessment data:', error);
+    throw error;
+  }
+};
+
 export const loginApi = {
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
     const response = await fetch('https://opros.sot.kg:443/api/v1/login/', {
