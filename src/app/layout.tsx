@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import "../globals.css";
+import "@/styles/globals.css";
 import "@/styles/skeleton.css";
 import Header from "@/components/layout/Header";
 import { Inter } from "next/font/google";
