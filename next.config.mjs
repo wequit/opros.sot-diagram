@@ -12,6 +12,8 @@ const nextConfig = {
   },
   experimental: {
     optimizeCss: true,
+    appDir: true,
+    scrollRestoration: true,
   },
   webpack: (config) => {
     config.module.rules.push({
