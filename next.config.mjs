@@ -20,6 +20,7 @@ const nextConfig = {
       test: /\.svg$/,
       use: ['@svgr/webpack'],
     });
+    config.resolve.extensions = ['.ts', '.tsx', '.js', '.css', ...config.resolve.extensions];
     return config;
   },
 };
