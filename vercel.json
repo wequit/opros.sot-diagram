@@ -1,13 +1,17 @@
 {
     "builds": [
       {
-        "src": "next.config.js",
+        "src": "next.config.mjs",
         "use": "@vercel/next"
       }
     ],
-    "build": {
-      "env": {
-        "NEXT_TELEMETRY_DISABLED": "1"
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "/$1"
       }
+    ],
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1"
     }
-  } 
+  }
