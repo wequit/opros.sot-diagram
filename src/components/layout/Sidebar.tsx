@@ -107,8 +107,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
                   : "hover:bg-gray-100"
               }`}
             >
-              <MdMap className="w-6 h-6" />
-              <span>Чуйская область</span>
+
             </Link>
           </>
         ) : (
