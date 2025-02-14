@@ -6,7 +6,7 @@ import { getCookie } from "@/api/login";
 import { SurveyProvider, useSurveyData } from "@/context/SurveyContext";
 import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
-function GeneralPageContent() {
+export default function GeneralPageContent() {
   const { setSurveyData, setIsLoading, isLoading } = useSurveyData();
 
   useEffect(() => {
@@ -56,12 +56,4 @@ function GeneralPageContent() {
       <Evaluations />
     </div>
   );
-}
-
-export default function GeneralPage() {
-  return (
-    <SurveyProvider>
-      <GeneralPageContent />
-    </SurveyProvider>
-  );
-}
+}1

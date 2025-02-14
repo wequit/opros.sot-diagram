@@ -305,8 +305,21 @@ export default function Map_rayon({ selectedRayon, onSelectRayon, courts }: MapP
       .data(Object.entries(courtCoordinates))
       .join('circle')
       .attr('class', 'court-point')
-      .attr('cx', d => projection(d[1])[0])
-      .attr('cy', d => projection(d[1])[1])
+      .attr('cx', d => {
+        const projectedPoint = projection(d[1]);
+        if (projectedPoint !== null) {
+          return projectedPoint[0];  // x-coordinate
+        }
+        return 0;  // or any default value when the point is null
+      })
+      .attr('cy', d => {
+        const projectedPoint = projection(d[1]);
+        if (projectedPoint !== null) {
+          return projectedPoint[1];  // y-coordinate
+        }
+        return 0;  // or any default value when the point is null
+      })
+      
       .attr('r', 4) // Увеличиваем размер точки
       .attr('fill', '#FF4444') // Единый цвет для всех точек
       .attr('stroke', '#fff')

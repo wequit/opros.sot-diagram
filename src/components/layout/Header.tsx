@@ -9,8 +9,7 @@ import Sidebar from "./Sidebar";
 import { GrLanguage } from "react-icons/gr";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
-import { LogoutButton } from '@/lib/utils/Logout';
-
+import { LogoutButton } from "@/lib/utils/Logout";
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -18,6 +17,7 @@ const Header: React.FC = () => {
   const [isSticky, setIsSticky] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { courtName, language, toggleLanguage } = useSurveyData();
+  
 
   useEffect(() => {
     const handleScroll = () => {
@@ -42,6 +42,13 @@ const Header: React.FC = () => {
           }`}
       >
         <div className="flex items-center gap-4">
+          {/* <button
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
+          >
+            <HiMenu className="w-6 h-6 text-gray-600" />
+          </button> */}
+
           <div className="flex items-center gap-3">
             <Link href="/">
               <Image
@@ -54,60 +61,66 @@ const Header: React.FC = () => {
             </Link>
 
             {user?.role === "Председатель 3 инстанции" ? (
-  <div className="flex space-x-4 p-2 rounded-lg">
-    <Link
-      href="/"
-      className={`px-4 py-2 rounded-md font-medium transition duration-200
-        ${pathname === "/"
-          ? "bg-blue-100/40 text-blue-600"
-          : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"}`}
-    >
-      {getTranslation("HeaderNavOne", language)}
-    </Link>
+              <div className="flex space-x-4  p-2 rounded-lg">
+                <Link
+                  href="/"
+                  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  ${
+                    pathname === "/"
+                      ? "bg-blue-100/40 text-blue-600"
+                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
+                  }`}
+                >
+                  {getTranslation("HeaderNavOne", language)}
+                </Link>
 
-    <Link
-      href="/maps/General"
-      className={`px-4 py-2 rounded-md font-medium transition duration-200
-        ${pathname === "/maps/General"
-          ? "bg-purple-100/40 text-indigo-600"
-          : "text-gray-700 hover:bg-purple-50 hover:text-indigo-600"}`}
-    >
-      {getTranslation("HeaderNavTwo", language)}
-    </Link>
+                <Link
+                  href="/maps/General"
+                  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  ${
+                    pathname === "/maps/General"
+                      ? "bg-purple-100/40 text-indigo-600"
+                      : "text-gray-700 hover:bg-purple-50 hover:text-indigo-600"
+                  }`}
+                >
+                   {getTranslation("HeaderNavTwo", language)}
+                </Link>
 
-    <Link
-      href="/maps/oblast/Regional-Courts"
-      className={`px-4 py-2 rounded-md font-medium transition duration-200
-        ${pathname === "/maps/oblast/Regional-Courts"
-          ? "bg-green-100/40 text-green-600"
-          : "text-gray-700 hover:bg-green-50 hover:text-green-600"}`}
-    >
-      {getTranslation("HeaderNavThree", language)}
-    </Link>
+                <Link
+                  href="/maps/oblast/Regional-Courts"
+                  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  ${
+                    pathname === "/maps/oblast/Regional-Courts"
+                      ? "bg-green-100/40 text-green-600"
+                      : "text-gray-700 hover:bg-green-50 hover:text-green-600"
+                  }`}
+                >
+                   {getTranslation("HeaderNavThree", language)}
+                </Link>
 
-    <Link
-      href="/maps/rayon/District-Courts"
-      className={`px-4 py-2 rounded-md font-medium transition duration-200
-        ${pathname === "/maps/rayon/District-Courts"
-          ? "bg-purple-100/40 text-purple-600"
-          : "text-gray-700 hover:bg-purple-50 hover:text-purple-600"}`}
-    >
-      {getTranslation("HeaderNavFour", language)}
-    </Link>
-  </div>
-) : (
-  <span className="text-lg font-semibold text-black uppercase">
-    {pathname === "/maps/rayon/District-Courts"
-      ? courtName // Показываем courtName, если находимся на нужном пути
-      : user?.role === "Председатель 2 инстанции"
-      ? courtName || user?.court // Для "Председатель 2 инстанции"
-      : user
-      ? user?.court // Для других случаев показываем суд
-      : "Загрузка..."}
-  </span>
-)}
+                <Link
+                  href="/maps/rayon/District-Courts"
+                  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  ${
+                    pathname === "/maps/rayon/District-Courts"
+                      ? "bg-purple-100/40 text-purple-600"
+                      : "text-gray-700 hover:bg-purple-50 hover:text-purple-600"
+                  }`}
+                >
+                  {getTranslation("HeaderNavFour", language)}
+                </Link>
 
-
+                
+              </div>
+            ) : (
+              <span className="text-lg font-semibold text-black uppercase">
+                {user?.role === "Председатель 2 инстанции"
+                  ? courtName || user.court
+                  : user
+                  ? user.court
+                  : "Загрузка..."}
+              </span>
+            )}
           </div>
         </div>
 
@@ -123,7 +136,7 @@ const Header: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex items-center gap-3 px-4 py-2 rounded-lg">
+          <div className="flex items-center gap-3 px-4 py-2 rounded-lg ">
             <div className="flex items-center gap-2">
               <CgProfile className="w-5 h-5 text-gray-600" />
               <span className="text-sm font-medium text-gray-700">
@@ -131,7 +144,7 @@ const Header: React.FC = () => {
               </span>
             </div>
             <div className="h-4 w-px bg-gray-300"></div>
-            <LogoutButton />
+            <LogoutButton/>
           </div>
         </div>
       </header>
