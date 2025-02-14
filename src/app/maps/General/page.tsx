@@ -3,8 +3,8 @@ import React, { useEffect } from "react";
 import Dates from "@/lib/utils/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { getCookie } from "@/api/login";
-import NoData from "@/lib/utils/NoData";
 import { SurveyProvider, useSurveyData } from "@/context/SurveyContext";
+import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
 function GeneralPageContent() {
   const { setSurveyData, setIsLoading, isLoading } = useSurveyData();
@@ -30,7 +30,7 @@ function GeneralPageContent() {
         }
         
         const data = await response.json();
-        setSurveyData(data); // Сохраняем данные в контексте
+        setSurveyData(data); 
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
       } finally {
@@ -44,7 +44,8 @@ function GeneralPageContent() {
   if (isLoading) {
     return (
       <div>
-        <NoData />
+       <Dates />
+       <SkeletonDashboard/>
       </div>
     );
   }
@@ -57,7 +58,7 @@ function GeneralPageContent() {
   );
 }
 
-export default function Page() {
+export default function GeneralPage() {
   return (
     <SurveyProvider>
       <GeneralPageContent />

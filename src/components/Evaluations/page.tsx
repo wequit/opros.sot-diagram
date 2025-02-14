@@ -18,9 +18,8 @@ import {
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { Context as DataLabelsContext } from "chartjs-plugin-datalabels";
-import { useSurveyData } from "@/context/SurveyContext";
-
-import {
+import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { 
   processSecondQuestion,
   processThirdQuestion,
   processFirstQuestion,
@@ -90,7 +89,7 @@ interface BarChartData extends ChartData<"bar", number[], string> {
 }
 
 export default function Evaluations() {
-  const { surveyData, isLoading } = useSurveyData();
+  const { surveyData, isLoading, language } = useSurveyData();
   const { remarks } = useRemarks();
   const [demographicsView, setDemographicsView] = useState("пол");
   const { user } = useAuth();
@@ -561,20 +560,28 @@ export default function Evaluations() {
   };
 
   // Компонент для прогресс-бара
+  // Компонент для прогресс-бара
   const ProgressBar = ({ value }: { value: number }) => {
     const getColor = (v: number) => {
-      if (v < 2) return "bg-red-500"; // До 2 - красный
-      if (v < 3) return "bg-orange-500"; // 2-2.9 - оранжевый
-      if (v < 4) return "bg-yellow-500"; // 3-3.9 - желтый
-      if (v < 4.5) return "bg-lime-500"; // 4-4.4 - светло-зеленый
-      return "bg-green-500"; // 4.5-5 - ярко-зеленый
+      if (v <= 1.0) return "#8B0000"; // Тёмно-красный
+      if (v <= 1.5) return "#A52A2A"; // Коричневато-красный
+      if (v <= 2.0) return "#CD5C5C"; // Светло-коричневый с красным оттенком
+      if (v <= 2.5) return "#E57357"; // Оранжево-красный
+      if (v <= 3.0) return "#F4A460"; // Светло-оранжевый
+      if (v <= 3.5) return "#FFC04D"; // Тёплый жёлто-оранжевый
+      if (v <= 4.0) return "#B4D330"; // Жёлто-зелёный
+      if (v <= 4.5) return "#66C266"; // Средне-зелёный
+      return "#008000"; // Зелёный для 5.0
     };
 
     return (
       <div className="w-full bg-gray-200 rounded-full h-6">
         <div
-          className={`h-6 rounded-full ${getColor(value)}`}
-          style={{ width: `${(value / 5) * 100}%` }}
+          className="h-6 rounded-full transition-all duration-300"
+          style={{ 
+            width: `${(value / 5) * 100}%`,
+            backgroundColor: getColor(value)
+          }}
         />
       </div>
     );
@@ -603,9 +610,9 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Общие показатели</h2>
+                <h2 className="text-xl font-medium">{getTranslation("DiagrammOne", language)}</h2>
                 <span className="text-gray-600">
-                  Количество ответов: {totalResponses}
+                {getTranslation("DiagrammOneTotal", language)} {totalResponses}
                 </span>
               </div>
             </div>
@@ -620,9 +627,9 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Замечания и предложения</h2>
+                <h2 className="text-xl font-medium">{getTranslation("DiagrammTwo", language)}</h2>
                 <span className="text-gray-600">
-                  Количество ответов: {totalResponsesAnswer}
+                {getTranslation("DiagrammTwoTotal", language)} {totalResponsesAnswer}
                 </span>
               </div>
             </div>
@@ -654,7 +661,7 @@ export default function Evaluations() {
           {/* Категории респондентов */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">Категории респондентов</h2>
+              <h2 className="text-xl font-medium">{getTranslation("DiagrammThree", language)}</h2>
             </div>
             <div className="p-6">
               <div className="w-[400px] h-[400px] mx-auto">
@@ -667,7 +674,7 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium text-start">
-                Демографические показатели
+              {getTranslation("DiagrammFour", language)}
               </h2>
             </div>
             <div className="p-6 flex flex-col items-center">
@@ -785,7 +792,7 @@ export default function Evaluations() {
           {/* Источники трафика */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">Источник трафика</h2>
+              <h2 className="text-xl font-medium">{getTranslation("DiagrammFive", language)}</h2>
             </div>
             <div className="p-6">
               <div className="h-[300px]">
@@ -797,7 +804,7 @@ export default function Evaluations() {
           {/* Категории судебных дел */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">Категории судебных дел</h2>
+              <h2 className="text-xl font-medium">{getTranslation("DiagrammSix", language)}</h2>
             </div>
             <div className="p-6">
               <div className="h-[300px]">
@@ -809,7 +816,7 @@ export default function Evaluations() {
           {/* Оценки судьи */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">Оценки судьи</h2>
+              <h2 className="text-xl font-medium">{getTranslation("DiagrammSeven", language)}</h2>
             </div>
             <div className="p-6 space-y-6">
               {Object.entries(judgeRatings).map(([title, rating]) => (
@@ -833,7 +840,7 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">Проявление неуважения</h2>
+                <h2 className="text-xl font-medium">{getTranslation("DiagrammEight", language)}</h2>
               </div>
             </div>
             <div className="p-6">
@@ -846,7 +853,7 @@ export default function Evaluations() {
           {/* Оценки сотрудников */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">Оценки сотрудников</h2>
+              <h2 className="text-xl font-medium">{getTranslation("DiagrammNine", language)}</h2>
             </div>
             <div className="p-6 space-y-6 mb-8">
               {Object.entries(staffRatings).map(([title, rating]) => (
@@ -869,7 +876,7 @@ export default function Evaluations() {
           {/* Оценки процесса */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">Оценки процесса</h2>
+              <h2 className="text-xl font-medium">{getTranslation("DiagrammTen", language)}</h2>
             </div>
             <div className="p-6 space-y-6">
               {Object.entries(processRatings).map(([title, rating]) => (
@@ -893,8 +900,7 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">
-                Использование средств аудио и видеофиксации судебного заседания
-                по уголовным делам
+              {getTranslation("DiagrammEleven", language)}
               </h2>
             </div>
             <div className="p-6">
@@ -933,7 +939,7 @@ export default function Evaluations() {
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b min-h-[90px]">
               <h2 className="text-xl font-medium">
-                Начало заседания в назначенное время
+              {getTranslation("DiagrammTwelve", language)}
               </h2>
             </div>
             <div className="p-6">
@@ -971,7 +977,7 @@ export default function Evaluations() {
           {/* Оценки канцелярии */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">Оценки канцелярии</h2>
+              <h2 className="text-xl font-medium">{getTranslation("DiagrammThirteen", language)}</h2>
             </div>
             <div className="p-6 space-y-6">
               {Object.entries(officeRatings).map(([title, rating]) => (
@@ -994,7 +1000,7 @@ export default function Evaluations() {
           {/* Оценки доступности */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">Оценки доступности здания</h2>
+              <h2 className="text-xl font-medium">{getTranslation("DiagrammFourteen", language)}</h2>
             </div>
             <div className="p-6 space-y-6">
               {Object.entries(accessibilityRatings).map(([title, rating]) => (

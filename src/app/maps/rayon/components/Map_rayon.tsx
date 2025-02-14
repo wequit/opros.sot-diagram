@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import rayonData from '../../../../../public/gadm41_KGZ_2.json';
-import { courts } from '../District-Courts/page'; // Импортируем данные из page.tsx
+import  courts  from '../District-Courts/page'; // Импортируем данные из page.tsx
 
 // Обновленный маппинг районов к судам
 const rayonToCourtMapping: { [key: string]: string } = {
@@ -63,36 +63,88 @@ const rayonToCourtMapping: { [key: string]: string } = {
   'Toktogul': 'Токтогульский районный суд'
 };
 
-
-
-// В функции getRayonRating добавим проверку на существование маппинга
-const getRayonRating = (rayonName: string): number => {
-  const courtName = rayonToCourtMapping[rayonName];
-  if (!courtName) {
-    console.log(`Нет маппинга для района: ${rayonName}`);
-    return 0;
-  }
-  const court = courts.find(c => c.name === courtName);
-  return court ? court.ratings[0] : 0;
-};
+interface Court {
+  id: number;
+  name: string;
+  instance: string;
+  overall_assessment: number;
+  assessment: {
+    judge: number;
+    process: number;
+    staff: number;
+    office: number;
+    building: number;
+  };
+  total_survey_responses: number;
+}
 
 interface MapProps {
   selectedRayon: string | null;
   onSelectRayon?: (courtName: string) => void;
+  courts: Court[]; // Добавляем courts в пропсы
 }
 
-export default function Map_rayon({ selectedRayon, onSelectRayon }: MapProps) {
+// Обновляем координаты для всех судов
+const courtCoordinates: { [key: string]: [number, number] } = {
+  // Административные суды
+  'Административный суд Баткенской области': [69.8597, 40.0563],
+  'Административный суд Джалал-Абадской области': [72.9814, 41.0273],
+  'Административный суд Иссык-Кульской области': [77.0826, 42.1287],
+  'Административный суд Нарынской области': [75.9911, 41.4269],
+  'Административный суд Ошской области': [72.7985, 40.5140],
+  'Административный суд Таласской области': [72.2427, 42.5280],
+  'Административный суд Чуйской области': [74.5698, 42.8746],
+  
+  // Городские суды Бишкека (смещены для видимости)
+  'Ленинский районный суд города Бишкек': [74.5555, 42.8700],
+  'Октябрьский районный суд города Бишкек': [74.5898, 42.8846],
+  'Первомайский районный суд города Бишкек': [74.5798, 42.8646],
+  'Свердловский районный суд города Бишкек': [74.5498, 42.8546],
+  
+  // Городские суды
+  'Балыкчинский городской суд': [76.1855, 42.4560],
+  'Джалал-Абадский городской суд': [72.9814, 40.9273],
+  'Каракольский городской суд': [78.3947, 42.4907],
+  'Нарынский городской суд': [75.9911, 41.4269],
+  'Ошский городской суд': [72.7985, 40.5140],
+  'Таласский городской суд': [72.2427, 42.5280],
+  'Токмокский городской суд': [75.3015, 42.8421],
+  
+  // Районные суды
+  'Сокулукский районный суд': [74.4400, 42.8700],
+  'Аламудунский районный суд': [74.6800, 42.8500],
+  'Ысык-Атинский районный суд': [74.9400, 42.8300]
+};
+
+export default function Map_rayon({ selectedRayon, onSelectRayon, courts }: MapProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
 
+  // Обновляем функцию getRayonRating
+  const getRayonRating = (rayonName: string): number => {
+    if (!courts || !Array.isArray(courts)) {
+      console.log('Courts data is not available');
+      return 0;
+    }
+
+    const courtName = rayonToCourtMapping[rayonName];
+    if (!courtName) {
+      console.log(`Нет маппинга для района: ${rayonName}`);
+      return 0;
+    }
+
+    const court = courts.find((c: Court) => c.name === courtName);
+    return court ? court.overall_assessment : 0;
+  };
+
   useEffect(() => {
-    if (!svgRef.current || !containerRef.current) return;
+    if (!svgRef.current || !containerRef.current || !Array.isArray(courts)) return;
 
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    const width = 800;
+    const width = 1200;
     const height = 400;
     
     svg.attr('width', width)
@@ -165,60 +217,61 @@ export default function Map_rayon({ selectedRayon, onSelectRayon }: MapProps) {
       .attr('d', path as any)
       .attr('fill', (d: any) => {
         const rating = getRayonRating(d.properties.NAME_2);
-        const isSelected = !selectedRayon || rayonToCourtMapping[d.properties.NAME_2] === selectedRayon;
+        const isSelected = selectedRayon === null || rayonToCourtMapping[d.properties.NAME_2] === selectedRayon;
         return getColor(rating, isSelected, d.properties);
       })
       .attr('stroke', 'white')
       .attr('stroke-width', '0.5')
       .style('cursor', 'pointer')
-      .on('click', (event: any, d: any) => {
-        const courtName = rayonToCourtMapping[d.properties.NAME_2];
-        if (courtName) {
-          onSelectRayon?.(courtName);
-        }
+      .on('mouseover', function(event: any, d: any) {
+        if (isLake(d.properties)) return;
+        
+        d3.select(this).attr('fill-opacity', 0.7);
+        const coordinates = getEventCoordinates(event);
+        
+        tooltip
+          .style('display', 'block')
+          .style('position', 'fixed')
+          .style('left', `${coordinates.x + 10}px`)
+          .style('top', `${coordinates.y + 10}px`)
+          .html(() => {
+            const rating = getRayonRating(d.properties.NAME_2);
+            return `
+              <div class="font-medium">${d.properties.NAME_2}</div>
+              <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
+            `;
+          });
       })
-      .on('mouseover', function(event, d: any) {
-        // Пропускаем тултип для озера
-        if (d.properties.NAME_2 === 'Ysyk-Köl(lake)' || 
-            d.properties.NAME_2 === 'Ysyk-Kol' || 
-            d.properties.NAME_2 === 'Issyk-Kul' ||
-            d.properties.NAME_2 === 'Song-Kol' || 
-            d.properties.NAME_2 === 'Song-Kol(lake)' || 
-            d.properties.NAME_2 === 'Song-kol') {
-          return;
-        }
-
-        d3.select(this)
-          .attr('fill-opacity', 0.7);
-
-        const [mouseX, mouseY] = d3.pointer(event);
-        const containerRect = containerRef.current?.getBoundingClientRect();
-        const tooltipNode = tooltipRef.current;
-
-        if (containerRect && tooltipNode) {
-          let tooltipX = mouseX;
-          let tooltipY = mouseY;
-
-          tooltip
-            .style('display', 'block')
-            .style('left', `${tooltipX + 10}px`)
-            .style('top', `${tooltipY + 10}px`)
-            .html(() => {
-              const rating = getRayonRating(d.properties.NAME_2);
-              return `
-                <div class="font-medium">${d.properties.NAME_2}</div>
-                <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
-              `;
-            });
-        }
+      .on('mousemove', function(event: any) {
+        const coordinates = getEventCoordinates(event);
+        tooltip
+          .style('left', `${coordinates.x + 10}px`)
+          .style('top', `${coordinates.y + 10}px`);
       })
       .on('mouseout', function() {
-        d3.select(this)
-          .attr('fill-opacity', 1);
+        d3.select(this).attr('fill-opacity', 1);
         tooltip.style('display', 'none');
+      })
+      .on('touchstart', function(event: any, d: any) {
+        event.preventDefault(); // Предотвращаем стандартное поведение
+        if (isLake(d.properties)) return;
+        
+        d3.select(this).attr('fill-opacity', 0.7);
+        const coordinates = getEventCoordinates(event);
+        
+        tooltip
+          .style('display', 'block')
+          .style('position', 'fixed')
+          .style('left', `${coordinates.x + 10}px`)
+          .style('top', `${coordinates.y + 10}px`)
+          .html(() => {
+            const rating = getRayonRating(d.properties.NAME_2);
+            return `
+              <div class="font-medium">${d.properties.NAME_2}</div>
+              <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
+            `;
+          });
       });
-
-
 
     // Добавляем текст оценок поверх карты
     const textGroup = g.append('g')
@@ -246,22 +299,78 @@ export default function Map_rayon({ selectedRayon, onSelectRayon }: MapProps) {
         return rating ? rating.toFixed(1) : '';
       });
 
-  }, [selectedRayon, onSelectRayon]);
+
+    // Добавляем точки для судов
+    const courtPoints = g.selectAll('.court-point')
+      .data(Object.entries(courtCoordinates))
+      .join('circle')
+      .attr('class', 'court-point')
+      .attr('cx', d => projection(d[1])[0])
+      .attr('cy', d => projection(d[1])[1])
+      .attr('r', 4) // Увеличиваем размер точки
+      .attr('fill', '#FF4444') // Единый цвет для всех точек
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1)
+      .style('cursor', 'pointer')
+      .on('mouseover', function(event, d) {
+        d3.select(this)
+          .attr('r', 6) // Увеличиваем размер при наведении
+          .attr('fill-opacity', 0.8);
+        
+        const court = courts.find(c => c.name === d[0]);
+        const rating = court ? court.overall_assessment : 0;
+        
+        tooltip
+          .style('display', 'block')
+          .style('position', 'fixed')
+          .style('left', `${event.pageX + 10}px`)
+          .style('top', `${event.pageY + 10}px`)
+          .html(`
+            <div class="font-medium">${d[0]}</div>
+            <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
+          `);
+      })
+      .on('mouseout', function() {
+        d3.select(this)
+          .attr('r', 4) // Возвращаем исходный размер
+          .attr('fill-opacity', 1);
+        tooltip.style('display', 'none');
+      });
+
+  }, [selectedRayon, onSelectRayon, courts]);
 
   return (
-    <div ref={containerRef} className="relative w-full flex justify-center items-center overflow-hidden">
-      <div className="w-full max-w-[1200px]">
-        <svg 
-          ref={svgRef} 
-          className="w-full h-auto"
-          style={{ cursor: 'grab' }}
-        ></svg>
-        <div
-          ref={tooltipRef}
-          className="absolute hidden bg-white px-2 py-1 rounded-md shadow-lg border border-gray-200 z-10"
-          style={{ pointerEvents: 'none' }}
-        ></div>
-      </div>
+    <div ref={containerRef} className="relative w-full h-full">
+      <svg ref={svgRef}></svg>
+      <div ref={tooltipRef} className="absolute hidden bg-white p-2 rounded shadow-lg"></div>
     </div>
   );
+}
+
+function isLake(properties: any): boolean {
+  return properties.NAME_2 === 'Ysyk-Köl(lake)' || 
+         properties.NAME_2 === 'Ysyk-Kol' || 
+         properties.NAME_2 === 'Issyk-Kul' ||
+         properties.NAME_2 === 'Song-Kol' || 
+         properties.NAME_2 === 'Song-Kol(lake)' || 
+         properties.NAME_2 === 'Song-kol';
+}
+
+function getEventCoordinates(event: any) {
+  if (event.touches && event.touches[0]) {
+    return {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY
+    };
+  }
+  if (event.changedTouches && event.changedTouches[0]) {
+    return {
+      x: event.changedTouches[0].clientX,
+      y: event.changedTouches[0].clientY
+    };
+  }
+  return {
+    x: event.clientX,
+    y: event.clientY
+  };
 }

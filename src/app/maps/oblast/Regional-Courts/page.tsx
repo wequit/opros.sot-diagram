@@ -78,16 +78,15 @@ export default function RegionalCourts() {
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(
-        sortDirection === "asc"
-          ? "desc"
-          : sortDirection === "desc"
-          ? null
-          : "asc"
+        sortDirection === 'asc' ? 'desc' : 
+        sortDirection === 'desc' ? null : 'asc'
       );
-      if (sortDirection === "desc") setSortField(null);
+      if (sortDirection === 'desc') {
+        setSortField(null);
+      }
     } else {
       setSortField(field);
-      setSortDirection("asc");
+      setSortDirection('asc');
     }
   };
 
@@ -101,12 +100,28 @@ export default function RegionalCourts() {
   const sortedData = [...regions].sort((a, b) => {
     if (!sortField || !sortDirection) return 0;
 
-    let aValue, bValue;
+    let aValue: number, bValue: number;
 
     switch (sortField) {
       case 'judge':
-        aValue = a.ratings[4]; // Индекс для судьи
+        aValue = a.ratings[4];
         bValue = b.ratings[4];
+        break;
+      case 'process':
+        aValue = a.ratings[2];
+        bValue = b.ratings[2];
+        break;
+      case 'staff':
+        aValue = a.ratings[3];
+        bValue = b.ratings[3];
+        break;
+      case 'office':
+        aValue = a.ratings[1];
+        bValue = b.ratings[1];
+        break;
+      case 'accessibility':
+        aValue = a.ratings[0];
+        bValue = b.ratings[0];
         break;
       case 'count':
         aValue = a.totalAssessments;
@@ -116,16 +131,23 @@ export default function RegionalCourts() {
         aValue = a.overall;
         bValue = b.overall;
         break;
-      // ... остальные случаи ...
       default:
         return 0;
     }
 
-    if (aValue === undefined || bValue === undefined) return 0;
+    // Обработка случая, когда значение равно 0 (нет данных)
+    if (aValue === 0) aValue = -Infinity;
+    if (bValue === 0) bValue = -Infinity;
+
+    if (aValue === -Infinity && bValue === -Infinity) return 0;
+    if (aValue === -Infinity) return sortDirection === 'asc' ? 1 : -1;
+    if (bValue === -Infinity) return sortDirection === 'asc' ? -1 : 1;
+
     return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
   });
 
   return (
+    
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-[1200px] mx-auto px-4 py-4">
         <div className="mb-4 flex justify-between items-center">

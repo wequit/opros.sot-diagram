@@ -4,7 +4,6 @@ import { useRef, useEffect, useState, RefObject, ReactNode } from 'react';
 import { Bar, Pie, Radar } from 'react-chartjs-2';
 import { ChartData, ChartOptions } from 'chart.js';
 
-// Хук для отслеживания видимости
 function useIntersectionObserver(options = {}): [RefObject<HTMLDivElement>, boolean] {
   const elementRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);

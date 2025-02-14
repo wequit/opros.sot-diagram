@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(!!token);
       if (token) {
         try {
-          const currentUser = await getCurrentUser(token);
+          const currentUser = await getCurrentUser();
           setUser(currentUser);
         } catch (error) {
           console.error('Ошибка при получении текущего пользователя:', error);
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setCookie('access_token', token);
       setIsAuthenticated(true);
-      const currentUser = await getCurrentUser(token);
+      const currentUser = await getCurrentUser();
       setUser(currentUser);
       await router.push('/');
       router.refresh();

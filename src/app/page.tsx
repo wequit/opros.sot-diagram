@@ -1,4 +1,3 @@
-// Home.tsx
 "use client";
 import React from "react";
 import Dates from "@/lib/utils/Dates";
@@ -13,7 +12,7 @@ function Home() {
   const { user } = useAuth();
 
   return (
-    <div className="space-y-6">
+    <div>
       {user?.role === "Председатель 1 инстанции" ? (
         <>
           <Dates />
@@ -29,5 +28,4 @@ function Home() {
   );
 }
 
-// Оборачиваем компонент в HOC для защиты
 export default withAuth(Home);
