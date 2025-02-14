@@ -8,7 +8,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   experimental: {
-    
+    optimizeCss: true,
   },
   webpack: (config) => {
     config.module.rules.push({
