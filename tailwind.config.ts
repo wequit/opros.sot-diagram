@@ -1,5 +1,7 @@
 /** @type {import('tailwindcss').Config} */
-const config = {
+import type { Config } from 'tailwindcss'
+
+const config: Config = {
   content: [
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     './node_modules/@tremor/**/*.{js,ts,jsx,tsx}',
@@ -62,11 +64,7 @@ const config = {
       },
     },
   },
-  safelist: [
-    {
-      pattern: /^(bg|text|border)-(red|orange|yellow|lime|emerald)-/,
-    },
-  ],
+
   plugins: [],
 };
 

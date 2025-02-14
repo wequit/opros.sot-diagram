@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  
+  output: 'standalone',
+  images: {
+    unoptimized: true,
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -18,4 +21,5 @@ const nextConfig = {
     return config;
   },
 };
+
 export default nextConfig; 
