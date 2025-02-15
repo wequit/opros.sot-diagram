@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
-  distDir: 'out',
   images: {
     unoptimized: true,
   },
@@ -12,14 +11,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   webpack: (config) => {
-    config.module.rules.push({
-      test: /\.css$/,
-      use: ['style-loader', 'css-loader', 'postcss-loader'],
-    });
     return config;
-  },
-  compiler: {
-    removeConsole: false,
   },
 };
 
