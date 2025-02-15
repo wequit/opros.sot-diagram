@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
+  distDir: 'out',
   images: {
     unoptimized: true,
   },
@@ -12,8 +13,8 @@ const nextConfig = {
   },
   webpack: (config) => {
     config.module.rules.push({
-      test: /\.svg$/,
-      use: ['@svgr/webpack'],
+      test: /\.css$/,
+      use: ['style-loader', 'css-loader', 'postcss-loader'],
     });
     return config;
   },
