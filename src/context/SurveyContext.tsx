@@ -1,4 +1,3 @@
-"use client";
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import ru from '@/locales/ru.json';
 import ky from '@/locales/ky.json';
@@ -51,6 +50,22 @@ interface SurveyContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
+  selectedRegion: {
+    id: number;
+    name: any;
+    overall: any;
+    ratings: any;
+    totalAssessments: any;
+  }[] | null;
+  setSelectedRegion: React.Dispatch<React.SetStateAction<
+    {
+      id: number;
+      name: any;
+      overall: any;
+      ratings: any;
+      totalAssessments: any;
+    }[] | null
+  >>;
 }
 
 const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
@@ -61,6 +76,15 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   const [userCourt, setUserCourt] = useState<string | null>(null);
   const [courtName, setCourtName] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("ru");
+  const [selectedRegion, setSelectedRegion] = useState<
+    {
+      id: number;
+      name: any;
+      overall: any;
+      ratings: any;
+      totalAssessments: any;
+    }[] | null
+  >(null);
 
   // При монтировании считываем сохранённый язык из localStorage
   useEffect(() => {
@@ -92,6 +116,8 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
         language,
         setLanguage,
         toggleLanguage,
+        selectedRegion,
+        setSelectedRegion,
       }}
     >
       {children}

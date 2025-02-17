@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getCookie } from "@/api/login";
+import { fetchWithAuth, getCookie } from "@/api/login";
 import { getAssessmentData } from "@/api/login";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
@@ -46,7 +46,7 @@ const SecondInstance = () => {
   const fetchResults = async (courtId: number) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`, {
+      const response = await fetchWithAuth(`https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${getCookie('access_token')}`,
@@ -80,7 +80,6 @@ const SecondInstance = () => {
       {selectedCourt ? (
         <div className="space-y-6">
           <Dates />
-          {/* <DataFetcher /> */}
           <Evaluations />
         </div>
       ) : (

@@ -5,7 +5,7 @@ import Map from '../components/Map_rayon';
 import { useState, useEffect } from 'react';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
-import { getRayonAssessmentData } from "@/api/login";
+import { fetchWithAuth, getRayonAssessmentData } from "@/api/login";
 import Evaluations from "@/components/Evaluations/page";
 import { useSurveyData } from '@/context/SurveyContext';
 import { getCookie } from '@/api/login';
@@ -115,7 +115,7 @@ export default function Courts() {
       // Сохраняем название суда в localStorage
       localStorage.setItem('selectedCourtName', court.name);
       
-      const response = await fetch(`https://opros.sot.kg/api/v1/results/${court.id}/?year=2025`, {
+      const response = await fetchWithAuth(`https://opros.sot.kg/api/v1/results/${court.id}/?year=2025`, {
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`

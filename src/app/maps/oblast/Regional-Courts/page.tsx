@@ -5,6 +5,8 @@ import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getAssessmentData, getCookie } from "@/api/login";
+import { useSurveyData } from "@/context/SurveyContext";
+import RegionDetails from "../components/RegionDetails";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -37,15 +39,9 @@ interface Region {
 
 export default function RegionalCourts() {
   const [regions, setRegions] = useState<OblastData[]>([]);
-  const [selectedRegion, setSelectedRegion] = useState<
-    | {
-        name: any;
-        overall: any;
-        ratings: any;
-        totalAssessments: any;
-      }[]
-    | null
-  >(null);
+  const [regionName, setRegionName] = useState<string | null>(null);
+  const { selectedRegion, setSelectedRegion } = useSurveyData();
+
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const pathname = usePathname();
@@ -148,8 +144,7 @@ export default function RegionalCourts() {
     try {
       const token = getCookie("access_token");
       if (!token) throw new Error("Token is null");
-
-      // Запрос данных для выбранного региона
+  
       const response = await fetch(
         `https://opros.sot.kg/api/v1/assessment/region/${court.id}/`,
         {
@@ -158,39 +153,39 @@ export default function RegionalCourts() {
           },
         }
       );
-
+  
       if (!response.ok) {
-        throw new Error(
-          `Ошибка HTTP: ${response.status} ${response.statusText}`
-        );
+        throw new Error(`Ошибка HTTP: ${response.status} ${response.statusText}`);
       }
-
+  
       const data = await response.json();
       console.log("Данные из API:", data);
-
+  
       if (!Array.isArray(data) || data.length === 0) {
         throw new Error("Данные по региону отсутствуют или неверного формата.");
       }
-
-      // Маппируем все данные, чтобы обновить состояние для каждого суда
+  
+      // Маппируем данные
       const updatedRegions = data.map((courtData: any) => ({
-        name: courtData.court, // Название суда
-        overall: courtData.overall_assessment, // Общая оценка
-        ratings: courtData.assessment.map((item: any) => item.court_avg), // Оценки по аспектам
-        totalAssessments: courtData.total_survey_responses, // Общее количество ответов
+        id: courtData.court_id,
+        name: courtData.court,
+        overall: courtData.overall_assessment,
+        ratings: courtData.assessment.map((item: any) => item.court_avg),
+        totalAssessments: courtData.total_survey_responses,
       }));
-
-      // Обновляем состояние для отображения данных
+  
+      // Обновляем `selectedRegion`
       setSelectedRegion(updatedRegions);
-      console.log("updatedRegions", updatedRegions);
+  
+      setRegionName(court.name); // используем `court.name`, так как он уже содержит `region_name`
     } catch (error) {
       console.error("Ошибка при получении данных для региона:", error);
     }
   };
-
+  
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-[1200px] mx-auto px-4 py-4">
+      <div className="max-w-[1250px] mx-auto">
         {!selectedRegion ? (
           <>
             <div className="mb-4 flex justify-between items-center">
@@ -339,119 +334,7 @@ export default function RegionalCourts() {
             </div>
           </>
         ) : (
-          // Можно добавить логику для отображения контента, когда selectedRegion установлен
-          <div className="flex flex-col ">
-            <div className="mb-4 flex justify-end  ">
-              <button
-                onClick={() => setSelectedRegion(null)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-              >
-                Вернуться к списку областей
-              </button>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                        №
-                      </th>
-                      <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                        Наименование области
-                      </th>
-                      <th
-                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                        onClick={() => handleSort("overall")}
-                      >
-                        <div className="flex items-center justify-between px-2">
-                          <span>Общая оценка</span>
-                          {getSortIcon("overall")}
-                        </div>
-                      </th>
-                      <th
-                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                        onClick={() => handleSort("judge")}
-                      >
-                        <div className="flex items-center justify-between px-2">
-                          <span>Здание</span>
-                          {getSortIcon("judge")}
-                        </div>
-                      </th>
-                      <th
-                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                        onClick={() => handleSort("process")}
-                      >
-                        <div className="flex items-center justify-between px-2">
-                          <span>Канцелярия</span>
-                          {getSortIcon("process")}
-                        </div>
-                      </th>
-                      <th
-                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                        onClick={() => handleSort("staff")}
-                      >
-                        <div className="flex items-center justify-between px-2">
-                          <span>Процесс</span>
-                          {getSortIcon("staff")}
-                        </div>
-                      </th>
-                      <th
-                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                        onClick={() => handleSort("office")}
-                      >
-                        <div className="flex items-center justify-between px-2">
-                          <span>Сотрудники</span>
-                          {getSortIcon("office")}
-                        </div>
-                      </th>
-                      <th
-                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                        onClick={() => handleSort("accessibility")}
-                      >
-                        <div className="flex items-center justify-between px-2">
-                          <span>Судья</span>
-                          {getSortIcon("accessibility")}
-                        </div>
-                      </th>
-                      <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                        Количество отзывов
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedRegion.map((court, index) => (
-                      <tr
-                        key={court.name}
-                        className="cursor-pointer hover:bg-gray-100"
-                      >
-                        <td className="px-3 py-2.5 text-center text-xs text-gray-600">
-                          {index + 1}
-                        </td>
-                        <td className="px-3 py-2.5 text-left text-xs text-gray-600">
-                          {court.name}
-                        </td>
-                        <td className="px-3 py-2.5 text-center text-xs text-gray-600">
-                          {court.overall}
-                        </td>
-                        {court.ratings.map((rating: number, idx: number) => (
-                          <td
-                            key={idx}
-                            className="px-3 py-2.5 text-center text-xs text-gray-600"
-                          >
-                            {rating}
-                          </td>
-                        ))}
-                        <td className="px-3 py-2.5 text-center text-xs text-gray-600">
-                          {court.totalAssessments}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+          <RegionDetails regionName={regionName} />
         )}
       </div>
     </div>

@@ -257,7 +257,6 @@ export default function Evaluations() {
       try {
         const republicData: { aspect: string; court_avg: number; all_courts_avg: number }[] = 
           await getRadarRepublicData();
-  
         // Создаем объект, где ключи - это aspect, а значения - all_courts_avg
         const allCourtsAvgMap: Record<string, number> = republicData.reduce((acc, item) => {
           acc[item.aspect] = item.all_courts_avg || 0;

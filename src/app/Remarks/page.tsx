@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRemarks } from "@/components/RemarksApi";
-import { getCookie } from "@/api/login";
+import { fetchWithAuth, getCookie } from "@/api/login";
 import { ArrowLeft, FileSearch } from "lucide-react";
 import Link from "next/link";
 const CommentModal = ({
@@ -74,7 +74,7 @@ export default function RemarksPage() {
   const handleCommentSubmit = async (comment: string) => {
     try {
       const token = getCookie("access_token");
-      const response = await fetch(
+      const response = await fetchWithAuth(
         "https://opros.sot.kg/api/v1/comments/respond/",
         {
           method: "POST",
