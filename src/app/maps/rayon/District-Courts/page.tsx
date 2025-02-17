@@ -112,6 +112,8 @@ export default function Courts() {
     try {
       setIsLoading(true);
       setCourtName(court.name);
+      // Сохраняем название суда в localStorage
+      localStorage.setItem('selectedCourtName', court.name);
       
       const response = await fetch(`https://opros.sot.kg/api/v1/results/${court.id}/?year=2025`, {
         headers: {
@@ -150,7 +152,12 @@ export default function Courts() {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortField(null);
+        setSortDirection(null);
+      }
     } else {
       setSortField(field);
       setSortDirection('asc');
@@ -211,8 +218,21 @@ export default function Courts() {
     <>
       {showEvaluations ? (
         <>
-        <Dates />
-        <Evaluations />
+          <Dates />
+          <div className="w-[55rem] ml-4 mb-4">
+            <div className="bg-[#F8F9FF] border-l-[6px] border-[#2563EB] rounded-lg shadow-sm">
+              <div className="px-5 py-4 flex items-center">
+                <svg className="w-7 h-7 text-[#2563EB]" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L3 8.2V9h18V8.2L12 2zm0 2.03l5.74 3.93H6.26L12 4.03zM4 10v9h2v-9H4zm14 0v9h2v-9h-2zM8 10v9h8v-9H8zm2 2h4v5h-4v-5z" 
+                    fill="currentColor"/>
+                </svg>
+                <h2 className="ml-3 text-[1.15rem] font-semibold text-gray-800">
+                  {courts.find(court => court.name === localStorage.getItem('selectedCourtName'))?.name}
+                </h2>
+              </div>
+            </div>
+          </div>
+          <Evaluations />
         </>
       ) : (
         
@@ -222,62 +242,74 @@ export default function Courts() {
           <table className="min-w-full border-collapse border border-gray-300 mt-8">
             <thead className="bg-gray-100 select-none">
               <tr>
-                <th 
-                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap text-center"
-                  onClick={() => handleSort('number')}
-                >
-                  № {sortField === 'number' }
+                <th className="border border-gray-300 px-4 py-2 text-center font-bold text-base whitespace-nowrap">
+                  №
+                </th>
+                <th className="border border-gray-300 px-4 py-2 text-center font-bold text-base whitespace-nowrap">
+                  Наименование суда
                 </th>
                 <th 
-                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap text-center"
-                  onClick={() => handleSort('name')}
-                >
-                  Наименование суда 
-                </th>
-                <th className="border border-gray-300 px-4 py-2 whitespace-nowrap">
-                  Инстанция
-                </th>
-                <th 
-                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  className="border border-gray-300 px-4 py-2 text-center font-bold text-base whitespace-nowrap cursor-pointer"
                   onClick={() => handleSort('overall')}
                 >
-                  Общая оценка {sortField === 'overall' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  <div className="flex items-center justify-center gap-1">
+                    Общая оценка
+                    {getSortIcon('overall')}
+                  </div>
                 </th>
                 <th 
-                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  className="border border-gray-300 px-4 py-2 text-center font-bold text-base whitespace-nowrap cursor-pointer"
                   onClick={() => handleSort('judge')}
                 >
-                  Судья {sortField === 'judge' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  <div className="flex items-center justify-center gap-1">
+                    Судья
+                    {getSortIcon('judge')}
+                  </div>
                 </th>
                 <th 
-                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  className="border border-gray-300 px-4 py-2 text-center font-bold text-base whitespace-nowrap cursor-pointer"
                   onClick={() => handleSort('process')}
                 >
-                  Процесс {sortField === 'process' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  <div className="flex items-center justify-center gap-1">
+                    Процесс
+                    {getSortIcon('process')}
+                  </div>
                 </th>
                 <th 
-                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  className="border border-gray-300 px-4 py-2 text-center font-bold text-base whitespace-nowrap cursor-pointer"
                   onClick={() => handleSort('staff')}
                 >
-                  Сотрудники {sortField === 'staff' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  <div className="flex items-center justify-center gap-1">
+                    Сотрудники
+                    {getSortIcon('staff')}
+                  </div>
                 </th>
                 <th 
-                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  className="border border-gray-300 px-4 py-2 text-center font-bold text-base whitespace-nowrap cursor-pointer"
                   onClick={() => handleSort('office')}
                 >
-                  Канцелярия {sortField === 'office' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  <div className="flex items-center justify-center gap-1">
+                    Канцелярия
+                    {getSortIcon('office')}
+                  </div>
                 </th>
                 <th 
-                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  className="border border-gray-300 px-4 py-2 text-center font-bold text-base whitespace-nowrap cursor-pointer"
                   onClick={() => handleSort('building')}
                 >
-                  Здание {sortField === 'building' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  <div className="flex items-center justify-center gap-1">
+                    Здание
+                    {getSortIcon('building')}
+                  </div>
                 </th>
                 <th 
-                  className="border border-gray-300 px-4 py-2 cursor-pointer whitespace-nowrap"
+                  className="border border-gray-300 px-4 py-2 text-center font-bold text-base whitespace-nowrap cursor-pointer"
                   onClick={() => handleSort('count')}
                 >
-                  Кол-во оценок {sortField === 'count' && (sortDirection === 'asc' ? '↑' : '↓')}
+                  <div className="flex items-center justify-center gap-1">
+                    Кол-во оценок
+                    {getSortIcon('count')}
+                  </div>
                 </th>
               </tr>
             </thead>
@@ -291,7 +323,6 @@ export default function Courts() {
                   >
                     {court.name}
                   </td>
-                  <td className="border border-gray-300 px-4 py-2 text-center">{court.instance}</td>
                   <td className={`border border-gray-300 px-4 py-2 ${getRatingColor(court.overall_assessment)}`}>
                     {renderTableCell(court.overall_assessment)}
                   </td>
