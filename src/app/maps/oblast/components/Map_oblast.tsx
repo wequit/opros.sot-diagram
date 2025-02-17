@@ -47,16 +47,14 @@ interface OblastData {
 }
 
 interface MapProps {
-  selectedOblast: string | null;
   oblastData: OblastData[];
-  onSelectOblast?: (oblast: string | null) => void;
 }
 
 type OblastMapping = {
   [key: string]: string;
 };
 
-export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast }: MapProps) {
+export default function Map_oblast({ oblastData  }: MapProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -79,8 +77,7 @@ export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast 
     return oblast?.overall || 0;
   }, [oblastData, oblastMapping]);
 
-  const getColor = useCallback((rating: number, isSelected: boolean) => {
-    if (!isSelected && selectedOblast) return '#E5E7EB';
+  const getColor = useCallback((rating: number) => {
     if (rating === 0) return '#999999';
     if (rating >= 5.0) return '#66C266';
     if (rating >= 4.5) return '#66C266';
@@ -93,7 +90,7 @@ export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast 
     if (rating >= 1.0) return '#fa5d5d';
     if (rating >= 0.5) return '#640202';
     return '#999999';
-  }, [selectedOblast, oblastData, oblastMapping]);
+  }, [ oblastData, oblastMapping]);
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current || !oblastData.length) return;
@@ -130,8 +127,7 @@ export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast 
       .attr('class', 'region-path')
       .attr('fill', (d: SVGFeature) => {
         const rating = getOblastRating(d.properties.NAME_1);
-        const isSelected = !selectedOblast || oblastMapping[d.properties.NAME_1] === selectedOblast;
-        return getColor(rating, isSelected);
+        return getColor(rating);
       })
       .attr('stroke', '#fff')
       .attr('stroke-width', '1')
@@ -196,10 +192,7 @@ export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast 
         d3.select(this).attr('stroke-width', '1');
         d3.select(tooltipRef.current).style('display', 'none');
       })
-      .on('click', function(event: MouseEvent | TouchEvent, d: SVGFeature) {
-        const mappedName = oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
-        onSelectOblast?.(mappedName);
-      });
+    
 
     // Добавляем текст с оценками на карту
     regionsGroup.selectAll('text')
@@ -252,7 +245,7 @@ export default function Map_oblast({ selectedOblast, oblastData, onSelectOblast 
           .text(d => d.label);
       });
 
-  }, [oblastData, selectedOblast, oblastMapping, onSelectOblast, getOblastRating, getColor]);
+  }, [oblastData, oblastMapping,  getOblastRating, getColor]);
 
   return (
     <div ref={containerRef} className="relative w-full">

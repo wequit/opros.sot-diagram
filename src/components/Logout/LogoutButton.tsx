@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import LogoutModal from './LogoutModal';
 import { FiLogOut } from 'react-icons/fi';
 import { getTranslation, useSurveyData } from '@/context/SurveyContext';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const LogoutButton: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);

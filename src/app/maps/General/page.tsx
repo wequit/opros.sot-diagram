@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
-import Dates from "@/lib/utils/Dates";
+import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { getCookie } from "@/api/login";
 import { SurveyProvider, useSurveyData } from "@/context/SurveyContext";

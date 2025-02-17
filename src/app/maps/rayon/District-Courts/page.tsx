@@ -9,7 +9,7 @@ import { getRayonAssessmentData } from "@/api/login";
 import Evaluations from "@/components/Evaluations/page";
 import { useSurveyData } from '@/context/SurveyContext';
 import { getCookie } from '@/api/login';
-import Dates from '@/lib/utils/Dates';
+import Dates from '@/components/Dates/Dates';
 // Типы для данных API
 interface Assessment {
   aspect: string;

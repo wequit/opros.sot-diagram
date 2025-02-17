@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
-import Dates from "@/lib/utils/Dates";
+import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import DataFetcher from "@/components/DataFetcher";
-import { useAuth } from "@/lib/utils/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import SecondInstance from "@/components/roles/2 instance";
 import ThirdInstance from "@/components/roles/3 instance ";
 import { withAuth } from "@/api/withAuth"; // Импортируем HOC

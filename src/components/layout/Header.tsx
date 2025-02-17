@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useAuth } from "@/lib/utils/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
 import { CgProfile } from "react-icons/cg";
 import { HiMenu } from "react-icons/hi";
@@ -9,7 +9,7 @@ import Sidebar from "./Sidebar";
 import { GrLanguage } from "react-icons/gr";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
-import { LogoutButton } from "@/lib/utils/Logout";
+import { LogoutButton } from "@/components/Logout";
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();

@@ -6,7 +6,7 @@ import "@/styles/map.css";
 import "@/styles/spinner.css";
 import Header from "@/components/layout/Header";
 import { Inter } from "next/font/google";
-import { AuthProvider, useAuth } from "@/lib/utils/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SurveyProvider, useSurveyData } from "@/context/SurveyContext";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";

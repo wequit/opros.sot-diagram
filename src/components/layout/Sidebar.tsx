@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { MdAssessment, MdFeedback, MdClose, MdMap } from "react-icons/md";
-import { useAuth } from "@/lib/utils/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
