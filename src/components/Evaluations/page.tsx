@@ -1,8 +1,9 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Radar, Bar, Pie, Line } from "react-chartjs-2";
+import { usePathname } from "next/navigation";
 import {
-  Chart as ChartJS,
+  Chart as ChartJS, 
   RadialLinearScale,
   PointElement,
   LineElement,
@@ -34,7 +35,7 @@ import {
   processStartTimeQuestion,
   processDisrespectQuestion,
   processAgeData,
-  // processAgeGenderData
+  processAgeGenderData,
 } from "@/lib/utils/processData";
 import NoData from "@/components/NoData/NoData";
 import { FaStar } from "react-icons/fa";
@@ -95,6 +96,7 @@ export default function Evaluations() {
   const { remarks } = useRemarks();
   const [demographicsView, setDemographicsView] = useState("пол");
   const { user } = useAuth();
+  const pathname = usePathname();
   const [categoryData, setCategoryData] = useState<PieChartData>({
     labels: [],
     datasets: [
@@ -157,7 +159,6 @@ export default function Evaluations() {
       },
     ],
   });
-
   const [audioVideoData, setAudioVideoData] = useState({
     labels: ["Да", "Нет", "Не знаю/Не уверен(а)", "Другое:"],
     datasets: [
@@ -192,7 +193,7 @@ export default function Evaluations() {
   );
 
   const [radarData, setRadarData] = useState({
-    labels: ["Судья", "Секретарь, помощник", "Канцелярия", "Процесс", "Здание"],
+    labels: ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"],
     datasets: [
       {
         label: user ? user.court : "Загрузка...",
@@ -206,7 +207,7 @@ export default function Evaluations() {
       },
       {
         label: "Средние оценки по республике",
-        data: [4.5, 4.2, 4.0, 4.3, 4.1],
+        data: [0, 0, 0, 0, 0],
         fill: true,
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
@@ -251,41 +252,21 @@ export default function Evaluations() {
   });
 
   const [ageData, setAgeData] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchRepublicData = async () => {
-      try {
-        const republicData: { aspect: string; court_avg: number; all_courts_avg: number }[] = 
-          await getRadarRepublicData();
-        // Создаем объект, где ключи - это aspect, а значения - all_courts_avg
-        const allCourtsAvgMap: Record<string, number> = republicData.reduce((acc, item) => {
-          acc[item.aspect] = item.all_courts_avg || 0;
-          return acc;
-        }, {} as Record<string, number>);
-  
-        setRadarData(prevData => ({
-          ...prevData,
-          datasets: [
-            prevData.datasets[0], // Оставляем данные по суду без изменений
-            {
-              ...prevData.datasets[1], // Копируем данные по республике
-              data: [
-                allCourtsAvgMap["Судья"] || 0,
-                allCourtsAvgMap["Сотрудники"] || 0,
-                allCourtsAvgMap["Канцелярия"] || 0,
-                allCourtsAvgMap["Процесс"] || 0,
-                allCourtsAvgMap["Здание"] || 0,
-              ],
-            },
-          ],
-        }));
-      } catch (error) {
-        console.error("Ошибка загрузки данных по республике:", error);
-      }
-    };
-  
-    fetchRepublicData();
-  }, []);
+  const [ageGenderData, setAgeGenderData] = useState({
+    labels: ["18-29", "30-44", "45-59", "60 +"],
+    datasets: [
+      {
+        label: "Мужской",
+        data: [0, 0, 0, 0],
+        backgroundColor: "rgb(51, 153, 255)",
+      },
+      {
+        label: "Женский",
+        data: [0, 0, 0, 0],
+        backgroundColor: "rgb(255, 99, 132)",
+      },
+    ],
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -304,6 +285,15 @@ export default function Evaluations() {
           );
           setGenderData(processedData);
         }
+        if (surveyData?.questions[2] && surveyData?.questions[3]) {
+          setAgeGenderData(
+            processAgeGenderData(
+              surveyData.questions[2].question_responses, // ответы по полу
+              surveyData.questions[3].question_responses // ответы по возрасту
+            )
+          );
+        }
+
         if (surveyData && surveyData.questions && surveyData.questions[0]) {
           const processedData = processFirstQuestion(
             surveyData.questions[0].question_responses,
@@ -343,7 +333,18 @@ export default function Evaluations() {
             language
           );
 
-          const currentCourtAverages = {
+          const republicData: { aspect: string; all_courts_avg: number }[] =
+            await getRadarRepublicData();
+
+          const allCourtsAvgMap: Record<string, number> = republicData.reduce(
+            (acc, item) => {
+              acc[item.aspect] = item.all_courts_avg || 0;
+              return acc;
+            },
+            {} as Record<string, number>
+          );
+
+          const currentCourtAverageSS = {
             judge: getAverageFromData(Object.values(judgeData)),
             secretary: getAverageFromData(Object.values(staffData)),
             office: getAverageFromData(Object.values(officeData)),
@@ -352,47 +353,66 @@ export default function Evaluations() {
           };
 
           setRadarData({
-            labels: [
-              "Судья",
-              "Секретарь, помощник",
-              "Канцелярия",
-              "Процесс",
-              "Здание",
-            ],
-            datasets: [
-              {
-                label: user ? user.court : "Загрузка...",
-                data: [
-                  currentCourtAverages.judge || 0,
-                  currentCourtAverages.secretary || 0,
-                  currentCourtAverages.office || 0,
-                  currentCourtAverages.process || 0,
-                  currentCourtAverages.building || 0,
-                ],
-                fill: true,
-                backgroundColor: "rgba(255, 206, 86, 0.2)",
-                borderColor: "rgba(255, 206, 86, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-              },
-              {
-                label: "Средние оценки по республике",
-                data: [0, 0, 0, 0, 0],
-                fill: true,
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-                datalabels: {
-                  display: false,
-                },
-              },
-            ],
+            labels: ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"],
+            datasets:
+              user?.role === "Председатель 3 инстанции" && pathname === "/"
+                ? [
+                    // Только республиканские данные
+                    {
+                      label: "Средние оценки по республике",
+                      data: [
+                        allCourtsAvgMap["Судья"] || 0,
+                        allCourtsAvgMap["Сотрудники"] || 0,
+                        allCourtsAvgMap["Канцелярия"] || 0,
+                        allCourtsAvgMap["Процесс"] || 0,
+                        allCourtsAvgMap["Здание"] || 0,
+                      ],
+                      fill: true,
+                      backgroundColor: "rgba(54, 162, 235, 0.2)",
+                      borderColor: "rgba(54, 162, 235, 1)",
+                      borderWidth: 2,
+                      pointRadius: 5,
+                      pointHoverRadius: 7,
+                      datalabels: { display: false },
+                    },
+                  ]
+                : [
+                    // Оба набора данных
+                    {
+                      label: user ? user.court : "Загрузка...",
+                      data: [
+                        currentCourtAverageSS.judge || 0,
+                        currentCourtAverageSS.secretary || 0,
+                        currentCourtAverageSS.office || 0,
+                        currentCourtAverageSS.process || 0,
+                        currentCourtAverageSS.building || 0,
+                      ],
+                      fill: true,
+                      backgroundColor: "rgba(255, 206, 86, 0.2)",
+                      borderColor: "rgba(255, 206, 86, 1)",
+                      borderWidth: 2,
+                      pointRadius: 5,
+                      pointHoverRadius: 7,
+                    },
+                    {
+                      label: "Средние оценки по республике",
+                      data: [
+                        allCourtsAvgMap["Судья"] || 0,
+                        allCourtsAvgMap["Сотрудники"] || 0,
+                        allCourtsAvgMap["Канцелярия"] || 0,
+                        allCourtsAvgMap["Процесс"] || 0,
+                        allCourtsAvgMap["Здание"] || 0,
+                      ],
+                      fill: true,
+                      backgroundColor: "rgba(54, 162, 235, 0.2)",
+                      borderColor: "rgba(54, 162, 235, 1)",
+                      borderWidth: 2,
+                      pointRadius: 5,
+                      pointHoverRadius: 7,
+                      datalabels: { display: false },
+                    },
+                  ],
           });
-
-          
 
           const ratings = processProgressRatings(
             surveyData.questions,
@@ -435,8 +455,6 @@ export default function Evaluations() {
           );
           setDisrespectData(disrespectData as BarChartData);
         }
-
-
         if (surveyData?.total_responses) {
           setTotalResponses(surveyData.total_responses);
         }
@@ -449,13 +467,20 @@ export default function Evaluations() {
             setAgeData(processedAgeData);
           }
         }
+        const fetchRepublicData = async () => {
+          try {
+          } catch (error) {
+            console.error("Ошибка загрузки данных по республике:", error);
+          }
+        };
+        fetchRepublicData();
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
       }
     };
 
     fetchData();
-  }, [surveyData, language]);
+  }, [surveyData, language, user]);
 
   // Подсчитываем количество custom_answer
   useEffect(() => {
@@ -517,49 +542,6 @@ export default function Evaluations() {
       },
     },
   };
-
-  // Обновленные данные для торнадо-диаграммы
-  const ageGenderData = {
-    labels: ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"],
-    datasets: [
-      {
-        label: "Мужчины",
-        data: [-35, -28, -20, -10, -5, -2],
-        backgroundColor: "rgb(54, 162, 235)",
-        stack: "Stack 0",
-        datalabels: {
-          color: "#FFFFFF",
-          formatter: (value: number): string => `${Math.abs(value)}%`,
-        },
-      },
-      {
-        label: "Женщины",
-        data: [30, 25, 18, 12, 8, 4],
-        backgroundColor: "rgb(255, 192, 203)",
-        stack: "Stack 0",
-        datalabels: {
-          color: "#FFFFFF",
-          formatter: (value: number): string => `${value}%`,
-        },
-      },
-    ],
-  };
-
-  // Обновленные данные для возрастной диаграммы
-  // const ageData = {
-  //   labels: ["18–29", "30–44", "45–59", "60+"],
-  //   datasets: [
-  //     {
-  //       label: "Количество пользователей",
-  //       data: [25, 40, 35, 10],  // Эти данные можно подставить из API
-  //       backgroundColor: "rgb(54, 162, 235)",  // Цвет столбцов
-  //       borderColor: "rgb(54, 162, 235)",
-  //       borderWidth: 1,
-  //     },
-  //   ],
-  // };
-
-  // Замечания и предложения
 
   // Обновленные данные для источников трафика
   const trafficSourceOptions = {
@@ -829,9 +811,9 @@ export default function Evaluations() {
                           stacked: true,
                           ticks: {
                             callback: function (value: string | number) {
-                              return Number(value);
+                              return `${Math.abs(Number(value))}%`; 
                             },
-                            display: false,
+                            display: true,
                           },
                           grid: {
                             display: false,
@@ -845,14 +827,35 @@ export default function Evaluations() {
                           },
                         },
                       },
+                      animation: {
+                        duration: 1000, // Задержка для анимации, если нужна плавность
+                      },
                       plugins: {
                         legend: {
                           position: "bottom" as const,
                         },
+                        datalabels: {
+                          display: true, // Включаем отображение меток данных
+                          color: "white", // Цвет текста метки
+                          font: {
+                            weight: "bold", // Шрифт метки
+                          },
+                          formatter: (value: number) => `${value}%`, // Форматируем метки как проценты
+                        },
+                        tooltip: {
+                          callbacks: {
+                            label: function (tooltipItem: any) {
+                              const value = Math.abs(tooltipItem.raw);  // Применяем Math.abs для отображения только положительных значений
+                              return `${value}%`;  // Отображаем процент без минуса
+                            },
+                          },
+                        },
                       },
+                      
                       maintainAspectRatio: false,
                     }}
-                  />
+                    plugins={[ChartDataLabels]} // Добавляем плагин в массив плагинов
+                  />  
                 )}
                 {demographicsView === "возраст" && ageData && (
                   <Bar

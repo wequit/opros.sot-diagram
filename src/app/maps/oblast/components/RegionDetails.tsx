@@ -1,15 +1,17 @@
 import { getCookie } from "@/api/login";
 import { useSurveyData } from "@/context/SurveyContext";
 import React, { useState } from "react";
-import Dates from "@/components/Dates/Dates"; // Импорт компонента Dates
-import Evaluations from "@/components/Evaluations/page"; // Импорт компонента Evaluations
+import Dates from "@/components/Dates/Dates"; 
+import Evaluations from "@/components/Evaluations/page"; 
 
 function RegionDetails({ regionName }: { regionName: string | null }) {
   const { selectedRegion, setSelectedRegion, setSurveyData, setIsLoading } = useSurveyData();
-  const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null); // Состояние для хранения выбранного суда
+  const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
+  const [selectedCourtName, setSelectedCourtName] = useState<string | null>(null);
 
-  const handleCourtClick = async (courtId: number) => {
-    setSelectedCourtId(courtId); // Устанавливаем выбранный суд
+  const handleCourtClick = async (courtId: number, courtName: string) => {
+    setSelectedCourtId(courtId);
+    setSelectedCourtName(courtName); // Сохраняем имя суда
 
     try {
       const token = getCookie("access_token");
@@ -25,47 +27,45 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
       );
 
       if (!response.ok) {
-        throw new Error(
-          `Ошибка HTTP: ${response.status} ${response.statusText}`
-        );
+        throw new Error(`Ошибка HTTP: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
       setSurveyData(data);
       setIsLoading(false);
-      console.log("Данные суда:", data);
     } catch (error) {
       console.error("Ошибка при получении данных суда:", error);
     }
   };
 
   const handleBackClick = () => {
-    setSelectedCourtId(null); // Возвращаемся к списку судов
+    setSelectedCourtId(null);
+    setSelectedCourtName(null); // Сбрасываем имя суда
   };
 
   return (
     <>
       {selectedCourtId ? (
         <div className="mt-8">
-        <button
-          onClick={handleBackClick}
-          className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 mb-6 transition"
-        >
-          Назад к списку судов
-        </button>
+         
 
-        <div className="space-y-6">
-          <Dates />
-          <Evaluations />
+          <h2 className="text-3xl font-bold mb-4">{selectedCourtName}</h2> {/* Отображаем название суда */}
+          <button
+            onClick={handleBackClick}
+            className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 mb-6 transition"
+          >
+            Назад к списку судов
+          </button>
+          <div className="space-y-6">
+            <Dates />
+            <Evaluations />
+          </div>
         </div>
-      </div>
       ) : (
         <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
           <div className="max-w-[1250px] mx-auto px-4 py-4">
             <div className="flex flex-col">
-              <h2 className="text-xl font-medium">
-                {regionName ? regionName : "Выберите регион"}
-              </h2>
+              <h2 className="text-xl font-medium">{regionName ? regionName : "Выберите регион"}</h2>
 
               <div className="mb-4 flex justify-end">
                 <button
@@ -87,35 +87,23 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
                         <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                           Наименование суда
                         </th>
-                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                          <div className="flex items-center justify-between px-2">
-                            <span>Общая оценка</span>
-                          </div>
+                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                            Общая оценка
                         </th>
-                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                          <div className="flex items-center justify-between px-2">
-                            <span>Здание</span>
-                          </div>
+                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                          Здание
                         </th>
-                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                          <div className="flex items-center justify-between px-2">
-                            <span>Канцелярия</span>
-                          </div>
+                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                          Канцелярия
                         </th>
-                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                          <div className="flex items-center justify-between px-2">
-                            <span>Процесс</span>
-                          </div>
+                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                          Процесс
                         </th>
-                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                          <div className="flex items-center justify-between px-2">
-                            <span>Сотрудники</span>
-                          </div>
+                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                          Сотрудники
                         </th>
-                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer">
-                          <div className="flex items-center justify-between px-2">
-                            <span>Судья</span>
-                          </div>
+                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                          Судья
                         </th>
                         <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                           Количество отзывов
@@ -133,7 +121,7 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
                           </td>
                           <td
                             className="px-3 py-2.5 text-left text-xs text-gray-600 cursor-pointer hover:text-blue-500"
-                            onClick={() => handleCourtClick(court.id)} // Используем court.id
+                            onClick={() => handleCourtClick(court.id, court.name)} // Передаем court.name
                           >
                             {court.name}
                           </td>

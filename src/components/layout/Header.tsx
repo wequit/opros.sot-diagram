@@ -16,7 +16,7 @@ const Header: React.FC = () => {
   const pathname = usePathname();
   const [isSticky, setIsSticky] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { courtName, language, toggleLanguage } = useSurveyData();
+  const { courtName, language, toggleLanguage} = useSurveyData();
   
 
   useEffect(() => {

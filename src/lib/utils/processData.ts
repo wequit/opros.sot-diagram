@@ -12,6 +12,7 @@ interface QuestionResponse {
     text_kg: string;
   }[];
   custom_answer: string | null;
+  answer?: string | undefined;
 }
 
 export function processFirstQuestion(
@@ -692,7 +693,6 @@ export function processDisrespectQuestion(
   return getEmptyDisrespectData();
 }
 
-
 function getEmptyDisrespectData() {
   return {
     labels: ["Грубость", "Игнорирование", "Не давали выступить", "Другое :"],
@@ -715,74 +715,94 @@ function getEmptyDisrespectData() {
   };
 }
 
-export function processAgeData(responses: QuestionResponse[]) {
-  const ageGroups = ["18–29", "30–44", "45–59", "60+"];
-  const ageCounts = new Array(ageGroups.length).fill(0);
+  export function processAgeData(responses: QuestionResponse[]) {
+    const ageGroups = ["18–29", "30–44", "45–59", "60+"];
+    const ageCounts = new Array(ageGroups.length).fill(0);
 
-  responses.forEach(response => {
-    if (response.selected_option) {
-      const ageGroupIndex = response.selected_option.id - 13; // Измените 13 на минимальный id для возрастных групп
-      if (ageGroupIndex >= 0 && ageGroupIndex < ageCounts.length) {
-        ageCounts[ageGroupIndex]++;
+    responses.forEach(response => {
+      if (response.selected_option) {
+        const ageGroupIndex = response.selected_option.id - 13; // Измените 13 на минимальный id для возрастных групп
+        if (ageGroupIndex >= 0 && ageGroupIndex < ageCounts.length) {
+          ageCounts[ageGroupIndex]++;
+        }
       }
-    }
-  });
+    });
 
-  return {
-    labels: ageGroups,
-    datasets: [
-      {
-        data: ageCounts,
-        backgroundColor: [
-          "rgb(54, 162, 235)",
-          "rgb(255, 99, 132)",
-          "rgb(75, 192, 192)",
-          "rgb(153, 102, 255)",
-        ],
-        datalabels: {
-          color: "#FFFFFF",
-          formatter: (value: number): string => `${value}`,
+    return {
+      labels: ageGroups,
+      datasets: [
+        {
+          data: ageCounts,
+          backgroundColor: [
+            "rgb(54, 162, 235)",
+            "rgb(255, 99, 132)",
+            "rgb(75, 192, 192)",
+            "rgb(153, 102, 255)",
+          ],
+          datalabels: {
+            color: "#FFFFFF",
+            formatter: (value: number): string => `${value}`,
+          },
         },
-      },
-    ],
+      ],
+    };
+  }
+
+ export function processAgeGenderData(
+  genderResponses: QuestionResponse[],
+  ageResponses: QuestionResponse[]
+) {
+  // Статичные возрастные группы
+  const ageGroups = ["18-29", "30-44", "45-59", "60+"];
+
+  // Структура для хранения данных
+  const groupedData: Record<string, { Мужской: number; Женский: number }> = {
+    "18-29": { Мужской: 0, Женский: 0 },
+    "30-44": { Мужской: 0, Женский: 0 },
+    "45-59": { Мужской: 0, Женский: 0 },
+    "60+": { Мужской: 0, Женский: 0 },
   };
-}
 
-export function processAgeGenderData(genderResponses: QuestionResponse[]) {
-  const ageGroups = ["18–24", "25–34", "35–44", "45–54", "55–64", "65+"];
-  const genderCounts = {
-    male: new Array(ageGroups.length).fill(0),
-    female: new Array(ageGroups.length).fill(0),
-  };
-
-  const totalResponses = genderResponses.length;
-
-  // Подсчет по возрастным группам
-  genderResponses.forEach((genderResponse) => {
-    const gender = genderResponse.selected_option?.text_ru === "Мужчина" ? "male" : "female";
-    const ageGroupIndex = Math.floor(Math.random() * ageGroups.length); // Замените на реальную логику для определения возраста
-
-    if (genderCounts[gender]) {
-      genderCounts[gender][ageGroupIndex]++;
+  for (let i = 0; i < genderResponses.length; i++) {
+    const gender = genderResponses[i]?.selected_option?.text_ru;
+    let age = ageResponses[i]?.selected_option?.text_ru;
+    
+    if (age) {
+      // Нормализуем возраст: убираем пробелы и заменяем en‑dash на дефис
+      age = age.replace(/–/g, "-").replace(/\s/g, "");
     }
+
+    console.log(`Индекс ${i}: нормализованный возраст: "${age}", пол: "${gender}"`);
+
+    if (gender && age && ageGroups.includes(age)) {
+      groupedData[age][gender as 'Мужской' | 'Женский']++;
+    }
+  }
+
+  console.log("Grouped Data:", groupedData);
+
+  // Вычисляем процентное соотношение
+  const maleData = ageGroups.map((age) => {
+    const total = groupedData[age]["Мужской"] + groupedData[age]["Женский"];
+    return total > 0 ? -Math.round((groupedData[age]["Мужской"] / total) * 100) : 0;
+  });
+  const femaleData = ageGroups.map((age) => {
+    const total = groupedData[age]["Мужской"] + groupedData[age]["Женский"];
+    return total > 0 ? Math.round((groupedData[age]["Женский"] / total) * 100) : 0;
   });
 
-  // Преобразуем количество в проценты
-  const malePercentages = genderCounts.male.map(count => totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0);
-  const femalePercentages = genderCounts.female.map(count => totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0);
-
   return {
-    labels: ageGroups,
+    labels: ageGroups, // Статичные возрастные группы
     datasets: [
       {
-        label: "Мужчины",
-        data: malePercentages.map(value => -value), // Отрицательные значения для отображения слева
-        backgroundColor: "rgb(54, 162, 235)",
+        label: "Мужской",
+        data: maleData, // Отрицательные проценты для торнадо-диаграммы
+        backgroundColor: "rgb(51, 153, 255)",
       },
       {
-        label: "Женщины",
-        data: femalePercentages,
-        backgroundColor: "rgb(255, 192, 203)",
+        label: "Женский",
+        data: femaleData,
+        backgroundColor: "rgb(255, 99, 132)",
       },
     ],
   };

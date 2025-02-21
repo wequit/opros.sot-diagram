@@ -112,10 +112,9 @@ export default function Courts() {
     try {
       setIsLoading(true);
       setCourtName(court.name);
-      // Сохраняем название суда в localStorage
       localStorage.setItem('selectedCourtName', court.name);
       
-      const response = await fetchWithAuth(`https://opros.sot.kg/api/v1/results/${court.id}/?year=2025`, {
+      const response = await fetch(`https://opros.sot.kg/api/v1/results/${court.id}/?year=2025`, {
         headers: {
           'Accept': 'application/json',
           'Authorization': `Bearer ${token}`
