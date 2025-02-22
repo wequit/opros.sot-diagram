@@ -707,7 +707,7 @@ export default function Evaluations() {
                           {absoluteIndex}
                         </span>
                         <span>{comment.text}</span>
-                      </div>
+                      </div>  
                     );
                   })}
                 </div>
