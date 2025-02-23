@@ -5,9 +5,8 @@ import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page"; 
 
 function RegionDetails({ regionName }: { regionName: string | null }) {
-  const { selectedRegion, setSelectedRegion, setSurveyData, setIsLoading } = useSurveyData();
+  const { selectedRegion, setSelectedRegion, setSurveyData, setIsLoading, selectedCourtName, setSelectedCourtName } = useSurveyData();
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
-  const [selectedCourtName, setSelectedCourtName] = useState<string | null>(null);
 
   const handleCourtClick = async (courtId: number, courtName: string) => {
     setSelectedCourtId(courtId);

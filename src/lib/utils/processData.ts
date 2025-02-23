@@ -772,14 +772,12 @@ function getEmptyDisrespectData() {
       age = age.replace(/–/g, "-").replace(/\s/g, "");
     }
 
-    console.log(`Индекс ${i}: нормализованный возраст: "${age}", пол: "${gender}"`);
 
     if (gender && age && ageGroups.includes(age)) {
       groupedData[age][gender as 'Мужской' | 'Женский']++;
     }
   }
 
-  console.log("Grouped Data:", groupedData);
 
   // Вычисляем процентное соотношение
   const maleData = ageGroups.map((age) => {

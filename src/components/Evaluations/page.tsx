@@ -489,6 +489,7 @@ export default function Evaluations() {
         (remark: { custom_answer: string | null }) =>
           remark.custom_answer &&
           remark.custom_answer !== "Необязательный вопрос"
+         
       ).length;
       setTotalResponsesAnswer(count);
     }
@@ -646,12 +647,12 @@ export default function Evaluations() {
   // Показываем сообщение о загрузке
   if (isLoading) {
     return <SkeletonDashboard />;
-  }
+  } 
 
   // Проверяем отсутствие данных только после загрузки
   if (
     !surveyData ||
-    (surveyData.questions.length === 0 && surveyData.total_responses === 0)
+    surveyData.total_responses === 0
   ) {
     return <NoData />;
   }

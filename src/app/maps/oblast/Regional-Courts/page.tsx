@@ -154,12 +154,18 @@ export default function RegionalCourts() {
         }
       );
   
+      if (response.status === 401) {
+        console.warn("Токен устарел, выполняем выход...");
+        router.push("/login");
+        return;
+      }
+  
       if (!response.ok) {
-        throw new Error(`Ошибка HTTP: ${response.status} ${response.statusText}`);
+        router.push("/login");
+        throw new Error(`Ошибка TP: ${response.status} ${response.statusText}`);
       }
   
       const data = await response.json();
-      console.log("Данные из API:", data);
   
       if (!Array.isArray(data) || data.length === 0) {
         throw new Error("Данные по региону отсутствуют или неверного формата.");
@@ -176,8 +182,8 @@ export default function RegionalCourts() {
   
       // Обновляем `selectedRegion`
       setSelectedRegion(updatedRegions);
-  
-      setRegionName(court.name); // используем `court.name`, так как он уже содержит `region_name`
+      
+      setRegionName(court.name);
     } catch (error) {
       console.error("Ошибка при получении данных для региона:", error);
     }

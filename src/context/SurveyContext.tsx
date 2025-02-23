@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import ru from '@/locales/ru.json';
-import ky from '@/locales/ky.json';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import ru from "@/locales/ru.json";
+import ky from "@/locales/ky.json";
 
 export interface SelectedOption {
   id: number;
@@ -36,6 +42,22 @@ interface SurveyData {
   total_responses: number;
 }
 
+interface Assessment {
+  aspect: string;
+  court_avg: number;
+  assessment_count: string;
+}
+
+interface CourtData {
+  court_id: number;
+  court: string;
+  instantiation: string;
+  overall_assessment: number;
+  assessment: Assessment[];
+  assessment_count: string;
+  total_survey_responses: number;
+}
+
 type Language = "ky" | "ru";
 
 interface SurveyContextType {
@@ -50,23 +72,34 @@ interface SurveyContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
-  selectedRegion: {
-    id: number;
-    name: any;
-    overall: any;
-    ratings: any;
-    totalAssessments: any;
-  }[] | null;
-  setSelectedRegion: React.Dispatch<React.SetStateAction<
-    {
-      id: number;
-      name: any;
-      overall: any;
-      ratings: any;
-      totalAssessments: any;
-    }[] | null
-  >>;
+  selectedRegion:
+    | {
+        id: number;
+        name: any;
+        overall: any;
+        ratings: any;
+        totalAssessments: any;
+      }[]
+    | null;
+  setSelectedRegion: React.Dispatch<
+    React.SetStateAction<
+      | {
+          id: number;
+          name: any;
+          overall: any;
+          ratings: any;
+          totalAssessments: any;
+        }[]
+      | null
+    >
+  >;
+  selectedCourt: CourtData | null;
+  setSelectedCourt: React.Dispatch<React.SetStateAction<CourtData | null>>;
+  selectedCourtName: string | null; // Добавлено свойство regionName
+  setSelectedCourtName: React.Dispatch<React.SetStateAction<string | null>>; // Добавлен setter для regionName
 }
+
+
 
 const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
 
@@ -76,14 +109,17 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   const [userCourt, setUserCourt] = useState<string | null>(null);
   const [courtName, setCourtName] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("ru");
+  const [selectedCourt, setSelectedCourt] = useState<CourtData | null>(null);
+  const [selectedCourtName, setSelectedCourtName] = useState<string | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<
-    {
-      id: number;
-      name: any;
-      overall: any;
-      ratings: any;
-      totalAssessments: any;
-    }[] | null
+    | {
+        id: number;
+        name: any;
+        overall: any;
+        ratings: any;
+        totalAssessments: any;
+      }[]
+    | null
   >(null);
 
   // При монтировании считываем сохранённый язык из localStorage
@@ -118,6 +154,10 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
         toggleLanguage,
         selectedRegion,
         setSelectedRegion,
+        selectedCourt,
+        setSelectedCourt,
+        selectedCourtName,
+        setSelectedCourtName
       }}
     >
       {children}
@@ -125,7 +165,10 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function getTranslation(key: keyof typeof ru, language: Language): string {
+export function getTranslation(
+  key: keyof typeof ru,
+  language: Language
+): string {
   const translations: Record<Language, typeof ru> = {
     ru,
     ky,
@@ -137,7 +180,7 @@ export function getTranslation(key: keyof typeof ru, language: Language): string
 export function useSurveyData() {
   const context = useContext(SurveyContext);
   if (context === undefined) {
-    throw new Error('useSurveyData must be used within a SurveyProvider');
+    throw new Error("useSurveyData must be used within a SurveyProvider");
   }
   return context;
 }

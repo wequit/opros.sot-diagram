@@ -2,6 +2,8 @@
 import { getCookie, getCurrentUser } from "@/api/login";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useSurveyData } from "@/context/SurveyContext";
+import { filterRemarks } from "@/types/filterRemarks"; 
 
 export interface Remark {
   id: number;
@@ -23,6 +25,7 @@ export function useRemarks() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const pathname = usePathname();
+  const { selectedCourt, courtName, selectedCourtName } = useSurveyData();
 
   const fetchRemarks = async () => {
     try {
@@ -31,7 +34,6 @@ export function useRemarks() {
 
       // Получаем текущего пользователя
       const user = await getCurrentUser();
-      const userCourt = user.court; // Предполагаем, что у user есть поле court
 
       const response = await fetch("https://opros.sot.kg/api/v1/comments/", {
         headers: {
@@ -47,21 +49,8 @@ export function useRemarks() {
 
       const data = await response.json();
 
-      const filteredData = data
-        .filter((item: Remark) => {
-          // Проверка роли пользователя
-          if (user.role === "Председатель 3 инстанции" && pathname === "/") {
-            // Для председателя 3 инстанции — показываем все ответы, кроме пустых и "Необязательный вопрос"
-            return item.custom_answer !== null && item.custom_answer !== "Необязательный вопрос";
-          } else {
-            // Для остальных пользователей — только их суд + ответы, кроме пустых и "Необязательный вопрос"
-            return (
-              item.court === userCourt &&
-              item.custom_answer !== null &&
-              item.custom_answer !== "Необязательный вопрос"
-            );
-          }
-        })
+      // Используем функцию filterRemarks для фильтрации данных
+      const filteredData = filterRemarks(data, user, pathname, selectedCourtName)
         .map((item: Remark) => ({
           id: item.id,
           custom_answer: item.custom_answer,
@@ -71,7 +60,8 @@ export function useRemarks() {
           question_id: item.question_id,
           court: item.court,
         }));
-
+      
+      console.log("Отфильтрованные remarks:", filteredData);
       setRemarks(filteredData);
     } catch (err) {
       console.error("Ошибка при получении данных:", err);
@@ -83,7 +73,7 @@ export function useRemarks() {
 
   useEffect(() => {
     fetchRemarks();
-  }, []);
+  }, [selectedCourt, courtName]); // Обновляем данные при изменении selectedCourt или courtName
 
   return { remarks, isLoading, error, fetchRemarks };
 }
