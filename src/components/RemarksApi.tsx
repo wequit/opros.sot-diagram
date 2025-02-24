@@ -28,6 +28,15 @@ export function useRemarks() {
   const { selectedCourt, courtName, selectedCourtName } = useSurveyData();
 
   const fetchRemarks = async () => {
+    // Получаем selectedCourtId из localStorage, если его нет, используем 0
+    const storedCourtId = localStorage.getItem("selectedCourtId");
+    const courtId = storedCourtId ? parseInt(storedCourtId, 10) : null;
+
+    if (!courtId) {
+      return;
+    }
+
+    
     try {
       setIsLoading(true);
       const token = getCookie("access_token");
@@ -50,7 +59,7 @@ export function useRemarks() {
       const data = await response.json();
 
       // Используем функцию filterRemarks для фильтрации данных
-      const filteredData = filterRemarks(data, user, pathname, selectedCourtName)
+      const filteredData = filterRemarks(data, user, pathname, selectedCourtName, courtId)
         .map((item: Remark) => ({
           id: item.id,
           custom_answer: item.custom_answer,
@@ -61,7 +70,6 @@ export function useRemarks() {
           court: item.court,
         }));
       
-      console.log("Отфильтрованные remarks:", filteredData);
       setRemarks(filteredData);
     } catch (err) {
       console.error("Ошибка при получении данных:", err);
@@ -73,7 +81,7 @@ export function useRemarks() {
 
   useEffect(() => {
     fetchRemarks();
-  }, [selectedCourt, courtName]); // Обновляем данные при изменении selectedCourt или courtName
+  }, [selectedCourt, courtName, selectedCourtName]); // Обновляем данные при изменении selectedCourt или courtName
 
   return { remarks, isLoading, error, fetchRemarks };
 }

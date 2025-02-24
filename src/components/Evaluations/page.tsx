@@ -91,7 +91,7 @@ interface BarChartData extends ChartData<"bar", number[], string> {
   })[];
 }
 
-export default function Evaluations() {
+export default function Evaluations({ selectedCourtId }: { selectedCourtId?: number | null }) {
   const { surveyData, isLoading, language } = useSurveyData();
   const { remarks } = useRemarks();
   const [demographicsView, setDemographicsView] = useState("пол");
@@ -643,7 +643,17 @@ export default function Evaluations() {
       </div>
     );
   };
+  let  remarksPath = "/remarks"; 
 
+  if (pathname.includes("/maps/General")) {
+    remarksPath = "/remarks/General";
+  } else if (pathname.includes("/maps/oblast/Regional-Courts")) {
+    remarksPath = "/remarks/Regional-Courts";
+  }
+
+  if (selectedCourtId) {
+    remarksPath += `/${selectedCourtId}`;
+  }
   // Показываем сообщение о загрузке
   if (isLoading) {
     return <SkeletonDashboard />;
@@ -724,7 +734,7 @@ export default function Evaluations() {
               )}
             </div>
             <div className="px-6 pb-6">
-              <Link href="/Remarks">
+              <Link href={remarksPath}>
                 <button className="mt-4 w-full py-3 text-white rounded-lg bg-green-600 hover:shadow-2xl transition-all duration-200">
                   {getTranslation("DiagrammTwoButton", language)}
                 </button>

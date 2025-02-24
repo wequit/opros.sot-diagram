@@ -5,21 +5,24 @@ export const filterRemarks = (
   remarks: Remark[],
   user: any,
   pathname: string,
-  selectedCourtName: string | null
+  selectedCourtName: string | null,
+  courtId: number | null
 ): Remark[] => {
+
+
   return remarks.filter((item: Remark) => {
-    if (user.role === "Председатель 3 инстанции" && pathname === "/") {
+    if (user.role === "Председатель 3 инстанции" && pathname === "/" || pathname === "/remarks" ) {
       return item.custom_answer !== null && item.custom_answer !== "Необязательный вопрос";
     }
 
     if (user.role === "Председатель 3 инстанции") {
-      if (pathname === "/maps/General") {
+      if (pathname === "/maps/General" || pathname === "/remarks/General" ) {
         return (
           item.court === "Верховный суд" &&
           item.custom_answer !== null &&
           item.custom_answer !== "Необязательный вопрос"
         );
-      } else if (pathname === "/maps/oblast/Regional-Courts") {
+      } else if (pathname === "/maps/oblast/Regional-Courts" ) {
         if (item.court === selectedCourtName) {
           return (
             item.custom_answer !== null &&
@@ -27,6 +30,16 @@ export const filterRemarks = (
           );
         } else {
           return false;
+        }
+      } 
+      else if (pathname === `/remarks/Regional-Courts/${courtId}`) {
+        if (item.court === selectedCourtName) {
+          return (
+            item.custom_answer !== null &&
+            item.custom_answer !== "Необязательный вопрос"
+          );
+        } else {
+          return false
         }
       }
     }

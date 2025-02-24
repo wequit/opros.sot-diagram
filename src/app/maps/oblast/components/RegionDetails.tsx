@@ -1,15 +1,25 @@
 import { getCookie } from "@/api/login";
 import { useSurveyData } from "@/context/SurveyContext";
 import React, { useState } from "react";
-import Dates from "@/components/Dates/Dates"; 
-import Evaluations from "@/components/Evaluations/page"; 
+import Dates from "@/components/Dates/Dates";
+import Evaluations from "@/components/Evaluations/page";
 
 function RegionDetails({ regionName }: { regionName: string | null }) {
-  const { selectedRegion, setSelectedRegion, setSurveyData, setIsLoading, selectedCourtName, setSelectedCourtName } = useSurveyData();
-  const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
+    const {
+      selectedRegion,
+      setSelectedRegion,
+      setSurveyData,
+      setIsLoading,
+      selectedCourtName,
+      setSelectedCourtName,
+      selectedCourtId,
+      setSelectedCourtId,
+    } = useSurveyData();
 
   const handleCourtClick = async (courtId: number, courtName: string) => {
     setSelectedCourtId(courtId);
+    localStorage.setItem("selectedCourtId", courtId.toString());
+    localStorage.setItem("selectedCourtName", courtName);
     setSelectedCourtName(courtName); // Сохраняем имя суда
 
     try {
@@ -18,7 +28,7 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
 
       const response = await fetch(
         `https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`,
-        {
+        { 
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -26,7 +36,9 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
       );
 
       if (!response.ok) {
-        throw new Error(`Ошибка HTTP: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `Ошибка HTTP: ${response.status} ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -46,9 +58,8 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
     <>
       {selectedCourtId ? (
         <div className="mt-8">
-         
-
-          <h2 className="text-3xl font-bold mb-4">{selectedCourtName}</h2> {/* Отображаем название суда */}
+          <h2 className="text-3xl font-bold mb-4">{selectedCourtName}</h2>
+          {/* Отображаем название суда */}
           <button
             onClick={handleBackClick}
             className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 mb-6 transition"
@@ -57,14 +68,16 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
           </button>
           <div className="space-y-6">
             <Dates />
-            <Evaluations />
+            <Evaluations selectedCourtId={selectedCourtId} />
           </div>
         </div>
       ) : (
         <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
           <div className="max-w-[1250px] mx-auto px-4 py-4">
             <div className="flex flex-col">
-              <h2 className="text-xl font-medium">{regionName ? regionName : "Выберите регион"}</h2>
+              <h2 className="text-xl font-medium">
+                {regionName ? regionName : "Выберите регион"}
+              </h2>
 
               <div className="mb-4 flex justify-end">
                 <button
@@ -87,7 +100,7 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
                           Наименование суда
                         </th>
                         <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                            Общая оценка
+                          Общая оценка
                         </th>
                         <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                           Здание
@@ -120,7 +133,9 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
                           </td>
                           <td
                             className="px-3 py-2.5 text-left text-xs text-gray-600 cursor-pointer hover:text-blue-500"
-                            onClick={() => handleCourtClick(court.id, court.name)} // Передаем court.name
+                            onClick={() =>
+                              handleCourtClick(court.id, court.name)
+                            } // Передаем court.name
                           >
                             {court.name}
                           </td>

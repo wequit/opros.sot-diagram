@@ -75,10 +75,19 @@ const SecondInstance = () => {
     }
   };
 
+  const handleBackClick = () => {
+    setSelectedCourt(null);
+  };
   return (
     <>
     {selectedCourt ? (
        <div className="space-y-6">
+        <button
+            onClick={handleBackClick}
+            className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 mb-6 transition"
+          >
+            Назад к списку судов
+          </button>
         <Dates />
         {/* <DataFetcher /> */}
         <Evaluations/>

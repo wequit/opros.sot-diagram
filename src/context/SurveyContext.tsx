@@ -60,6 +60,14 @@ interface CourtData {
 
 type Language = "ky" | "ru";
 
+interface RegionData {
+  id: number;
+  name: string;
+  overall: number;
+  ratings: number[];
+  totalAssessments: number;
+}
+
 interface SurveyContextType {
   surveyData: SurveyData | null;
   setSurveyData: (data: SurveyData) => void;
@@ -72,34 +80,15 @@ interface SurveyContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
-  selectedRegion:
-    | {
-        id: number;
-        name: any;
-        overall: any;
-        ratings: any;
-        totalAssessments: any;
-      }[]
-    | null;
-  setSelectedRegion: React.Dispatch<
-    React.SetStateAction<
-      | {
-          id: number;
-          name: any;
-          overall: any;
-          ratings: any;
-          totalAssessments: any;
-        }[]
-      | null
-    >
-  >;
+  selectedRegion: RegionData[] | null;
+  setSelectedRegion: React.Dispatch<React.SetStateAction<RegionData[] | null>>;
   selectedCourt: CourtData | null;
   setSelectedCourt: React.Dispatch<React.SetStateAction<CourtData | null>>;
-  selectedCourtName: string | null; // Добавлено свойство regionName
-  setSelectedCourtName: React.Dispatch<React.SetStateAction<string | null>>; // Добавлен setter для regionName
+  selectedCourtName: string | null;
+  setSelectedCourtName: React.Dispatch<React.SetStateAction<string | null>>;
+  selectedCourtId: number | null;
+  setSelectedCourtId: React.Dispatch<React.SetStateAction<number | null>>;
 }
-
-
 
 const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
 
@@ -111,16 +100,8 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("ru");
   const [selectedCourt, setSelectedCourt] = useState<CourtData | null>(null);
   const [selectedCourtName, setSelectedCourtName] = useState<string | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<
-    | {
-        id: number;
-        name: any;
-        overall: any;
-        ratings: any;
-        totalAssessments: any;
-      }[]
-    | null
-  >(null);
+  const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
+  const [selectedRegion, setSelectedRegion] = useState<RegionData[] | null>(null);
 
   // При монтировании считываем сохранённый язык из localStorage
   useEffect(() => {
@@ -131,6 +112,7 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
       }
     }
   }, []);
+
 
   const toggleLanguage = () => {
     const newLanguage = language === "ru" ? "ky" : "ru";
@@ -157,7 +139,9 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
         selectedCourt,
         setSelectedCourt,
         selectedCourtName,
-        setSelectedCourtName
+        setSelectedCourtName,
+        selectedCourtId,
+        setSelectedCourtId,
       }}
     >
       {children}
