@@ -5,18 +5,22 @@ import Map from '../components/Map_rayon';
 import { useState, useEffect } from 'react';
 import { FaSort, FaSortUp, FaSortDown } from 'react-icons/fa';
 import { usePathname } from 'next/navigation';
-import { getRayonAssessmentData } from "@/api/login";
+import { fetchWithAuth, getRayonAssessmentData } from "@/api/login";
 import Evaluations from "@/components/Evaluations/page";
 import { useSurveyData } from '@/context/SurveyContext';
 import { getCookie } from '@/api/login';
-import Dates from '@/lib/utils/Dates';
+import Dates from '@/components/Dates/Dates';
 // Типы для данных API
 interface Assessment {
   aspect: string;
   court_avg: number;
 }
 
+// Обновляем интерфейс Court
 interface Court {
+  court_id: number;
+  court: string;
+  instantiation: string;
   id: number;
   name: string;
   instance: string;
@@ -90,11 +94,18 @@ const transformApiData = (apiData: any): Court[] => {
   }).filter(Boolean);
 };
 
-export default function Courts() {
+export default function DistrictCourts() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-  const { setCourtName, setSurveyData, setIsLoading } = useSurveyData();
+  const { 
+    setCourtName, 
+    setSurveyData, 
+    setIsLoading, 
+    setBreadcrumbCourt,
+    setSelectedCourt,
+    breadcrumbCourt
+  } = useSurveyData();
   const [showEvaluations, setShowEvaluations] = useState(false);
 
   const token = getCookie('access_token');
@@ -111,8 +122,12 @@ export default function Courts() {
   const handleCourtClick = async (court: Court) => {
     try {
       setIsLoading(true);
+      
+      setBreadcrumbCourt(court.name);
+      
       setCourtName(court.name);
-      // Сохраняем название суда в localStorage
+      setSelectedCourt(court);
+      
       localStorage.setItem('selectedCourtName', court.name);
       
       const response = await fetch(`https://opros.sot.kg/api/v1/results/${court.id}/?year=2025`, {
@@ -149,6 +164,12 @@ export default function Courts() {
 
     fetchCourts();
   }, []);
+
+  useEffect(() => {
+    if (breadcrumbCourt) {
+      console.log('Breadcrumb court updated:', breadcrumbCourt);
+    }
+  }, [breadcrumbCourt]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -219,23 +240,9 @@ export default function Courts() {
       {showEvaluations ? (
         <>
           <Dates />
-          <div className="w-[55rem] ml-4 mb-4">
-            <div className="bg-[#F8F9FF] border-l-[6px] border-[#2563EB] rounded-lg shadow-sm">
-              <div className="px-5 py-4 flex items-center">
-                <svg className="w-7 h-7 text-[#2563EB]" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2L3 8.2V9h18V8.2L12 2zm0 2.03l5.74 3.93H6.26L12 4.03zM4 10v9h2v-9H4zm14 0v9h2v-9h-2zM8 10v9h8v-9H8zm2 2h4v5h-4v-5z" 
-                    fill="currentColor"/>
-                </svg>
-                <h2 className="ml-3 text-[1.15rem] font-semibold text-gray-800">
-                  {courts.find(court => court.name === localStorage.getItem('selectedCourtName'))?.name}
-                </h2>
-              </div>
-            </div>
-          </div>
           <Evaluations />
         </>
       ) : (
-        
         <div className="container mx-auto px-4 py-8">
           <h2 className="text-2xl font-bold mb-4">Районные суды</h2>
           <Map selectedRayon={null} onSelectRayon={() => {}} courts={courts}/>

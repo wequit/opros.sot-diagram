@@ -1,4 +1,4 @@
-import { Question } from '@/lib/utils/Dates';
+import { Question } from '@/components/Dates/Dates';
 interface QuestionResponse {
   question: number;
   selected_option: {
@@ -13,8 +13,6 @@ interface QuestionResponse {
   }[];
   custom_answer: string | null;
 }
-
-
 
 export function processFirstQuestion(
   responses: QuestionResponse[],
@@ -112,117 +110,10 @@ export function processSecondQuestion(
           "Иш боюнча тарап (доогер, жоопкер, жабырлануучу, айыпталуучу)",
           "Адвокат же тараптын өкүлү",
           "Күбө",
-          "Келүүчү   (тууганы, досу, кошунасы, бир тараптын кесиптеши ж.б.)"
+          "Келүүчү (тууганы, досу, кошунасы, бир тараптын кесиптеши ж.б.)"
         ];
 
   // Фильтруем ответы (отбрасываем те, у которых selected_option равен null)
-  const validResponses = responses.filter(r => r.selected_option !== null);
-  const totalResponses = validResponses.length;
-
-  // Группируем ответы по выбранному варианту: если язык ru, то берем text_ru, иначе text_kg
-  const grouped = validResponses.reduce((acc, response) => {
-    const optionText =
-      language === "ru"
-        ? response.selected_option!.text_ru
-        : response.selected_option!.text_kg;
-    acc[optionText] = (acc[optionText] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Формируем массив данных для всех категорий
-  const labels = allCategories;
-  const data = labels.map(label => (grouped[label] ? Math.round((grouped[label] / totalResponses) * 100) : 0));
-
-  return {
-    labels,
-    datasets: [
-      {
-        data,
-        backgroundColor: [
-          'rgb(54, 162, 235)',
-          'rgb(255, 99, 132)',
-          'rgb(255, 159, 64)',
-          'rgb(153, 102, 255)'
-        ],
-        datalabels: {
-          color: "#FFFFFF",
-          display: true,
-          formatter: (value: number): string => value + '%'
-        }
-      }
-    ]
-  };
-}
-
-
-export function processThirdQuestion(
-  responses: QuestionResponse[],
-  language: "ru" | "ky"
-) {
-  // Определяем категории в зависимости от языка
-  const allCategories = language === "ru"
-    ? ["Женский", "Мужской"]
-    : ["Аял", "Эркек"];
-
-  // Фильтруем только ответы, где выбран вариант
-  const validResponses = responses.filter(r => r.selected_option !== null);
-  const totalResponses = validResponses.length;
-
-  // Группируем ответы по выбранным вариантам
-  const grouped = validResponses.reduce((acc, response) => {
-    const optionText = language === "ru"
-      ? response.selected_option!.text_ru
-      : response.selected_option!.text_kg;
-    acc[optionText] = (acc[optionText] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Формируем массив данных для всех категорий (если в группе нет — ставим 0)
-  const labels = allCategories;
-  const data = labels.map(label => {
-    const count = grouped[label] || 0;
-    return totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0;
-  });
-
-  return {
-    labels,
-    datasets: [{
-      data,
-      backgroundColor: [
-        'rgb(255, 99, 132)',  // Цвет для первой категории (Женский/Аял)
-        'rgb(51, 153, 255)'   // Цвет для второй категории (Мужской/Эр)
-      ],
-      datalabels: {
-        color: "#FFFFFF",
-        display: true,
-        formatter: (value: number): string => `${value}%`,
-      }
-    }]
-  };
-}
-
-
-export function processFifthQuestion(
-  responses: QuestionResponse[],
-  language: "ru" | "ky"
-) {
-  // Определяем категории в зависимости от языка
-  const allCategories =
-    language === "ru"
-      ? [
-          "Гражданские",
-          "Уголовные",
-          "Административные",
-          "Другое :"
-        ]
-      : [
-          "Жарандык",         // Перевод для "Гражданские"
-          "Кылмыш",           // Перевод для "Уголовные"
-          "Административдик",  // Перевод для "Административные"
-          "Башка:"            // Перевод для "Другое :"
-        ];
-
-  // Фильтруем ответы (только те, где выбран вариант)
   const validResponses = responses.filter(r => r.selected_option !== null);
   const totalResponses = validResponses.length;
 
@@ -236,36 +127,124 @@ export function processFifthQuestion(
     return acc;
   }, {} as Record<string, number>);
 
-  // Формируем массив данных для всех категорий
+  // Формируем массив данных
   const labels = allCategories;
-  const data = labels.map(label => {
-    const count = grouped[label] || 0;
-    return totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0;
-  });
-
-  // Опционально: сортируем данные по проценту
-  const sortedEntries = labels
-    .map((label, index) => [label, data[index]] as [string, number])
-    .sort((a, b) => b[1] - a[1]);
+  const data = labels.map(label =>
+    grouped[label] ? Math.round((grouped[label] / totalResponses) * 100) : null
+  );
 
   return {
-    labels: sortedEntries.map(([label]) => label),
+    labels,
     datasets: [
       {
-        data: sortedEntries.map(([_, value]) => value),
+        data: data.map(value => (value !== null ? value : NaN)), // NaN не будет отображаться в диаграмме
         backgroundColor: [
-          'rgb(54, 162, 235)',  // для первой категории
-          'rgb(255, 99, 132)',  // для второй категории
-          'rgb(75, 192, 192)',  // для третьей категории
-          'rgb(153, 102, 255)'  // для четвертой категории
+          'rgb(54, 162, 235)',
+          'rgb(255, 99, 132)',
+          'rgb(255, 159, 64)',
+          'rgb(153, 102, 255)'
         ],
         datalabels: {
           color: "#FFFFFF",
-          formatter: (value: number): string => `${value}%`
-        },
-        label: ''
+          display: true,
+          formatter: (value: number): string => (isNaN(value) ? "" : `${value}%`) // Убираем 0%
+        }
       }
     ]
+  };
+}
+
+export function processThirdQuestion(
+  responses: QuestionResponse[],
+  language: "ru" | "ky"
+) {
+  // Определяем категории в зависимости от языка
+  const allCategories =
+    language === "ru" ? ["Женский", "Мужской"] : ["Аял", "Эркек"];
+
+  // Фильтруем только ответы, где выбран вариант
+  const validResponses = responses.filter((r) => r.selected_option !== null);
+  const totalResponses = validResponses.length;
+
+  // Группируем ответы по выбранным вариантам
+  const grouped = validResponses.reduce((acc, response) => {
+    const optionText =
+      language === "ru"
+        ? response.selected_option!.text_ru
+        : response.selected_option!.text_kg;
+    acc[optionText] = (acc[optionText] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // Формируем массив данных для всех категорий (если в группе нет — ставим NaN)
+  const labels = allCategories;
+  const data = labels.map((label) =>
+    grouped[label] ? Math.round((grouped[label] / totalResponses) * 100) : NaN
+  );
+
+  return {
+    labels,
+    datasets: [
+      {
+        data,
+        backgroundColor: [
+          "rgb(255, 99, 132)", // Цвет для первой категории (Женский/Аял)
+          "rgb(51, 153, 255)", // Цвет для второй категории (Мужской/Эркек)
+        ],
+        datalabels: {
+          color: "#FFFFFF",
+          display: true,
+          formatter: (value: number): string => (isNaN(value) ? "" : `${value}%`),
+        },
+      },
+    ],
+  };
+}
+
+export function processFifthQuestion(
+  responses: QuestionResponse[],
+  language: "ru" | "ky"
+) {
+  const allCategories =
+    language === "ru"
+      ? ["Гражданские", "Уголовные", "Административные", "Другое :"]
+      : ["Жарандык", "Кылмыш", "Административдик", "Башка:"];
+
+  const validResponses = responses.filter((r) => r.selected_option !== null);
+  const totalResponses = validResponses.length;
+
+  const grouped = validResponses.reduce((acc, response) => {
+    const optionText =
+      language === "ru"
+        ? response.selected_option!.text_ru
+        : response.selected_option!.text_kg;
+    acc[optionText] = (acc[optionText] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const data = allCategories.map((label) => {
+    const count = grouped[label] || 0;
+    return totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0; // Оставляем 0
+  });
+
+  return {
+    labels: allCategories,
+    datasets: [
+      {
+        data, // Оставляем 0, но скрываем его отображение в процентах
+        backgroundColor: [
+          "rgb(54, 162, 235)",
+          "rgb(255, 99, 132)",
+          "rgb(75, 192, 192)",
+          "rgb(153, 102, 255)",
+        ],
+        datalabels: {
+          color: "#FFFFFF",
+          formatter: (value: number): string => (value === 0 ? "" : `${value}%`), // Скрываем 0%
+        },
+        label: "",
+      },
+    ],
   };
 }
 
@@ -276,19 +255,15 @@ export function processAudioVideoQuestion(
   const question = questions.find(q => q.id === 13);
 
   if (question && question.question_responses) {
-    // Определяем категории в зависимости от языка
     const allCategories = language === "ru"
       ? ["Да", "Нет", "Не знаю/Не уверен(а)", "Другое:"]
       : ["Ооба", "Жок", "Билбейм/Белгисиз", "Башка:"];
-      
-    // Фильтруем только ответы, где выбран вариант
+
     const validResponses = question.question_responses.filter(
       r => r.selected_option !== null
     );
     const totalResponses = validResponses.length;
 
-    // Группируем ответы по выбранному варианту:
-    // если язык ru – используем text_ru, иначе text_kg
     const grouped = validResponses.reduce((acc: Record<string, number>, response) => {
       const optionText = language === "ru"
         ? response.selected_option!.text_ru
@@ -297,7 +272,6 @@ export function processAudioVideoQuestion(
       return acc;
     }, {} as Record<string, number>);
 
-    // Рассчитываем проценты и приводим порядок категорий к allCategories
     const data = allCategories.map(category => {
       const count = grouped[category] || 0;
       return totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0;
@@ -310,12 +284,12 @@ export function processAudioVideoQuestion(
         backgroundColor: [
           'rgb(54, 162, 235)',  // для "Да" или "Ооба"
           'rgb(255, 99, 132)',  // для "Нет" или "Жок"
-          'rgb(255, 159, 64)',  // для "Не знаю/Не уверен(а)" или "Билбейм/Ыйык эмеспин"
+          'rgb(255, 159, 64)',  // для "Не знаю/Не уверен(а)" или "Билбейм/Белгисиз"
           'rgb(153, 102, 255)'  // для "Другое:" или "Башка:"
         ],
         datalabels: {
           color: "#FFFFFF",
-          formatter: (value: number): string => `${value}%`
+          formatter: (value: number): string => (value === 0 ? "" : `${value}%`), // Скрываем 0%
         }
       }]
     };
@@ -582,13 +556,11 @@ export function processStartTimeQuestion(
   const question = questions.find(q => q.id === 16);
 
   if (question && question.question_responses) {
-    // Определяем категории на нужном языке
     const allCategories =
       language === "ru"
         ? ["Да", "Нет", "Другое:"]
-        : ["Ооба", "Жок", "Башка:"]; // Пример перевода на кыргызский
+        : ["Ооба", "Жок", "Башка:"];
 
-    // Фильтруем валидные ответы
     const validResponses = question.question_responses.filter(
       (r: QuestionResponse) => r.selected_option !== null
     );
@@ -599,7 +571,6 @@ export function processStartTimeQuestion(
       return getEmptyStartTimeData();
     }
 
-    // Группируем ответы
     const grouped = validResponses.reduce((acc: Record<string, number>, response) => {
       const optionText =
         language === "ru"
@@ -609,13 +580,11 @@ export function processStartTimeQuestion(
       return acc;
     }, {});
 
-    // Рассчитываем проценты для каждой категории
     const data = allCategories.map(category => {
       const count = grouped[category] || 0;
-      return Math.round((count / totalResponses) * 100);
+      return totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0;
     });
 
-    // Цвета для каждой категории
     const colors = [
       "rgb(54, 162, 235)", // Да / Ооба — синий
       "rgb(255, 99, 132)", // Нет / Жок — красный
@@ -630,7 +599,7 @@ export function processStartTimeQuestion(
           backgroundColor: colors,
           datalabels: {
             color: "#FFFFFF",
-            formatter: (value: number): string => `${value}%`,
+            formatter: (value: number): string => (value === 0 ? "" : `${value}%`), // Скрываем 0%
           }
         }
       ]

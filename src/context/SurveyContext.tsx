@@ -1,7 +1,24 @@
-"use client";
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import ru from '@/locales/ru.json';
 import ky from '@/locales/ky.json';
+
+interface Court {
+  court_id: number;
+  court: string;
+  instantiation: string;
+  id: number;
+  name: string;
+  instance: string;
+  overall_assessment: number;
+  assessment: {
+    judge: number;
+    process: number;
+    staff: number;
+    office: number;
+    building: number;
+  };
+  total_survey_responses: number;
+}
 
 export interface SelectedOption {
   id: number;
@@ -35,6 +52,7 @@ interface SurveyData {
   period_start: string;
   period_end: string;
   total_responses: number;
+  court?: string;
 }
 
 type Language = "ky" | "ru";
@@ -51,6 +69,28 @@ interface SurveyContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
+  selectedRegion: {
+    id: number;
+    name: any;
+    overall: any;
+    ratings: any;
+    totalAssessments: any;
+  }[] | null;
+  setSelectedRegion: React.Dispatch<React.SetStateAction<
+    {
+      id: number;
+      name: any;
+      overall: any;
+      ratings: any;
+      totalAssessments: any;
+    }[] | null
+  >>;
+  breadcrumbRegion: string | null;
+  setBreadcrumbRegion: (region: string | null) => void;
+  breadcrumbCourt: string | null;
+  setBreadcrumbCourt: (court: string | null) => void;
+  selectedCourt?: Court;
+  setSelectedCourt: (court: Court | undefined) => void;
 }
 
 const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
@@ -61,6 +101,18 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   const [userCourt, setUserCourt] = useState<string | null>(null);
   const [courtName, setCourtName] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("ru");
+  const [selectedRegion, setSelectedRegion] = useState<
+    {
+      id: number;
+      name: any;
+      overall: any;
+      ratings: any;
+      totalAssessments: any;
+    }[] | null
+  >(null);
+  const [breadcrumbRegion, setBreadcrumbRegion] = useState<string | null>(null);
+  const [breadcrumbCourt, setBreadcrumbCourt] = useState<string | null>(null);
+  const [selectedCourt, setSelectedCourt] = useState<Court | undefined>(undefined);
 
   // При монтировании считываем сохранённый язык из localStorage
   useEffect(() => {
@@ -92,6 +144,14 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
         language,
         setLanguage,
         toggleLanguage,
+        selectedRegion,
+        setSelectedRegion,
+        breadcrumbRegion,
+        setBreadcrumbRegion,
+        breadcrumbCourt,
+        setBreadcrumbCourt,
+        selectedCourt,
+        setSelectedCourt,
       }}
     >
       {children}

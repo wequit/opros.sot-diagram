@@ -10,20 +10,33 @@ interface LoginCredentials {
   password: string;
 }
 
+interface Assessment {
+  aspect: string;
+  court_avg: number;
+}
+
+interface RegionAssessmentData {
+  court: string;
+  instantiation: string;
+  overall_assessment: number;
+  assessment: Assessment[];
+  total_survey_responses: number;
+}
+
 export const setCookie = (name: string, value: string, days = 7) => {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; Secure; SameSite=Strict`;
 };
 
 export const getCookie = (name: string): string | null => {
-  const nameEQ = name + '=';
-  const ca = document.cookie.split(';');
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(";");
   for (let i = 0; i < ca.length; i++) {
     let c = ca[i];
-    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+    while (c.charAt(0) === " ") c = c.substring(1, c.length);
     if (c.indexOf(nameEQ) === 0) return decodeURIComponent(c.substring(nameEQ.length, c.length));
   }
-  return null;  
+  return null;
 };
 
 export const deleteCookie = (name: string) => {
@@ -118,6 +131,39 @@ export const getAssessmentData = async () => {
 export const getCurrentUser = async () => {
   return await fetchWithAuth('https://opros.sot.kg:443/api/v1/current_user/');
 };
+
+export const getRadarRepublicData = async () => {
+  return await fetchWithAuth("https://opros.sot.kg:443/api/v1/chart/radar/");
+};
+
+// api/login.ts (или другой файл, где определена функция)
+export const getRegionAssessmentData = async (id: string): Promise<RegionAssessmentData | null> => {
+  const token = getCookie("access_token");
+
+  if (!token) {
+    throw new Error("Токен доступа не найден");
+  }
+
+  try {
+    const res = await fetch(`https://opros.sot.kg:443/api/v1/assessment/region/${id}/`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Ошибка получения данных оценок для региона");
+    }
+
+    const data: RegionAssessmentData = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Ошибка запроса:", error);
+    return null;
+  }
+};
+
 
 export const getRayonAssessmentData = async () => {
   const token = getCookie('access_token');

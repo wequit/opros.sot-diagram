@@ -139,13 +139,12 @@ export default function Map_rayon({ selectedRayon, onSelectRayon, courts }: MapP
   // Обновляем функцию getRayonRating
   const getRayonRating = (rayonName: string): number => {
     if (!courts || !Array.isArray(courts)) {
-      console.log('Courts data is not available');
       return 0;
     }
 
     const courtName = rayonToCourtMapping[rayonName];
     if (!courtName) {
-      console.log(`Нет маппинга для района: ${rayonName}`);
+      (`Нет маппинга для района: ${rayonName}`);
       return 0;
     }
 

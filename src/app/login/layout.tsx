@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { AuthProvider } from "@/lib/utils/AuthContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 export default function LoginLayout({
   children,

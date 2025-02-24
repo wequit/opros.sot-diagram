@@ -36,12 +36,13 @@ import {
   processAgeData,
   // processAgeGenderData
 } from "@/lib/utils/processData";
-import NoData from "@/lib/utils/NoData";
+import NoData from "@/components/NoData/NoData";
 import { FaStar } from "react-icons/fa";
 import Link from "next/link";
 import { useRemarks } from "@/components/RemarksApi";
-import { useAuth } from "@/lib/utils/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
+import { getRadarRepublicData } from "@/api/login";
 
 ChartJS.register(
   RadialLinearScale,
@@ -252,6 +253,41 @@ export default function Evaluations() {
   const [ageData, setAgeData] = useState<any>(null);
 
   useEffect(() => {
+    const fetchRepublicData = async () => {
+      try {
+        const republicData: { aspect: string; court_avg: number; all_courts_avg: number }[] = 
+          await getRadarRepublicData();
+        // Создаем объект, где ключи - это aspect, а значения - all_courts_avg
+        const allCourtsAvgMap: Record<string, number> = republicData.reduce((acc, item) => {
+          acc[item.aspect] = item.all_courts_avg || 0;
+          return acc;
+        }, {} as Record<string, number>);
+  
+        setRadarData(prevData => ({
+          ...prevData,
+          datasets: [
+            prevData.datasets[0], // Оставляем данные по суду без изменений
+            {
+              ...prevData.datasets[1], // Копируем данные по республике
+              data: [
+                allCourtsAvgMap["Судья"] || 0,
+                allCourtsAvgMap["Сотрудники"] || 0,
+                allCourtsAvgMap["Канцелярия"] || 0,
+                allCourtsAvgMap["Процесс"] || 0,
+                allCourtsAvgMap["Здание"] || 0,
+              ],
+            },
+          ],
+        }));
+      } catch (error) {
+        console.error("Ошибка загрузки данных по республике:", error);
+      }
+    };
+  
+    fetchRepublicData();
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         if (surveyData && surveyData.questions && surveyData.questions[1]) {
@@ -342,7 +378,7 @@ export default function Evaluations() {
               },
               {
                 label: "Средние оценки по республике",
-                data: [4.5, 4.2, 4.0, 4.3, 4.1],
+                data: [0, 0, 0, 0, 0],
                 fill: true,
                 backgroundColor: "rgba(54, 162, 235, 0.2)",
                 borderColor: "rgba(54, 162, 235, 1)",
@@ -355,6 +391,8 @@ export default function Evaluations() {
               },
             ],
           });
+
+          
 
           const ratings = processProgressRatings(
             surveyData.questions,
@@ -397,6 +435,8 @@ export default function Evaluations() {
           );
           setDisrespectData(disrespectData as BarChartData);
         }
+
+
         if (surveyData?.total_responses) {
           setTotalResponses(surveyData.total_responses);
         }

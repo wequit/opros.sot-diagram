@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useAuth } from "@/lib/utils/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
 import { CgProfile } from "react-icons/cg";
 import { HiMenu } from "react-icons/hi";
@@ -9,24 +9,40 @@ import Sidebar from "./Sidebar";
 import { GrLanguage } from "react-icons/gr";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
-import { LogoutButton } from "@/lib/utils/Logout";
+import { LogoutButton } from "@/components/Logout";
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const pathname = usePathname();
   const [isSticky, setIsSticky] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const { courtName, language, toggleLanguage } = useSurveyData();
   
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsSticky(window.scrollY > 0);
+      const currentScrollY = window.scrollY;
+      
+      // Устанавливаем sticky состояние
+      setIsSticky(currentScrollY > 0);
+      
+      // Определяем направление скролла и показываем/скрываем хедер
+      if (currentScrollY > lastScrollY && currentScrollY > 80) {
+        // Скролл вниз - скрываем хедер
+        setIsVisible(false);
+      } else {
+        // Скролл вверх - показываем хедер
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [lastScrollY]);
 
   if (!isAuthenticated || pathname === "/login") {
     return null;
@@ -38,8 +54,9 @@ const Header: React.FC = () => {
         className={`${isSticky
             ? "fixed top-0 left-0 right-0 z-40 backdrop-blur-lg bg-white/40 border-b border-gray-200 shadow-md"
             : "fixed top-0 left-0 right-0 bg-white w-full"
-          } h-16 flex items-center justify-between px-6 transition-all duration-500 ${isSidebarOpen ? "backdrop-blur-lg" : ""
-          }`}
+          } h-16 flex items-center justify-between px-6 transition-all duration-500 
+          transform ${isVisible ? 'translate-y-0' : '-translate-y-full'}
+          ${isSidebarOpen ? "backdrop-blur-lg" : ""}`}
       >
         <div className="flex items-center gap-4">
           {/* <button
