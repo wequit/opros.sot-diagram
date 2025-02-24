@@ -16,9 +16,7 @@ const Header: React.FC = () => {
   const pathname = usePathname();
   const [isSticky, setIsSticky] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const { courtName, language, toggleLanguage } = useSurveyData();
+  const { courtName, language, toggleLanguage} = useSurveyData();
   
 
   useEffect(() => {
@@ -81,10 +79,10 @@ const Header: React.FC = () => {
               <div className="flex space-x-4  p-2 rounded-lg">
                 <Link
                   href="/"
-                  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
                   ${
                     pathname === "/"
-                      ? "bg-blue-100/40 text-blue-600"
+                      ? "bg-slate-200 text-blue-500"
                       : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}
                 >
@@ -93,11 +91,11 @@ const Header: React.FC = () => {
 
                 <Link
                   href="/maps/General"
-                  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
                   ${
                     pathname === "/maps/General"
-                      ? "bg-purple-100/40 text-indigo-600"
-                      : "text-gray-700 hover:bg-purple-50 hover:text-indigo-600"
+                      ? "bg-slate-200 text-blue-500"
+                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}
                 >
                    {getTranslation("HeaderNavTwo", language)}
@@ -105,11 +103,11 @@ const Header: React.FC = () => {
 
                 <Link
                   href="/maps/oblast/Regional-Courts"
-                  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
                   ${
                     pathname === "/maps/oblast/Regional-Courts"
-                      ? "bg-green-100/40 text-green-600"
-                      : "text-gray-700 hover:bg-green-50 hover:text-green-600"
+                      ? "bg-slate-200 text-blue-500"
+                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}
                 >
                    {getTranslation("HeaderNavThree", language)}
@@ -117,11 +115,11 @@ const Header: React.FC = () => {
 
                 <Link
                   href="/maps/rayon/District-Courts"
-                  className={`px-4 py-2 rounded-md font-medium transition duration-200
+                  className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
                   ${
                     pathname === "/maps/rayon/District-Courts"
-                      ? "bg-purple-100/40 text-purple-600"
-                      : "text-gray-700 hover:bg-purple-50 hover:text-purple-600"
+                      ? "bg-slate-200 text-blue-500"
+                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}
                 >
                   {getTranslation("HeaderNavFour", language)}

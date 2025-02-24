@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect, useRef } from 'react';
+
 interface LoginResponse {
   access: string;
   refresh: string;
@@ -136,39 +138,10 @@ export const getRadarRepublicData = async () => {
   return await fetchWithAuth("https://opros.sot.kg:443/api/v1/chart/radar/");
 };
 
-// api/login.ts (или другой файл, где определена функция)
-export const getRegionAssessmentData = async (id: string): Promise<RegionAssessmentData | null> => {
-  const token = getCookie("access_token");
-
-  if (!token) {
-    throw new Error("Токен доступа не найден");
-  }
-
-  try {
-    const res = await fetch(`https://opros.sot.kg:443/api/v1/assessment/region/${id}/`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!res.ok) {
-      throw new Error("Ошибка получения данных оценок для региона");
-    }
-
-    const data: RegionAssessmentData = await res.json();
-    return data;
-  } catch (error) {
-    console.error("Ошибка запроса:", error);
-    return null;
-  }
-};
-
-
 export const getRayonAssessmentData = async () => {
   const token = getCookie('access_token');
   
-  try { 
+  try {
     const response = await fetch('https://opros.sot.kg/api/v1/assessment/rayon/', {
       method: 'GET',
       headers: {
@@ -209,6 +182,35 @@ export const loginApi = {
     setCookie('refresh_token', data.refresh);
     return data;
   },
+};
 
-  
+// Хук для кеширования и предотвращения повторных запросов
+export const useFetchAssessmentData = () => {
+  const dataRef = useRef<any>(null); // Используем useRef для кеширования
+  const [data, setData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        if (dataRef.current) {
+          // Если данные уже кешированы, используем их
+          setData(dataRef.current);
+        } else {
+          const response = await fetchWithAuth('https://opros.sot.kg:443/api/v1/assessment/');
+          dataRef.current = response; // Кешируем данные в useRef
+          setData(response);
+        }
+      } catch (error) {
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Запрос выполняется только один раз
+
+  return { data, isLoading, error };
 };

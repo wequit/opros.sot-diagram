@@ -126,8 +126,6 @@ export default function DistrictCourts() {
       setBreadcrumbCourt(court.name);
       
       setCourtName(court.name);
-      setSelectedCourt(court);
-      
       localStorage.setItem('selectedCourtName', court.name);
       
       const response = await fetch(`https://opros.sot.kg/api/v1/results/${court.id}/?year=2025`, {

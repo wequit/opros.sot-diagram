@@ -23,8 +23,7 @@ interface CourtData {
 
 const SecondInstance = () => {
   const [assessmentData, setAssessmentData] = useState<CourtData[]>([]);
-  const [selectedCourt, setSelectedCourt] = useState<CourtData | null>(null);
-  const { setCourtName, setSurveyData, setIsLoading } = useSurveyData();
+  const { setCourtName, setSurveyData, setIsLoading , selectedCourt, setSelectedCourt} = useSurveyData();
 
   useEffect(() => {
     const fetchAssessmentData = async () => {
@@ -75,66 +74,62 @@ const SecondInstance = () => {
     }
   };
 
+  const handleBackClick = () => {
+    setSelectedCourt(null);
+  };
   return (
     <>
-      {selectedCourt ? (
-        <div className="space-y-6">
-          <Dates />
-          <Evaluations />
-        </div>
-      ) : (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 max-w-[1300px] mx-auto px-4 py-4">
-          <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse border border-gray-300 shadow-lg rounded-lg overflow-hidden">
-              <thead className="bg-gray-200">
-                <tr>
-                  <th className="border border-gray-300 px-4 py-2 text-left">№</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Наименование суда</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Инстанция</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Общая оценка</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Судья</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Процесс</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Сотрудники</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Канцелярия</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Доступность</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Кол-во оценок</th>
-                </tr>
-              </thead>
-              <tbody>
-                {assessmentData.map((court, index) => (
-                  <tr key={court.court_id} className="hover:bg-gray-100 transition-colors duration-200">
-                    <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
-                    <td 
-                      className="border border-gray-300 px-4 py-2 cursor-pointer text-blue-600" 
-                      onClick={() => handleCourtClick(court)}
-                    >
-                      {court.court}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2 w-36">{court.instantiation}</td>
-                    <td className="border border-gray-300 px-4 py-2">{court.overall_assessment}</td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {court.assessment.find(a => a.aspect === "Судья")?.court_avg || 0}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {court.assessment.find(a => a.aspect === "Процесс")?.court_avg || 0}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {court.assessment.find(a => a.aspect === "Сотрудники")?.court_avg || 0}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {court.assessment.find(a => a.aspect === "Канцелярия")?.court_avg || 0}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      {court.assessment.find(a => a.aspect === "Доступность")?.court_avg || 0}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2">{court.total_survey_responses || 0}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+    {selectedCourt ? (
+       <div className="space-y-6">
+        <button
+            onClick={handleBackClick}
+            className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 mb-6 transition"
+          >
+            Назад к списку судов
+          </button>
+        <Dates />
+        {/* <DataFetcher /> */}
+        <Evaluations/>
+      </div>
+    ): (
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 max-w-[1300px] mx-auto px-4 py-4">
+      <div className="overflow-x-auto">
+        <table className="min-w-full border-collapse border border-gray-300 shadow-lg rounded-lg overflow-hidden">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="border border-gray-300 px-4 py-2 text-left">№</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Наименование суда</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Инстанция</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Общая оценка</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Судья</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Процесс</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Сотрудники</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Канцелярия</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Доступность</th>
+              <th className="border border-gray-300 px-4 py-2 text-left">Кол-во оценок</th>
+            </tr>
+          </thead>
+          <tbody>
+            {assessmentData.map((court, index) => (
+              <tr key={court.court_id} className="hover:bg-gray-100 transition-colors duration-200" >
+                <td className="border border-gray-300 px-4 py-2">{index + 1}</td>
+                <td className="border border-gray-300 px-4 py-2 cursor-pointer text-blue-600" onClick={() => handleCourtClick(court)}>{court.court}</td>
+                <td className="border border-gray-300 px-4 py-2 w-36">{court.instantiation}</td>
+                <td className="border border-gray-300 px-4 py-2">{court.overall_assessment}</td>
+                <td className="border border-gray-300 px-4 py-2">{court.assessment.find(a => a.aspect === "Судья")?.court_avg || 0}</td>
+                <td className="border border-gray-300 px-4 py-2">{court.assessment.find(a => a.aspect === "Процесс")?.court_avg || 0}</td>
+                <td className="border border-gray-300 px-4 py-2">{court.assessment.find(a => a.aspect === "Сотрудники")?.court_avg || 0}</td>
+                <td className="border border-gray-300 px-4 py-2">{court.assessment.find(a => a.aspect === "Канцелярия")?.court_avg || 0}</td>
+                <td className="border border-gray-300 px-4 py-2">{court.assessment.find(a => a.aspect === "Доступность")?.court_avg || 0}</td>
+                <td className="border border-gray-300 px-4 py-2">{court.total_survey_responses || 0}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      
+    </div>
+    )}
     </>
   );
 };

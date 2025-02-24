@@ -154,12 +154,18 @@ export default function RegionalCourts() {
         }
       );
   
+      if (response.status === 401) {
+        console.warn("Токен устарел, выполняем выход...");
+        router.push("/login");
+        return;
+      }
+  
       if (!response.ok) {
-        throw new Error(`Ошибка HTTP: ${response.status} ${response.statusText}`);
+        router.push("/login");
+        throw new Error(`Ошибка TP: ${response.status} ${response.statusText}`);
       }
   
       const data = await response.json();
-      console.log("Данные из API:", data);
   
       if (!Array.isArray(data) || data.length === 0) {
         throw new Error("Данные по региону отсутствуют или неверного формата.");
@@ -172,16 +178,17 @@ export default function RegionalCourts() {
         overall: courtData.overall_assessment,
         ratings: courtData.assessment.map((item: any) => item.court_avg),
         totalAssessments: courtData.total_survey_responses,
+        coordinates: [courtData.latitude, courtData.longitude], // добавляем координаты
       }));
   
       // Обновляем `selectedRegion`
       setSelectedRegion(updatedRegions);
-  
-      setRegionName(court.name); // используем `court.name`, так как он уже содержит `region_name`
+      setRegionName(court.name);
     } catch (error) {
       console.error("Ошибка при получении данных для региона:", error);
     }
   };
+  
   
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -202,9 +209,9 @@ export default function RegionalCourts() {
                   Средние оценки по областям
                 </Link>
                 <Link
-                  href="/Remarks"
+                  href="/remarks"
                   className={`px-4 py-2 rounded-md font-medium transition duration-200 ${
-                    pathname === "/Remarks"
+                    pathname === "/remarks"
                       ? "bg-blue-100/40 text-blue-600"
                       : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}

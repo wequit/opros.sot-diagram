@@ -1,7 +1,9 @@
-'use client';
-import { getCookie, getCurrentUser } from '@/api/login';
-import { useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+"use client";
+import { getCookie, getCurrentUser } from "@/api/login";
+import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { useSurveyData } from "@/context/SurveyContext";
+import { filterRemarks } from "@/types/filterRemarks"; 
 
 export interface Remark {
   id: number;
@@ -22,59 +24,56 @@ export function useRemarks() {
   const [remarks, setRemarks] = useState<Remark[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const pathname = usePathname(); 
+  const pathname = usePathname();
+  const { selectedCourt, courtName, selectedCourtName } = useSurveyData();
 
   const fetchRemarks = async () => {
+    // Получаем selectedCourtId из localStorage, если его нет, используем 0
+    const storedCourtId = localStorage.getItem("selectedCourtId");
+    const courtId = storedCourtId ? parseInt(storedCourtId, 10) : null;
+
+    if (!courtId) {
+      return;
+    }
+
+    
     try {
       setIsLoading(true);
-      const token = getCookie('access_token');
+      const token = getCookie("access_token");
 
       // Получаем текущего пользователя
       const user = await getCurrentUser();
-      const userCourt = user.court; // Предполагаем, что у user есть поле court
 
-      const response = await fetch('https://opros.sot.kg/api/v1/comments/', {
+      const response = await fetch("https://opros.sot.kg/api/v1/comments/", {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Ошибка при получении данных');
+        throw new Error(errorData.detail || "Ошибка при получении данных");
       }
 
       const data = await response.json();
 
-      const filteredData = data
-  .filter((item: Remark) => {
-    // Проверка роли пользователя
-    if (user.role === "Председатель 3 инстанции" && pathname === "/") {
-      // Для председателя 3 инстанции показываем все данные без фильтрации по суду
-      return item.question_id === 17 || 
-             (item.custom_answer !== null && item.custom_answer !== "Необязательный вопрос");
-    } else {
-      // Для других пользователей фильтруем по суду
-      return item.court === userCourt && 
-             (item.question_id === 17 || 
-             (item.custom_answer !== null && item.custom_answer !== "Необязательный вопрос"));
-    }
-  })
-  .map((item: Remark) => ({
-    id: item.id,
-    custom_answer: item.custom_answer,
-    reply_to_comment: item.reply_to_comment,
-    comment_created_at: item.comment_created_at,
-    author: item.author,
-    question_id: item.question_id,
-    court: item.court,
-  }));
-
-setRemarks(filteredData);
+      // Используем функцию filterRemarks для фильтрации данных
+      const filteredData = filterRemarks(data, user, pathname, selectedCourtName, courtId)
+        .map((item: Remark) => ({
+          id: item.id,
+          custom_answer: item.custom_answer,
+          reply_to_comment: item.reply_to_comment,
+          comment_created_at: item.comment_created_at,
+          author: item.author,
+          question_id: item.question_id,
+          court: item.court,
+        }));
+      
+      setRemarks(filteredData);
     } catch (err) {
-      console.error('Ошибка при получении данных:', err);
-      setError(err instanceof Error ? err.message : 'Произошла ошибка');
+      console.error("Ошибка при получении данных:", err);
+      setError(err instanceof Error ? err.message : "Произошла ошибка");
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +81,7 @@ setRemarks(filteredData);
 
   useEffect(() => {
     fetchRemarks();
-  }, []);
+  }, [selectedCourt, courtName, selectedCourtName]); // Обновляем данные при изменении selectedCourt или courtName
 
   return { remarks, isLoading, error, fetchRemarks };
 }
