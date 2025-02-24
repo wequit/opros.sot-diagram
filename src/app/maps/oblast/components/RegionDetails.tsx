@@ -88,6 +88,7 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
                 </button>
               </div>
 
+
               <div className="bg-white rounded-xl shadow-sm border border-gray-100">
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">

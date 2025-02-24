@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { getCookie } from "@/api/login";
-import { SurveyProvider, useSurveyData } from "@/context/SurveyContext";
+import { useSurveyData } from "@/context/SurveyContext";
 import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
 export default function GeneralPageContent() {

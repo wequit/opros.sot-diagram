@@ -189,97 +189,88 @@ export default function Dates() {
   );
 
   return (
-    <div className="w-full bg-gradient-to-r from-[#3B82F6] to-[#6366F1] p-5 rounded-2xl shadow-lg mb-8">
-      {/* Верхняя секция */}
-      <div className="flex items-center gap-4 mb-6">
-        {/* Даты */}
-        <div className="bg-white/15 backdrop-blur-sm rounded-xl flex items-center p-3 hover:bg-white/20 transition-all group border border-white/10 shadow-sm min-w-[380px]">
-          <div className="flex items-center flex-1">
-            <span className="text-sm font-semibold text-white/90 px-3 group-hover:text-white font-inter">С</span>
+    <div className="w-full bg-slate-800 p-3 rounded-lg shadow-lg mb-6">
+      <div className="flex items-center gap-3">
+        {/* Блок с датами и годом */}
+        <div className="flex items-center gap-2">
+          <div className="bg-slate-700 rounded-md flex items-center p-2">
+            <span className="text-slate-300 text-sm px-2">С</span>
             <input
               type="text"
               value={formatDate(dateRange.startDate)}
-              className="w-28 bg-transparent border-0 focus:ring-0 text-white font-medium text-sm p-1 font-inter"
+              className="w-24 bg-transparent border-0 focus:ring-0 text-white text-sm"
               readOnly
             />
           </div>
-          <div className="w-px h-5 bg-white/20 mx-2"></div>
-          <div className="flex items-center flex-1">
-            <span className="text-sm font-semibold text-white/90 px-3 group-hover:text-white font-inter">По</span>
+          <div className="bg-slate-700 rounded-md flex items-center p-2">
+            <span className="text-slate-300 text-sm px-2">По</span>
             <input
               type="text"
               value={formatDate(dateRange.endDate)}
-              className="w-28 bg-transparent border-0 focus:ring-0 text-white font-medium text-sm p-1 font-inter"
+              className="w-24 bg-transparent border-0 focus:ring-0 text-white text-sm"
               readOnly
             />
           </div>
-        </div>
-
-        {/* Год */}
-        <div className="relative">
-          <button
-            onClick={() => setShowYearDropdown(!showYearDropdown)}
-            className="bg-white/15 backdrop-blur-sm px-6 py-3 rounded-xl font-semibold text-white hover:bg-white/25 
-              transition-all duration-200 flex items-center gap-2 text-sm group border border-white/10 shadow-sm min-w-[130px] font-inter"
-          >
-            <span className="group-hover:transform group-hover:scale-105 transition-transform">{dateRange.year}</span>
-            <svg className={`w-4 h-4 transition-all duration-300 ${showYearDropdown ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
-            </svg>
-          </button>
-
-          {showYearDropdown && (
-            <div className="absolute mt-2 bg-[#4F46E5] rounded-xl shadow-lg z-30 max-h-60 overflow-y-auto w-full 
-              border border-white/20 animate-fadeIn">
-              {years.map((year) => (
-                <button
-                  key={year}
-                  onClick={() => handleYearSelect(year)}
-                  className="w-full px-6 py-3 text-left text-white hover:bg-white/20 text-sm transition-all
-                    first:rounded-t-xl last:rounded-b-xl font-inter font-medium hover:pl-8 duration-200"
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="relative">
+            <button
+              onClick={() => setShowYearDropdown(!showYearDropdown)}
+              className="bg-slate-700 text-white rounded-md p-2 text-sm hover:bg-slate-600 
+              transition-all flex items-center gap-2 min-w-[90px] justify-center"
+            >
+              {dateRange.year}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {showYearDropdown && (
+              <div className="absolute top-full mt-1 w-full bg-slate-700 rounded-md shadow-xl py-1 z-10">
+                {years.map((year) => (
+                  <button
+                    key={year}
+                    onClick={() => handleYearSelect(year)}
+                    className="w-full px-3 py-1.5 text-center text-white hover:bg-slate-600 text-sm"
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Кварталы */}
-        <div className="flex gap-3">
+        <div className="flex items-center gap-1.5">
           {periods.slice(0, 4).map((period) => (
             <button
               key={period.id}
               onClick={() => handlePeriodClick(period)}
-              className={`px-5 py-3 rounded-xl text-sm font-semibold transition-all duration-300 min-w-[140px] font-inter
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-all
                 ${activePeriod === period.id
-                  ? "bg-indigo-500 text-white shadow-lg scale-105 hover:bg-indigo-600 border border-indigo-400"
-                  : "bg-white/10 text-white hover:bg-white/20 active:bg-white/25 backdrop-blur-sm hover:scale-105 border border-white/10"
-                }
-                transform hover:-translate-y-0.5 active:translate-y-0 shadow-sm`}
+                  ? "bg-blue-600 text-white"
+                  : "bg-slate-700 text-white hover:bg-slate-600"
+                }`}
             >
-              {period.label} квартал
+              {period.label.replace(' квартал', '')}
             </button>
           ))}
         </div>
-      </div>
 
-      {/* Месяцы */}
-      <div className="grid grid-cols-12 gap-3">
-        {periods.slice(4).map((period) => (
-          <button
-            key={period.id}
-            onClick={() => handlePeriodClick(period)}
-            className={`py-3 rounded-xl text-sm font-semibold transition-all duration-300 font-inter
-              ${activePeriod === period.id
-                ? "bg-indigo-500 text-white shadow-lg scale-105 hover:bg-indigo-600 border border-indigo-400"
-                : "bg-white/10 text-white hover:bg-white/20 active:bg-white/25 backdrop-blur-sm hover:scale-105 border border-white/10"
-              }
-              transform hover:-translate-y-0.5 active:translate-y-0 shadow-sm`}
-          >
-            <span className="relative z-10">{period.label}</span>
-          </button>
-        ))}
+        {/* Месяцы */}
+        <div className="flex items-center gap-1.5 flex-1">
+          {periods.slice(4).map((period) => (
+            <button
+              key={period.id}
+              onClick={() => handlePeriodClick(period)}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition-all flex-1
+                ${activePeriod === period.id
+                  ? "bg-blue-600 text-white"
+                  : "bg-slate-700 text-white hover:bg-slate-600"
+                }`}
+            >
+              {period.label}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );
