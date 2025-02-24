@@ -20,10 +20,11 @@ interface SVGFeature {
   };
   geometry: {
     type: string;
-    coordinates: number[][][][]; // Проверьте, соответствует ли это вашим данным
+    coordinates: number[][][][];
   };
 }
 
+// Координаты для каждой области
 const oblastCoordinates: { [key: string]: [number, number] } = {
   'Бишкек': [74.69, 42.87],
   'Чуйская область': [74.5, 42.8],
@@ -50,7 +51,7 @@ type OblastMapping = {
   [key: string]: string;
 };
 
-export default function Map_oblast({ oblastData }: MapProps) {
+export default function Map_oblast({ oblastData  }: MapProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -86,55 +87,40 @@ export default function Map_oblast({ oblastData }: MapProps) {
     if (rating >= 1.0) return '#fa5d5d';
     if (rating >= 0.5) return '#640202';
     return '#999999';
-  }, []);
-
-  // Мемоизируем размеры и проекцию
-  const { width, height, projection, pathGenerator } = useMemo(() => {
-    const containerWidth = containerRef.current ? containerRef.current.getBoundingClientRect().width : 800;
-    const calculatedWidth = containerWidth || 800;
-    const calculatedHeight = calculatedWidth * 0.6;
-    const proj = d3.geoMercator()
-      .center([74, 41.5])
-      .scale(calculatedWidth * 4)
-      .translate([calculatedWidth / 2, calculatedHeight / 2]);
-    const pathGen = d3.geoPath().projection(proj);
-    return { width: calculatedWidth, height: calculatedHeight, projection: proj, pathGenerator: pathGen };
-  }, [containerRef.current]);
-
-  // Обработчик событий для тултипа (можно обернуть в throttle)
-  const handleMouseMove = useCallback((event: any) => {
-    const coordinates = getEventCoordinates(event);
-    const tooltip = d3.select(tooltipRef.current);
-    tooltip
-      .style('left', `${coordinates.x + 10}px`)
-      .style('top', `${coordinates.y + 10}px`);
-  }, []);
+  }, [ oblastData, oblastMapping]);
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current || !oblastData.length) return;
 
-    // Обновляем размеры
     const container = d3.select(containerRef.current);
-    const containerWidth = container.node()?.getBoundingClientRect().width || 800;
-    const calculatedHeight = containerWidth * 0.6;
-    setDimensions({ width: containerWidth, height: calculatedHeight });
+    const width = container.node()?.getBoundingClientRect().width || 800;
+    const height = width * 0.6;
+
+    setDimensions({ width, height });
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
+
     svg
-      .attr('width', containerWidth)
-      .attr('height', calculatedHeight)
-      .attr('viewBox', `0 0 ${containerWidth} ${calculatedHeight}`);
+      .attr('width', width)
+      .attr('height', height)
+      .attr('viewBox', `0 0 ${width} ${height}`);
 
-    const regionsGroup = svg.append('g').attr('class', 'regions');
+    const projection = d3.geoMercator()
+      .center([74, 41.5])
+      .scale(width * 4)
+      .translate([width / 2, height / 2]);
 
-    const features = geoData.features as SVGFeature[];
+    const path = d3.geoPath().projection(projection);
 
-    // Рисуем регионы
+    const regionsGroup = svg.append('g')
+      .attr('class', 'regions');
+
+    // Рисуем области
     regionsGroup.selectAll('path')
-      .data(features)
+      .data(geoData.features as SVGFeature[])
       .join('path')
-      .attr('d', pathGenerator as any)
+      .attr('d', path as any)
       .attr('class', 'region-path')
       .attr('fill', (d: SVGFeature) => {
         const rating = getOblastRating(d.properties.NAME_1);
@@ -145,6 +131,7 @@ export default function Map_oblast({ oblastData }: MapProps) {
       .style('cursor', 'pointer')
       .on('mouseover', function(event: any, d: SVGFeature) {
         d3.select(this).attr('stroke-width', '2');
+        
         const coordinates = getEventCoordinates(event);
         const tooltip = d3.select(tooltipRef.current);
         tooltip
@@ -152,6 +139,7 @@ export default function Map_oblast({ oblastData }: MapProps) {
           .style('position', 'fixed')
           .style('left', `${coordinates.x + 10}px`)
           .style('top', `${coordinates.y + 10}px`);
+
         const mappedName = oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
         const rating = getOblastRating(d.properties.NAME_1);
         tooltip.html(`
@@ -159,7 +147,13 @@ export default function Map_oblast({ oblastData }: MapProps) {
           <div>Общая оценка: ${rating.toFixed(1)}</div>
         `);
       })
-      .on('mousemove', handleMouseMove)
+      .on('mousemove', function(event: any) {
+        const coordinates = getEventCoordinates(event);
+        const tooltip = d3.select(tooltipRef.current);
+        tooltip
+          .style('left', `${coordinates.x + 10}px`)
+          .style('top', `${coordinates.y + 10}px`);
+      })
       .on('mouseout', function() {
         d3.select(this).attr('stroke-width', '1');
         d3.select(tooltipRef.current).style('display', 'none');
@@ -167,6 +161,7 @@ export default function Map_oblast({ oblastData }: MapProps) {
       .on('touchstart', function(event: any, d: SVGFeature) {
         event.preventDefault();
         d3.select(this).attr('stroke-width', '2');
+        
         const coordinates = getEventCoordinates(event);
         const tooltip = d3.select(tooltipRef.current);
         tooltip
@@ -174,6 +169,7 @@ export default function Map_oblast({ oblastData }: MapProps) {
           .style('position', 'fixed')
           .style('left', `${coordinates.x + 10}px`)
           .style('top', `${coordinates.y + 10}px`);
+
         const mappedName = oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
         const rating = getOblastRating(d.properties.NAME_1);
         tooltip.html(`
@@ -183,19 +179,24 @@ export default function Map_oblast({ oblastData }: MapProps) {
       })
       .on('touchmove', function(event: any) {
         event.preventDefault();
-        handleMouseMove(event);
+        const coordinates = getEventCoordinates(event);
+        const tooltip = d3.select(tooltipRef.current);
+        tooltip
+          .style('left', `${coordinates.x + 10}px`)
+          .style('top', `${coordinates.y + 10}px`);
       })
       .on('touchend', function() {
         d3.select(this).attr('stroke-width', '1');
         d3.select(tooltipRef.current).style('display', 'none');
-      });
+      })
+    
 
-    // Добавляем текстовые метки с оценками
+    // Добавляем текст с оценками на карту
     regionsGroup.selectAll('text')
-      .data(features)
+      .data(geoData.features as SVGFeature[])
       .join('text')
-      .attr('x', (d: any) => pathGenerator.centroid(d)[0])
-      .attr('y', (d: any) => pathGenerator.centroid(d)[1])
+      .attr('x', (d: any) => path.centroid(d)[0])
+      .attr('y', (d: any) => path.centroid(d)[1])
       .attr('text-anchor', 'middle')
       .attr('class', 'region-label')
       .attr('font-weight', 'bold')
@@ -206,10 +207,11 @@ export default function Map_oblast({ oblastData }: MapProps) {
         return rating ? rating.toFixed(1) : '';
       });
 
-    // Легенда (можно вынести в отдельную функцию)
+    // Добавляем легенду
     const legend = svg.append('g')
       .attr('class', 'legend')
-      .attr('transform', `translate(20, ${calculatedHeight - 650})`);
+      .attr('transform', `translate(20, ${height - 650})`);
+
     const legendData = [
       { color: '#66C266', label: '4.5 - 5.0' },
       { color: '#B4D330', label: '4.0 - 4.4' },
@@ -220,6 +222,7 @@ export default function Map_oblast({ oblastData }: MapProps) {
       { color: '#fa5d5d', label: '1.0 - 1.5' },
       { color: '#640202', label: '0.5 - 1.0' }
     ];
+
     legend.selectAll('.legend-item')
       .data(legendData)
       .join('g')
@@ -238,17 +241,21 @@ export default function Map_oblast({ oblastData }: MapProps) {
           .attr('fill', '#666')
           .text(d => d.label);
       });
-  }, [oblastData, oblastMapping, getOblastRating, getColor, pathGenerator]);
+
+  }, [oblastData, oblastMapping,  getOblastRating, getColor]);
 
   return (
     <div ref={containerRef} className="relative w-full">
       <svg ref={svgRef} className="w-full h-auto"></svg>
-      <div ref={tooltipRef} className="absolute bg-white border border-gray-200 rounded-md shadow-lg p-2 z-50" style={{ pointerEvents: 'none', display: 'none' }}></div>
+      <div
+        ref={tooltipRef}
+        className="hidden absolute bg-white border border-gray-200 rounded-md shadow-lg p-2 z-50"
+        style={{ pointerEvents: 'none' }}
+      ></div>
     </div>
   );
 }
 
-// Функция для получения координат события
 function getEventCoordinates(event: any) {
   if (event.touches && event.touches[0]) {
     return {

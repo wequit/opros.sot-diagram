@@ -41,7 +41,7 @@ export function useRemarks() {
       setIsLoading(true);
       const token = getCookie("access_token");
 
-      // Получаем текущего пользователя
+      // Получаем текущего пользователя 
       const user = await getCurrentUser();
 
       const response = await fetch("https://opros.sot.kg/api/v1/comments/", {
