@@ -8,24 +8,6 @@ import React, {
 import ru from "@/locales/ru.json";
 import ky from "@/locales/ky.json";
 
-interface Court {
-  court_id: number;
-  court: string;
-  instantiation: string;
-  id: number;
-  name: string;
-  instance: string;
-  overall_assessment: number;
-  assessment: {
-    judge: number;
-    process: number;
-    staff: number;
-    office: number;
-    building: number;
-  };
-  total_survey_responses: number;
-}
-
 export interface SelectedOption {
   id: number;
   text_ru: string;
@@ -58,7 +40,6 @@ interface SurveyData {
   period_start: string;
   period_end: string;
   total_responses: number;
-  court?: string;
 }
 
 interface Assessment {

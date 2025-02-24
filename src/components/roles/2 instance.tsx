@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { fetchWithAuth, getCookie } from "@/api/login";
+import { getCookie } from "@/api/login";
 import { getAssessmentData } from "@/api/login";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { useSurveyData } from '@/context/SurveyContext';
+// import DataFetcher from "@/components/DataFetcher";
 
 interface Assessment {
   aspect: string;
@@ -45,7 +46,7 @@ const SecondInstance = () => {
   const fetchResults = async (courtId: number) => {
     try {
       setIsLoading(true);
-      const response = await fetchWithAuth(`https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`, {
+      const response = await fetch(`https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${getCookie('access_token')}`,

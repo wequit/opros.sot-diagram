@@ -10,7 +10,6 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SurveyProvider, useSurveyData } from "@/context/SurveyContext";
 import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
-import { Breadcrumb } from "@/components/Breadcrumb";
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -57,10 +56,7 @@ function AuthContent({ children }: { children: React.ReactNode }) {
     <div className="max-w-[1250px] mx-auto">
       <Header />
       <div className={`flex min-h-[calc(100vh-48px)] ${pathname === "/login" ? "mt-0" : "mt-16"}`}>
-        <main className={`${mainClassName}`}>
-          {pathname !== '/login' && <Breadcrumb />}
-          {children}
-        </main>
+        <main className={`${mainClassName}`}>{children}</main>
       </div>
     </div>
   );

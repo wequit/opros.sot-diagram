@@ -269,41 +269,6 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
   });
 
   useEffect(() => {
-    const fetchRepublicData = async () => {
-      try {
-        const republicData: { aspect: string; court_avg: number; all_courts_avg: number }[] = 
-          await getRadarRepublicData();
-        // Создаем объект, где ключи - это aspect, а значения - all_courts_avg
-        const allCourtsAvgMap: Record<string, number> = republicData.reduce((acc, item) => {
-          acc[item.aspect] = item.all_courts_avg || 0;
-          return acc;
-        }, {} as Record<string, number>);
-  
-        setRadarData(prevData => ({
-          ...prevData,
-          datasets: [
-            prevData.datasets[0], // Оставляем данные по суду без изменений
-            {
-              ...prevData.datasets[1], // Копируем данные по республике
-              data: [
-                allCourtsAvgMap["Судья"] || 0,
-                allCourtsAvgMap["Сотрудники"] || 0,
-                allCourtsAvgMap["Канцелярия"] || 0,
-                allCourtsAvgMap["Процесс"] || 0,
-                allCourtsAvgMap["Здание"] || 0,
-              ],
-            },
-          ],
-        }));
-      } catch (error) {
-        console.error("Ошибка загрузки данных по республике:", error);
-      }
-    };
-  
-    fetchRepublicData();
-  }, []);
-
-  useEffect(() => {
     const fetchData = async () => {
       try {
         if (surveyData && surveyData.questions && surveyData.questions[1]) {
@@ -449,8 +414,6 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                   ],
           });
 
-          
-
           const ratings = processProgressRatings(
             surveyData.questions,
             language
@@ -492,8 +455,6 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           );
           setDisrespectData(disrespectData as BarChartData);
         }
-
-
         if (surveyData?.total_responses) {
           setTotalResponses(surveyData.total_responses);
         }

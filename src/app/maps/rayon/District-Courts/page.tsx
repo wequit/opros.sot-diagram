@@ -16,11 +16,7 @@ interface Assessment {
   court_avg: number;
 }
 
-// Обновляем интерфейс Court
 interface Court {
-  court_id: number;
-  court: string;
-  instantiation: string;
   id: number;
   name: string;
   instance: string;
@@ -94,18 +90,11 @@ const transformApiData = (apiData: any): Court[] => {
   }).filter(Boolean);
 };
 
-export default function DistrictCourts() {
+export default function Courts() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-  const { 
-    setCourtName, 
-    setSurveyData, 
-    setIsLoading, 
-    setBreadcrumbCourt,
-    setSelectedCourt,
-    breadcrumbCourt
-  } = useSurveyData();
+  const { setCourtName, setSurveyData, setIsLoading } = useSurveyData();
   const [showEvaluations, setShowEvaluations] = useState(false);
 
   const token = getCookie('access_token');
@@ -122,9 +111,6 @@ export default function DistrictCourts() {
   const handleCourtClick = async (court: Court) => {
     try {
       setIsLoading(true);
-      
-      setBreadcrumbCourt(court.name);
-      
       setCourtName(court.name);
       localStorage.setItem('selectedCourtName', court.name);
       
@@ -162,12 +148,6 @@ export default function DistrictCourts() {
 
     fetchCourts();
   }, []);
-
-  useEffect(() => {
-    if (breadcrumbCourt) {
-      console.log('Breadcrumb court updated:', breadcrumbCourt);
-    }
-  }, [breadcrumbCourt]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -238,9 +218,23 @@ export default function DistrictCourts() {
       {showEvaluations ? (
         <>
           <Dates />
+          <div className="w-[55rem] ml-4 mb-4">
+            <div className="bg-[#F8F9FF] border-l-[6px] border-[#2563EB] rounded-lg shadow-sm">
+              <div className="px-5 py-4 flex items-center">
+                <svg className="w-7 h-7 text-[#2563EB]" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 2L3 8.2V9h18V8.2L12 2zm0 2.03l5.74 3.93H6.26L12 4.03zM4 10v9h2v-9H4zm14 0v9h2v-9h-2zM8 10v9h8v-9H8zm2 2h4v5h-4v-5z" 
+                    fill="currentColor"/>
+                </svg>
+                <h2 className="ml-3 text-[1.15rem] font-semibold text-gray-800">
+                  {courts.find(court => court.name === localStorage.getItem('selectedCourtName'))?.name}
+                </h2>
+              </div>
+            </div>
+          </div>
           <Evaluations />
         </>
       ) : (
+        
         <div className="container mx-auto px-4 py-8">
           <h2 className="text-2xl font-bold mb-4">Районные суды</h2>
           <Map selectedRayon={null} onSelectRayon={() => {}} courts={courts}/>
