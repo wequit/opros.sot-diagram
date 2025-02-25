@@ -37,14 +37,6 @@ interface Region {
   total_assessments: number;
 }
 
-// Добавляем функцию для определения цвета фона ячейки
-const getRatingColor = (rating: number) => {
-  if (rating === 0) return 'bg-gray-100';
-  if (rating <= 2) return 'bg-red-100';
-  if (rating <= 3.5) return 'bg-yellow-100';
-  return 'bg-green-100';
-};
-
 export default function RegionalCourts() {
   const [regions, setRegions] = useState<OblastData[]>([]);
   const [regionName, setRegionName] = useState<string | null>(null);
@@ -197,10 +189,7 @@ export default function RegionalCourts() {
       }));
 
       // Обновляем `selectedRegion`
-      setSelectedRegion(updatedRegions.map(region => ({
-        ...region,
-        coordinates: region.coordinates as [number, number] // приводим координаты к типу [number, number]
-      })));
+      setSelectedRegion(updatedRegions);
       setRegionName(court.name);
     } catch (error) {
       console.error("Ошибка при получении данных для региона:", error);
@@ -216,6 +205,8 @@ export default function RegionalCourts() {
               <h2 className="text-xl font-medium">Оценки по областям</h2>
             </div>
 
+            {/* Условный рендеринг таблицы */}
+
             <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
               <Map oblastData={regions} />
             </div>
@@ -224,76 +215,86 @@ export default function RegionalCourts() {
               <div className="overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="bg-gray-50">
-                      <th className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600">
+                    <tr className="border-b border-gray-200">
+                      <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                         №
                       </th>
-                      <th className="border border-gray-300 px-4 py-2 text-left font-bold text-sm text-gray-600">
+                      <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                         Наименование области
                       </th>
-                      <th 
+                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                         onClick={() => handleSort("overall")}
-                        className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600 cursor-pointer"
                       >
-                        <div className="flex items-center justify-center">
-                          Общая оценка
+                        <div className="flex items-center justify-between px-2">
+                          <span>Общая оценка</span>
                           {getSortIcon("overall")}
                         </div>
                       </th>
                       <th
-                        onClick={() => handleSort("accessibility")}
-                        className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600 cursor-pointer"
-                      >
-                        <div className="flex items-center justify-center">
-                          Судья
-                          {getSortIcon("accessibility")}
-                        </div>
-                      </th>
-                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                         onClick={() => handleSort("judge")}
-                        className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600 cursor-pointer"
                       >
-                        <div className="flex items-center justify-center">
-                          Здание
+                        <div className="flex items-center justify-between px-2">
+                          <span>Здание</span>
                           {getSortIcon("judge")}
                         </div>
                       </th>
-                      
                       <th
-                        onClick={() => handleSort("staff")}
-                        className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600 cursor-pointer"
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort("process")}
                       >
-                        <div className="flex items-center justify-center">
-                          Процесс
+                        <div className="flex items-center justify-between px-2">
+                          <span>Канцелярия</span>
+                          {getSortIcon("process")}
+                        </div>
+                      </th>
+                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort("staff")}
+                      >
+                        <div className="flex items-center justify-between px-2">
+                          <span>Процесс</span>
                           {getSortIcon("staff")}
                         </div>
                       </th>
                       <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                         onClick={() => handleSort("office")}
-                        className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600 cursor-pointer"
                       >
-                        <div className="flex items-center justify-center">
-                          Сотрудники
+                        <div className="flex items-center justify-between px-2">
+                          <span>Сотрудники</span>
                           {getSortIcon("office")}
                         </div>
                       </th>
-                      
-                      <th className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600">
+                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort("accessibility")}
+                      >
+                        <div className="flex items-center justify-between px-2">
+                          <span>Судья</span>
+                          {getSortIcon("accessibility")}
+                        </div>
+                      </th>
+                      <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                         Количество отзывов
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {sortedData.map((region, index) => (
-                      <tr key={region.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
-                          {index + 1}
+                    {sortedData.map((oblast) => (
+                      <tr
+                        key={oblast.id}
+                        className="hover:bg-gray-50/50 border-b border-gray-200"
+                      >
+                        <td className="px-3 py-2.5 text-sm text-gray-900 text-center border-r border-gray-200">
+                          {oblast.id}
                         </td>
                         <td
-                          onClick={() => handleCourtClick(region)}
-                          className="border border-gray-300 px-4 py-2 text-sm text-gray-800 hover:text-blue-600 cursor-pointer"
+                          className="px-3 py-2.5 text-sm text-gray-900 border-r border-gray-200 cursor-pointer hover:text-blue-600"
+                          onClick={() => handleCourtClick(oblast)}
                         >
-                          {region.name}
+                          {oblast.name}
                         </td>
                         <td
                           className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
@@ -337,8 +338,8 @@ export default function RegionalCourts() {
                         >
                           {oblast.ratings[4].toFixed(1)}
                         </td>
-                        <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
-                          {region.totalAssessments}
+                        <td className="px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200">
+                          {oblast.totalAssessments}
                         </td>
                       </tr>
                     ))}

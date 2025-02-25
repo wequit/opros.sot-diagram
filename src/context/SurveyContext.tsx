@@ -61,7 +61,6 @@ interface CourtData {
 type Language = "ky" | "ru";
 
 interface RegionData {
-  coordinates: [any, any];
   id: number;
   name: string;
   overall: number;
