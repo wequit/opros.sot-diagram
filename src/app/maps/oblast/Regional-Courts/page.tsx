@@ -148,11 +148,18 @@ export default function RegionalCourts() {
     return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
   });
 
+  const getRatingColor = (rating: number) => {
+    if (rating === 0) return "bg-gray-100";
+    if (rating <= 2) return "bg-red-100";
+    if (rating <= 3.5) return "bg-yellow-100";
+    return "bg-green-100";
+  };
+
   const handleCourtClick = async (court: OblastData) => {
     try {
       const token = getCookie("access_token");
       if (!token) throw new Error("Token is null");
-  
+
       const response = await fetch(
         `https://opros.sot.kg/api/v1/assessment/region/${court.id}/`,
         {
@@ -161,24 +168,24 @@ export default function RegionalCourts() {
           },
         }
       );
-  
+
       if (response.status === 401) {
         console.warn("Токен устарел, выполняем выход...");
         router.push("/login");
         return;
       }
-  
+
       if (!response.ok) {
         router.push("/login");
         throw new Error(`Ошибка TP: ${response.status} ${response.statusText}`);
       }
-  
+
       const data = await response.json();
-  
+
       if (!Array.isArray(data) || data.length === 0) {
         throw new Error("Данные по региону отсутствуют или неверного формата.");
       }
-  
+
       // Маппируем данные
       const updatedRegions = data.map((courtData: any) => ({
         id: courtData.court_id,
@@ -188,7 +195,7 @@ export default function RegionalCourts() {
         totalAssessments: courtData.total_survey_responses,
         coordinates: [courtData.latitude, courtData.longitude], // добавляем координаты
       }));
-  
+
       // Обновляем `selectedRegion`
       setSelectedRegion(updatedRegions.map(region => ({
         ...region,
@@ -199,37 +206,14 @@ export default function RegionalCourts() {
       console.error("Ошибка при получении данных для региона:", error);
     }
   };
-  
-  
+
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 my-8">
       <div className="max-w-[1250px] mx-auto">
         {!selectedRegion ? (
           <>
             <div className="mb-4 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">Оценки по областям</h2>
-              <div className="flex space-x-4">
-                <Link
-                  href="/maps/oblast/Regional-Courts"
-                  className={`px-4 py-2 rounded-md font-medium transition duration-200 ${
-                    pathname === "/maps/oblast/Regional-Courts"
-                      ? "bg-blue-100/40 text-blue-600"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  }`}
-                >
-                  Средние оценки по областям
-                </Link>
-                <Link
-                  href="/remarks"
-                  className={`px-4 py-2 rounded-md font-medium transition duration-200 ${
-                    pathname === "/remarks"
-                      ? "bg-blue-100/40 text-blue-600"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  }`}
-                >
-                  Замечания и предложения
-                </Link>
-              </div>
+              <h2 className="text-xl font-medium">Оценки по областям</h2>
             </div>
 
             <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
@@ -311,23 +295,47 @@ export default function RegionalCourts() {
                         >
                           {region.name}
                         </td>
-                        <td className={`border border-gray-300 px-4 py-2 text-center text-sm ${getRatingColor(region.overall)}`}>
-                          {region.overall.toFixed(1)}
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            oblast.overall
+                          )}`}
+                        >
+                          {oblast.overall.toFixed(1)}
                         </td>
-                        <td className={`border border-gray-300 px-4 py-2 text-center text-sm ${getRatingColor(region.ratings[0])}`}>
-                          {region.ratings[0].toFixed(1)}
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            oblast.ratings[0]
+                          )}`}
+                        >
+                          {oblast.ratings[0].toFixed(1)}
                         </td>
-                        <td className={`border border-gray-300 px-4 py-2 text-center text-sm ${getRatingColor(region.ratings[1])}`}>
-                          {region.ratings[1].toFixed(1)}
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            oblast.ratings[1]
+                          )}`}
+                        >
+                          {oblast.ratings[1].toFixed(1)}
                         </td>
-                        <td className={`border border-gray-300 px-4 py-2 text-center text-sm ${getRatingColor(region.ratings[2])}`}>
-                          {region.ratings[2].toFixed(1)}
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            oblast.ratings[2]
+                          )}`}
+                        >
+                          {oblast.ratings[2].toFixed(1)}
                         </td>
-                        <td className={`border border-gray-300 px-4 py-2 text-center text-sm ${getRatingColor(region.ratings[3])}`}>
-                          {region.ratings[3].toFixed(1)}
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            oblast.ratings[3]
+                          )}`}
+                        >
+                          {oblast.ratings[3].toFixed(1)}
                         </td>
-                        <td className={`border border-gray-300 px-4 py-2 text-center text-sm ${getRatingColor(region.ratings[4])}`}>
-                          {region.ratings[4].toFixed(1)}
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            oblast.ratings[4]
+                          )}`}
+                        >
+                          {oblast.ratings[4].toFixed(1)}
                         </td>
                         <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
                           {region.totalAssessments}

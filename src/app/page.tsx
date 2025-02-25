@@ -12,7 +12,7 @@ function Home() {
   const { user } = useAuth();
 
   return (
-    <div>
+    <div className="">
       {user?.role === "Председатель 1 инстанции" ? (
         <>
           <Dates />

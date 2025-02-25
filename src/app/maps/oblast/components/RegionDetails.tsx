@@ -1,13 +1,13 @@
 import { getCookie } from "@/api/login";
 import { useSurveyData } from "@/context/SurveyContext";
-import React, { useState, useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
+import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import * as d3 from 'd3';
 import { GeoPermissibleObjects } from 'd3-geo';
 import geoData from '../../../../../public/gadm41_KGZ_1.json';
 
-// Обновляем функцию для определения цвета на основе оценки
 const getRatingColor = (rating: number) => {
   if (rating === 0) return '#F3F4F6'; // gray-100
   if (rating <= 2) return '#FEE2E2'; // red-100
@@ -155,23 +155,24 @@ const courtPositionsMap: { [key: string]: { [key: string]: [number, number] } } 
   }
 };
 
+
 function RegionDetails({ regionName }: { regionName: string | null }) {
-    const {
-      selectedRegion,
-      setSelectedRegion,
-      setSurveyData,
-      setIsLoading,
-      selectedCourtName,
-      setSelectedCourtName,
-      selectedCourtId,
-      setSelectedCourtId,
-    } = useSurveyData();
+  const {
+    selectedRegion,
+    setSelectedRegion,
+    setSurveyData,
+    setIsLoading,
+    selectedCourtName,
+    setSelectedCourtName,
+    selectedCourtId,
+    setSelectedCourtId,
+  } = useSurveyData();
 
   const handleCourtClick = async (courtId: number, courtName: string) => {
     setSelectedCourtId(courtId);
     localStorage.setItem("selectedCourtId", courtId.toString());
     localStorage.setItem("selectedCourtName", courtName);
-    setSelectedCourtName(courtName); // Сохраняем имя суда
+    setSelectedCourtName(courtName);
 
     try {
       const token = getCookie("access_token");
@@ -179,7 +180,7 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
 
       const response = await fetch(
         `https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`,
-        { 
+        {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -200,9 +201,171 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
     }
   };
 
-  const handleBackClick = () => {
+  const renderRegionMap = useCallback(() => {
+    if (!regionName || !selectedRegion) return null;
+
+    const courtPositions = courtPositionsMap[regionName] || {};
+
+    const regionMapping: { [key: string]: string } = {
+      'Баткенская область': 'Batken',
+      'Жалал-Абадская область': 'Jalal-Abad',
+      'Иссык-Кульская область': 'Ysyk-Köl',
+      'Нарынская область': 'Naryn',
+      'Ошская область': 'Osh',
+      'Таласская область': 'Talas',
+      'Чуйская область': 'Chüy',
+      'Город Бишкек': 'Biškek'
+    };
+
+    const geoJsonData = geoData as GeoJsonData;
+    const regionFeature = geoJsonData.features.find(
+      (feature) => feature.properties.NAME_1 === regionMapping[regionName]
+    );
+
+    if (!regionFeature) return null;
+
+    return (
+      <div className="w-full h-[400px] relative mb-6 bg-white rounded-lg shadow-sm p-4">
+        <style>
+          {`
+            #tooltip {
+              pointer-events: none;
+              transition: all 0.1s  ease;
+              z-index: 1000;
+              position: fixed;
+            }
+          `}
+        </style>
+        <div
+          id="tooltip"
+          className="absolute hidden bg-white px-3 py-2 rounded shadow-lg border border-gray-200 z-50"
+        />
+        <svg ref={(node) => {
+          if (node) {
+            const width = node.clientWidth;
+            const height = node.clientHeight;
+            const svg = d3.select(node);
+            svg.selectAll("*").remove();
+
+            // Создаем градиент для фона области
+            const gradient = svg.append("defs")
+              .append("linearGradient")
+              .attr("id", "region-gradient")
+              .attr("x1", "0%")
+              .attr("y1", "0%")
+              .attr("x2", "100%")
+              .attr("y2", "100%");
+
+            gradient.append("stop")
+              .attr("offset", "0%")
+              .attr("style", "stop-color: #EBF4FF; stop-opacity: 1");
+
+            gradient.append("stop")
+              .attr("offset", "100%")
+              .attr("style", "stop-color: #E5E7EB; stop-opacity: 1");
+
+            const margin = { top: 20, right: 20, bottom: 20, left: 20 };
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            const g = svg.append("g")
+              .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const projection = d3.geoMercator()
+              .fitSize([innerWidth, innerHeight], regionFeature as unknown as GeoPermissibleObjects);
+
+            const path = d3.geoPath().projection(projection);
+
+            // Рисуем область с градиентом и улучшенными границами
+            g.append("path")
+              .datum(regionFeature as unknown as GeoPermissibleObjects)
+              .attr("d", path)
+              .attr("fill", "url(#region-gradient)")
+              .attr("stroke", "#4B5563")
+              .attr("stroke-width", 1.5)
+              .attr("stroke-linejoin", "round")
+              .attr("filter", "drop-shadow(0 1px 2px rgb(0 0 0 / 0.1))");
+
+            // Добавляем суды как точки на карте
+            selectedRegion.forEach((court: RegionData & { coordinates?: [number, number] }) => {
+              const position = courtPositions[court.name];
+              if (position) {
+                const [lon, lat] = position;
+                const [x, y] = projection([lon, lat]) || [0, 0];
+
+                const tooltip = d3.select("#tooltip");
+                const ratingColor = getRatingColor(court.overall);
+                const borderColor = getRatingBorderColor(court.overall);
+
+                g.append("circle")
+                  .attr("cx", x)
+                  .attr("cy", y)
+                  .attr("r", 6)
+                  .attr("fill", ratingColor)
+                  .attr("stroke", borderColor)
+                  .attr("stroke-width", 2)
+                  .attr("class", "cursor-pointer transition-all duration-200")
+                  .attr("filter", "drop-shadow(0 1px 1px rgb(0 0 0 / 0.1))")
+                  .on("mousemove", (event) => {
+                    d3.select(event.currentTarget)
+                      .transition()
+                      .duration(200)
+                      .attr("r", 8)
+                      .attr("stroke-width", 3);
+
+                    const tooltipNode = tooltip.node() as HTMLElement;
+                    
+                    tooltip
+                      .style("display", "block")
+                      .style("left", `${event.clientX + 20}px`)
+                      .style("top", `${event.clientY - 10}px`)
+                      .html(`
+                        <div class="font-medium">${court.name}</div>
+                        <div class="text-sm text-gray-600">
+                          Общая оценка: <span class="font-medium" style="color: ${borderColor}">${court.overall.toFixed(1)}</span>
+                        </div>
+                      `);
+
+                    // Проверяем и корректируем позицию, если тултип выходит за пределы экрана
+                    const tooltipRect = tooltipNode.getBoundingClientRect();
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+
+                    if (event.clientX + tooltipRect.width + 20 > viewportWidth) {
+                      tooltip.style("left", `${event.clientX - tooltipRect.width - 20}px`);
+                    }
+                    if (event.clientY + tooltipRect.height > viewportHeight) {
+                      tooltip.style("top", `${event.clientY - tooltipRect.height - 10}px`);
+                    }
+                  })
+                  .on("mouseout", (event) => {
+                    d3.select(event.currentTarget)
+                      .transition()
+                      .duration(200)
+                      .attr("r", 6)
+                      .attr("stroke-width", 2);
+                    tooltip.style("display", "none");
+                  })
+                  .on("click", () => {
+                    handleCourtClick(court.id, court.name);
+                  });
+              }
+            });
+          }
+        }} className="w-full h-full" />
+      </div>
+    );
+  }, [regionName, selectedRegion, handleCourtClick]);
+
+  
+
+  const handleCourtBackClick = () => {
     setSelectedCourtId(null);
-    setSelectedCourtName(null); // Сбрасываем имя суда
+    setSelectedCourtName(null);
+  };
+
+  const handleRegionBackClick = () => {
+    setSelectedRegion(null);
   };
 
   // Добавляем функцию для отрисовки карты области
@@ -366,14 +529,14 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
     <>
       {selectedCourtId ? (
         <div className="mt-8">
-          <h2 className="text-3xl font-bold mb-4">{selectedCourtName}</h2>
-          {/* Отображаем название суда */}
-          <button
-            onClick={handleBackClick}
-            className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500 mb-6 transition"
-          >
-            Назад к списку судов
-          </button>
+          <Breadcrumb
+            regionName={regionName}
+            courtName={selectedCourtName}
+            onCourtBackClick={handleCourtBackClick} 
+            onRegionBackClick={handleRegionBackClick} 
+          />
+          <h2 className="text-3xl font-bold mb-4 mt-4">{selectedCourtName}</h2>
+          
           <div className="space-y-6">
             <Dates />
             <Evaluations selectedCourtId={selectedCourtId} />
@@ -383,19 +546,15 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
         <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
           <div className="max-w-[1250px] mx-auto px-4 py-4">
             <div className="flex flex-col">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {regionName}
-                </h2>
-                <button
-                  onClick={() => setSelectedRegion(null)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Вернуться к списку областей
-                </button>
-              </div>
-
+              <Breadcrumb
+                regionName={regionName}
+                onRegionBackClick={handleRegionBackClick} // Только возврат к списку регионов
+              />
+              <h2 className="text-xl font-medium mt-4">
+                {regionName ? regionName : "Выберите регион"}
+              </h2>
               {renderRegionMap()}
+              
 
               <div className="mt-6 bg-white rounded-lg shadow-sm border border-gray-200">
                 <div className="overflow-x-auto">
@@ -441,8 +600,10 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
                             {index + 1}
                           </td>
                           <td
-                            onClick={() => handleCourtClick(court.id, court.name)}
-                            className="border border-gray-300 px-4 py-2 text-sm text-gray-800 hover:text-blue-600 cursor-pointer"
+                            className="px-3 py-2.5 text-left text-xs text-gray-600 cursor-pointer hover:text-blue-500"
+                            onClick={() =>
+                              handleCourtClick(court.id, court.name)
+                            }
                           >
                             {court.name}
                           </td>
