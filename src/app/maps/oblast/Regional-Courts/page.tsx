@@ -257,6 +257,15 @@ export default function RegionalCourts() {
                         </div>
                       </th>
                       <th
+                        onClick={() => handleSort("accessibility")}
+                        className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600 cursor-pointer"
+                      >
+                        <div className="flex items-center justify-center">
+                          Судья
+                          {getSortIcon("accessibility")}
+                        </div>
+                      </th>
+                      <th
                         onClick={() => handleSort("judge")}
                         className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600 cursor-pointer"
                       >
@@ -265,15 +274,7 @@ export default function RegionalCourts() {
                           {getSortIcon("judge")}
                         </div>
                       </th>
-                      <th
-                        onClick={() => handleSort("process")}
-                        className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600 cursor-pointer"
-                      >
-                        <div className="flex items-center justify-center">
-                          Канцелярия
-                          {getSortIcon("process")}
-                        </div>
-                      </th>
+                      
                       <th
                         onClick={() => handleSort("staff")}
                         className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600 cursor-pointer"
@@ -292,15 +293,7 @@ export default function RegionalCourts() {
                           {getSortIcon("office")}
                         </div>
                       </th>
-                      <th
-                        onClick={() => handleSort("accessibility")}
-                        className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600 cursor-pointer"
-                      >
-                        <div className="flex items-center justify-center">
-                          Судья
-                          {getSortIcon("accessibility")}
-                        </div>
-                      </th>
+                      
                       <th className="border border-gray-300 px-4 py-2 text-center font-bold text-sm text-gray-600">
                         Количество отзывов
                       </th>
