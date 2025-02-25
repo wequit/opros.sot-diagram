@@ -24,6 +24,18 @@ interface SVGFeature {
   };
 }
 
+// Координаты для каждой области
+const oblastCoordinates: { [key: string]: [number, number] } = {
+  'Бишкек': [74.69, 42.87],
+  'Чуйская область': [74.5, 42.8],
+  'Таласская область': [72.2, 42.5],
+  'Иссык-Кульская область': [77.5, 42.3],
+  'Нарынская область': [75.5, 41.3],
+  'Жалал-Абадская область': [72.5, 41.5],
+  'Баткенская область': [71.5, 40.0],
+  'Ошская область': [73.0, 40.5],
+};
+
 interface OblastData {
   id: number;
   name: string;
@@ -39,55 +51,46 @@ type OblastMapping = {
   [key: string]: string;
 };
 
-export default function Map_oblast({ oblastData }: MapProps) {
+export default function Map_oblast({ oblastData  }: MapProps) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 480 });
 
-  const oblastMapping: OblastMapping = useMemo(
-    () => ({
-      'Biškek': 'Город Бишкек',
-      'Chüy': 'Чуйская область',
-      'Talas': 'Таласская область',
-      'Ysyk-Köl': 'Иссык-Кульская область',
-      'Naryn': 'Нарынская область',
-      'Jalal-Abad': 'Жалал-Абадская область',
-      'Batken': 'Баткенская область',
-      'Osh': 'Ошская область',
-    }),
-    []
-  );
+  const oblastMapping: OblastMapping = useMemo(() => ({
+    'Biškek': 'Город Бишкек',
+    'Chüy': 'Чуйская область',
+    'Talas': 'Таласская область',
+    'Ysyk-Köl': 'Иссык-Кульская область',
+    'Naryn': 'Нарынская область',
+    'Jalal-Abad': 'Жалал-Абадская область',
+    'Batken': 'Баткенская область',
+    'Osh': 'Ошская область'
+  }), []);
 
-  const getOblastRating = useCallback(
-    (oblastName: string) => {
-      const mappedName = oblastMapping[oblastName] || oblastName;
-      const oblast = oblastData.find((o) => o.name === mappedName);
-      return oblast?.overall || 0;
-    },
-    [oblastData, oblastMapping]
-  );
+  const getOblastRating = useCallback((oblastName: string) => {
+    const mappedName = oblastMapping[oblastName] || oblastName;
+    const oblast = oblastData.find(o => o.name === mappedName);
+    return oblast?.overall || 0;
+  }, [oblastData, oblastMapping]);
 
-  const getColor = useCallback(
-    (rating: number) => {
-      if (rating === 0) return '#999999'; // Серый цвет по умолчанию
-      if (rating >= 5.0) return '#66C266';
-      if (rating >= 4.5) return '#66C266';
-      if (rating >= 4.0) return '#B4D330';
-      if (rating >= 3.5) return '#FFC04D';
-      if (rating >= 3.0) return '#F4A460';
-      if (rating >= 2.5) return '#E57357';
-      if (rating >= 2.0) return '#ff620d';
-      if (rating >= 1.5) return '#fa5d5d';
-      if (rating >= 1.0) return '#fa5d5d';
-      if (rating >= 0.5) return '#640202';
-      return '#999999';
-    },
-    [oblastData, oblastMapping]
-  );
+  const getColor = useCallback((rating: number) => {
+    if (rating === 0) return '#999999';
+    if (rating >= 5.0) return '#66C266';
+    if (rating >= 4.5) return '#66C266';
+    if (rating >= 4.0) return '#B4D330';
+    if (rating >= 3.5) return '#FFC04D';
+    if (rating >= 3.0) return '#F4A460';
+    if (rating >= 2.5) return '#E57357';
+    if (rating >= 2.0) return '#ff620d';
+    if (rating >= 1.5) return '#fa5d5d';
+    if (rating >= 1.0) return '#fa5d5d';
+    if (rating >= 0.5) return '#640202';
+    return '#999999';
+  }, [ oblastData, oblastMapping]);
 
   useEffect(() => {
-    if (!svgRef.current || !containerRef.current) return;
+    if (!svgRef.current || !containerRef.current || !oblastData.length) return;
 
     const container = d3.select(containerRef.current);
     const width = container.node()?.getBoundingClientRect().width || 800;
@@ -110,10 +113,11 @@ export default function Map_oblast({ oblastData }: MapProps) {
 
     const path = d3.geoPath().projection(projection);
 
-    const regionsGroup = svg.append('g').attr('class', 'regions');
+    const regionsGroup = svg.append('g')
+      .attr('class', 'regions');
 
-    regionsGroup
-      .selectAll('path')
+    // Рисуем области
+    regionsGroup.selectAll('path')
       .data(geoData.features as SVGFeature[])
       .join('path')
       .attr('d', path as any)
@@ -125,9 +129,9 @@ export default function Map_oblast({ oblastData }: MapProps) {
       .attr('stroke', '#fff')
       .attr('stroke-width', '1')
       .style('cursor', 'pointer')
-      .on('mouseover', function (event: any, d: SVGFeature) {
+      .on('mouseover', function(event: any, d: SVGFeature) {
         d3.select(this).attr('stroke-width', '2');
-
+        
         const coordinates = getEventCoordinates(event);
         const tooltip = d3.select(tooltipRef.current);
         tooltip
@@ -143,21 +147,21 @@ export default function Map_oblast({ oblastData }: MapProps) {
           <div>Общая оценка: ${rating.toFixed(1)}</div>
         `);
       })
-      .on('mousemove', function (event: any) {
+      .on('mousemove', function(event: any) {
         const coordinates = getEventCoordinates(event);
         const tooltip = d3.select(tooltipRef.current);
         tooltip
           .style('left', `${coordinates.x + 10}px`)
           .style('top', `${coordinates.y + 10}px`);
       })
-      .on('mouseout', function () {
+      .on('mouseout', function() {
         d3.select(this).attr('stroke-width', '1');
         d3.select(tooltipRef.current).style('display', 'none');
       })
-      .on('touchstart', function (event: any, d: SVGFeature) {
+      .on('touchstart', function(event: any, d: SVGFeature) {
         event.preventDefault();
         d3.select(this).attr('stroke-width', '2');
-
+        
         const coordinates = getEventCoordinates(event);
         const tooltip = d3.select(tooltipRef.current);
         tooltip
@@ -173,7 +177,7 @@ export default function Map_oblast({ oblastData }: MapProps) {
           <div>Общая оценка: ${rating.toFixed(1)}</div>
         `);
       })
-      .on('touchmove', function (event: any) {
+      .on('touchmove', function(event: any) {
         event.preventDefault();
         const coordinates = getEventCoordinates(event);
         const tooltip = d3.select(tooltipRef.current);
@@ -181,13 +185,14 @@ export default function Map_oblast({ oblastData }: MapProps) {
           .style('left', `${coordinates.x + 10}px`)
           .style('top', `${coordinates.y + 10}px`);
       })
-      .on('touchend', function () {
+      .on('touchend', function() {
         d3.select(this).attr('stroke-width', '1');
         d3.select(tooltipRef.current).style('display', 'none');
-      });
+      })
+    
 
-    regionsGroup
-      .selectAll('text')
+    // Добавляем текст с оценками на карту
+    regionsGroup.selectAll('text')
       .data(geoData.features as SVGFeature[])
       .join('text')
       .attr('x', (d: any) => path.centroid(d)[0])
@@ -202,8 +207,8 @@ export default function Map_oblast({ oblastData }: MapProps) {
         return rating ? rating.toFixed(1) : '';
       });
 
-    const legend = svg
-      .append('g')
+    // Добавляем легенду
+    const legend = svg.append('g')
       .attr('class', 'legend')
       .attr('transform', `translate(20, ${height - 650})`);
 
@@ -215,29 +220,29 @@ export default function Map_oblast({ oblastData }: MapProps) {
       { color: '#ff8300', label: '2.0 - 2.9' },
       { color: '#ff620d', label: '1.5 - 2.0' },
       { color: '#fa5d5d', label: '1.0 - 1.5' },
-      { color: '#640202', label: '0.5 - 1.0' },
+      { color: '#640202', label: '0.5 - 1.0' }
     ];
 
-    legend
-      .selectAll('.legend-item')
+    legend.selectAll('.legend-item')
       .data(legendData)
       .join('g')
       .attr('class', 'legend-item')
       .attr('transform', (d, i) => `translate(0, ${i * 20})`)
-      .call((g) => {
+      .call(g => {
         g.append('rect')
           .attr('width', 15)
           .attr('height', 15)
           .attr('rx', 2)
-          .attr('fill', (d) => d.color);
+          .attr('fill', d => d.color);
         g.append('text')
           .attr('x', 25)
           .attr('y', 12)
           .attr('font-size', '12px')
           .attr('fill', '#666')
-          .text((d) => d.label);
+          .text(d => d.label);
       });
-  }, [oblastData, oblastMapping, getOblastRating, getColor]);
+
+  }, [oblastData, oblastMapping,  getOblastRating, getColor]);
 
   return (
     <div ref={containerRef} className="relative w-full">
@@ -255,17 +260,17 @@ function getEventCoordinates(event: any) {
   if (event.touches && event.touches[0]) {
     return {
       x: event.touches[0].clientX,
-      y: event.touches[0].clientY,
+      y: event.touches[0].clientY
     };
   }
   if (event.changedTouches && event.changedTouches[0]) {
     return {
       x: event.changedTouches[0].clientX,
-      y: event.changedTouches[0].clientY,
+      y: event.changedTouches[0].clientY
     };
   }
   return {
     x: event.clientX,
-    y: event.clientY,
+    y: event.clientY
   };
 }
