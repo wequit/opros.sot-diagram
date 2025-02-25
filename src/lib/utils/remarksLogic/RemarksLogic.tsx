@@ -4,6 +4,7 @@ import { useRemarks } from "@/components/RemarksApi";
 import { getCookie } from "@/api/login";
 import { ArrowLeft, FileSearch } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 const CommentModal = ({
   isOpen,
   onClose,
@@ -64,6 +65,7 @@ export default function RemarksPage() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [localRemarks, setLocalRemarks] = useState<any[]>([]);
   const itemsPerPage = 35;
+  const router = useRouter();
 
   const storedCourtId = localStorage.getItem("selectedCourtId");
   const courtId = storedCourtId ? parseInt(storedCourtId, 10) : null;
@@ -140,27 +142,36 @@ export default function RemarksPage() {
     <div className="container mx-auto p-4">
       {localRemarks.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-6">
-        <div className="animate-bounce mb-4">
-          <FileSearch size={64} className="text-gray-400" />
+          <div className="animate-bounce mb-4">
+            <FileSearch size={64} className="text-gray-400" />
+          </div>
+          <p className="text-gray-700 text-xl font-semibold mb-2">
+            Нет доступных замечаний
+          </p>
+          <p className="text-gray-500 text-sm mb-4">
+            Для вашего суда пока не поступило ни одного замечания.
+          </p>
+          <Link
+            href="/"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-600 transition"
+          >
+            <ArrowLeft size={18} />
+            Вернуться на главную
+          </Link>
         </div>
-        <p className="text-gray-700 text-xl font-semibold mb-2">
-          Нет доступных замечаний
-        </p>
-        <p className="text-gray-500 text-sm mb-4">
-          Для вашего суда пока не поступило ни одного замечания.
-        </p>
-        <Link
-          href="/"
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-600 transition"
-        >
-          <ArrowLeft size={18} />
-          Вернуться на главную
-        </Link>
-      </div>
       ) : (
         <>
-          <h1 className="text-2xl font-bold mb-4">Замечания и предложения</h1>
           <div className="overflow-x-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-2xl font-bold">Замечания и предложения</h1>
+              <button
+                onClick={() => router.back()}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-600 transition"
+              >
+                <ArrowLeft size={18} />
+                Назад
+              </button>
+            </div>
             <table className="min-w-full border border-gray-200">
               <thead>
                 <tr className="bg-gray-100">
@@ -187,9 +198,7 @@ export default function RemarksPage() {
                         {item.court || "Не указано"}
                       </td>
                       <td className="border p-2">{item.custom_answer || ""}</td>
-                      <td className="border p-2">
-                        {item.author || ""}
-                      </td>
+                      <td className="border p-2">{item.author || ""}</td>
                       <td className="border p-2">
                         {item.reply_to_comment || ""}
                       </td>

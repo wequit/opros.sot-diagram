@@ -5,11 +5,11 @@ import Evaluations  from '@/components/Evaluations/page';
 
 const ThirdInstance = () => {
   return (
-    <>
+    <div className="mt-4">
       <Dates />
       <DataFetcher />
       <Evaluations />
-    </>
+    </div>
   );
 };
 

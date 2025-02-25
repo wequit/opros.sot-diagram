@@ -43,7 +43,7 @@ export default function GeneralPageContent() {
 
   if (isLoading) {
     return (
-      <div>
+      <div className="mt-4">
        <Dates />
        <SkeletonDashboard/>
       </div>
@@ -51,7 +51,7 @@ export default function GeneralPageContent() {
   }
 
   return (
-    <div>
+    <div className="mt-4">
       <Dates />
       <Evaluations />
     </div>

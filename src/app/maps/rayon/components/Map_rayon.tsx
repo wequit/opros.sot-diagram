@@ -3,7 +3,6 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import rayonData from '../../../../../public/gadm41_KGZ_2.json';
 
-// Обновленный маппинг районов к судам
 const rayonToCourtMapping: { [key: string]: string } = {
   // Бишкек
   'Biskek': 'Бишкекский межрайонный суд',

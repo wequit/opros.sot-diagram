@@ -189,83 +189,108 @@ export default function Dates() {
   );
 
   return (
-    <div className="w-full bg-slate-800 p-3 rounded-lg shadow-lg mb-6">
-      <div className="flex items-center gap-3">
-        {/* Блок с датами и годом */}
-        <div className="flex items-center gap-2">
-          <div className="bg-slate-700 rounded-md flex items-center p-2">
-            <span className="text-slate-300 text-sm px-2">С</span>
+    <div className="w-full bg-gradient-to-r from-blue-700 to-indigo-400 p-6 rounded-2xl mb-4">
+      {/* Даты */}
+      <div className="flex flex-wrap gap-6 mb-6">
+        <div className="flex items-center bg-white rounded-xl shadow-sm p-2">
+          <div className="flex items-center gap-3">
+            <span className=" font-medium px-2">С</span>
             <input
               type="text"
-              value={formatDate(dateRange.startDate)}
-              className="w-24 bg-transparent border-0 focus:ring-0 text-white text-sm"
-              readOnly
+              value={dateRange.startDate}
+              onChange={(e) => handleDateChange("startDate", e.target.value)}
+              className="border-0 focus:ring-0 text-gray-600 font-medium w-24"
             />
           </div>
-          <div className="bg-slate-700 rounded-md flex items-center p-2">
-            <span className="text-slate-300 text-sm px-2">По</span>
+          <div className="w-px h-6 bg-gray-200 mx-2"></div>
+          <div className="flex items-center gap-3">
+            <span className=" font-medium px-2">По</span>
             <input
               type="text"
-              value={formatDate(dateRange.endDate)}
-              className="w-24 bg-transparent border-0 focus:ring-0 text-white text-sm"
-              readOnly
+              value={dateRange.endDate}
+              onChange={(e) => handleDateChange("endDate", e.target.value)}
+              className="border-0 focus:ring-0 text-gray-600 font-medium w-24"
             />
-          </div>
-          <div className="relative">
-            <button
-              onClick={() => setShowYearDropdown(!showYearDropdown)}
-              className="bg-slate-700 text-white rounded-md p-2 text-sm hover:bg-slate-600 
-              transition-all flex items-center gap-2 min-w-[90px] justify-center"
-            >
-              {dateRange.year}
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {showYearDropdown && (
-              <div className="absolute top-full mt-1 w-full bg-slate-700 rounded-md shadow-xl py-1 z-10">
-                {years.map((year) => (
-                  <button
-                    key={year}
-                    onClick={() => handleYearSelect(year)}
-                    className="w-full px-3 py-1.5 text-center text-white hover:bg-slate-600 text-sm"
-                  >
-                    {year}
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
         </div>
+        {/* Выбор года */}
+        <div className="relative">
+          <button
+            onClick={() => setShowYearDropdown(!showYearDropdown)}
+            className="bg-white px-4 py-2 rounded-xl font-medium text-gray-600 hover:bg-blue-50 transition-all duration-200 flex items-center gap-2"
+          >
+            {dateRange.year}
+            <svg
+              className={`w-4 h-4 transition-transform ${
+                showYearDropdown ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
 
+          {/* Выпадающий список с годами */}
+          {showYearDropdown && (
+            <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto">
+              {years.map((year) => (
+                <button
+                  key={year}
+                  onClick={() => handleYearSelect(year)}
+                  className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors
+                                    ${
+                                      dateRange.year === year
+                                        ? "bg-blue-100"
+                                        : ""
+                                    }`}
+                >
+                  {year}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        
+      </div>
+
+      {/* Периоды */}
+      <div className=" flex items-center gap-4">
         {/* Кварталы */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap gap-3">
           {periods.slice(0, 4).map((period) => (
             <button
               key={period.id}
               onClick={() => handlePeriodClick(period)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-all
-                ${activePeriod === period.id
-                  ? "bg-blue-600 text-white"
-                  : "bg-slate-700 text-white hover:bg-slate-600"
-                }`}
+              className={
+                "px-5 py-2 rounded-xl font-medium transition-all duration-200 " +
+                (activePeriod === period.id
+                  ? "bg-indigo-950 text-white shadow-lg shadow-blue-900 scale-105"
+                  : "bg-white text-black hover:bg-[#003494] hover:text-white ")
+              }
             >
-              {period.label.replace(' квартал', '')}
+              {period.label}
             </button>
           ))}
         </div>
-
         {/* Месяцы */}
-        <div className="flex items-center gap-1.5 flex-1">
+        <div className="flex flex-wrap gap-3 ">
           {periods.slice(4).map((period) => (
             <button
               key={period.id}
               onClick={() => handlePeriodClick(period)}
-              className={`px-3 py-2 rounded-md text-sm font-medium transition-all flex-1
-                ${activePeriod === period.id
-                  ? "bg-blue-600 text-white"
-                  : "bg-slate-700 text-white hover:bg-slate-600"
-                }`}
+              className={
+                "px-4 py-2 rounded-xl font-medium transition-all duration-200 " +
+                (activePeriod === period.id
+                  ? "bg-indigo-950 text-white shadow-lg shadow-blue-900    scale-105"
+                  : "bg-white text-black hover:bg-[#003494]  hover:text-white ")
+              }
             >
               {period.label}
             </button>
@@ -278,10 +303,10 @@ export default function Dates() {
 
 // Функция форматирования даты из YYYY-MM-DD в DD.MM.YYYY
 const formatDate = (dateString: string) => {
-  if (!dateString) return '';
-  const [year, month, day] = dateString.split('-');
+  if (!dateString) return "";
+  const [year, month, day] = dateString.split("-");
   // Убедимся, что все компоненты существуют
-  if (!year || !month || !day) return '';
+  if (!year || !month || !day) return "";
   // Форматируем дату в DD.MM.YYYY
-  return `${day.padStart(2, '0')}.${month.padStart(2, '0')}.${year}`;
+  return `${day.padStart(2, "0")}.${month.padStart(2, "0")}.${year}`;
 };

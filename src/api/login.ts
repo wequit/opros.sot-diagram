@@ -47,7 +47,7 @@ export const deleteCookie = (name: string) => {
 
 export const isTokenExpired = (token: string): boolean => {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1])); // Декодируем токен
+    const payload = JSON.parse(atob(token.split('.')[1])); 
     const currentTime = Math.floor(Date.now() / 1000);
     return payload.exp < currentTime;
   } catch (error) {
@@ -62,7 +62,7 @@ export const reLogin = async (refreshToken: string): Promise<string | null> => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ refresh: refreshToken }), // Отправляем refresh токен
+      body: JSON.stringify({ refresh: refreshToken }), 
     });
 
     if (!response.ok) {
@@ -184,9 +184,8 @@ export const loginApi = {
   },
 };
 
-// Хук для кеширования и предотвращения повторных запросов
 export const useFetchAssessmentData = () => {
-  const dataRef = useRef<any>(null); // Используем useRef для кеширования
+  const dataRef = useRef<any>(null);
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
@@ -196,11 +195,10 @@ export const useFetchAssessmentData = () => {
       setIsLoading(true);
       try {
         if (dataRef.current) {
-          // Если данные уже кешированы, используем их
           setData(dataRef.current);
         } else {
           const response = await fetchWithAuth('https://opros.sot.kg:443/api/v1/assessment/');
-          dataRef.current = response; // Кешируем данные в useRef
+          dataRef.current = response;
           setData(response);
         }
       } catch (error) {
@@ -210,7 +208,7 @@ export const useFetchAssessmentData = () => {
     };
 
     fetchData();
-  }, []); // Запрос выполняется только один раз
+  }, []);
 
   return { data, isLoading, error };
 };

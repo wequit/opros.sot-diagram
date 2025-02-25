@@ -668,8 +668,8 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
   }
 
   return (
-    <div className="min-h-screen ">
-      <div className="max-w-[1440px] mx-auto ">
+    <div className="min-h-screen">
+      <div className="max-w-[1250px] mx-auto ">
         <div className="grid grid-cols-2 gap-4">
           {/* Общие показатели */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
