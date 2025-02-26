@@ -11,7 +11,6 @@ import { getCookie } from "@/api/login";
 import Dates from "@/components/Dates/Dates";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 
-// Типы для данных API
 interface Assessment {
   aspect: string;
   court_avg: number;
