@@ -4,6 +4,7 @@ import "@/styles/globals.css";
 import "@/styles/skeleton.css";
 import "@/styles/map.css";
 import "@/styles/spinner.css";
+import "@/styles/responsive.css"
 import Header from "@/components/layout/Header";
 import { Inter } from "next/font/google";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
@@ -52,7 +53,7 @@ function AuthContent({ children }: { children: React.ReactNode }) {
 
 
   return (
-    <div className="max-w-[1250px] mx-auto">
+    <div className="max-w-[1250px] mx-auto layout">
       <Header />
       <div className={`flex min-h-[calc(100vh-48px)] ${pathname === "/login" ? "mt-0" : "mt-16"}`}>
         <main className='flex-1 max-w-[1250px] mx-auto'>{children}</main>

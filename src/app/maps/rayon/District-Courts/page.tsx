@@ -116,8 +116,15 @@ export default function Courts() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-  const { setCourtName, setSurveyData, setIsLoading, courtName, language } =
-    useSurveyData();
+  const {
+    setCourtName,
+    setSurveyData,
+    setIsLoading,
+    courtName,
+    language,
+    courtNameId,
+    setCourtNameId,
+  } = useSurveyData();
   const [showEvaluations, setShowEvaluations] = useState(false);
 
   const token = getCookie("access_token");
@@ -133,6 +140,13 @@ export default function Courts() {
     try {
       setIsLoading(true);
       setCourtName(court.name);
+      setCourtNameId(court.id.toString());
+
+      const courtNameIdValue = courtNameId ?? court.id.toString();
+      const courtNameValue = courtName ?? court.name;
+
+      localStorage.setItem("courtNameId", courtNameIdValue);
+      localStorage.setItem("courtName", courtNameValue);
       localStorage.setItem("selectedCourtName", court.name);
 
       const response = await fetch(
@@ -250,17 +264,25 @@ export default function Courts() {
             regionName={getTranslation("HeaderNavFour", language)}
             courtName={courtName}
             onCourtBackClick={handleBackClick}
-            showHome={false}  
+            showHome={false}
           />
           <h2 className="text-3xl font-bold mb-4 mt-4">{courtName}</h2>
           <Dates />
-
-          <Evaluations />
+          <Evaluations courtNameId={courtNameId} />
         </div>
       ) : (
         <div className="container mx-auto px-4 py-8">
-          <h2 className="text-2xl font-bold mb-4 mt-2">Районные суды</h2>
-          <div className="border border-gray-300">
+          <div className="mb-4 flex justify-between items-center">
+            <Breadcrumb
+              regionName={null}
+              courtName={null}
+              onRegionBackClick={handleBackClick}
+              showHome={true}
+              headerKey="HeaderNavFour"
+            />
+            <h2 className="text-2xl font-bold  mt-2">Районные суды</h2>
+          </div>
+          <div className="border border-gray-300 rounded-2xl bg-white ">
             <Map
               selectedRayon={null}
               onSelectRayon={() => {}}

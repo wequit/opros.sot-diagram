@@ -1,4 +1,5 @@
 "use client";
+
 import Map from "../components/Map_oblast";
 import { useState, useEffect } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
@@ -7,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { getAssessmentData, getCookie } from "@/api/login";
 import { useSurveyData } from "@/context/SurveyContext";
 import RegionDetails from "../components/RegionDetails";
+import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -44,7 +46,6 @@ export default function RegionalCourts() {
 
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-  const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
@@ -196,17 +197,26 @@ export default function RegionalCourts() {
     }
   };
 
+  const handleRegionBackClick = () => {
+    setSelectedRegion(null);
+  };
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 my-8">
       <div className="max-w-[1250px] mx-auto">
         {!selectedRegion ? (
           <>
             <div className="mb-4 flex justify-between items-center">
-              <h2 className="text-xl font-medium">Оценки по областям</h2>
+              <Breadcrumb
+                regionName={null}
+                onRegionBackClick={handleRegionBackClick}
+                showHome={true}
+                headerKey="HeaderNavThree"
+              />
+              <h2 className="text-2xl font-bold mt-2">Оценки по областям</h2>
             </div>
 
             {/* Условный рендеринг таблицы */}
-
             <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
               <Map oblastData={regions} />
             </div>

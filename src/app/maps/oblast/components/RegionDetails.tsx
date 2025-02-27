@@ -366,6 +366,7 @@ function RegionDetails({ regionName }: { regionName: string | null }) {
 
   const handleRegionBackClick = () => {
     setSelectedRegion(null);
+    setSelectedCourtId(null);
   };
 
   return (

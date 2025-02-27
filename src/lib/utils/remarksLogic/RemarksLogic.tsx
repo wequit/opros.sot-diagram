@@ -4,7 +4,7 @@ import { useRemarks } from "@/components/RemarksApi";
 import { getCookie } from "@/api/login";
 import { ArrowLeft, FileSearch } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 const CommentModal = ({
   isOpen,
   onClose,
@@ -66,6 +66,7 @@ export default function RemarksPage() {
   const [localRemarks, setLocalRemarks] = useState<any[]>([]);
   const itemsPerPage = 35;
   const router = useRouter();
+  const pathname = usePathname();
 
   const storedCourtId = localStorage.getItem("selectedCourtId");
   const courtId = storedCourtId ? parseInt(storedCourtId, 10) : null;

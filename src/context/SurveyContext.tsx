@@ -77,6 +77,8 @@ interface SurveyContextType {
   setUserCourt: (court: string | null) => void;
   courtName: string | null;
   setCourtName: (name: string | null) => void;
+  courtNameId: string | null; // Добавляем тип для нового состояния
+  setCourtNameId: (nameId: string | null) => void; // Типизируем setter
   language: Language;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
@@ -94,28 +96,27 @@ const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
 
 export function SurveyProvider({ children }: { children: ReactNode }) {
   const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Явно указываем тип boolean
   const [userCourt, setUserCourt] = useState<string | null>(null);
   const [courtName, setCourtName] = useState<string | null>(null);
+  const [courtNameId, setCourtNameId] = useState<string | null>(null); // Добавляем тип для нового состояния
   const [language, setLanguage] = useState<Language>("ru");
   const [selectedCourt, setSelectedCourt] = useState<CourtData | null>(null);
   const [selectedCourtName, setSelectedCourtName] = useState<string | null>(null);
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionData[] | null>(null);
 
-  // При монтировании считываем сохранённый язык из localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const savedLanguage = localStorage.getItem("language");
+      const savedLanguage = localStorage.getItem("language") as Language | null;
       if (savedLanguage === "ky" || savedLanguage === "ru") {
         setLanguage(savedLanguage);
       }
     }
   }, []);
 
-
   const toggleLanguage = () => {
-    const newLanguage = language === "ru" ? "ky" : "ru";
+    const newLanguage: Language = language === "ru" ? "ky" : "ru";
     setLanguage(newLanguage);
     localStorage.setItem("language", newLanguage);
   };
@@ -131,6 +132,8 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
         setUserCourt,
         courtName,
         setCourtName,
+        courtNameId,
+        setCourtNameId,
         language,
         setLanguage,
         toggleLanguage,
@@ -161,7 +164,7 @@ export function getTranslation(
   return translations[language][key] || key;
 }
 
-export function useSurveyData() {
+export function useSurveyData(): SurveyContextType {
   const context = useContext(SurveyContext);
   if (context === undefined) {
     throw new Error("useSurveyData must be used within a SurveyProvider");

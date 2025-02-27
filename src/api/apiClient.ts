@@ -23,7 +23,7 @@ export class ApiClient {
     this.endpoint = config.endpoint;
   }
 
-  async fetchData(params: FetchParams = { year: '2025' }) {
+  async fetchData(courtId: number | string | null, params: FetchParams = { year: '2025' }) {
     try {
       const token = getCookie('access_token');
 
@@ -46,7 +46,21 @@ export class ApiClient {
         queryParams.append('end_date', params.endDate || '2025-12-31');
       }
 
-      const response = await fetch(`${this.baseURL}${this.endpoint}?${queryParams}`, {
+      // Формируем URL без лишнего слэша
+      let path = this.endpoint;
+      if (courtId) {
+        // Если courtId — строка, преобразуем её в число или используем как есть, если это не число
+        const effectiveCourtId = typeof courtId === 'string' ? parseInt(courtId, 10) || courtId : courtId;
+        path += `${effectiveCourtId}/`;
+      }
+
+      let url = `${this.baseURL}${path}`;
+      if (queryParams.toString()) {
+        url += `?${queryParams.toString()}`;
+      }
+
+
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -70,4 +84,4 @@ export class ApiClient {
       throw error;
     }
   }
-} 
+}

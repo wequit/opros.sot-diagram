@@ -91,8 +91,8 @@ interface BarChartData extends ChartData<"bar", number[], string> {
   })[];
 }
 
-export default function Evaluations({ selectedCourtId }: { selectedCourtId?: number | null }) {
-  const { surveyData, isLoading, language } = useSurveyData();
+export default function Evaluations({ selectedCourtId, courtNameId }: { selectedCourtId?: number | null; courtNameId?: string | null; }) {
+  const { surveyData, isLoading, language, selectedCourtName, courtName } = useSurveyData();
   const { remarks } = useRemarks();
   const [demographicsView, setDemographicsView] = useState("пол");
   const { user } = useAuth();
@@ -355,63 +355,137 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           setRadarData({
             labels: ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"],
             datasets:
-              user?.role === "Председатель 3 инстанции" && pathname === "/"
-                ? [
-                    // Только республиканские данные
-                    {
-                      label: "Средние оценки по республике",
-                      data: [
-                        allCourtsAvgMap["Судья"] || 0,
-                        allCourtsAvgMap["Сотрудники"] || 0,
-                        allCourtsAvgMap["Канцелярия"] || 0,
-                        allCourtsAvgMap["Процесс"] || 0,
-                        allCourtsAvgMap["Здание"] || 0,
-                      ],
-                      fill: true,
-                      backgroundColor: "rgba(54, 162, 235, 0.2)",
-                      borderColor: "rgba(54, 162, 235, 1)",
-                      borderWidth: 2,
-                      pointRadius: 5,
-                      pointHoverRadius: 7,
-                      datalabels: { display: false },
-                    },
-                  ]
-                : [
-                    // Оба набора данных
-                    {
-                      label: user ? user.court : "Загрузка...",
-                      data: [
-                        currentCourtAverageSS.judge || 0,
-                        currentCourtAverageSS.secretary || 0,
-                        currentCourtAverageSS.office || 0,
-                        currentCourtAverageSS.process || 0,
-                        currentCourtAverageSS.building || 0,
-                      ],
-                      fill: true,
-                      backgroundColor: "rgba(255, 206, 86, 0.2)",
-                      borderColor: "rgba(255, 206, 86, 1)",
-                      borderWidth: 2,
-                      pointRadius: 5,
-                      pointHoverRadius: 7,
-                    },
-                    {
-                      label: "Средние оценки по республике",
-                      data: [
-                        allCourtsAvgMap["Судья"] || 0,
-                        allCourtsAvgMap["Сотрудники"] || 0,
-                        allCourtsAvgMap["Канцелярия"] || 0,
-                        allCourtsAvgMap["Процесс"] || 0,
-                        allCourtsAvgMap["Здание"] || 0,
-                      ],
-                      fill: true,
-                      backgroundColor: "rgba(54, 162, 235, 0.2)",
-                      borderColor: "rgba(54, 162, 235, 1)",
-                      borderWidth: 2,
-                      pointRadius: 5,
-                      pointHoverRadius: 7,
-                      datalabels: { display: false },
-                    },
-                  ],
+  user?.role === "Председатель 3 инстанции" && pathname === "/"
+    ? [
+        // Только республиканские данные
+        {
+          label: "Средние оценки по республике",
+          data: [
+            allCourtsAvgMap["Судья"] || 0,
+            allCourtsAvgMap["Сотрудники"] || 0,
+            allCourtsAvgMap["Канцелярия"] || 0,
+            allCourtsAvgMap["Процесс"] || 0,
+            allCourtsAvgMap["Здание"] || 0,
+          ],
+          fill: true,
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          datalabels: { display: false },
+        },
+      ]
+    : user?.role === "Председатель 3 инстанции" && pathname === "/maps/oblast/Regional-Courts"
+    ? [
+        // Данные для выбранного суда из useSurveyData (региональные суды)
+        {
+          label: selectedCourtName || "Загрузка...",
+          data: [
+            currentCourtAverageSS.judge || 0,
+            currentCourtAverageSS.secretary || 0,
+            currentCourtAverageSS.office || 0,
+            currentCourtAverageSS.process || 0,
+            currentCourtAverageSS.building || 0,
+          ],
+          fill: true,
+          backgroundColor: "rgba(255, 206, 86, 0.2)",
+          borderColor: "rgba(255, 206, 86, 1)",
+          borderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        },
+        {
+          label: "Средние оценки по республике",
+          data: [
+            allCourtsAvgMap["Судья"] || 0,
+            allCourtsAvgMap["Сотрудники"] || 0,
+            allCourtsAvgMap["Канцелярия"] || 0,
+            allCourtsAvgMap["Процесс"] || 0,
+            allCourtsAvgMap["Здание"] || 0,
+          ],
+          fill: true,
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          datalabels: { display: false },
+        },
+      ]
+    : user?.role === "Председатель 3 инстанции" && pathname === "/maps/rayon/District-Courts"
+    ? [
+        // Данные для выбранного суда из useSurveyData (районные суды)
+        {
+          label: courtName || "Загрузка...",
+          data: [
+            currentCourtAverageSS.judge || 0,
+            currentCourtAverageSS.secretary || 0,
+            currentCourtAverageSS.office || 0,
+            currentCourtAverageSS.process || 0,
+            currentCourtAverageSS.building || 0,
+          ],
+          fill: true,
+          backgroundColor: "rgba(255, 206, 86, 0.2)",
+          borderColor: "rgba(255, 206, 86, 1)",
+          borderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        },
+        {
+          label: "Средние оценки по республике",
+          data: [
+            allCourtsAvgMap["Судья"] || 0,
+            allCourtsAvgMap["Сотрудники"] || 0,
+            allCourtsAvgMap["Канцелярия"] || 0,
+            allCourtsAvgMap["Процесс"] || 0,
+            allCourtsAvgMap["Здание"] || 0,
+          ],
+          fill: true,
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          datalabels: { display: false },
+        },
+      ]
+    : [
+        // Оба набора данных (дефолтный случай)
+        {
+          label: user ? user.court : "Загрузка...",
+          data: [
+            currentCourtAverageSS.judge || 0,
+            currentCourtAverageSS.secretary || 0,
+            currentCourtAverageSS.office || 0,
+            currentCourtAverageSS.process || 0,
+            currentCourtAverageSS.building || 0,
+          ],
+          fill: true,
+          backgroundColor: "rgba(255, 206, 86, 0.2)",
+          borderColor: "rgba(255, 206, 86, 1)",
+          borderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+        },
+        {
+          label: "Средние оценки по республике",
+          data: [
+            allCourtsAvgMap["Судья"] || 0,
+            allCourtsAvgMap["Сотрудники"] || 0,
+            allCourtsAvgMap["Канцелярия"] || 0,
+            allCourtsAvgMap["Процесс"] || 0,
+            allCourtsAvgMap["Здание"] || 0,
+          ],
+          fill: true,
+          backgroundColor: "rgba(54, 162, 235, 0.2)",
+          borderColor: "rgba(54, 162, 235, 1)",
+          borderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          datalabels: { display: false },
+        },
+      ],
           });
 
           const ratings = processProgressRatings(
@@ -650,9 +724,15 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
   } else if (pathname.includes("/maps/oblast/Regional-Courts")) {
     remarksPath = "/remarks/Regional-Courts";
   }
+  else if (pathname.includes("/maps/rayon/District-Courts")) {
+    remarksPath = "/remarks/District-Courts";
+  }
 
-  if (selectedCourtId) {
+  if (selectedCourtId ) {
     remarksPath += `/${selectedCourtId}`;
+  }
+  if (courtNameId) {
+    remarksPath += `/${courtNameId}`;
   }
   // Показываем сообщение о загрузке
   if (isLoading) {
@@ -668,7 +748,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen mb-4">
       <div className="max-w-[1250px] mx-auto ">
         <div className="grid grid-cols-2 gap-4">
           {/* Общие показатели */}
