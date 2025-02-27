@@ -10,6 +10,7 @@ import { GrLanguage } from "react-icons/gr";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
 import { LogoutButton } from "@/components/Logout";
+import  logo from '../../../public/logo.png'
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -52,7 +53,7 @@ const Header: React.FC = () => {
           <div className="flex items-center gap-3">
             <Link href="/">
               <Image
-                src="/logo.png"
+                src={logo}
                 alt="Логотип"
                 width={45}
                 height={45}

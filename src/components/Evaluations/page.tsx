@@ -160,7 +160,7 @@ export default function Evaluations({ selectedCourtId, courtNameId }: { selected
     ],
   });
   const [audioVideoData, setAudioVideoData] = useState({
-    labels: ["Да", "Нет", "Не знаю/Не уверен(а)", "Другое:"],
+    labels: ["Да", "Нет", "Не знаю", "Другое:"],
     datasets: [
       {
         data: [0, 0, 0, 0],
@@ -618,6 +618,7 @@ export default function Evaluations({ selectedCourtId, courtNameId }: { selected
     },
   };
 
+  
   // Обновленные данные для источников трафика
   const trafficSourceOptions = {
     indexAxis: "y" as const,
@@ -750,15 +751,15 @@ export default function Evaluations({ selectedCourtId, courtNameId }: { selected
   return (
     <div className="min-h-screen mb-4">
       <div className="max-w-[1250px] mx-auto ">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 EvalutionCols">
           {/* Общие показатели */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">
+                <h2 className="text-xl font-medium DiagrammOne ">
                   {getTranslation("DiagrammOne", language)}
                 </h2>
-                <span className="text-gray-600">
+                <span className="text-gray-600 DiagrammOneTotal">
                   {getTranslation("DiagrammOneTotal", language)}{" "}
                   {totalResponses}
                 </span>
@@ -775,10 +776,10 @@ export default function Evaluations({ selectedCourtId, courtNameId }: { selected
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex flex-col justify-between h-full">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">
+                <h2 className="text-xl font-medium DiagrammTwo">
                   {getTranslation("DiagrammTwo", language)}
                 </h2>
-                <span className="text-gray-600">
+                <span className="text-gray-600 DiagrammTwoTotal">
                   {getTranslation("DiagrammTwoTotal", language)}{" "}
                   {totalResponsesAnswer}
                 </span>
@@ -830,7 +831,7 @@ export default function Evaluations({ selectedCourtId, courtNameId }: { selected
               </h2>
             </div>
             <div className="p-6">
-              <div className="w-[400px] h-[400px] mx-auto">
+              <div className="w-[350px] h-[400px] mx-auto">
                 <Pie data={categoryData} options={commonOptions} />
               </div>
             </div>
@@ -848,9 +849,9 @@ export default function Evaluations({ selectedCourtId, courtNameId }: { selected
                 {["Пол", "Пол и возраст", "Возраст"].map((tab) => (
                   <button
                     key={tab}
-                    className={`px-6 py-2 rounded-lg transition-colors ${
+                    className={`px-6 py-2 rounded-lg transition-colors AgeGenderButtons ${
                       demographicsView === tab.toLowerCase()
-                        ? "bg-blue-500 text-white"
+                        ? "bg-blue-600 text-white AgeGenderButtons"
                         : " bg-gray-100"
                     }`}
                     onClick={() => setDemographicsView(tab.toLowerCase())}
@@ -976,7 +977,7 @@ export default function Evaluations({ selectedCourtId, courtNameId }: { selected
             </div>
           </div>
 
-          {/* Источники трафика */}
+          {/* Источник трафика */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <h2 className="text-xl font-medium">
@@ -1039,8 +1040,9 @@ export default function Evaluations({ selectedCourtId, courtNameId }: { selected
               </div>
             </div>
             <div className="p-6">
-              <div className="h-[300px]">
-                <Bar data={disrespectData} options={disrespectOptions} />
+              <div className="h-[300px]" >
+                <Bar data={disrespectData} options={disrespectOptions}  
+                />
               </div>
             </div>
           </div>
@@ -1103,7 +1105,7 @@ export default function Evaluations({ selectedCourtId, courtNameId }: { selected
               </h2>
             </div>
             <div className="p-6">
-              <div className="h-[300px] w-[450px] mx-auto">
+              <div className="h-[300px] w-[350px] mx-auto">
                 <Pie
                   data={audioVideoData}
                   options={{

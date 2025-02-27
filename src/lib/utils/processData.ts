@@ -257,8 +257,8 @@ export function processAudioVideoQuestion(
 
   if (question && question.question_responses) {
     const allCategories = language === "ru"
-      ? ["Да", "Нет", "Не знаю/Не уверен(а)", "Другое:"]
-      : ["Ооба", "Жок", "Билбейм/Белгисиз", "Башка:"];
+      ? ["Да", "Нет", "Не знаю", "Другое:"]
+      : ["Ооба", "Жок", "Билбейм", "Башка:"];
 
     const validResponses = question.question_responses.filter(
       r => r.selected_option !== null

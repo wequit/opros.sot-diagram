@@ -1,10 +1,81 @@
-/* @media (max-width: 1280px) {
+@media (max-width: 1280px) {
   .layout {
     @apply max-w-[1000px];
   }
 }
+
 @media (max-width: 1024px) {
   .layout {
-    @apply max-w-[860px];
+    @apply max-w-[880px];
   }
-} */
+}
+
+@media (max-width: 910px) {
+  .layout {
+    @apply max-w-[700px];
+  }
+
+  .EvalutionCols {
+    @apply grid-cols-1;
+  }
+}
+
+@media (max-width: 760px) {
+  .layout {
+    @apply max-w-[600px];
+  }
+
+  .EvalutionCols {
+    @apply grid-cols-1;
+  }
+}
+
+@media (max-width: 640px) {
+  .layout {
+    @apply max-w-[500px];
+  }
+
+  .EvalutionCols {
+    @apply grid-cols-1;
+  }
+}
+
+@media (max-width: 530px) {
+  .layout {
+    @apply max-w-[430px];
+  }
+
+  .EvalutionCols {
+    @apply grid-cols-1;
+  }
+}
+
+@media (max-width: 470px) {
+  .layout {
+    @apply max-w-[380px];
+  }
+
+  .EvalutionCols {
+    @apply grid-cols-1;
+  }
+
+  .DiagrammOne{
+    @apply text-base
+  }
+  .DiagrammOneTotal{
+    @apply text-sm
+  }
+
+  .DiagrammTwo{
+    @apply text-base
+  }
+  .DiagrammTwoTotal{
+    @apply text-sm text-end
+  }
+
+  .AgeGenderButtons{
+    @apply text-[0.80rem]
+  }
+
+  
+}
