@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRemarks } from "@/components/RemarksApi";
-import { getCookie } from "@/api/login";
+import { getCookie } from "@/lib/login";
 import { ArrowLeft, FileSearch } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -68,17 +68,12 @@ export default function RemarksPage() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const storedCourtId = localStorage.getItem("selectedCourtId");
-  const courtId = storedCourtId ? parseInt(storedCourtId, 10) : null;
-
-  if (!courtId) {
-    return;
-  }
+  
   useEffect(() => {
     if (remarks) {
       setLocalRemarks(remarks);
     }
-  }, [remarks, courtId]);
+  }, [remarks]);
 
   const handleCommentSubmit = async (comment: string) => {
     try {
@@ -153,7 +148,7 @@ export default function RemarksPage() {
             Для вашего суда пока не поступило ни одного замечания.
           </p>
           <Link
-            href="/"
+            href="/results"
             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-600 transition"
           >
             <ArrowLeft size={18} />

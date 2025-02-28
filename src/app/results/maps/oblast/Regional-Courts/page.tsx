@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { getAssessmentData, getCookie } from "@/api/login";
+import { getAssessmentData, getCookie } from "@/lib/login";
 import { useSurveyData } from "@/context/SurveyContext";
 import RegionDetails from "../components/RegionDetails";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
@@ -164,12 +164,12 @@ export default function RegionalCourts() {
 
       if (response.status === 401) {
         console.warn("Токен устарел, выполняем выход...");
-        router.push("/login");
+        router.push("/results/login");
         return;
       }
 
       if (!response.ok) {
-        router.push("/login");
+        router.push("/results/login");
         throw new Error(`Ошибка TP: ${response.status} ${response.statusText}`);
       }
 
@@ -359,7 +359,7 @@ export default function RegionalCourts() {
             </div>
           </>
         ) : (
-          <RegionDetails regionName={regionName} />
+          <RegionDetails regionName={regionName} regions={regions} />
         )}
       </div>
     </div>

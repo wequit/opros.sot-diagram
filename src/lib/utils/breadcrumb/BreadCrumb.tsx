@@ -33,7 +33,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
         {/* Фиксированная "Главная" с href="/" */}
         <li className="flex items-center">
           <Link
-            href="/"
+            href="/results"
             className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
           >
             Главная

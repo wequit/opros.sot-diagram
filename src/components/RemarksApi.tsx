@@ -1,6 +1,6 @@
 "use client";
 
-import { getCookie, getCurrentUser } from "@/api/login";
+import { getCookie, getCurrentUser } from "@/lib/login";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSurveyData } from "@/context/SurveyContext";
@@ -45,7 +45,7 @@ export function useRemarks() {
     return remarks.filter((item: Remark) => {
       if (
         user.role === "Председатель 3 инстанции" &&
-        (pathname === "/" || pathname === "/remarks")
+        (pathname === "/results" || pathname === "/results/remarks")
       ) {
         return (
           item.custom_answer !== null &&
@@ -54,13 +54,13 @@ export function useRemarks() {
       }
 
       if (user.role === "Председатель 3 инстанции") {
-        if (pathname === "/maps/General" || pathname === "/remarks/General") {
+        if (pathname === "/results/maps/General" || pathname === "/results/remarks/General") {
           return (
             item.court === "Верховный суд" &&
             item.custom_answer !== null &&
             item.custom_answer !== "Необязательный вопрос"
           );
-        } else if (pathname === "/maps/oblast/Regional-Courts") {
+        } else if (pathname === "/results/maps/oblast/Regional-Courts") {
 
           if (selectedCourtName && selectedCourtName === item.court) {
             return (
@@ -69,7 +69,7 @@ export function useRemarks() {
             );
           }
           return false;
-        }else if (pathname === `/remarks/Regional-Courts/${courtId}`) {
+        }else if (pathname === `/results/remarks/Regional-Courts/${courtId}`) {
           return (
             item.custom_answer !== null &&
             item.custom_answer !== "Необязательный вопрос" &&
@@ -77,7 +77,7 @@ export function useRemarks() {
           );
         }
 
-        else if (pathname === "/maps/rayon/District-Courts") {
+        else if (pathname === "/results/maps/rayon/District-Courts") {
           if (courtName && courtName === item.court) {
             return (
               item.custom_answer !== null &&
@@ -85,7 +85,7 @@ export function useRemarks() {
             );
           }
           return false;
-        }else if (pathname === `/remarks/District-Courts/${courtNameId}`) {
+        }else if (pathname === `/results/remarks/District-Courts/${courtNameId}`) {
           return (
             item.custom_answer !== null &&
             item.custom_answer !== "Необязательный вопрос" &&

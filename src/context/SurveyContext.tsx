@@ -70,7 +70,7 @@ interface RegionData {
 
 interface SurveyContextType {
   surveyData: SurveyData | null;
-  setSurveyData: (data: SurveyData) => void;
+  setSurveyData: (data: SurveyData | null) => void;
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
   userCourt: string | null;

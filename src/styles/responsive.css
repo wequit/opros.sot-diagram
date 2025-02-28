@@ -1,3 +1,5 @@
+
+
 @media (max-width: 1280px) {
   .layout {
     @apply max-w-[1000px];
@@ -48,6 +50,17 @@
   .EvalutionCols {
     @apply grid-cols-1;
   }
+
+  .DiagrammTwoComments{
+    @apply text-sm
+  }
+
+  .DiagrammTwoCommentsBtn{
+    @apply text-sm mt-0
+  }
+
+  
+
 }
 
 @media (max-width: 470px) {
@@ -77,5 +90,62 @@
     @apply text-[0.80rem]
   }
 
+  .DiagrammElevenName{
+    @apply text-lg
+  }
   
+  .ProgressBar{
+    @apply h-6
+  }
+
+  .DiagrammSevenProgress{
+    @apply text-sm
+  }
+
+  .DiagrammNineProgress{
+    @apply text-sm
+  }
+
+  .DiagrammTenProgress{
+    @apply text-sm mb-8
+  }
+
+  .DiagrammThirteenProgress{
+    @apply text-sm mb-4
+  }
+
+  .DiagrammFourteenProgress{
+    @apply text-sm 
+  }
+  
+}
+
+@media (max-width: 440px) {
+  .layout {
+    @apply max-w-[350px];
+  }
+
+  .AgeGenderButtons{
+    @apply text-[0.70rem]
+  }
+  .ProgressBar{
+    @apply h-6
+  }
+
+  .DiagrammThreeName{
+    @apply text-lg
+  }
+
+  .DiagrammFourName{
+    @apply text-lg
+  }
+
+  .DiagrammFiveName{
+    @apply text-lg
+  }
+
+  .DiagrammSixName{
+    @apply text-lg
+  }
+
 }

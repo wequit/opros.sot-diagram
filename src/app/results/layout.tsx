@@ -18,7 +18,7 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const LoginPage = dynamic(() => import("@/app/login/page"));
+const LoginPage = dynamic(() => import("@/app/results/login/page"));
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -55,7 +55,7 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="max-w-[1250px] mx-auto layout">
       <Header />
-      <div className={`flex min-h-[calc(100vh-48px)] ${pathname === "/login" ? "mt-0" : "mt-16"}`}>
+      <div className={`flex min-h-[calc(100vh-48px)] ${pathname === "/results/login" ? "mt-0" : "mt-16"}`}>
         <main className='flex-1 max-w-[1250px] mx-auto'>{children}</main>
       </div>
     </div>

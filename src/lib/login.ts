@@ -84,7 +84,7 @@ export const reLogin = async (refreshToken: string): Promise<string | null> => {
 const handleUnauthorized = () => {
   deleteCookie('access_token');
   deleteCookie('refresh_token');
-  window.location.href = '/login';
+  window.location.href = '/results/login';
 };
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
@@ -210,5 +210,5 @@ export const useFetchAssessmentData = () => {
     fetchData();
   }, []);
 
-  return { data, isLoading, error };
+  return { data, isLoading, error };  
 };

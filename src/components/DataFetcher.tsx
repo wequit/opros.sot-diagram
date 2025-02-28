@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { ApiClient } from "@/api/apiClient";
+import { ApiClient } from "@/lib/apiClient";
 import { useSurveyData } from "@/context/SurveyContext";
 
 export const apiClient = new ApiClient({

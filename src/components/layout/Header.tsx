@@ -10,7 +10,7 @@ import { GrLanguage } from "react-icons/gr";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
 import { LogoutButton } from "@/components/Logout";
-import  logo from '../../../public/logo.png'
+import logo from '../../../public/logo.png';
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -19,7 +19,6 @@ const Header: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { courtName, language, toggleLanguage} = useSurveyData();
   
-
   useEffect(() => {
     const handleScroll = () => {
       setIsSticky(window.scrollY > 0);
@@ -29,7 +28,7 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (!isAuthenticated || pathname === "/login") {
+  if (!isAuthenticated || pathname === "/results/login") {
     return null;
   }
 
@@ -51,7 +50,7 @@ const Header: React.FC = () => {
           </button> */}
 
           <div className="flex items-center gap-3">
-            <Link href="/">
+            <Link href="/results">
               <Image
                 src={logo}
                 alt="Логотип"
@@ -64,7 +63,7 @@ const Header: React.FC = () => {
             {user?.role === "Председатель 3 инстанции" ? (
               <div className="flex space-x-4  p-2 rounded-lg">
                 <Link
-                  href="/"
+                  href="/results"
                   className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
                   ${
                     pathname === "/"
@@ -76,7 +75,7 @@ const Header: React.FC = () => {
                 </Link>
 
                 <Link
-                  href="/maps/General"
+                  href="/results/maps/General"
                   className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
                   ${
                     pathname === "/maps/General"
@@ -88,10 +87,10 @@ const Header: React.FC = () => {
                 </Link>
 
                 <Link
-                  href="/maps/oblast/Regional-Courts"
+                  href="/results/maps/oblast/Regional-Courts"
                   className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
                   ${
-                    pathname === "/maps/oblast/Regional-Courts"
+                    pathname === "/results/maps/oblast/Regional-Courts"
                       ? "bg-slate-200 text-blue-500"
                       : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}
@@ -100,7 +99,7 @@ const Header: React.FC = () => {
                 </Link>
 
                 <Link
-                  href="/maps/rayon/District-Courts"
+                  href="/results/maps/rayon/District-Courts"
                   className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
                   ${
                     pathname === "/maps/rayon/District-Courts"
