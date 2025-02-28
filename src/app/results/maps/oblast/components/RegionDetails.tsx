@@ -593,7 +593,12 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                   .append("path")
                   .attr("class", "district-border")
                   .attr("d", path as any)
-                  .attr("fill", "none")
+                  .attr("fill", (d: any) => {
+                    if (isLake(d.properties)) return "#7CC9F0";
+                    const courtName = districtNamesRu[d.properties.NAME_2];
+                    const court = selectedRegion?.find(c => c.name === courtName);
+                    return getRegionColor(court?.overall || 0);
+                  })
                   .attr("stroke", "#4B5563")
                   .attr("stroke-width", 1)
                   .attr("pointer-events", "all")
@@ -602,27 +607,19 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                     d3.select(this).attr("stroke-width", "1.5");
                     const tooltip = d3.select("#tooltip");
                     const coordinates = getEventCoordinates(event);
+                    const districtName = d.properties.NAME_2;
+                    const russianName = districtNamesRu[districtName] || districtName;
+                    const court = selectedRegion?.find(c => c.name === russianName);
+                    const rating = court?.overall;
+
                     tooltip
                       .style("display", "block")
-                      .style("left", `${coordinates.x}px`)
-                      .style("top", `${coordinates.y}px`)
+                      .style("left", `${coordinates.x + 10}px`)
+                      .style("top", `${coordinates.y + 10}px`)
                       .html(`
-                      <div class="bg-white rounded-lg shadow-lg border border-gray-100 p-3">
-                        <div class="font-semibold text-gray-800 mb-1">
-                          ${
-                            districtNamesRu[d.properties.NAME_2] ||
-                            d.properties.NAME_2
-                          }
-                        </div>
-                        <div class="text-sm text-gray-600">
-                          Общая оценка: ${
-                            d.properties.overall
-                              ? d.properties.overall.toFixed(1)
-                              : "Нет данных"
-                          }
-                        </div>
-                      </div>
-                    `);
+                        <div class="font-medium">${russianName}</div>
+                        <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
+                      `);
                   })
                   .on("mousemove", function (event) {
                     const coordinates = getEventCoordinates(event);
@@ -631,8 +628,28 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                       .style("top", `${coordinates.y}px`);
                   })
                   .on("mouseout", function () {
-                    d3.select(this).attr("stroke-width", "1");
+                    d3.select(this).attr("fill-opacity", 1);
                     d3.select("#tooltip").style("display", "none");
+                  });
+
+                // Добавляем текст с оценками
+                const textGroup = g.append('g')
+                  .attr('class', 'rating-labels');
+
+                textGroup.selectAll('text')
+                  .data(districtFeatures)
+                  .join('text')
+                  .attr('x', (d: any) => path.centroid(d)[0])
+                  .attr('y', (d: any) => path.centroid(d)[1])
+                  .attr('text-anchor', 'middle')
+                  .style('pointer-events', 'none')
+                  .attr('font-weight', 'bold')
+                  .attr('font-size', '10px')
+                  .text((d: any) => {
+                    if (isLake(d.properties)) return '';
+                    const courtName = districtNamesRu[d.properties.NAME_2];
+                    const court = selectedRegion?.find(c => c.name === courtName);
+                    return court?.overall ? court.overall.toFixed(1) : '0.0';
                   });
               }
 
