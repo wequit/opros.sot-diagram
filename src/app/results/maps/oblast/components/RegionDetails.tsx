@@ -242,6 +242,13 @@ const districtNamesRu: { [key: string]: string } = {
   "Ysyk-Ata": "Ысык-Атинский районный суд",
 };
 
+const getDisplayName = (name: string): string => {
+  return name
+    .replace(' районный суд', ' район')
+    .replace(' городской суд', ' город')
+    .replace(' межрайонный суд', ' район');
+};
+
 const getRegionColor = (rating: number, properties?: any): string => {
   if (properties && isLake(properties)) {
     return "#7CC9F0";
@@ -270,62 +277,6 @@ function isLake(properties: any): boolean {
     properties.NAME_2 === "Song-kol"
   );
 }
-
-const rayonToCourtMapping: { [key: string]: string } = {
-  Biskek: "Бишкекский межрайонный суд",
-  Batken: "Баткенский районный суд",
-  Lailak: "Лейлекский районный суд",
-  Kadamjai: "Кадамжайский районный суд",
-  "Kyzyl-Kiya": "Кызыл-Кийский городской суд",
-  Suluktu: "Сулюктинский городской суд",
-  Alamüdün: "Аламудунский районный суд",
-  Sokuluk: "Сокулукский районный суд",
-  Moskovsky: "Московский районный суд",
-  Jaiyl: "Жайылский районный суд",
-  Panfilov: "Панфиловский районный суд",
-  Kemin: "Кеминский районный суд",
-  Chui: "Чуйский районный суд",
-  "Ysyk-Ata": "Ысык-Атинский районный суд",
-  Tokmok: "Токмокский городской суд",
-  "Ak-Suu": "Ак-Суйский районный суд",
-  "Djety-Oguz": "Джети-Огузский районный суд",
-  Ton: "Тонский районный суд",
-  Tüp: "Тюпский районный суд",
-  "Ysyk-Köl": "Иссык-Кульский районный суд",
-  Karakol: "Каракольский городской суд",
-  Balykchy: "Балыкчинский городской суд",
-  "Ak-Talaa": "Ак-Талинский районный суд",
-  "At-Bashi": "Ат-Башинский районный суд",
-  Jumgal: "Жумгальский районный суд",
-  Kochkor: "Кочкорский районный суд",
-  Naryn: "Нарынский районный суд",
-  "Naryn City": "Нарынский городской суд",
-  Talas: "Таласский районный суд",
-  "Bakai-Ata": "Бакай-Атинский районный суд",
-  "Kara-Buura": "Кара-Буринский районный суд",
-  Manas: "Манасский районный суд",
-  "Talas City": "Таласский городской суд",
-  Alay: "Алайский районный суд",
-  Aravan: "Араванский районный суд",
-  "Kara-Kulja": "Кара-Кульджинский районный суд",
-  "Kara-Suu": "Кара-Суйский районный суд",
-  Nookat: "Ноокатский районный суд",
-  Uzgen: "Узгенский районный суд",
-  "Chong-Alay": "Чон-Алайский районный суд",
-  "Osh City": "Ошский городской суд",
-  Aksy: "Аксыйский районный суд",
-  "Ala-Buka": "Ала-Букинский районный суд",
-  "Bazar-Korgon": "Базар-Коргонский районный суд",
-  Nooken: "Ноокенский районный суд",
-  Suzak: "Сузакский районный суд",
-  "Toguz-Toro": "Тогуз-Тороуский районный суд",
-  Toktogul: "Токтогульский районный суд",
-  Chatkal: "Чаткальский районный суд",
-  "Jalal-Abad City": "Джалал-Абадский городской суд",
-  Mailuusuu: "Майлуу-Сууский городской суд",
-  "Tash-Kumyr": "Таш-Кумырский городской суд",
-  "Kara-Kul": "Кара-Кульский городской суд",
-};
 
 const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) => {
   const {
@@ -609,15 +560,16 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                     const coordinates = getEventCoordinates(event);
                     const districtName = d.properties.NAME_2;
                     const russianName = districtNamesRu[districtName] || districtName;
+                    const displayName = getDisplayName(russianName);
                     const court = selectedRegion?.find(c => c.name === russianName);
-                    const rating = court?.overall;
+                    const rating = court?.overall || 0;
 
                     tooltip
                       .style("display", "block")
                       .style("left", `${coordinates.x + 10}px`)
                       .style("top", `${coordinates.y + 10}px`)
                       .html(`
-                        <div class="font-medium">${russianName}</div>
+                        <div class="font-medium">${displayName}</div>
                         <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
                       `);
                   })
