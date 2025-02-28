@@ -271,6 +271,53 @@ export default function Evaluations({
       },
     ],
   });
+  const radarOptions = {
+    plugins: {
+      legend: {
+        position: "bottom" as const,
+        align: "start" as const,
+        labels: {
+          padding: 20,
+          boxWidth: 15,
+          font: {
+            size: windowWidth < 530 ? 10 : 12, // Адаптивный шрифт для легенды
+          },
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const label = context.dataset.label || "";
+            const value = context.raw || 0;
+            return `${label}: ${value.toFixed(1)}`;
+          },
+        },
+      },
+    },
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        angleLines: {
+          display: true,
+          color: "rgba(0, 0, 0, 0.2)", // Более мягкий цвет линий
+        },
+        suggestedMin: 0,
+        suggestedMax: 5,
+        ticks: {
+          display: false,
+          stepSize: 1,
+        },
+        grid: {
+          color: "rgba(0, 0, 0, 0.1)",
+        },
+        pointLabels: {
+          font: {
+            size: windowWidth < 470 ? 9 : 12, 
+          },
+        },
+      },
+    },
+  };
 
   const [totalResponses, setTotalResponses] = useState<number>(0);
   const [totalResponsesAnswer, setTotalResponsesAnswer] = useState<number>(0);
@@ -411,7 +458,8 @@ export default function Evaluations({
           setRadarData({
             labels: ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"],
             datasets:
-              user?.role === "Председатель 3 инстанции" && pathname === "/"
+              user?.role === "Председатель 3 инстанции" &&
+              pathname === "/results"
                 ? [
                     // Только республиканские данные
                     {
@@ -698,7 +746,14 @@ export default function Evaluations({
           padding: 1,
           align: "center" as const,
           font: {
-            size:  windowWidth < 440 ? 7.5 : windowWidth < 470 ? 8 : windowWidth < 530 ? 9 : 11,
+            size:
+              windowWidth < 440
+                ? 7.5
+                : windowWidth < 470
+                ? 8
+                : windowWidth < 530
+                ? 9
+                : 11,
           },
         },
       },
@@ -724,7 +779,8 @@ export default function Evaluations({
         grid: {
           display: true, // Включаем сетку на X, как в "Источник трафика"
         },
-        suggestedMax: Math.max(...(disrespectData.datasets[0]?.data || [0])) + 1,
+        suggestedMax:
+          Math.max(...(disrespectData.datasets[0]?.data || [0])) + 1,
         ticks: {
           stepSize: 1,
         },
@@ -750,7 +806,10 @@ export default function Evaluations({
         callbacks: {
           label: (context: any) => {
             const value = context.raw;
-            const sum = disrespectData.datasets[0].data.reduce((a, b) => a + b, 0);
+            const sum = disrespectData.datasets[0].data.reduce(
+              (a, b) => a + b,
+              0
+            );
             const percentage = ((value / sum) * 100).toFixed(1);
             return `${value} (${percentage}%)`; // Tooltip как в данных
           },
@@ -836,7 +895,7 @@ export default function Evaluations({
             </div>
             <div className="p-6">
               <div className="h-[400px]">
-                <Radar data={radarData} options={commonOptions} />
+                <Radar data={radarData} options={radarOptions} />
               </div>
             </div>
           </div>
@@ -1077,7 +1136,7 @@ export default function Evaluations({
           {/* Оценки судьи */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">
+              <h2 className="text-xl font-medium DiagrammSevenName">
                 {getTranslation("DiagrammSeven", language)}
               </h2>
             </div>
@@ -1103,7 +1162,7 @@ export default function Evaluations({
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">
+                <h2 className="text-xl font-medium DiagrammEightName">
                   {getTranslation("DiagrammEight", language)}
                 </h2>
               </div>
@@ -1118,7 +1177,7 @@ export default function Evaluations({
           {/* Оценки сотрудников */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">
+              <h2 className="text-xl font-medium DiagrammNineName">
                 {getTranslation("DiagrammNine", language)}
               </h2>
             </div>
@@ -1189,8 +1248,8 @@ export default function Evaluations({
                         formatter: (value) => value + "%",
                       },
                       legend: {
-                        position: "right",
-                        align: "center",
+                        position: windowWidth < 530 ? "bottom" : "right",
+                        align: windowWidth < 530 ? "start" : "center",
                         labels: {
                           usePointStyle: true,
                           padding: 20,
@@ -1228,7 +1287,7 @@ export default function Evaluations({
                         formatter: (value) => value + "%",
                       },
                       legend: {
-                        position: "right",
+                        position: windowWidth < 530 ? "bottom" : "right",
                         align: "center",
                         labels: {
                           usePointStyle: true,

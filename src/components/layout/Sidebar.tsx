@@ -50,7 +50,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/")
+              isActivePath("/results")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }

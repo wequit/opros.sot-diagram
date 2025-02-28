@@ -50,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(true);
       const currentUser = await getCurrentUser();
       setUser(currentUser);
-      await router.push('/');
+      await router.push('/results');
       router.refresh();
     } catch (error) {
       console.error('Ошибка при логине:', error);

@@ -66,7 +66,7 @@ const Header: React.FC = () => {
                   href="/results"
                   className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
                   ${
-                    pathname === "/"
+                    pathname === "/results"
                       ? "bg-slate-200 text-blue-500"
                       : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
                   }`}

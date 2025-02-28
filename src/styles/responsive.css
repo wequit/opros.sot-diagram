@@ -58,9 +58,6 @@
   .DiagrammTwoCommentsBtn{
     @apply text-sm mt-0
   }
-
-  
-
 }
 
 @media (max-width: 470px) {
@@ -73,14 +70,14 @@
   }
 
   .DiagrammOne{
-    @apply text-base
+    @apply text-lg w-[20rem]
   }
   .DiagrammOneTotal{
     @apply text-sm
   }
 
   .DiagrammTwo{
-    @apply text-base
+    @apply text-lg  w-[20rem]
   }
   .DiagrammTwoTotal{
     @apply text-sm text-end
@@ -129,7 +126,7 @@
     @apply text-[0.70rem]
   }
   .ProgressBar{
-    @apply h-6
+    @apply h-5
   }
 
   .DiagrammThreeName{
@@ -146,6 +143,16 @@
 
   .DiagrammSixName{
     @apply text-lg
+  }
+
+  .DiagrammSevenName{
+  }
+
+  .DiagrammEightName{
+    @apply text-lg
+  }
+
+  .DiagrammNineName{
   }
 
 }
