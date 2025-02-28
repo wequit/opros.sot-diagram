@@ -1,17 +1,17 @@
-'use client';
-import { useEffect, useState, useCallback } from 'react';
-import { ApiClient } from '@/api/apiClient';
-import { useSurveyData } from '@/context/SurveyContext';
+"use client";
+import { useEffect, useState, useCallback } from "react";
+import { ApiClient } from "@/lib/apiClient";
+import { useSurveyData } from "@/context/SurveyContext";
 
 export const apiClient = new ApiClient({
-  baseURL: 'https://opros.sot.kg',
-  endpoint: '/api/v1/results/'
+  baseURL: "https://opros.sot.kg",
+  endpoint: "/api/v1/results/",
 });
 
 // Выносим функцию fetchDataWithParams за пределы компонента
-export const fetchDataWithParams = async (params = {}) => {
+export const fetchDataWithParams = async (courtId: number | string | null, params = {}) => {
   try {
-    const response = await apiClient.fetchData(params);
+    const response = await apiClient.fetchData(courtId, params);
     return response;
   } catch (err) {
     console.error('Ошибка при получении данных:', err);
@@ -21,20 +21,21 @@ export const fetchDataWithParams = async (params = {}) => {
 
 export default function DataFetcher() {
   const [error, setError] = useState<string | null>(null);
-  const { setSurveyData, setIsLoading } = useSurveyData();
+  const { setSurveyData, setIsLoading, selectedCourtId } = useSurveyData();
 
   const fetchData = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await fetchDataWithParams({ year: '2025' });
+      // Передаём selectedCourtId как первый аргумент (courtId) и параметры как второй
+      const response = await fetchDataWithParams(selectedCourtId, { year: "2025" });
       setSurveyData(response);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Произошла ошибка');
+      setError(err instanceof Error ? err.message : "Произошла ошибка");
     } finally {
       setIsLoading(false);
     }
-  }, [setSurveyData, setIsLoading]);
+  }, [setSurveyData, setIsLoading, selectedCourtId]);
 
   useEffect(() => {
     fetchData();
@@ -45,4 +46,4 @@ export default function DataFetcher() {
   }
 
   return null;
-} 
+}

@@ -1,12 +1,14 @@
 "use client";
+
 import Map from "../components/Map_oblast";
 import { useState, useEffect } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { getAssessmentData, getCookie } from "@/api/login";
+import { getAssessmentData, getCookie } from "@/lib/login";
 import { useSurveyData } from "@/context/SurveyContext";
 import RegionDetails from "../components/RegionDetails";
+import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -37,11 +39,6 @@ interface Region {
   total_assessments: number;
 }
 
-interface RegionDetailsProps {
-  regionName: string;
-  regions: OblastData[];
-}
-
 export default function RegionalCourts() {
   const [regions, setRegions] = useState<OblastData[]>([]);
   const [regionName, setRegionName] = useState<string | null>(null);
@@ -49,7 +46,6 @@ export default function RegionalCourts() {
 
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-  const pathname = usePathname();
   const router = useRouter();
 
   useEffect(() => {
@@ -146,13 +142,10 @@ export default function RegionalCourts() {
   });
 
   const getRatingColor = (rating: number) => {
-    if (rating === 0) return 'bg-gray-100';
-    if (rating < 2) return 'bg-red-100';
-    if (rating < 2.5) return 'bg-red-100';
-    if (rating < 3) return 'bg-orange-100';
-    if (rating < 3.5) return 'bg-yellow-100';
-    if (rating < 4) return 'bg-emerald-100';
-    return 'bg-green-100';
+    if (rating === 0) return "bg-gray-100";
+    if (rating <= 2) return "bg-red-100";
+    if (rating <= 3.5) return "bg-yellow-100";
+    return "bg-green-100";
   };
 
   const handleCourtClick = async (court: OblastData) => {
@@ -171,12 +164,12 @@ export default function RegionalCourts() {
 
       if (response.status === 401) {
         console.warn("Токен устарел, выполняем выход...");
-        router.push("/login");
+        router.push("/results/login");
         return;
       }
 
       if (!response.ok) {
-        router.push("/login");
+        router.push("/results/login");
         throw new Error(`Ошибка TP: ${response.status} ${response.statusText}`);
       }
 
@@ -204,17 +197,26 @@ export default function RegionalCourts() {
     }
   };
 
+  const handleRegionBackClick = () => {
+    setSelectedRegion(null);
+  };
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 my-8">
       <div className="max-w-[1250px] mx-auto">
         {!selectedRegion ? (
           <>
             <div className="mb-4 flex justify-between items-center">
-              <h2 className="text-xl font-bold">Средние оценки по областям</h2>
+              <Breadcrumb
+                regionName={null}
+                onRegionBackClick={handleRegionBackClick}
+                showHome={true}
+                headerKey="HeaderNavThree"
+              />
+              <h2 className="text-2xl font-bold mt-2">Оценки по областям</h2>
             </div>
 
             {/* Условный рендеринг таблицы */}
-
             <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
               <Map oblastData={regions} />
             </div>
@@ -285,7 +287,7 @@ export default function RegionalCourts() {
                         </div>
                       </th>
                       <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                        Количество оценок
+                        Количество отзывов
                       </th>
                     </tr>
                   </thead>
@@ -357,10 +359,7 @@ export default function RegionalCourts() {
             </div>
           </>
         ) : (
-          <RegionDetails 
-            regionName={regionName} 
-            regions={regions}
-          />
+          <RegionDetails regionName={regionName} regions={regions} />
         )}
       </div>
     </div>

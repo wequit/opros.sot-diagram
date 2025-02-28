@@ -10,7 +10,8 @@ interface BreadcrumbProps {
   courtName?: string | null;
   onCourtBackClick?: () => void; // Возврат к списку судов
   onRegionBackClick?: () => void; // Возврат к списку регионов
-  showHome?: boolean; // Управление отображением второго "Главная" (HeaderNavThree)
+  showHome?: boolean; // Управление отображением второго "Главная" (HeaderNavThree/HeaderNavFour)
+  headerKey?: "HeaderNavThree" | "HeaderNavFour"; // Новый проп для выбора ключа перевода
 }
 
 const Breadcrumb: React.FC<BreadcrumbProps> = ({
@@ -19,8 +20,12 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   onCourtBackClick,
   onRegionBackClick,
   showHome = true, // По умолчанию второй "Главная" отображается
+  headerKey = "HeaderNavThree", // По умолчанию используем HeaderNavThree
 }) => {
   const { language } = useSurveyData();
+
+  // Определяем ключ перевода, если headerKey не передан
+  const effectiveHeaderKey = headerKey || (regionName ? "HeaderNavThree" : "HeaderNavFour");
 
   return (
     <nav className="flex items-center space-x-2 text-sm text-gray-600" aria-label="Breadcrumb">
@@ -28,7 +33,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
         {/* Фиксированная "Главная" с href="/" */}
         <li className="flex items-center">
           <Link
-            href="/"
+            href="/results"
             className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
           >
             Главная
@@ -38,7 +43,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
           )}
         </li>
 
-        {/* Вторая "Главная" (HeaderNavThree) - отображается только если showHome === true */}
+        {/* Вторая "Главная" (HeaderNavThree или HeaderNavFour) - отображается только если showHome === true */}
         {showHome && (
           <li className="flex items-center">
             <button
@@ -46,7 +51,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
               className="text-blue-600 hover:text-blue-800 transition-colors duration-200 cursor-pointer disabled:text-gray-400 disabled:cursor-not-allowed"
               disabled={!onRegionBackClick}
             >
-              {getTranslation("HeaderNavThree", language)}
+              {getTranslation(effectiveHeaderKey, language)}
             </button>
             {(regionName || courtName) && (
               <ChevronRight className="w-4 h-4 mx-1 text-gray-400" />

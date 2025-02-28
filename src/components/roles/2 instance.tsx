@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getCookie } from "@/api/login";
-import { getAssessmentData } from "@/api/login";
+import { getAssessmentData ,getCookie } from "@/lib/login";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { useSurveyData } from "@/context/SurveyContext";

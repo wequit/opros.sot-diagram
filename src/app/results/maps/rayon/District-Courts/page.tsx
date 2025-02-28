@@ -1,17 +1,16 @@
 "use client";
 
 import Map from "../components/Map_rayon";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { usePathname } from "next/navigation";
-import { fetchWithAuth, getRayonAssessmentData } from "@/api/login";
+import { fetchWithAuth, getRayonAssessmentData, getCookie } from "@/lib/login";
 import Evaluations from "@/components/Evaluations/page";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
-import { getCookie } from "@/api/login";
 import Dates from "@/components/Dates/Dates";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
+import debounce from "lodash/debounce";
 
-// Типы для данных API
 interface Assessment {
   aspect: string;
   court_avg: number;
@@ -117,10 +116,18 @@ export default function Courts() {
   const [courts, setCourts] = useState<Court[]>([]);
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
-  const { setCourtName, setSurveyData, setIsLoading, courtName, language } =
-    useSurveyData();
+  const {
+    setCourtName,
+    setSurveyData,
+    setIsLoading,
+    courtName,
+    language,
+    courtNameId,
+    setCourtNameId,
+  } = useSurveyData();
   const [showEvaluations, setShowEvaluations] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filteredCourts, setFilteredCourts] = useState<Court[]>([]);
 
   const token = getCookie("access_token");
 
@@ -135,6 +142,13 @@ export default function Courts() {
     try {
       setIsLoading(true);
       setCourtName(court.name);
+      setCourtNameId(court.id.toString());
+
+      const courtNameIdValue = courtNameId ?? court.id.toString();
+      const courtNameValue = courtName ?? court.name;
+
+      localStorage.setItem("courtNameId", courtNameIdValue);
+      localStorage.setItem("courtName", courtNameValue);
       localStorage.setItem("selectedCourtName", court.name);
 
       const response = await fetch(
@@ -167,6 +181,7 @@ export default function Courts() {
         const data = await getRayonAssessmentData();
         const transformedCourts = transformApiData(data);
         setCourts(transformedCourts);
+        setFilteredCourts(transformedCourts); // Инициализируем filteredCourts
       } catch (error) {
         console.error("Error fetching courts:", error);
       }
@@ -196,58 +211,72 @@ export default function Courts() {
     return <FaSortDown className="ml-1 inline-block text-blue-600" />;
   };
 
-  const sortedCourts = [...courts].sort((a, b) => {
-    if (!sortField || !sortDirection) return 0;
+  const sortedCourts = useMemo(() => {
+    if (!sortField || !sortDirection) return filteredCourts;
 
-    let aValue: any, bValue: any;
+    return [...filteredCourts].sort((a, b) => {
+      let aValue: any, bValue: any;
 
-    switch (sortField) {
-      case "overall":
-        aValue = a.overall_assessment;
-        bValue = b.overall_assessment;
-        break;
-      case "judge":
-        aValue = a.assessment.judge;
-        bValue = b.assessment.judge;
-        break;
-      case "process":
-        aValue = a.assessment.process;
-        bValue = b.assessment.process;
-        break;
-      case "staff":
-        aValue = a.assessment.staff;
-        bValue = b.assessment.staff;
-        break;
-      case "office":
-        aValue = a.assessment.office;
-        bValue = b.assessment.office;
-        break;
-      case "building":
-        aValue = a.assessment.building;
-        bValue = b.assessment.building;
-        break;
-      case "count":
-        aValue = a.total_survey_responses;
-        bValue = b.total_survey_responses;
-        break;
-      default:
-        return 0;
-    }
+      switch (sortField) {
+        case "overall":
+          aValue = a.overall_assessment;
+          bValue = b.overall_assessment;
+          break;
+        case "judge":
+          aValue = a.assessment.judge;
+          bValue = b.assessment.judge;
+          break;
+        case "process":
+          aValue = a.assessment.process;
+          bValue = b.assessment.process;
+          break;
+        case "staff":
+          aValue = a.assessment.staff;
+          bValue = b.assessment.staff;
+          break;
+        case "office":
+          aValue = a.assessment.office;
+          bValue = b.assessment.office;
+          break;
+        case "building":
+          aValue = a.assessment.building;
+          bValue = b.assessment.building;
+          break;
+        case "count":
+          aValue = a.total_survey_responses;
+          bValue = b.total_survey_responses;
+          break;
+        default:
+          return 0;
+      }
 
-    if (aValue === 0) aValue = -Infinity;
-    if (bValue === 0) bValue = -Infinity;
+      if (aValue === 0) aValue = -Infinity;
+      if (bValue === 0) bValue = -Infinity;
 
-    return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
-  });
+      return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+    });
+  }, [filteredCourts, sortField, sortDirection]);
+
+  // Обработчик поиска с debounce
+  const debouncedSearch = useCallback(
+    debounce((query: string) => {
+      setSearchQuery(query);
+      if (!query.trim()) {
+        setFilteredCourts(courts);
+      } else {
+        setFilteredCourts(
+          courts.filter((court) =>
+            court.name.toLowerCase().includes(query.toLowerCase())
+          )
+        );
+      }
+    }, 300),
+    [courts]
+  );
 
   const handleBackClick = () => {
     setShowEvaluations(false);
   };
-
-  // Фильтруем суды по поисковому запросу
-  const filteredCourts = sortedCourts.filter(court => 
-    court.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <>
@@ -257,31 +286,53 @@ export default function Courts() {
             regionName={getTranslation("HeaderNavFour", language)}
             courtName={courtName}
             onCourtBackClick={handleBackClick}
-            showHome={false}  
+            showHome={false}
           />
           <h2 className="text-3xl font-bold mb-4 mt-4">{courtName}</h2>
           <Dates />
-
-          <Evaluations />
+          <Evaluations courtNameId={courtNameId} />
         </div>
       ) : (
         <div className="container mx-auto px-4 py-8">
-          <h2 className="text-2xl font-bold mb-4">Средние оценки по районным судам</h2>
-          <div className="border border-gray-300 mb-8">
+          <div className="mb-4 flex justify-between items-center">
+            <Breadcrumb
+              regionName={null}
+              courtName={null}
+              onRegionBackClick={handleBackClick}
+              showHome={true}
+              headerKey="HeaderNavFour"
+            />
+            <h2 className="text-2xl font-bold mt-2">Районные суды</h2>
+          </div>
+          <div className="border border-gray-300 rounded-2xl bg-white">
             <Map selectedRayon={null} onSelectRayon={() => {}} courts={courts} />
           </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="p-4">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Поиск суда"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-8">
             <div className="overflow-x-auto">
+              <div className="relative w-full max-w-[13rem] my-4 ml-4">
+                <input
+                  type="text"
+                  onChange={(e) => debouncedSearch(e.target.value)}
+                  placeholder="Поиск суда"
+                  className="w-full pl-10 pr-4 py-2.5 text-sm text-gray-900 bg-white rounded-lg focus:outline-none transition-all duration-200 ease-in-out placeholder-gray-500"
+                />
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                  <svg
+                    className="w-5 h-5 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="border-b border-gray-200">
@@ -346,12 +397,12 @@ export default function Courts() {
                       </div>
                     </th>
                     <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                      Количество оценок
+                      Кол-во оценок
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCourts.map((court, index) => (
+                  {sortedCourts.map((court, index) => (
                     <tr
                       key={court.id}
                       className="hover:bg-gray-50/50 border-b border-gray-200"
@@ -412,13 +463,16 @@ export default function Courts() {
                       </td>
                     </tr>
                   ))}
-                  {filteredCourts.length === 0 && (
-                    <tr>
-                      <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
-                        {searchQuery ? 'Ничего не найдено' : 'Нет данных'}
-                      </td>
-                    </tr>
-                  )}
+                  {sortedCourts.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={9} // Увеличено до 9, так как 9 колонок
+                            className="px-6 py-4 text-center text-gray-500 h-[300px]" // Задаем высоту для пустой строки
+                          >
+                            {searchQuery ? "Ничего не найдено" : "Нет данных"}
+                          </td>
+                        </tr>
+                      )}
                 </tbody>
               </table>
             </div>

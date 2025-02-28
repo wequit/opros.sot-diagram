@@ -1,0 +1,158 @@
+
+
+@media (max-width: 1280px) {
+  .layout {
+    @apply max-w-[1000px];
+  }
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    @apply max-w-[880px];
+  }
+}
+
+@media (max-width: 910px) {
+  .layout {
+    @apply max-w-[700px];
+  }
+
+  .EvalutionCols {
+    @apply grid-cols-1;
+  }
+}
+
+@media (max-width: 760px) {
+  .layout {
+    @apply max-w-[600px];
+  }
+
+  .EvalutionCols {
+    @apply grid-cols-1;
+  }
+}
+
+@media (max-width: 640px) {
+  .layout {
+    @apply max-w-[500px];
+  }
+
+  .EvalutionCols {
+    @apply grid-cols-1;
+  }
+}
+
+@media (max-width: 530px) {
+  .layout {
+    @apply max-w-[430px];
+  }
+
+  .EvalutionCols {
+    @apply grid-cols-1;
+  }
+
+  .DiagrammTwoComments{
+    @apply text-sm
+  }
+
+  .DiagrammTwoCommentsBtn{
+    @apply text-sm mt-0
+  }
+}
+
+@media (max-width: 470px) {
+  .layout {
+    @apply max-w-[380px];
+  }
+
+  .EvalutionCols {
+    @apply grid-cols-1;
+  }
+
+  .DiagrammOne{
+    @apply text-lg w-[20rem]
+  }
+  .DiagrammOneTotal{
+    @apply text-sm
+  }
+
+  .DiagrammTwo{
+    @apply text-lg  w-[20rem]
+  }
+  .DiagrammTwoTotal{
+    @apply text-sm text-end
+  }
+
+  .AgeGenderButtons{
+    @apply text-[0.80rem]
+  }
+
+  .DiagrammElevenName{
+    @apply text-lg
+  }
+  
+  .ProgressBar{
+    @apply h-6
+  }
+
+  .DiagrammSevenProgress{
+    @apply text-sm
+  }
+
+  .DiagrammNineProgress{
+    @apply text-sm
+  }
+
+  .DiagrammTenProgress{
+    @apply text-sm mb-8
+  }
+
+  .DiagrammThirteenProgress{
+    @apply text-sm mb-4
+  }
+
+  .DiagrammFourteenProgress{
+    @apply text-sm 
+  }
+  
+}
+
+@media (max-width: 440px) {
+  .layout {
+    @apply max-w-[350px];
+  }
+
+  .AgeGenderButtons{
+    @apply text-[0.70rem]
+  }
+  .ProgressBar{
+    @apply h-5
+  }
+
+  .DiagrammThreeName{
+    @apply text-lg
+  }
+
+  .DiagrammFourName{
+    @apply text-lg
+  }
+
+  .DiagrammFiveName{
+    @apply text-lg
+  }
+
+  .DiagrammSixName{
+    @apply text-lg
+  }
+
+  .DiagrammSevenName{
+  }
+
+  .DiagrammEightName{
+    @apply text-lg
+  }
+
+  .DiagrammNineName{
+  }
+
+}

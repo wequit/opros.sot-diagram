@@ -17,7 +17,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const { language } = useSurveyData();
 
   // Не показываем сайдбар на странице логина
-  if (!isAuthenticated || pathname === "/login") {
+  if (!isAuthenticated || pathname === "/results/login") {
     return null;
   }
 
@@ -45,12 +45,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
       {/* Навигация */}
       <nav className="flex flex-col p-4 space-y-2">
         <Link
-          href="/"
+          href="/results"
           onClick={onClose}
           className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/")
+              isActivePath("/results")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
@@ -68,12 +68,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
         user?.role !== "Председатель 1 инстанции" ? (
           <>
             <Link
-              href="/maps/oblast/Regional-Courts"
+              href="/results/maps/oblast/Regional-Courts"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/maps/oblast")
+              isActivePath("/results/maps/oblast")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
@@ -84,7 +84,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </Link>
 
             <Link
-              href="/maps/rayon/District-Courts"
+              href="/results/maps/rayon/District-Courts"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
@@ -100,7 +100,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </Link>
 
             <Link
-              href="/maps/oblast-courts/chuy"
+              href="/results/maps/oblast-courts/chuy"
               className={`flex items-center space-x-2 p-2 rounded-lg transition-colors ${
                 pathname === "/maps/oblast-courts/chuy"
                   ? "bg-blue-500 text-white"
@@ -115,12 +115,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
         )}
 
         <Link
-          href="/remarks"
+          href="/results/remarks"
           onClick={onClose}
           className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/remarks")
+              isActivePath("/results/remarks")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }

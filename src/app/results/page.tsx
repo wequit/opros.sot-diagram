@@ -6,7 +6,7 @@ import DataFetcher from "@/components/DataFetcher";
 import { useAuth } from "@/context/AuthContext";
 import SecondInstance from "@/components/roles/2 instance";
 import ThirdInstance from "@/components/roles/3 instance ";
-import { withAuth } from "@/api/withAuth"; // Импортируем HOC
+import { withAuth } from "@/lib/withAuth"; // Импортируем HOC
 
 function Home() {
   const { user } = useAuth();

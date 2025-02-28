@@ -2,6 +2,7 @@
 import React, { useCallback, useState } from "react";
 import { fetchDataWithParams } from "@/components/DataFetcher";
 import { useSurveyData } from "@/context/SurveyContext";
+import { usePathname } from "next/navigation";
 
 interface DateRange {
   startDate: string;
@@ -22,7 +23,6 @@ interface SelectedOption {
   text_kg: string;
 }
 
-// Define the structure of a question response
 interface QuestionResponse {
   multiple_selected_options?: any;
   question: number;
@@ -31,7 +31,6 @@ interface QuestionResponse {
   gender: string;
 }
 
-// Define the structure of a question
 export interface Question {
   id: number;
   text: string;
@@ -46,17 +45,17 @@ export default function Dates() {
     endDate: "2025-12-31",
     year: "2025",
   });
-  const { setSurveyData } = useSurveyData();
+  const { setSurveyData, selectedCourtId, courtNameId } = useSurveyData();
+  const pathname = usePathname();
 
-  //Год
   const years = Array.from({ length: 11 }, (_, i) => (2025 + i).toString());
 
   const handleYearSelect = async (selectedYear: string) => {
-    // Обновляем все даты для выбранного года
+
     setDateRange((prev) => ({
       ...prev,
-      startDate: `${selectedYear}-01-01`, // Первый день года
-      endDate: `${selectedYear}-12-31`, // Последний день года
+      startDate: `${selectedYear}-01-01`,
+      endDate: `${selectedYear}-12-31`,
       year: selectedYear,
     }));
 
@@ -64,7 +63,21 @@ export default function Dates() {
     setActivePeriod(null);
 
     try {
-      const response = await fetchDataWithParams({ year: selectedYear });
+      let courtId: number | null = null;
+
+      if (pathname === "/results/maps/oblast/Regional-Courts" && selectedCourtId) {
+        courtId = selectedCourtId;
+      } else if (pathname === "/results/maps/rayon/District-Courts" && courtNameId) {
+        const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
+        courtId = numericCourtId;
+      } else if (pathname === "/results/maps/General") {
+        courtId = 65; // Статичный courtId для пути /maps/General
+      } else if (pathname === "/results") {
+        courtId = null; // Для пути '/' не добавляем courtId
+      }
+
+      const params = { year: selectedYear };
+      const response = await fetchDataWithParams(courtId, params);
       setSurveyData(response);
     } catch (error) {
       console.error("Ошибка при получении данных за год:", error);
@@ -93,9 +106,9 @@ export default function Dates() {
 
   const handlePeriodClick = useCallback(
     async (period: Period) => {
+     
       setActivePeriod(period.id);
 
-      // Определяем даты для каждого периода
       let newStartDate = dateRange.startDate;
       let newEndDate = dateRange.endDate;
 
@@ -123,11 +136,9 @@ export default function Dates() {
         const month = (period.id - 3).toString().padStart(2, "0");
         newStartDate = `${dateRange.year}-${month}-01`;
 
-        // Определяем последний день месяца
         let lastDay;
         switch (month) {
           case "02": // Февраль
-            // Проверка на високосный год
             const isLeapYear =
               Number(dateRange.year) % 4 === 0 &&
               (Number(dateRange.year) % 100 !== 0 ||
@@ -153,39 +164,67 @@ export default function Dates() {
       }));
 
       try {
-        let response;
+        let params: { year?: string; quarter?: number; month?: number } = {
+          year: dateRange.year,
+        };
         if (period.type === "quarter") {
-          const quarter = Math.floor(period.id) + 1;
-          response = await fetchDataWithParams({
-            year: dateRange.year,
-            quarter,
-          });
+          params.quarter = Math.floor(period.id) + 1;
         } else if (period.type === "month") {
-          const month = period.id - 3;
-          response = await fetchDataWithParams({ year: dateRange.year, month });
+          params.month = period.id - 3;
         }
+
+        let courtId: number | null = null;
+
+        if (pathname === "/results/maps/oblast/Regional-Courts" && selectedCourtId) {
+          courtId = selectedCourtId;
+        } else if (pathname === "/results/maps/rayon/District-Courts" && courtNameId) {
+          const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
+          courtId = numericCourtId;
+        } else if (pathname === "/results/maps/General") {
+          courtId = 65; // Статичный courtId для пути /maps/General
+        } else if (pathname === "/results") {
+          courtId = null; // Для пути '/' не добавляем courtId
+        }
+
+        const response = await fetchDataWithParams(courtId, params);
         setSurveyData(response);
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
       }
     },
-    [dateRange.year, setSurveyData]
+    [dateRange.year, setSurveyData, pathname, selectedCourtId, courtNameId]
   );
 
   const handleDateChange = useCallback(
     async (field: keyof DateRange, value: string) => {
+     
       setDateRange((prev) => ({ ...prev, [field]: value }));
       try {
-        const response = await fetchDataWithParams({
+        const params = {
           startDate: field === "startDate" ? value : dateRange.startDate,
           endDate: field === "endDate" ? value : dateRange.endDate,
-        });
+        };
+
+        let courtId: number | null = null;
+
+        if (pathname === "/results/maps/oblast/Regional-Courts" && selectedCourtId) {
+          courtId = selectedCourtId;
+        } else if (pathname === "/results/maps/rayon/District-Courts" && courtNameId) {
+          const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
+          courtId = numericCourtId;
+        } else if (pathname === "/results/maps/General") {
+          courtId = 65; // Статичный courtId для пути /maps/General
+        } else if (pathname === "/results") {
+          courtId = null; // Для пути '/' не добавляем courtId
+        }
+
+        const response = await fetchDataWithParams(courtId, params);
         setSurveyData(response);
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
       }
     },
-    [dateRange.startDate, dateRange.endDate, setSurveyData]
+    [dateRange.startDate, dateRange.endDate, setSurveyData, pathname, selectedCourtId, courtNameId]
   );
 
   return (
@@ -194,7 +233,7 @@ export default function Dates() {
       <div className="flex flex-wrap gap-6 mb-6">
         <div className="flex items-center bg-white rounded-xl shadow-sm p-2">
           <div className="flex items-center gap-3">
-            <span className=" font-medium px-2">С</span>
+            <span className="font-medium px-2">С</span>
             <input
               type="text"
               value={dateRange.startDate}
@@ -204,7 +243,7 @@ export default function Dates() {
           </div>
           <div className="w-px h-6 bg-gray-200 mx-2"></div>
           <div className="flex items-center gap-3">
-            <span className=" font-medium px-2">По</span>
+            <span className="font-medium px-2">По</span>
             <input
               type="text"
               value={dateRange.endDate}
@@ -221,9 +260,7 @@ export default function Dates() {
           >
             {dateRange.year}
             <svg
-              className={`w-4 h-4 transition-transform ${
-                showYearDropdown ? "rotate-180" : ""
-              }`}
+              className={`w-4 h-4 transition-transform ${showYearDropdown ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -245,11 +282,7 @@ export default function Dates() {
                   key={year}
                   onClick={() => handleYearSelect(year)}
                   className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors
-                                    ${
-                                      dateRange.year === year
-                                        ? "bg-blue-100"
-                                        : ""
-                                    }`}
+                                    ${dateRange.year === year ? "bg-blue-100" : ""}`}
                 >
                   {year}
                 </button>
@@ -257,11 +290,10 @@ export default function Dates() {
             </div>
           )}
         </div>
-        
       </div>
 
       {/* Периоды */}
-      <div className=" flex items-center gap-4">
+      <div className="flex items-center gap-4">
         {/* Кварталы */}
         <div className="flex flex-wrap gap-3">
           {periods.slice(0, 4).map((period) => (
@@ -272,7 +304,7 @@ export default function Dates() {
                 "px-5 py-2 rounded-xl font-medium transition-all duration-200 " +
                 (activePeriod === period.id
                   ? "bg-indigo-950 text-white shadow-lg shadow-blue-900 scale-105"
-                  : "bg-white text-black hover:bg-[#003494] hover:text-white ")
+                  : "bg-white text-black hover:bg-[#003494] hover:text-white")
               }
             >
               {period.label}
@@ -280,7 +312,7 @@ export default function Dates() {
           ))}
         </div>
         {/* Месяцы */}
-        <div className="flex flex-wrap gap-3 ">
+        <div className="flex flex-wrap gap-3">
           {periods.slice(4).map((period) => (
             <button
               key={period.id}
@@ -288,8 +320,8 @@ export default function Dates() {
               className={
                 "px-4 py-2 rounded-xl font-medium transition-all duration-200 " +
                 (activePeriod === period.id
-                  ? "bg-indigo-950 text-white shadow-lg shadow-blue-900    scale-105"
-                  : "bg-white text-black hover:bg-[#003494]  hover:text-white ")
+                  ? "bg-indigo-950 text-white shadow-lg shadow-blue-900 scale-105"
+                  : "bg-white text-black hover:bg-[#003494] hover:text-white")
               }
             >
               {period.label}
@@ -300,13 +332,3 @@ export default function Dates() {
     </div>
   );
 }
-
-// Функция форматирования даты из YYYY-MM-DD в DD.MM.YYYY
-const formatDate = (dateString: string) => {
-  if (!dateString) return "";
-  const [year, month, day] = dateString.split("-");
-  // Убедимся, что все компоненты существуют
-  if (!year || !month || !day) return "";
-  // Форматируем дату в DD.MM.YYYY
-  return `${day.padStart(2, "0")}.${month.padStart(2, "0")}.${year}`;
-};

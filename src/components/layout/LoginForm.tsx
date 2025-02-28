@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { loginApi } from "@/api/login";
+import { loginApi } from "@/lib/login";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import { FiUser, FiLock } from "react-icons/fi";
+import logo from '../../../public/logo.png';
 
 const LoginForm: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -40,7 +41,7 @@ const LoginForm: React.FC = () => {
         <div className="absolute inset-0 bg-pattern opacity-10"></div>
         <div className="relative z-10 flex flex-col items-center justify-center w-full p-12 text-white">
           <Image
-            src="/logo.png"
+            src={logo}
             alt="Логотип"
             width={160}
             height={160}

@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { Radar, Bar, Pie, Line } from "react-chartjs-2";
 import { usePathname } from "next/navigation";
+import { ChartOptions } from "chart.js";
 import {
-  Chart as ChartJS, 
+  Chart as ChartJS,
   RadialLinearScale,
   PointElement,
   LineElement,
@@ -43,7 +44,7 @@ import Link from "next/link";
 import { useRemarks } from "@/components/RemarksApi";
 import { useAuth } from "@/context/AuthContext";
 import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
-import { getRadarRepublicData } from "@/api/login";
+import { getRadarRepublicData } from "@/lib/login";
 
 ChartJS.register(
   RadialLinearScale,
@@ -91,8 +92,18 @@ interface BarChartData extends ChartData<"bar", number[], string> {
   })[];
 }
 
-export default function Evaluations({ selectedCourtId }: { selectedCourtId?: number | null }) {
-  const { surveyData, isLoading, language } = useSurveyData();
+export default function Evaluations({
+  selectedCourtId,
+  courtNameId,
+}: {
+  selectedCourtId?: number | null;
+  courtNameId?: string | null;
+}) {
+  const { surveyData, isLoading, language, selectedCourtName, courtName } =
+    useSurveyData();
+  const [windowWidth, setWindowWidth] = useState<number>(
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
   const { remarks } = useRemarks();
   const [demographicsView, setDemographicsView] = useState("пол");
   const { user } = useAuth();
@@ -111,6 +122,46 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
       },
     ],
   });
+  const categoryOptions: ChartOptions<"pie"> = {
+    plugins: {
+      legend: {
+        position: "bottom",
+        align: "start",
+        labels: {
+          padding: 20,
+          boxWidth: 15,
+          font: {
+            size: windowWidth < 440 ? 8 : 11,
+            family: "Inter, sans-serif",
+          },
+          usePointStyle: true,
+        },
+      },
+      datalabels: {
+        color: "#FFFFFF",
+        font: {
+          size: 14,
+          weight: "bold",
+        },
+        formatter: (value: number) => `${value}%`,
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const label = context.label || "";
+            const value = context.raw || 0;
+            return `${label}: ${value}%`;
+          },
+        },
+      },
+    },
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        bottom: 20,
+      },
+    },
+  };
   const [genderData, setGenderData] = useState<PieChartData>({
     labels: [],
     datasets: [
@@ -160,7 +211,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
     ],
   });
   const [audioVideoData, setAudioVideoData] = useState({
-    labels: ["Да", "Нет", "Не знаю/Не уверен(а)", "Другое:"],
+    labels: ["Да", "Нет", "Не знаю", "Другое:"],
     datasets: [
       {
         data: [0, 0, 0, 0],
@@ -220,6 +271,53 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
       },
     ],
   });
+  const radarOptions = {
+    plugins: {
+      legend: {
+        position: "bottom" as const,
+        align: "start" as const,
+        labels: {
+          padding: 20,
+          boxWidth: 15,
+          font: {
+            size: windowWidth < 530 ? 10 : 12, // Адаптивный шрифт для легенды
+          },
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const label = context.dataset.label || "";
+            const value = context.raw || 0;
+            return `${label}: ${value.toFixed(1)}`;
+          },
+        },
+      },
+    },
+    maintainAspectRatio: false,
+    scales: {
+      r: {
+        angleLines: {
+          display: true,
+          color: "rgba(0, 0, 0, 0.2)", // Более мягкий цвет линий
+        },
+        suggestedMin: 0,
+        suggestedMax: 5,
+        ticks: {
+          display: false,
+          stepSize: 1,
+        },
+        grid: {
+          color: "rgba(0, 0, 0, 0.1)",
+        },
+        pointLabels: {
+          font: {
+            size: windowWidth < 470 ? 9 : 12, 
+          },
+        },
+      },
+    },
+  };
 
   const [totalResponses, setTotalResponses] = useState<number>(0);
   const [totalResponsesAnswer, setTotalResponsesAnswer] = useState<number>(0);
@@ -231,9 +329,9 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
         backgroundColor: "rgb(139, 69, 19)",
         barThickness: 20,
         datalabels: {
-          color: "gray",
-          align: "end",
-          anchor: "end",
+          color: "white",
+          align: "end" as const,
+          anchor: "end" as const,
           offset: 4,
           formatter: (value: number, context: DataLabelsContext): string => {
             const dataset = context.dataset;
@@ -243,8 +341,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
             return `${value} (${percentage}%)`;
           },
           font: {
-            size: 14,
-            weight: "bold",
+            size: windowWidth < 470 ? 10 : 16,
           },
         },
       },
@@ -267,6 +364,12 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
       },
     ],
   });
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -355,7 +458,8 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           setRadarData({
             labels: ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"],
             datasets:
-              user?.role === "Председатель 3 инстанции" && pathname === "/"
+              user?.role === "Председатель 3 инстанции" &&
+              pathname === "/results"
                 ? [
                     // Только республиканские данные
                     {
@@ -376,8 +480,84 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                       datalabels: { display: false },
                     },
                   ]
+                : user?.role === "Председатель 3 инстанции" &&
+                  pathname === "/results/maps/oblast/Regional-Courts"
+                ? [
+                    // Данные для выбранного суда из useSurveyData (региональные суды)
+                    {
+                      label: selectedCourtName || "Загрузка...",
+                      data: [
+                        currentCourtAverageSS.judge || 0,
+                        currentCourtAverageSS.secretary || 0,
+                        currentCourtAverageSS.office || 0,
+                        currentCourtAverageSS.process || 0,
+                        currentCourtAverageSS.building || 0,
+                      ],
+                      fill: true,
+                      backgroundColor: "rgba(255, 206, 86, 0.2)",
+                      borderColor: "rgba(255, 206, 86, 1)",
+                      borderWidth: 2,
+                      pointRadius: 5,
+                      pointHoverRadius: 7,
+                    },
+                    {
+                      label: "Средние оценки по республике",
+                      data: [
+                        allCourtsAvgMap["Судья"] || 0,
+                        allCourtsAvgMap["Сотрудники"] || 0,
+                        allCourtsAvgMap["Канцелярия"] || 0,
+                        allCourtsAvgMap["Процесс"] || 0,
+                        allCourtsAvgMap["Здание"] || 0,
+                      ],
+                      fill: true,
+                      backgroundColor: "rgba(54, 162, 235, 0.2)",
+                      borderColor: "rgba(54, 162, 235, 1)",
+                      borderWidth: 2,
+                      pointRadius: 5,
+                      pointHoverRadius: 7,
+                      datalabels: { display: false },
+                    },
+                  ]
+                : user?.role === "Председатель 3 инстанции" &&
+                  pathname === "/maps/rayon/District-Courts"
+                ? [
+                    // Данные для выбранного суда из useSurveyData (районные суды)
+                    {
+                      label: courtName || "Загрузка...",
+                      data: [
+                        currentCourtAverageSS.judge || 0,
+                        currentCourtAverageSS.secretary || 0,
+                        currentCourtAverageSS.office || 0,
+                        currentCourtAverageSS.process || 0,
+                        currentCourtAverageSS.building || 0,
+                      ],
+                      fill: true,
+                      backgroundColor: "rgba(255, 206, 86, 0.2)",
+                      borderColor: "rgba(255, 206, 86, 1)",
+                      borderWidth: 2,
+                      pointRadius: 5,
+                      pointHoverRadius: 7,
+                    },
+                    {
+                      label: "Средние оценки по республике",
+                      data: [
+                        allCourtsAvgMap["Судья"] || 0,
+                        allCourtsAvgMap["Сотрудники"] || 0,
+                        allCourtsAvgMap["Канцелярия"] || 0,
+                        allCourtsAvgMap["Процесс"] || 0,
+                        allCourtsAvgMap["Здание"] || 0,
+                      ],
+                      fill: true,
+                      backgroundColor: "rgba(54, 162, 235, 0.2)",
+                      borderColor: "rgba(54, 162, 235, 1)",
+                      borderWidth: 2,
+                      pointRadius: 5,
+                      pointHoverRadius: 7,
+                      datalabels: { display: false },
+                    },
+                  ]
                 : [
-                    // Оба набора данных
+                    // Оба набора данных (дефолтный случай)
                     {
                       label: user ? user.court : "Загрузка...",
                       data: [
@@ -489,7 +669,6 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
         (remark: { custom_answer: string | null }) =>
           remark.custom_answer &&
           remark.custom_answer !== "Необязательный вопрос"
-         
       ).length;
       setTotalResponsesAnswer(count);
     }
@@ -567,7 +746,14 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           padding: 1,
           align: "center" as const,
           font: {
-            size: 11,
+            size:
+              windowWidth < 440
+                ? 7.5
+                : windowWidth < 470
+                ? 8
+                : windowWidth < 530
+                ? 9
+                : 11,
           },
         },
       },
@@ -586,37 +772,58 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
   };
 
   const disrespectOptions = {
-    ...commonOptions,
     indexAxis: "y" as const,
     scales: {
       x: {
         beginAtZero: true,
         grid: {
-          display: false,
+          display: true, // Включаем сетку на X, как в "Источник трафика"
         },
+        suggestedMax:
+          Math.max(...(disrespectData.datasets[0]?.data || [0])) + 1,
         ticks: {
-          display: false,
+          stepSize: 1,
         },
       },
       y: {
         grid: {
-          display: false,
+          display: false, // Скрываем сетку на Y
         },
-      },
-    },
-    layout: {
-      padding: {
-        right: 80,
+        ticks: {
+          padding: 1,
+          align: "center" as const,
+          font: {
+            size: windowWidth < 470 ? 11 : 12,
+          },
+        },
       },
     },
     plugins: {
       legend: {
         display: false,
       },
+      tooltip: {
+        callbacks: {
+          label: (context: any) => {
+            const value = context.raw;
+            const sum = disrespectData.datasets[0].data.reduce(
+              (a, b) => a + b,
+              0
+            );
+            const percentage = ((value / sum) * 100).toFixed(1);
+            return `${value} (${percentage}%)`; // Tooltip как в данных
+          },
+        },
+      },
+    },
+    maintainAspectRatio: false,
+    layout: {
+      padding: {
+        left: 1,
+      },
     },
   };
 
-  // Компонент для прогресс-бара
   // Компонент для прогресс-бара
   const ProgressBar = ({ value }: { value: number }) => {
     const getColor = (v: number) => {
@@ -632,9 +839,9 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
     };
 
     return (
-      <div className="w-full bg-gray-200 rounded-full h-6">
+      <div className="w-full bg-gray-200 rounded-full h-6 ProgressBar">
         <div
-          className="h-6 rounded-full transition-all duration-300"
+          className="h-6 rounded-full transition-all duration-300 ProgressBar"
           style={{
             width: `${(value / 5) * 100}%`,
             backgroundColor: getColor(value),
@@ -643,42 +850,44 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
       </div>
     );
   };
-  let  remarksPath = "/remarks"; 
+  let remarksPath = "/results/remarks";
 
-  if (pathname.includes("/maps/General")) {
-    remarksPath = "/remarks/General";
-  } else if (pathname.includes("/maps/oblast/Regional-Courts")) {
-    remarksPath = "/remarks/Regional-Courts";
+  if (pathname.includes("/results/maps/General")) {
+    remarksPath = "/results/remarks/General";
+  } else if (pathname.includes("/results/maps/oblast/Regional-Courts")) {
+    remarksPath = "/results/remarks/Regional-Courts";
+  } else if (pathname.includes("/results/maps/rayon/District-Courts")) {
+    remarksPath = "/results/remarks/District-Courts";
   }
 
   if (selectedCourtId) {
     remarksPath += `/${selectedCourtId}`;
   }
+  if (courtNameId) {
+    remarksPath += `/${courtNameId}`;
+  }
   // Показываем сообщение о загрузке
   if (isLoading) {
     return <SkeletonDashboard />;
-  } 
+  }
 
   // Проверяем отсутствие данных только после загрузки
-  if (
-    !surveyData ||
-    surveyData.total_responses === 0
-  ) {
+  if (!surveyData || surveyData.total_responses === 0) {
     return <NoData />;
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen mb-4">
       <div className="max-w-[1250px] mx-auto ">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 EvalutionCols">
           {/* Общие показатели */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">
+                <h2 className="text-xl font-medium DiagrammOne ">
                   {getTranslation("DiagrammOne", language)}
                 </h2>
-                <span className="text-gray-600">
+                <span className="text-gray-600 DiagrammOneTotal">
                   {getTranslation("DiagrammOneTotal", language)}{" "}
                   {totalResponses}
                 </span>
@@ -686,7 +895,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
             </div>
             <div className="p-6">
               <div className="h-[400px]">
-                <Radar data={radarData} options={commonOptions} />
+                <Radar data={radarData} options={radarOptions} />
               </div>
             </div>
           </div>
@@ -695,18 +904,18 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex flex-col justify-between h-full">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">
+                <h2 className="text-xl font-medium DiagrammTwo">
                   {getTranslation("DiagrammTwo", language)}
                 </h2>
-                <span className="text-gray-600">
+                <span className="text-gray-600 DiagrammTwoTotal">
                   {getTranslation("DiagrammTwoTotal", language)}{" "}
                   {totalResponsesAnswer}
                 </span>
               </div>
             </div>
-            <div className="p-6 flex-1">
+            <div className="p-6 flex-1 DiagrammTwoComments">
               {comments.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-3 ">
                   {comments.map((comment, index) => {
                     const absoluteIndex = totalResponsesAnswer - index;
                     return (
@@ -714,11 +923,11 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                         key={index}
                         className="flex gap-4 p-3 border rounded bg-gray-50"
                       >
-                        <span className="text-gray-500 min-w-[24px]">
+                        <span className="text-gray-500 min-w-[24px] ">
                           {absoluteIndex}
                         </span>
                         <span>{comment.text}</span>
-                      </div>  
+                      </div>
                     );
                   })}
                 </div>
@@ -733,9 +942,9 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                 </div>
               )}
             </div>
-            <div className="px-6 pb-6">
+            <div className="px-6 pb-6 ">
               <Link href={remarksPath}>
-                <button className="mt-4 w-full py-3 text-white rounded-lg bg-green-600 hover:shadow-2xl transition-all duration-200">
+                <button className="mt-4 w-full py-3 text-white rounded-lg bg-green-600 hover:shadow-2xl transition-all duration-200 DiagrammTwoCommentsBtn">
                   {getTranslation("DiagrammTwoButton", language)}
                 </button>
               </Link>
@@ -745,13 +954,13 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           {/* Категории респондентов */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">
+              <h2 className="text-xl font-medium DiagrammThreeName">
                 {getTranslation("DiagrammThree", language)}
               </h2>
             </div>
             <div className="p-6">
-              <div className="w-[400px] h-[400px] mx-auto">
-                <Pie data={categoryData} options={commonOptions} />
+              <div className="w-[350px] h-[400px] mx-auto">
+                <Pie data={categoryData} options={categoryOptions} />
               </div>
             </div>
           </div>
@@ -759,7 +968,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           {/* Демографические показатели */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium text-start">
+              <h2 className="text-xl font-medium text-start DiagrammFourName">
                 {getTranslation("DiagrammFour", language)}
               </h2>
             </div>
@@ -768,9 +977,9 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                 {["Пол", "Пол и возраст", "Возраст"].map((tab) => (
                   <button
                     key={tab}
-                    className={`px-6 py-2 rounded-lg transition-colors ${
+                    className={`px-6 py-2 rounded-lg transition-colors AgeGenderButtons ${
                       demographicsView === tab.toLowerCase()
-                        ? "bg-blue-500 text-white"
+                        ? "bg-blue-600 text-white AgeGenderButtons"
                         : " bg-gray-100"
                     }`}
                     onClick={() => setDemographicsView(tab.toLowerCase())}
@@ -822,7 +1031,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                           stacked: true,
                           ticks: {
                             callback: function (value: string | number) {
-                              return `${Math.abs(Number(value))}%`; 
+                              return `${Math.abs(Number(value))}%`;
                             },
                             display: true,
                           },
@@ -856,17 +1065,17 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                         tooltip: {
                           callbacks: {
                             label: function (tooltipItem: any) {
-                              const value = Math.abs(tooltipItem.raw);  // Применяем Math.abs для отображения только положительных значений
-                              return `${value}%`;  // Отображаем процент без минуса
+                              const value = Math.abs(tooltipItem.raw); // Применяем Math.abs для отображения только положительных значений
+                              return `${value}%`; // Отображаем процент без минуса
                             },
                           },
                         },
                       },
-                      
+
                       maintainAspectRatio: false,
                     }}
                     plugins={[ChartDataLabels]} // Добавляем плагин в массив плагинов
-                  />  
+                  />
                 )}
                 {demographicsView === "возраст" && ageData && (
                   <Bar
@@ -896,10 +1105,10 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
             </div>
           </div>
 
-          {/* Источники трафика */}
+          {/* Источник трафика */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">
+              <h2 className="text-xl font-medium DiagrammFiveName">
                 {getTranslation("DiagrammFive", language)}
               </h2>
             </div>
@@ -913,7 +1122,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           {/* Категории судебных дел */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">
+              <h2 className="text-xl font-medium DiagrammSixName">
                 {getTranslation("DiagrammSix", language)}
               </h2>
             </div>
@@ -927,11 +1136,11 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           {/* Оценки судьи */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">
+              <h2 className="text-xl font-medium DiagrammSevenName">
                 {getTranslation("DiagrammSeven", language)}
               </h2>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-6 DiagrammSevenProgress">
               {Object.entries(judgeRatings).map(([title, rating]) => (
                 <div key={title} className="space-y-4">
                   <div className="flex justify-between items-center">
@@ -953,13 +1162,13 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-medium">
+                <h2 className="text-xl font-medium DiagrammEightName">
                   {getTranslation("DiagrammEight", language)}
                 </h2>
               </div>
             </div>
             <div className="p-6">
-              <div className="h-[300px]">
+              <div className="h-[300px] w-full">
                 <Bar data={disrespectData} options={disrespectOptions} />
               </div>
             </div>
@@ -968,11 +1177,11 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           {/* Оценки сотрудников */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">
+              <h2 className="text-xl font-medium DiagrammNineName">
                 {getTranslation("DiagrammNine", language)}
               </h2>
             </div>
-            <div className="p-6 space-y-6 mb-8">
+            <div className="p-6 space-y-6 mb-8 DiagrammNineProgress">
               {Object.entries(staffRatings).map(([title, rating]) => (
                 <div key={title} className="space-y-2 mb-12">
                   <div className="flex justify-between items-center">
@@ -997,7 +1206,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                 {getTranslation("DiagrammTen", language)}
               </h2>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-6 DiagrammTenProgress">
               {Object.entries(processRatings).map(([title, rating]) => (
                 <div key={title} className="space-y-2">
                   <div className="flex justify-between items-center">
@@ -1018,12 +1227,12 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
           {/* Использование средств аудио и видеофиксации */}
           <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-xl font-medium">
+              <h2 className="text-xl font-medium DiagrammElevenName">
                 {getTranslation("DiagrammEleven", language)}
               </h2>
             </div>
             <div className="p-6">
-              <div className="h-[300px] w-[450px] mx-auto">
+              <div className="h-[300px] w-[350px] mx-auto">
                 <Pie
                   data={audioVideoData}
                   options={{
@@ -1039,8 +1248,8 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                         formatter: (value) => value + "%",
                       },
                       legend: {
-                        position: "right",
-                        align: "center",
+                        position: windowWidth < 530 ? "bottom" : "right",
+                        align: windowWidth < 530 ? "start" : "center",
                         labels: {
                           usePointStyle: true,
                           padding: 20,
@@ -1078,7 +1287,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                         formatter: (value) => value + "%",
                       },
                       legend: {
-                        position: "right",
+                        position: windowWidth < 530 ? "bottom" : "right",
                         align: "center",
                         labels: {
                           usePointStyle: true,
@@ -1100,7 +1309,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                 {getTranslation("DiagrammThirteen", language)}
               </h2>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-6 DiagrammThirteenProgress">
               {Object.entries(officeRatings).map(([title, rating]) => (
                 <div key={title} className="space-y-2">
                   <div className="flex justify-between items-center mb-8">
@@ -1125,7 +1334,7 @@ export default function Evaluations({ selectedCourtId }: { selectedCourtId?: num
                 {getTranslation("DiagrammFourteen", language)}
               </h2>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-6 DiagrammFourteenProgress">
               {Object.entries(accessibilityRatings).map(([title, rating]) => (
                 <div key={title} className="space-y-2 mb-4">
                   <div className="flex justify-between items-center">

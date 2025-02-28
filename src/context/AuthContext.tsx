@@ -1,8 +1,7 @@
 'use client'
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { setCookie, getCookie, deleteCookie } from '@/api/login';
-import { getCurrentUser } from '@/api/login';
+import { setCookie, getCookie, deleteCookie, getCurrentUser } from '@/lib/login';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -51,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(true);
       const currentUser = await getCurrentUser();
       setUser(currentUser);
-      await router.push('/');
+      await router.push('/results');
       router.refresh();
     } catch (error) {
       console.error('Ошибка при логине:', error);
@@ -61,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     deleteCookie('access_token');
     setIsAuthenticated(false);
-    router.push('/login');
+    router.push('/results/login');
   };
 
   const getToken = () => {

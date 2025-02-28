@@ -1,7 +1,7 @@
 "use client";
 import React, { ComponentType, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getCookie, deleteCookie, isTokenExpired, reLogin } from "@/api/login";
+import { getCookie, deleteCookie, isTokenExpired, reLogin } from "@/lib/login";
 
 export const withAuth = (WrappedComponent: ComponentType) => {
   return function AuthenticatedComponent(props: any) {
@@ -25,7 +25,7 @@ export const withAuth = (WrappedComponent: ComponentType) => {
         
           deleteCookie("access_token");
           deleteCookie("refresh_token");
-          router.push("/login");
+          router.push("/results/login");
         } else {
           setIsAuthenticated(true); 
         }
