@@ -120,6 +120,7 @@ export default function Courts() {
   const { setCourtName, setSurveyData, setIsLoading, courtName, language } =
     useSurveyData();
   const [showEvaluations, setShowEvaluations] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const token = getCookie("access_token");
 
@@ -243,6 +244,11 @@ export default function Courts() {
     setShowEvaluations(false);
   };
 
+  // Фильтруем суды по поисковому запросу
+  const filteredCourts = sortedCourts.filter(court => 
+    court.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
       {showEvaluations ? (
@@ -260,15 +266,21 @@ export default function Courts() {
         </div>
       ) : (
         <div className="container mx-auto px-4 py-8">
-          <h2 className="text-2xl font-bold mb-4 mt-2">Районные суды</h2>
-          <div className="border border-gray-300">
-            <Map
-              selectedRayon={null}
-              onSelectRayon={() => {}}
-              courts={courts}
-            />
+          <h2 className="text-2xl font-bold mb-4">Средние оценки по районным судам</h2>
+          <div className="border border-gray-300 mb-8">
+            <Map selectedRayon={null} onSelectRayon={() => {}} courts={courts} />
           </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-8">
+
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="p-4">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Поиск суда"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
@@ -334,12 +346,12 @@ export default function Courts() {
                       </div>
                     </th>
                     <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                      Кол-во оценок
+                      Количество оценок
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedCourts.map((court, index) => (
+                  {filteredCourts.map((court, index) => (
                     <tr
                       key={court.id}
                       className="hover:bg-gray-50/50 border-b border-gray-200"
@@ -400,6 +412,13 @@ export default function Courts() {
                       </td>
                     </tr>
                   ))}
+                  {filteredCourts.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="px-6 py-4 text-center text-gray-500">
+                        {searchQuery ? 'Ничего не найдено' : 'Нет данных'}
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

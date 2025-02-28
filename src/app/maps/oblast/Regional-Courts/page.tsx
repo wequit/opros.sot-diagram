@@ -37,6 +37,11 @@ interface Region {
   total_assessments: number;
 }
 
+interface RegionDetailsProps {
+  regionName: string;
+  regions: OblastData[];
+}
+
 export default function RegionalCourts() {
   const [regions, setRegions] = useState<OblastData[]>([]);
   const [regionName, setRegionName] = useState<string | null>(null);
@@ -141,10 +146,13 @@ export default function RegionalCourts() {
   });
 
   const getRatingColor = (rating: number) => {
-    if (rating === 0) return "bg-gray-100";
-    if (rating <= 2) return "bg-red-100";
-    if (rating <= 3.5) return "bg-yellow-100";
-    return "bg-green-100";
+    if (rating === 0) return 'bg-gray-100';
+    if (rating < 2) return 'bg-red-100';
+    if (rating < 2.5) return 'bg-red-100';
+    if (rating < 3) return 'bg-orange-100';
+    if (rating < 3.5) return 'bg-yellow-100';
+    if (rating < 4) return 'bg-emerald-100';
+    return 'bg-green-100';
   };
 
   const handleCourtClick = async (court: OblastData) => {
@@ -202,7 +210,7 @@ export default function RegionalCourts() {
         {!selectedRegion ? (
           <>
             <div className="mb-4 flex justify-between items-center">
-              <h2 className="text-xl font-medium">Оценки по областям</h2>
+              <h2 className="text-xl font-bold">Средние оценки по областям</h2>
             </div>
 
             {/* Условный рендеринг таблицы */}
@@ -277,7 +285,7 @@ export default function RegionalCourts() {
                         </div>
                       </th>
                       <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                        Количество отзывов
+                        Количество оценок
                       </th>
                     </tr>
                   </thead>
@@ -349,7 +357,10 @@ export default function RegionalCourts() {
             </div>
           </>
         ) : (
-          <RegionDetails regionName={regionName} />
+          <RegionDetails 
+            regionName={regionName} 
+            regions={regions}
+          />
         )}
       </div>
     </div>

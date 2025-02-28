@@ -60,6 +60,50 @@ const rayonToCourtMapping: { [key: string]: string } = {
   'Toktogul': 'Токтогульский районный суд'
 };
 
+// Обновляем маппинг для русских названий
+const districtNamesRu: { [key: string]: string } = {
+  'Batken': 'Баткенский районный суд',
+  'Kadamjai': 'Кадамжайский районный суд',
+  'Lailak': 'Лейлекский районный суд',
+  'Ak-Suu': 'Ак-Суйский районный суд',
+  'Djety-Oguz': 'Жети-Огузский районный суд',
+  'Ysyk-Köl': 'Иссык-Кульский районный суд',
+  'Balykchy': 'Балыкчинский районный суд',
+  'Ton': 'Тонский районный суд',
+  'Tüp': 'Тюпский районный суд',
+  'Ak-Talaa': 'Ак-Талинский районный суд',
+  'At-Bashi': 'Ат-Башинский районный суд',
+  'Jumgal': 'Жумгальский районный суд',
+  'Kochkor': 'Кочкорский районный суд',
+  'Naryn': 'Нарынский районный суд',
+  'Alai': 'Алайский районный суд',
+  'Aravan': 'Араванский районный суд',
+  'Kara-Suu': 'Кара-Суйский районный суд',
+  'Nookat': 'Ноокатский районный суд',
+  'Uzgen': 'Узгенский районный суд',
+  'Chong-Alay': 'Чон-Алайский районный суд',
+  'Bakai-Ata': 'Бакай-Атинский районный суд',
+  'Kara-Buura': 'Кара-Буринский районный суд',
+  'Manas': 'Манасский районный суд',
+  'Talas': 'Таласский районный суд',
+  'Ala-Buka': 'Ала-Букинский районный суд',
+  'Aksyi': 'Аксыйский районный суд',
+  'Bazar-Korgon': 'Базар-Коргонский районный суд',
+  'Chatkal': 'Чаткальский районный суд',
+  'Nooken': 'Ноокенский районный суд',
+  'Suzak': 'Сузакский районный суд',
+  'Togus-Toro': 'Тогуз-Тороуский районный суд',
+  'Toktogul': 'Токтогульский районный суд',
+  'Alamüdün': 'Аламудунский районный суд',
+  'Jaiyl': 'Жайылский районный суд',
+  'Kemin': 'Кеминский районный суд',
+  'Moskovsky': 'Московский районный суд',
+  'Panfilov': 'Панфиловский районный суд',
+  'Sokuluk': 'Сокулукский районный суд',
+  'Chui': 'Чуйский районный суд',
+  'Ysyk-Ata': 'Ысык-Атинский районный суд'
+};
+
 interface Court {
   id: number;
   name: string;
@@ -241,48 +285,42 @@ export default function Map_rayon({ selectedRayon, onSelectRayon, courts }: MapP
         d3.select(this).attr('fill-opacity', 0.7);
         const coordinates = getEventCoordinates(event);
         
+        // Используем русское название из маппинга
+        const districtName = d.properties.NAME_2;
+        const russianName = districtNamesRu[districtName] || districtName;
+        const rating = getRayonRating(districtName);
+
         tooltip
           .style('display', 'block')
           .style('position', 'fixed')
           .style('left', `${coordinates.x + 10}px`)
           .style('top', `${coordinates.y + 10}px`)
-          .html(() => {
-            const rating = getRayonRating(d.properties.NAME_2);
-            return `
-              <div class="font-medium">${d.properties.NAME_2}</div>
-              <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
-            `;
-          });
-      })
-      .on('mousemove', function(event: any) {
-        const coordinates = getEventCoordinates(event);
-        tooltip
-          .style('left', `${coordinates.x + 10}px`)
-          .style('top', `${coordinates.y + 10}px`);
-      })
-      .on('mouseout', function() {
-        d3.select(this).attr('fill-opacity', 1);
-        tooltip.style('display', 'none');
+          .html(`
+            <div class="font-medium">${russianName}</div>
+            <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
+          `);
       })
       .on('touchstart', function(event: any, d: any) {
-        event.preventDefault(); // Предотвращаем стандартное поведение
+        event.preventDefault();
         if (isLake(d.properties)) return;
         
         d3.select(this).attr('fill-opacity', 0.7);
         const coordinates = getEventCoordinates(event);
         
+        // Также используем русское название для тач-событий
+        const districtName = d.properties.NAME_2;
+        const russianName = districtNamesRu[districtName] || districtName;
+        const rating = getRayonRating(districtName);
+
         tooltip
           .style('display', 'block')
           .style('position', 'fixed')
           .style('left', `${coordinates.x + 10}px`)
           .style('top', `${coordinates.y + 10}px`)
-          .html(() => {
-            const rating = getRayonRating(d.properties.NAME_2);
-            return `
-              <div class="font-medium">${d.properties.NAME_2}</div>
-              <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
-            `;
-          });
+          .html(`
+            <div class="font-medium">${russianName}</div>
+            <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
+          `);
       });
 
     // Добавляем текст оценок поверх карты
@@ -344,6 +382,7 @@ export default function Map_rayon({ selectedRayon, onSelectRayon, courts }: MapP
           .style('top', `${event.pageY + 10}px`)
           .html(`
             <div class="font-medium">${d[0]}</div>
+            
             <div class="text-sm text-gray-600">Общая оценка: ${court ? court.overall_assessment.toFixed(1) : 'Нет данных'}</div>
           `);
       })
