@@ -97,6 +97,22 @@
   .DiagrammTwoCommentsBtn {
     @apply text-sm mt-0;
   }
+
+  .Dates{
+    @apply text-sm
+  }
+
+  .DatesInputText{
+    @apply w-[4.8rem]
+  }
+
+  .DatesQuarter_Month{
+    @apply text-sm
+  }
+
+  .SideBarWindow{
+    @apply w-72
+  }
 }
 
 @media (max-width: 470px) {
@@ -160,6 +176,9 @@
 }
 
 @media (max-width: 440px) {
+  .Logo_1024{
+   display: none
+  }
   .layout {
     @apply max-w-[350px];
   }
@@ -168,7 +187,7 @@
     @apply text-[0.70rem];
   }
   .ProgressBar {
-    @apply h-5;
+    @apply h-6;
   }
 
   .DiagrammThreeName {

@@ -1,8 +1,15 @@
 "use client";
 
-import React, { useRef, useEffect, useMemo, useState, useCallback } from "react";
+import React, {
+  useRef,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+} from "react";
 import * as d3 from "d3";
 import geoData from "../../../../../../public/gadm41_KGZ_1.json";
+import { FiMinus, FiPlus, FiRefreshCw } from "react-icons/fi";
 
 interface SVGFeature {
   type: string;
@@ -25,9 +32,8 @@ interface SVGFeature {
   };
 }
 
-
 const oblastCoordinates: { [key: string]: [number, number] } = {
-  "Бишкек": [74.69, 42.87],
+  Бишкек: [74.69, 42.87],
   "Чуйская область": [74.5, 42.8],
   "Таласская область": [72.2, 42.5],
   "Иссык-Кульская область": [77.5, 42.3],
@@ -58,6 +64,28 @@ export default function Map_oblast({ oblastData }: MapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 480 });
 
+  // Создаём объект zoom для управления масштабом
+ // Создаём объект zoom для управления масштабом
+const zoom = useMemo(
+  () =>
+    d3
+      .zoom<SVGSVGElement, unknown>()
+      .scaleExtent([1, 8]) // Ограничиваем масштаб от 1x до 8x
+      .touchable(true) // Включаем поддержку сенсорных событий
+      .wheelDelta((event) => -event.deltaY * 0.002)
+      .on("start", () => {
+        // Сбрасываем флаг перемещения при начале зума
+      })
+      .on("zoom", (event) => {
+        d3.select(svgRef.current)
+          .select(".regions")
+          .attr("transform", event.transform);
+      })
+      .on("end", () => {
+        // Ничего не делаем, просто завершаем событие
+      }),
+  []
+);
   const oblastMapping: OblastMapping = useMemo(
     () => ({
       Biškek: "Город Бишкек",
@@ -81,23 +109,20 @@ export default function Map_oblast({ oblastData }: MapProps) {
     [oblastData, oblastMapping]
   );
 
-  const getColor = useCallback(
-    (rating: number) => {
-      if (rating === 0) return "#999999";
-      if (rating >= 5.0) return "#66C266";
-      if (rating >= 4.5) return "#66C266";
-      if (rating >= 4.0) return "#B4D330";
-      if (rating >= 3.5) return "#FFC04D";
-      if (rating >= 3.0) return "#F4A460";
-      if (rating >= 2.5) return "#E57357";
-      if (rating >= 2.0) return "#ff620d";
-      if (rating >= 1.5) return "#fa5d5d";
-      if (rating >= 1.0) return "#fa5d5d";
-      if (rating >= 0.5) return "#640202";
-      return "#999999";
-    },
-    []
-  );
+  const getColor = useCallback((rating: number) => {
+    if (rating === 0) return "#999999";
+    if (rating >= 5.0) return "#66C266";
+    if (rating >= 4.5) return "#66C266";
+    if (rating >= 4.0) return "#B4D330";
+    if (rating >= 3.5) return "#FFC04D";
+    if (rating >= 3.0) return "#F4A460";
+    if (rating >= 2.5) return "#E57357";
+    if (rating >= 2.0) return "#ff620d";
+    if (rating >= 1.5) return "#fa5d5d";
+    if (rating >= 1.0) return "#fa5d5d";
+    if (rating >= 0.5) return "#640202";
+    return "#999999";
+  }, []);
 
   useEffect(() => {
     if (!svgRef.current || !containerRef.current) return;
@@ -111,7 +136,10 @@ export default function Map_oblast({ oblastData }: MapProps) {
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
-    svg.attr("width", width).attr("height", height).attr("viewBox", `0 0 ${width} ${height}`);
+    svg
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", `0 0 ${width} ${height}`);
 
     const projection = d3
       .geoMercator()
@@ -121,7 +149,17 @@ export default function Map_oblast({ oblastData }: MapProps) {
 
     const path = d3.geoPath().projection(projection);
 
+    // Создаём группу для регионов
     const regionsGroup = svg.append("g").attr("class", "regions");
+
+    // Применяем зум к SVG
+    svg.call(zoom);
+
+    // Ограничиваем перемещение карты
+    zoom.translateExtent([
+      [0, 0], // Минимальные координаты (верхний левый угол)
+      [width, height], // Максимальные координаты (нижний правый угол)
+    ]);
 
     const hasData = oblastData && oblastData.length > 0;
 
@@ -139,7 +177,7 @@ export default function Map_oblast({ oblastData }: MapProps) {
       .attr("stroke-width", "1")
       .style("cursor", hasData ? "pointer" : "default")
       .on("mouseover", function (event: any, d: SVGFeature) {
-        if (!hasData) return; // Не показываем tooltip, если данных нет
+        if (!hasData) return;
         d3.select(this).attr("stroke-width", "2");
 
         const coordinates = getEventCoordinates(event);
@@ -150,7 +188,8 @@ export default function Map_oblast({ oblastData }: MapProps) {
           .style("left", `${coordinates.x + 10}px`)
           .style("top", `${coordinates.y + 10}px`);
 
-        const mappedName = oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
+        const mappedName =
+          oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
         const rating = getOblastRating(d.properties.NAME_1);
         tooltip.html(`
           <div class="font-medium">${mappedName}</div>
@@ -183,7 +222,8 @@ export default function Map_oblast({ oblastData }: MapProps) {
           .style("left", `${coordinates.x + 10}px`)
           .style("top", `${coordinates.y + 10}px`);
 
-        const mappedName = oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
+        const mappedName =
+          oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
         const rating = getOblastRating(d.properties.NAME_1);
         tooltip.html(`
           <div class="font-medium">${mappedName}</div>
@@ -216,7 +256,7 @@ export default function Map_oblast({ oblastData }: MapProps) {
         .attr("text-anchor", "middle")
         .attr("class", "region-label")
         .attr("font-weight", "bold")
-        .attr("font-size", "14px")
+        .attr("font-size", width < 640 ? "10px" : "14px") // Адаптивный размер текста
         .style("pointer-events", "none")
         .text((d: SVGFeature) => {
           const rating = getOblastRating(d.properties.NAME_1);
@@ -262,11 +302,44 @@ export default function Map_oblast({ oblastData }: MapProps) {
             .text((d) => d.label);
         });
     }
-  }, [oblastData, getOblastRating, getColor]);
+
+    // Сбрасываем масштаб при изменении размера окна
+    return () => {
+      svg.call(zoom.transform, d3.zoomIdentity);
+    };
+  }, [oblastData, getOblastRating, getColor, zoom]);
 
   return (
     <div ref={containerRef} className="relative w-full">
       <svg ref={svgRef} className="w-full h-auto"></svg>
+      {/* Кнопки зума */}
+      <div className="absolute bottom-4 right-4 flex flex-col gap-5 z-30 ContainerZoomButtons">
+        <button
+          onClick={() => {
+            svgRef.current && d3.select(svgRef.current).call(zoom.scaleBy, 1.2);
+          }}
+          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600"
+        >
+          <FiPlus className="w-7 h-7 ZoomButtons" />
+        </button>
+        <button
+          onClick={() => {
+            svgRef.current && d3.select(svgRef.current).call(zoom.scaleBy, 0.8);
+          }}
+          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600"
+        >
+          <FiMinus className="w-7 h-7 ZoomButtons" />
+        </button>
+        <button
+          onClick={() => {
+            svgRef.current &&
+              d3.select(svgRef.current).call(zoom.transform, d3.zoomIdentity);
+          }}
+          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600"
+        >
+          <FiRefreshCw className="w-7 h-7 ZoomButtons" />
+        </button>
+      </div>
       <div
         ref={tooltipRef}
         className="hidden absolute bg-white border border-gray-200 rounded-md shadow-lg p-2 z-50"

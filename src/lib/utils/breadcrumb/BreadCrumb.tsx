@@ -28,8 +28,8 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   const effectiveHeaderKey = headerKey || (regionName ? "HeaderNavThree" : "HeaderNavFour");
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600" aria-label="Breadcrumb">
-      <ol className="flex items-center space-x-2">
+    <nav className="flex items-center space-x-2 text-sm text-gray-600 " aria-label="Breadcrumb">
+      <ol className="flex items-center space-x-2 BreadCrumbText">
         {/* Фиксированная "Главная" с href="/" */}
         <li className="flex items-center">
           <Link

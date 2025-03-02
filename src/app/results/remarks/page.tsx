@@ -6,7 +6,6 @@ function page() {
   return (
     <div>
       <RemarksPage/>
-      Hello world
     </div>
   )
 }

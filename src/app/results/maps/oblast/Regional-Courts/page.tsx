@@ -202,8 +202,7 @@ export default function RegionalCourts() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 my-8">
-      <div className="max-w-[1250px] mx-auto">
+    <div className="max-w-[1250px] mx-auto w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 my-8 Oblast">
         {!selectedRegion ? (
           <>
             <div className="mb-4 flex justify-between items-center">
@@ -213,7 +212,7 @@ export default function RegionalCourts() {
                 showHome={true}
                 headerKey="HeaderNavThree"
               />
-              <h2 className="text-2xl font-bold mt-2">Оценки по областям</h2>
+              <h2 className="text-2xl font-bold RegionName">Оценки по областям</h2>
             </div>
 
             {/* Условный рендеринг таблицы */}
@@ -361,7 +360,6 @@ export default function RegionalCourts() {
         ) : (
           <RegionDetails regionName={regionName} regions={regions} />
         )}
-      </div>
     </div>
   );
 }

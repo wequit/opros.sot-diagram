@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { fetchDataWithParams } from "@/components/DataFetcher";
 import { useSurveyData } from "@/context/SurveyContext";
 import { usePathname } from "next/navigation";
@@ -45,13 +45,23 @@ export default function Dates() {
     endDate: "2025-12-31",
     year: "2025",
   });
+  const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+  const [windowWidth, setWindowWidth] = useState<number>(
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const { setSurveyData, selectedCourtId, courtNameId } = useSurveyData();
   const pathname = usePathname();
 
   const years = Array.from({ length: 11 }, (_, i) => (2025 + i).toString());
 
   const handleYearSelect = async (selectedYear: string) => {
-
     setDateRange((prev) => ({
       ...prev,
       startDate: `${selectedYear}-01-01`,
@@ -65,9 +75,15 @@ export default function Dates() {
     try {
       let courtId: number | null = null;
 
-      if (pathname === "/results/maps/oblast/Regional-Courts" && selectedCourtId) {
+      if (
+        pathname === "/results/maps/oblast/Regional-Courts" &&
+        selectedCourtId
+      ) {
         courtId = selectedCourtId;
-      } else if (pathname === "/results/maps/rayon/District-Courts" && courtNameId) {
+      } else if (
+        pathname === "/results/maps/rayon/District-Courts" &&
+        courtNameId
+      ) {
         const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
         courtId = numericCourtId;
       } else if (pathname === "/results/maps/General") {
@@ -106,7 +122,6 @@ export default function Dates() {
 
   const handlePeriodClick = useCallback(
     async (period: Period) => {
-     
       setActivePeriod(period.id);
 
       let newStartDate = dateRange.startDate;
@@ -175,9 +190,15 @@ export default function Dates() {
 
         let courtId: number | null = null;
 
-        if (pathname === "/results/maps/oblast/Regional-Courts" && selectedCourtId) {
+        if (
+          pathname === "/results/maps/oblast/Regional-Courts" &&
+          selectedCourtId
+        ) {
           courtId = selectedCourtId;
-        } else if (pathname === "/results/maps/rayon/District-Courts" && courtNameId) {
+        } else if (
+          pathname === "/results/maps/rayon/District-Courts" &&
+          courtNameId
+        ) {
           const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
           courtId = numericCourtId;
         } else if (pathname === "/results/maps/General") {
@@ -197,7 +218,6 @@ export default function Dates() {
 
   const handleDateChange = useCallback(
     async (field: keyof DateRange, value: string) => {
-     
       setDateRange((prev) => ({ ...prev, [field]: value }));
       try {
         const params = {
@@ -207,9 +227,15 @@ export default function Dates() {
 
         let courtId: number | null = null;
 
-        if (pathname === "/results/maps/oblast/Regional-Courts" && selectedCourtId) {
+        if (
+          pathname === "/results/maps/oblast/Regional-Courts" &&
+          selectedCourtId
+        ) {
           courtId = selectedCourtId;
-        } else if (pathname === "/results/maps/rayon/District-Courts" && courtNameId) {
+        } else if (
+          pathname === "/results/maps/rayon/District-Courts" &&
+          courtNameId
+        ) {
           const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
           courtId = numericCourtId;
         } else if (pathname === "/results/maps/General") {
@@ -224,13 +250,19 @@ export default function Dates() {
         console.error("Ошибка при получении данных:", error);
       }
     },
-    [dateRange.startDate, dateRange.endDate, setSurveyData, pathname, selectedCourtId, courtNameId]
+    [
+      dateRange.startDate,
+      dateRange.endDate,
+      setSurveyData,
+      pathname,
+      selectedCourtId,
+      courtNameId,
+    ]
   );
 
   return (
     <div className="w-full bg-gradient-to-r from-blue-700 to-indigo-400 p-6 rounded-2xl mb-4">
-      {/* Даты */}
-      <div className="flex flex-wrap gap-6 mb-6">
+      <div className="flex flex-wrap gap-6 mb-6 Dates max-[470px]:mb-4">
         <div className="flex items-center bg-white rounded-xl shadow-sm p-2">
           <div className="flex items-center gap-3">
             <span className="font-medium px-2">С</span>
@@ -238,7 +270,7 @@ export default function Dates() {
               type="text"
               value={dateRange.startDate}
               onChange={(e) => handleDateChange("startDate", e.target.value)}
-              className="border-0 focus:ring-0 text-gray-600 font-medium w-24"
+              className="border-0 focus:ring-0 text-gray-600 font-medium w-24 DatesInputText"
             />
           </div>
           <div className="w-px h-6 bg-gray-200 mx-2"></div>
@@ -248,85 +280,180 @@ export default function Dates() {
               type="text"
               value={dateRange.endDate}
               onChange={(e) => handleDateChange("endDate", e.target.value)}
-              className="border-0 focus:ring-0 text-gray-600 font-medium w-24"
+              className="border-0 focus:ring-0 text-gray-600 font-medium w-24 DatesInputText"
             />
           </div>
         </div>
-        {/* Выбор года */}
-        <div className="relative">
-          <button
-            onClick={() => setShowYearDropdown(!showYearDropdown)}
-            className="bg-white px-4 py-2 rounded-xl font-medium text-gray-600 hover:bg-blue-50 transition-all duration-200 flex items-center gap-2"
-          >
-            {dateRange.year}
-            <svg
-              className={`w-4 h-4 transition-transform ${showYearDropdown ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button>
 
-          {/* Выпадающий список с годами */}
-          {showYearDropdown && (
-            <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto">
-              {years.map((year) => (
-                <button
-                  key={year}
-                  onClick={() => handleYearSelect(year)}
-                  className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors
-                                    ${dateRange.year === year ? "bg-blue-100" : ""}`}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        {windowWidth > 470 ? (
+          <div className="relative">
+            <button
+              onClick={() => setShowYearDropdown(!showYearDropdown)}
+              className="bg-white px-4 py-2 rounded-xl font-medium text-gray-600 hover:bg-blue-50 transition-all duration-200 flex items-center gap-2"
+            >
+              {dateRange.year}{" "}
+              {/* Отображает текущий год (по умолчанию 2025) */}
+              <svg
+                className={`w-4 h-4 transition-transform ${
+                  showYearDropdown ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            {showYearDropdown && (
+              <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto">
+                {years.map((year) => (
+                  <button
+                    key={year}
+                    onClick={() => handleYearSelect(year)}
+                    className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors ${
+                      dateRange.year === year ? "bg-blue-100 font-semibold" : ""
+                    }`} // Подсвечивает 2025 по умолчанию
+                  >
+                    {year}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          ""
+        )}
       </div>
 
-      {/* Периоды */}
-      <div className="flex items-center gap-4">
-        {/* Кварталы */}
-        <div className="flex flex-wrap gap-3">
-          {periods.slice(0, 4).map((period) => (
-            <button
-              key={period.id}
-              onClick={() => handlePeriodClick(period)}
-              className={
-                "px-5 py-2 rounded-xl font-medium transition-all duration-200 " +
-                (activePeriod === period.id
-                  ? "bg-indigo-950 text-white shadow-lg shadow-blue-900 scale-105"
-                  : "bg-white text-black hover:bg-[#003494] hover:text-white")
-              }
-            >
-              {period.label}
-            </button>
-          ))}
-        </div>
-        {/* Месяцы */}
-        <div className="flex flex-wrap gap-3">
-          {periods.slice(4).map((period) => (
-            <button
-              key={period.id}
-              onClick={() => handlePeriodClick(period)}
-              className={
-                "px-4 py-2 rounded-xl font-medium transition-all duration-200 " +
-                (activePeriod === period.id
-                  ? "bg-indigo-950 text-white shadow-lg shadow-blue-900 scale-105"
-                  : "bg-white text-black hover:bg-[#003494] hover:text-white")
-              }
-            >
-              {period.label}
-            </button>
-          ))}
+      <div className="flex flex-wrap items-center gap-4 justify-between">
+        <div className="flex flex-wrap items-center gap-3 DatesQuarter_Month">
+          <div className="flex flex-wrap gap-3 border-r border-white/20 pr-4 lg:border-none md:border-none lg:pr-0 max-[470px]:border-none max-[470px]:pr-0">
+            {periods.slice(0, 4).map((period) => (
+              <button
+                key={period.id}
+                onClick={() => handlePeriodClick(period)}
+                className={
+                  "px-5 py-2 rounded-xl font-medium transition-all duration-200 " +
+                  (activePeriod === period.id
+                    ? "bg-indigo-950 text-white shadow-lg shadow-blue-900 scale-105"
+                    : "bg-white text-black hover:bg-[#003494] hover:text-white")
+                }
+              >
+                {period.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {windowWidth < 640 ? (
+              <div className="relative flex gap-3">
+                {windowWidth < 470 ? 
+                <div className="relative">
+                <button
+                  onClick={() => setShowYearDropdown(!showYearDropdown)}
+                  className="bg-white px-4 py-2 rounded-xl font-medium text-gray-600 hover:bg-blue-50 transition-all duration-200 flex items-center gap-2"
+                >
+                  {dateRange.year}{" "}
+                  {/* Отображает текущий год (по умолчанию 2025) */}
+                  <svg
+                    className={`w-4 h-4 transition-transform ${
+                      showYearDropdown ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+                {showYearDropdown && (
+                  <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto">
+                    {years.map((year) => (
+                      <button
+                        key={year}
+                        onClick={() => handleYearSelect(year)}
+                        className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors ${
+                          dateRange.year === year ? "bg-blue-100 font-semibold" : ""
+                        }`} // Подсвечивает 2025 по умолчанию
+                      >
+                        {year}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+                 : ""}
+
+                <button
+                  onClick={() => setShowMonthDropdown(!showMonthDropdown)}
+                  className="bg-white px-4 py-2 rounded-xl font-medium text-gray-600 hover:bg-blue-50 transition-all duration-200 flex items-center gap-2"
+                >
+                  Месяц
+                  <svg
+                    className={`w-4 h-4 transition-transform ${
+                      showMonthDropdown ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+                {showMonthDropdown && (
+                  <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto">
+                    {periods.slice(4).map((period) => (
+                      <button
+                        key={period.id}
+                        onClick={() => {
+                          handlePeriodClick(period);
+                          setShowMonthDropdown(false);
+                        }}
+                        className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors ${
+                          activePeriod === period.id ? "bg-blue-100" : ""
+                        }`}
+                      >
+                        {period.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-3">
+                {periods.slice(4).map((period) => (
+                  <button
+                    key={period.id}
+                    onClick={() => handlePeriodClick(period)}
+                    className={
+                      "px-4 py-2 rounded-xl font-medium transition-all duration-200 " +
+                      (windowWidth <= 1281 ? "w-16 text-center" : "") +
+                      (activePeriod === period.id
+                        ? " bg-indigo-950 text-white shadow-lg shadow-blue-900 scale-105"
+                        : " bg-white text-black hover:bg-[#003494] hover:text-white")
+                    }
+                  >
+                    {period.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
