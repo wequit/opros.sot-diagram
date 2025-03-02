@@ -10,15 +10,25 @@ import { GrLanguage } from "react-icons/gr";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
 import { LogoutButton } from "@/components/Logout";
-import logo from '../../../public/logo.png';
+import logo from "../../../public/logo.png";
+import { FaBuilding, FaCity, FaHome, FaMap } from "react-icons/fa";
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const pathname = usePathname();
   const [isSticky, setIsSticky] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { courtName, language, toggleLanguage} = useSurveyData();
-  
+  const { courtName, language, toggleLanguage } = useSurveyData();
+  const [windowWidth, setWindowWidth] = useState<number>(
+    typeof window !== "undefined" ? window.innerWidth : 0
+  );
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   useEffect(() => {
     const handleScroll = () => {
       setIsSticky(window.scrollY > 0);
@@ -35,116 +45,144 @@ const Header: React.FC = () => {
   return (
     <>
       <header
-        className={`${isSticky
+        className={`${
+          isSticky
             ? "fixed top-0 left-0 right-0 z-40 backdrop-blur-lg bg-white/40 border-b border-gray-200 shadow-md"
             : "fixed top-0 left-0 right-0 bg-white w-full"
-          } h-16 flex items-center justify-between px-6 transition-all duration-500 ${isSidebarOpen ? "backdrop-blur-lg" : ""
-          }`}
+        } HeaderHeight h-[4.5rem] flex items-center justify-between px-6 transition-all duration-500 ${
+          isSidebarOpen ? "backdrop-blur-lg" : ""
+        }`}
       >
-        <div className="flex items-center gap-4">
-          {/* <button
-            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
-          >
-            <HiMenu className="w-6 h-6 text-gray-600" />
-          </button> */}
+        <div className="flex items-center gap-1">
+          {windowWidth < 1024 && (
+            <>
+              <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
+              >
+                <HiMenu className="w-6 h-6 text-gray-600" />
+              </button>
+              <Link href="/results">
+                <Image
+                  src={logo}
+                  alt="Логотип"
+                  width={40}
+                  height={40}
+                  className="rounded-full shadow-sm Logo_1024"
+                />
+              </Link>
+            </>
+          )}
+          {windowWidth > 1024 && (
+            <div className="flex items-center gap-3">
+              <Link href="/results">
+                <Image
+                  src={logo}
+                  alt="Логотип"
+                  width={45}
+                  height={45}
+                  className="rounded-full shadow-sm"
+                />
+              </Link>
 
-          <div className="flex items-center gap-3">
-            <Link href="/results">
-              <Image
-                src={logo}
-                alt="Логотип"
-                width={45}
-                height={45}
-                className="rounded-full shadow-sm"
-              />
-            </Link>
+              {user?.role === "Председатель 3 инстанции" ? (
+                <div className="flex space-x-3 p-2 rounded-xl  ">
+                  <Link
+                    href="/results"
+                    className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
+                   flex items-center gap-2
+                   ${
+                     pathname === "/results"
+                       ? "text-gray-600 bg-blue-50 shadow-inner"
+                       : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+                   }`}
+                  >
+                    {getTranslation("HeaderNavOne", language)}
+                  </Link>
 
-            {user?.role === "Председатель 3 инстанции" ? (
-              <div className="flex space-x-4  p-2 rounded-lg">
-                <Link
-                  href="/results"
-                  className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
-                  ${
-                    pathname === "/results"
-                      ? "bg-slate-200 text-blue-500"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  }`}
-                >
-                  {getTranslation("HeaderNavOne", language)}
-                </Link>
+                  <Link
+                    href="/results/maps/General"
+                    className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
+                   flex items-center gap-2
+                   ${
+                     pathname === "/maps/General"
+                       ? "text-blue-600 bg-blue-100 shadow-inner"
+                       : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+                   }`}
+                  >
+                    {getTranslation("HeaderNavTwo", language)}
+                  </Link>
 
-                <Link
-                  href="/results/maps/General"
-                  className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
-                  ${
-                    pathname === "/maps/General"
-                      ? "bg-slate-200 text-blue-500"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  }`}
-                >
-                   {getTranslation("HeaderNavTwo", language)}
-                </Link>
+                  <Link
+                    href="/results/maps/oblast/Regional-Courts"
+                    className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
+                   flex items-center gap-2
+                   ${
+                     pathname === "/results/maps/oblast/Regional-Courts"
+                       ? "text-blue-600 bg-blue-100 shadow-inner"
+                       : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+                   }`}
+                  >
+                    {getTranslation("HeaderNavThree", language)}
+                  </Link>
 
-                <Link
-                  href="/results/maps/oblast/Regional-Courts"
-                  className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
-                  ${
-                    pathname === "/results/maps/oblast/Regional-Courts"
-                      ? "bg-slate-200 text-blue-500"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  }`}
-                >
-                   {getTranslation("HeaderNavThree", language)}
-                </Link>
-
-                <Link
-                  href="/results/maps/rayon/District-Courts"
-                  className={`px-4 py-2 rounded-md font-semibold transition duration-200 text-teal-900
-                  ${
-                    pathname === "/maps/rayon/District-Courts"
-                      ? "bg-slate-200 text-blue-500"
-                      : "text-gray-700 hover:bg-blue-50 hover:text-blue-600"
-                  }`}
-                >
-                  {getTranslation("HeaderNavFour", language)}
-                </Link>
-
-                
-              </div>
-            ) : (
-              <span className="text-lg font-semibold text-black uppercase">
-                {user?.role === "Председатель 2 инстанции"
-                  ? courtName || user.court
-                  : user
-                  ? user.court
-                  : "Загрузка..."}
-              </span>
-            )}
-          </div>
+                  <Link
+                    href="/results/maps/rayon/District-Courts"
+                    className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
+                   flex items-center gap-2
+                   ${
+                     pathname === "/maps/rayon/District-Courts"
+                       ? "text-blue-600 bg-blue-100 shadow-inner"
+                       : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+                   }`}
+                  >
+                    {getTranslation("HeaderNavFour", language)}
+                  </Link>
+                </div>
+              ) : (
+                <span className="text-lg font-semibold text-black uppercase">
+                  {user?.role === "Председатель 2 инстанции"
+                    ? courtName || user.court
+                    : user
+                    ? user.court
+                    : "Загрузка..."}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-3">
           <div
-            className="flex gap-2 items-center px-3 py-1.5 rounded-full bg-blue-50 hover:bg-blue-100 
-              transition-all duration-200 cursor-pointer"
+            className="flex gap-2 items-center px-3 py-1.5 bg-gradient-to-r from-gray-100 to-blue-100 
+      hover:from-gray-200 hover:to-blue-200 transition-all duration-200 cursor-pointer rounded-full"
             onClick={toggleLanguage}
           >
-            <GrLanguage className="w-4 h-4 text-blue-600" />
-            <span className="text-blue-700 font-medium text-sm">
-              {language === "ru" ? "Кыргызча" : "Русский"}
+            <GrLanguage
+              className={`w-4 h-4 text-gray-800 transition-transform duration-300 ${
+                language === "ru" ? "rotate-0" : "rotate-180"
+              }`}
+            />
+            <span className="text-gray-800 font-medium text-xs sm:text-sm">
+              {language === "ru"
+                ? windowWidth < 640
+                  ? "KG"
+                  : "Кыргызча"
+                : windowWidth < 640
+                ? "RU"
+                : "Русский"}
             </span>
           </div>
 
-          <div className="flex items-center gap-3 px-4 py-2 rounded-lg ">
-            <div className="flex items-center gap-2">
-              <CgProfile className="w-5 h-5 text-gray-600" />
-              <span className="text-sm font-medium text-gray-700">
+          <div className="flex items-center gap-3 px-4 py-2 rounded-lg HeaderUser_Exit">
+            <div className="flex items-center gap-2 HeaderUser">
+              <CgProfile className="w-5 h-5 text-gray-600 CgProfile" />
+              <span className="text-xs sm:text-sm font-medium text-gray-700 HeaderUserName">
                 {user ? `${user.first_name} ${user.last_name}` : "Загрузка..."}
               </span>
             </div>
             <div className="h-4 w-px bg-gray-300"></div>
-            <LogoutButton/>
+            <LogoutButton />
           </div>
         </div>
       </header>
@@ -158,8 +196,9 @@ const Header: React.FC = () => {
 
       <div
         style={{ zIndex: "70" }}
-        className={`fixed top-0 left-0 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
+        className={`fixed top-0 left-0 h-full w-96 bg-white shadow-2xl transform transition-transform duration-300 ease-in-out ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         <Sidebar onClose={() => setIsSidebarOpen(false)} />
       </div>

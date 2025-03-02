@@ -59,7 +59,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <MdAssessment className="w-6 h-6" />
           <span>
             {user?.role === "Председатель 3 инстанции"
-              ? getTranslation("HeaderNavTwo", language)
+              ? getTranslation("HeaderNavOne", language)
               : "Оценки по судам"}
           </span>
         </Link>
@@ -68,12 +68,28 @@ export default function Sidebar({ onClose }: SidebarProps) {
         user?.role !== "Председатель 1 инстанции" ? (
           <>
             <Link
+              href="/results/maps/General"
+              onClick={onClose}
+              className={`
+            flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+            ${
+              isActivePath("/results/maps/General")
+                ? "bg-green-50 text-green-700 font-medium shadow-sm"
+                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+            }
+          `}
+            >
+              <MdMap className="w-6 h-6" />
+              <span>{getTranslation("HeaderNavTwo", language)}</span>
+            </Link>
+
+            <Link
               href="/results/maps/oblast/Regional-Courts"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/results/maps/oblast")
+              isActivePath("/results/maps/oblast/Regional-Courts")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
@@ -83,13 +99,14 @@ export default function Sidebar({ onClose }: SidebarProps) {
               <span>{getTranslation("HeaderNavThree", language)}</span>
             </Link>
 
+
             <Link
               href="/results/maps/rayon/District-Courts"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/maps/rayon")
+              isActivePath("/results/maps/rayon/District-Courts")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
@@ -98,38 +115,11 @@ export default function Sidebar({ onClose }: SidebarProps) {
               <MdMap className="w-6 h-6" />
               <span>{getTranslation("HeaderNavFour", language)}</span>
             </Link>
-
-            <Link
-              href="/results/maps/oblast-courts/chuy"
-              className={`flex items-center space-x-2 p-2 rounded-lg transition-colors ${
-                pathname === "/maps/oblast-courts/chuy"
-                  ? "bg-blue-500 text-white"
-                  : "hover:bg-gray-100"
-              }`}
-            >
-
-            </Link>
+            
           </>
         ) : (
           ""
         )}
-
-        <Link
-          href="/results/remarks"
-          onClick={onClose}
-          className={`
-            flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
-            ${
-              isActivePath("/results/remarks")
-                ? "bg-green-50 text-green-700 font-medium shadow-sm"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            }
-          `}
-        >
-          <MdFeedback className="w-6 h-6" />
-          <span>{getTranslation("HeaderNavRemarks", language)}</span> 
-          
-        </Link>
       </nav>
     </div>
   );

@@ -1,8 +1,22 @@
-
-
 @media (max-width: 1280px) {
   .layout {
     @apply max-w-[1000px];
+  }
+
+  .HeaderNav {
+    @apply text-sm;
+  }
+}
+
+@media (max-width: 1150px) {
+  .HeaderNav {
+    @apply text-center px-2;
+  }
+  .HeaderUser_Exit {
+    @apply px-2;
+  }
+  .HeaderUser {
+    @apply w-[9rem];
   }
 }
 
@@ -40,6 +54,31 @@
   .EvalutionCols {
     @apply grid-cols-1;
   }
+
+  .HeaderHeight {
+    @apply h-14 px-3;
+  }
+
+  .HeaderUser_Exit {
+    @apply gap-0 text-xs;
+  }
+
+  .HeaderUserName {
+    @apply text-sm;
+  }
+
+  .CgProfile {
+    @apply w-4 h-4;
+  }
+
+  .LogoutButton {
+    @apply w-4 h-4;
+  }
+
+  .Logo_1024{
+    @apply w-8 h-8
+  }
+
 }
 
 @media (max-width: 530px) {
@@ -51,12 +90,12 @@
     @apply grid-cols-1;
   }
 
-  .DiagrammTwoComments{
-    @apply text-sm
+  .DiagrammTwoComments {
+    @apply text-sm;
   }
 
-  .DiagrammTwoCommentsBtn{
-    @apply text-sm mt-0
+  .DiagrammTwoCommentsBtn {
+    @apply text-sm mt-0;
   }
 }
 
@@ -69,52 +108,55 @@
     @apply grid-cols-1;
   }
 
-  .DiagrammOne{
-    @apply text-lg w-[20rem]
+  .DiagrammOne {
+    @apply text-lg w-[20rem];
   }
-  .DiagrammOneTotal{
-    @apply text-sm
-  }
-
-  .DiagrammTwo{
-    @apply text-lg  w-[20rem]
-  }
-  .DiagrammTwoTotal{
-    @apply text-sm text-end
+  .DiagrammOneTotal {
+    @apply text-sm;
   }
 
-  .AgeGenderButtons{
-    @apply text-[0.80rem]
+  .DiagrammTwo {
+    @apply text-lg  w-[20rem];
+  }
+  .DiagrammTwoTotal {
+    @apply text-sm text-end;
   }
 
-  .DiagrammElevenName{
-    @apply text-lg
-  }
-  
-  .ProgressBar{
-    @apply h-6
+  .AgeGenderButtons {
+    @apply text-[0.80rem];
   }
 
-  .DiagrammSevenProgress{
-    @apply text-sm
+  .DiagrammElevenName {
+    @apply text-lg;
   }
 
-  .DiagrammNineProgress{
-    @apply text-sm
+  .ProgressBar {
+    @apply h-6;
   }
 
-  .DiagrammTenProgress{
-    @apply text-sm mb-8
+  .DiagrammSevenProgress {
+    @apply text-sm;
   }
 
-  .DiagrammThirteenProgress{
-    @apply text-sm mb-4
+  .DiagrammNineProgress {
+    @apply text-sm;
   }
 
-  .DiagrammFourteenProgress{
-    @apply text-sm 
+  .DiagrammTenProgress {
+    @apply text-sm mb-8;
   }
-  
+
+  .DiagrammThirteenProgress {
+    @apply text-sm mb-4;
+  }
+
+  .DiagrammFourteenProgress {
+    @apply text-sm;
+  }
+
+  .HeaderNavExitText{
+    display: none;
+  }
 }
 
 @media (max-width: 440px) {
@@ -122,37 +164,36 @@
     @apply max-w-[350px];
   }
 
-  .AgeGenderButtons{
-    @apply text-[0.70rem]
+  .AgeGenderButtons {
+    @apply text-[0.70rem];
   }
-  .ProgressBar{
-    @apply h-5
-  }
-
-  .DiagrammThreeName{
-    @apply text-lg
+  .ProgressBar {
+    @apply h-5;
   }
 
-  .DiagrammFourName{
-    @apply text-lg
+  .DiagrammThreeName {
+    @apply text-lg;
   }
 
-  .DiagrammFiveName{
-    @apply text-lg
+  .DiagrammFourName {
+    @apply text-lg;
   }
 
-  .DiagrammSixName{
-    @apply text-lg
+  .DiagrammFiveName {
+    @apply text-lg;
   }
 
-  .DiagrammSevenName{
+  .DiagrammSixName {
+    @apply text-lg;
   }
 
-  .DiagrammEightName{
-    @apply text-lg
+  .DiagrammSevenName {
   }
 
-  .DiagrammNineName{
+  .DiagrammEightName {
+    @apply text-lg;
   }
 
+  .DiagrammNineName {
+  }
 }
