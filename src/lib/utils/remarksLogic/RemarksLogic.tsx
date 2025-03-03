@@ -68,7 +68,6 @@ export default function RemarksPage() {
   const router = useRouter();
   const pathname = usePathname();
 
-  
   useEffect(() => {
     if (remarks) {
       setLocalRemarks(remarks);
@@ -135,7 +134,7 @@ export default function RemarksPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className=" mx-auto p-4">
       {localRemarks.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-6">
           <div className="animate-bounce mb-4">
@@ -148,7 +147,7 @@ export default function RemarksPage() {
             Для вашего суда пока не поступило ни одного замечания.
           </p>
           <Link
-            href="/results"
+            href="/"
             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-600 transition"
           >
             <ArrowLeft size={18} />
@@ -156,77 +155,154 @@ export default function RemarksPage() {
           </Link>
         </div>
       ) : (
-        <>
-          <div className="overflow-x-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h1 className="text-2xl font-bold">Замечания и предложения</h1>
-              <button
-                onClick={() => router.back()}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-600 transition"
-              >
-                <ArrowLeft size={18} />
-                Назад
-              </button>
-            </div>
-            <table className="min-w-full border border-gray-200">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border p-2 w-16">№</th>
-                  <th className="border p-2">СУД</th>
-                  <th className="border p-2">КОММЕНТАРИИ/ПРИНЯТЫЕ МЕРЫ</th>
-                  <th className="border p-2">АВТОР</th>
-                  <th className="border p-2">ЗАМЕЧАНИЯ</th>
-                  <th className="border p-2">ДЕЙСТВИЯ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {getCurrentPageData().map((item, index) => {
-                  const absoluteIndex =
-                    localRemarks.length -
-                    (currentPage - 1) * itemsPerPage -
-                    index;
-                  return (
-                    <tr key={item.id}>
-                      <td className="border p-2 text-center">
-                        {absoluteIndex}
-                      </td>
-                      <td className="border p-2">
-                        {item.court || "Не указано"}
-                      </td>
-                      <td className="border p-2">{item.custom_answer || ""}</td>
-                      <td className="border p-2">{item.author || ""}</td>
-                      <td className="border p-2">
-                        {item.reply_to_comment || ""}
-                      </td>
-                      <td className="border p-2 text-center">
-                        <button
-                          onClick={() => handleCommentClick(item)}
-                          className="text-blue-500 hover:text-blue-700"
-                        >
-                          Комментировать
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        <div className=" mx-auto px-4 py-6">
+          {/* Заголовок и кнопка "Назад" */}
+          <div className="flex  sm:flex-row items-center justify-between mb-6 gap-4 sm:gap-0">
+            <h1 className="text-2xl max-sm:text-xl font-bold text-gray-800 tracking-tight text-center sm:text-left RemarksText">
+              Замечания и предложения
+            </h1>
+            <button
+              onClick={() => router.back()}
+              className="max-sm:px-2 max-sm:py-2  flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+            >
+              <ArrowLeft size={18} />
+              Назад
+            </button>
           </div>
 
-          <div className="flex justify-center mt-4 gap-2">
+          {/* Таблица для десктопов, карточки для мобильных */}
+          <div className="shadow-lg rounded-xl border border-gray-200 bg-white">
+            {/* Таблица для десктопов */}
+            <div className="hidden sm:block overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gradient-to-r from-gray-100 to-gray-200">
+                  <tr>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">
+                      №
+                    </th>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Суд
+                    </th>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Комментарии / Меры
+                    </th>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Автор
+                    </th>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Замечания
+                    </th>
+                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Действия
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {getCurrentPageData().map((item, index) => {
+                    const absoluteIndex =
+                      localRemarks.length -
+                      (currentPage - 1) * itemsPerPage -
+                      index;
+                    return (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <td className="py-4 px-4 text-sm text-gray-700 text-center">
+                          {absoluteIndex}
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-900">
+                          {item.court || "Не указано"}
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-700">
+                          {item.custom_answer || "—"}
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-700">
+                          {item.author || "—"}
+                        </td>
+                        <td className="py-4 px-4 text-sm text-gray-700">
+                          {item.reply_to_comment || "—"}
+                        </td>
+                        <td className="py-4 px-4 text-center">
+                          <button
+                            onClick={() => handleCommentClick(item)}
+                            className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                          >
+                            Комментировать
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Карточки для мобильных */}
+            <div className="block sm:hidden p-4 space-y-4">
+              {getCurrentPageData().map((item, index) => {
+                const absoluteIndex =
+                  localRemarks.length -
+                  (currentPage - 1) * itemsPerPage -
+                  index;
+                return (
+                  <div
+                    key={item.id}
+                    className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                  >
+                    <div className="flex justify-between items-start">
+                      <span className="text-sm font-semibold text-gray-800">
+                        № {absoluteIndex}
+                      </span>
+                      <button
+                        onClick={() => handleCommentClick(item)}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
+                      >
+                        Комментировать
+                      </button>
+                    </div>
+                    <div className="mt-2 space-y-2">
+                      <p className="text-xs text-gray-700">
+                        <span className="font-medium">Суд:</span>{" "}
+                        {item.court || "Не указано"}
+                      </p>
+                      <p className="text-xs text-gray-700">
+                        <span className="font-medium">Автор:</span>{" "}
+                        {item.author || "—"}
+                      </p>
+                      <p className="text-xs text-gray-700">
+                        <span className="font-medium">Замечания:</span>{" "}
+                        {item.reply_to_comment || "—"}
+                      </p>
+                      {/* Акцент на комментарии */}
+                      <p className="text-sm text-gray-900 bg-gray-100 p-2 rounded-md">
+                        <span className="font-medium text-gray-800">
+                          Комментарии:
+                        </span>{" "}
+                        {item.custom_answer || "—"}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Пагинация */}
+          <div className="flex justify-center items-center mt-6 gap-2 sm:gap-3">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="px-3 py-1 border rounded bg-white disabled:bg-gray-100"
+              className="px-3 py-1 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 disabled:bg-gray-100 disabled:text-gray-400 transition-colors duration-200 text-sm"
             >
               Назад
             </button>
-            <span className="px-3 py-1 border rounded bg-blue-500 text-white">
+            <span className="px-3 py-1 sm:px-4 sm:py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm text-sm">
               {currentPage}
             </span>
             <button
               onClick={() => setCurrentPage((prev) => prev + 1)}
-              className="px-3 py-1 border rounded bg-white"
+              className="px-3 py-1 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors duration-200 text-sm"
             >
               Вперед
             </button>
@@ -238,7 +314,7 @@ export default function RemarksPage() {
             onSubmit={handleCommentSubmit}
             selectedComment={selectedItem?.custom_answer || ""}
           />
-        </>
+        </div>
       )}
     </div>
   );

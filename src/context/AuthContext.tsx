@@ -50,7 +50,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsAuthenticated(true);
       const currentUser = await getCurrentUser();
       setUser(currentUser);
-      await router.push('/results');
+      await router.push('/');
       router.refresh();
     } catch (error) {
       console.error('Ошибка при логине:', error);
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     deleteCookie('access_token');
     setIsAuthenticated(false);
-    router.push('/results/login');
+    router.push('/login');
   };
 
   const getToken = () => {

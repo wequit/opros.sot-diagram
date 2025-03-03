@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import logo from '../../../public/logo.png'
 
 interface SidebarProps {
   onClose: () => void;
@@ -17,7 +18,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const { language } = useSurveyData();
 
   // Не показываем сайдбар на странице логина
-  if (!isAuthenticated || pathname === "/results/login") {
+  if (!isAuthenticated || pathname === "/login") {
     return null;
   }
 
@@ -28,7 +29,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
       {/* Шапка сайдбара */}
       <div className="p-4 border-b flex justify-between items-center">
         <Image
-          src="/logo.png"
+          src={logo}
           alt="Логотип"
           width={45}
           height={45}
@@ -45,12 +46,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
       {/* Навигация */}
       <nav className="flex flex-col p-4 space-y-2">
         <Link
-          href="/results"
+          href="/"
           onClick={onClose}
           className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/results")
+              isActivePath("/")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
@@ -68,12 +69,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
         user?.role !== "Председатель 1 инстанции" ? (
           <>
             <Link
-              href="/results/maps/General"
+              href="/maps/General"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/results/maps/General")
+              isActivePath("/maps/General")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
@@ -84,12 +85,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </Link>
 
             <Link
-              href="/results/maps/oblast/Regional-Courts"
+              href="/maps/oblast/Regional-Courts"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/results/maps/oblast/Regional-Courts")
+              isActivePath("/maps/oblast/Regional-Courts")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
@@ -101,12 +102,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
 
             <Link
-              href="/results/maps/rayon/District-Courts"
+              href="/maps/rayon/District-Courts"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/results/maps/rayon/District-Courts")
+              isActivePath("/maps/rayon/District-Courts")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }

@@ -38,7 +38,7 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (!isAuthenticated || pathname === "/results/login") {
+  if (!isAuthenticated || pathname === "/login") {
     return null;
   }
 
@@ -62,7 +62,7 @@ const Header: React.FC = () => {
               >
                 <HiMenu className="w-6 h-6 text-gray-600" />
               </button>
-              <Link href="/results">
+              <Link href="/">
                 <Image
                   src={logo}
                   alt="Логотип"
@@ -75,7 +75,7 @@ const Header: React.FC = () => {
           )}
           {windowWidth > 1024 && (
             <div className="flex items-center gap-3">
-              <Link href="/results">
+              <Link href="/">
                 <Image
                   src={logo}
                   alt="Логотип"
@@ -88,11 +88,11 @@ const Header: React.FC = () => {
               {user?.role === "Председатель 3 инстанции" ? (
                 <div className="flex space-x-3 p-2 rounded-xl  ">
                   <Link
-                    href="/results"
+                    href="/"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                     pathname === "/results"
+                     pathname === "/"
                        ? "text-gray-600 bg-blue-50 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}
@@ -101,7 +101,7 @@ const Header: React.FC = () => {
                   </Link>
 
                   <Link
-                    href="/results/maps/General"
+                    href="//maps/General"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
@@ -114,11 +114,11 @@ const Header: React.FC = () => {
                   </Link>
 
                   <Link
-                    href="/results/maps/oblast/Regional-Courts"
+                    href="/maps/oblast/Regional-Courts"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                     pathname === "/results/maps/oblast/Regional-Courts"
+                     pathname === "/maps/oblast/Regional-Courts"
                        ? "text-blue-600 bg-blue-100 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}
@@ -127,7 +127,7 @@ const Header: React.FC = () => {
                   </Link>
 
                   <Link
-                    href="/results/maps/rayon/District-Courts"
+                    href="/maps/rayon/District-Courts"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${

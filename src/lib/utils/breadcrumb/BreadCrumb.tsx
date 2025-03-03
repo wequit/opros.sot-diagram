@@ -25,15 +25,19 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   const { language } = useSurveyData();
 
   // Определяем ключ перевода, если headerKey не передан
-  const effectiveHeaderKey = headerKey || (regionName ? "HeaderNavThree" : "HeaderNavFour");
+  const effectiveHeaderKey =
+    headerKey || (regionName ? "HeaderNavThree" : "HeaderNavFour");
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600 " aria-label="Breadcrumb">
+    <nav
+      className="flex items-center space-x-2 text-sm text-gray-600 "
+      aria-label="Breadcrumb"
+    >
       <ol className="flex items-center space-x-2 BreadCrumbText">
         {/* Фиксированная "Главная" с href="/" */}
         <li className="flex items-center">
           <Link
-            href="/results"
+            href="/"
             className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
           >
             Главная
@@ -72,14 +76,18 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
             ) : (
               <span className="text-gray-800 font-medium">{regionName}</span>
             )}
-            {courtName && <ChevronRight className="w-4 h-4 mx-1 text-gray-400" />}
+            {courtName && (
+              <ChevronRight className="w-4 h-4 mx-1 text-gray-400" />
+            )}
           </li>
         )}
 
         {/* Название суда */}
         {courtName && (
           <li className="flex items-center">
-            <span className="text-gray-800 font-medium">{courtName}</span>
+            <span className="text-gray-800 font-medium truncate max-w-[15ch]">
+              {courtName}
+            </span>
           </li>
         )}
       </ol>

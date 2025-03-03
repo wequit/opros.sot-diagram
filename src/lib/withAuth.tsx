@@ -25,7 +25,7 @@ export const withAuth = (WrappedComponent: ComponentType) => {
         
           deleteCookie("access_token");
           deleteCookie("refresh_token");
-          router.push("/results/login");
+          router.push("/login");
         } else {
           setIsAuthenticated(true); 
         }

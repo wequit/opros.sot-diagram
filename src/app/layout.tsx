@@ -4,7 +4,7 @@ import "@/styles/globals.css";
 import "@/styles/skeleton.css";
 import "@/styles/map.css";
 import "@/styles/spinner.css";
-import "@/styles/responsive.css"
+import "@/styles/responsive.css";
 import Header from "@/components/layout/Header";
 import { Inter } from "next/font/google";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
@@ -18,7 +18,7 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const LoginPage = dynamic(() => import("@/app/results/login/page"));
+const LoginPage = dynamic(() => import("@/app/login/page"));
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -26,7 +26,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen slate-100 font-inter">
         <SurveyProvider>
           <AuthProvider>
-            <AuthContent>{children}</AuthContent>
+            <div className="root-layout-wrapper">
+              <AuthContent>{children}</AuthContent>
+            </div>
           </AuthProvider>
         </SurveyProvider>
       </body>
@@ -51,12 +53,27 @@ function AuthContent({ children }: { children: React.ReactNode }) {
     );
   }
 
+  const isRemarksPath = pathname.startsWith("/remarks/");
+
+  if (isRemarksPath) {
+    return (
+      <div className="w-full">
+        <div className="flex min-h-[calc(100vh-48px)] mt-0">
+          <main className="flex-1 w-full">{children}</main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-[1250px] mx-auto layout">
       <Header />
-      <div className={`flex min-h-[calc(100vh-48px)] ${pathname === "/results/login" ? "mt-0" : "mt-16"}`}>
-        <main className='flex-1 max-w-[1250px] mx-auto'>{children}</main>
+      <div
+        className={`flex min-h-[calc(100vh-48px)] ${
+          pathname === "/login" ? "mt-0" : "mt-16"
+        }`}
+      >
+        <main className="flex-1 max-w-[1250px] mx-auto">{children}</main>
       </div>
     </div>
   );

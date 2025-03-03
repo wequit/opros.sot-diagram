@@ -256,7 +256,7 @@ const zoom = useMemo(
         .attr("text-anchor", "middle")
         .attr("class", "region-label")
         .attr("font-weight", "bold")
-        .attr("font-size", width < 640 ? "10px" : "14px") // Адаптивный размер текста
+        .attr("font-size", width < 640 ? "10px" : "11px") // Адаптивный размер текста
         .style("pointer-events", "none")
         .text((d: SVGFeature) => {
           const rating = getOblastRating(d.properties.NAME_1);

@@ -312,7 +312,7 @@ export default function Evaluations({
         },
         pointLabels: {
           font: {
-            size: windowWidth < 470 ? 9 : 12, 
+            size: windowWidth < 470 ? 9 : 12,
           },
         },
       },
@@ -459,7 +459,7 @@ export default function Evaluations({
             labels: ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"],
             datasets:
               user?.role === "Председатель 3 инстанции" &&
-              pathname === "/results"
+              pathname === "/"
                 ? [
                     // Только республиканские данные
                     {
@@ -481,7 +481,7 @@ export default function Evaluations({
                     },
                   ]
                 : user?.role === "Председатель 3 инстанции" &&
-                  pathname === "/results/maps/oblast/Regional-Courts"
+                  pathname === "/maps/oblast/Regional-Courts"
                 ? [
                     // Данные для выбранного суда из useSurveyData (региональные суды)
                     {
@@ -850,14 +850,14 @@ export default function Evaluations({
       </div>
     );
   };
-  let remarksPath = "/results/remarks";
+  let remarksPath = "/remarks";
 
-  if (pathname.includes("/results/maps/General")) {
-    remarksPath = "/results/remarks/General";
-  } else if (pathname.includes("/results/maps/oblast/Regional-Courts")) {
-    remarksPath = "/results/remarks/Regional-Courts";
-  } else if (pathname.includes("/results/maps/rayon/District-Courts")) {
-    remarksPath = "/results/remarks/District-Courts";
+  if (pathname.includes("/maps/General")) {
+    remarksPath = "/remarks/General";
+  } else if (pathname.includes("/maps/oblast/Regional-Courts")) {
+    remarksPath = "/remarks/Regional-Courts";
+  } else if (pathname.includes("/maps/rayon/District-Courts")) {
+    remarksPath = "/remarks/District-Courts";
   }
 
   if (selectedCourtId) {
@@ -932,11 +932,11 @@ export default function Evaluations({
                   })}
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center h-full bg-gray-50 border border-gray-200 rounded-lg">
-                  <p className="text-gray-700 text-lg font-medium">
+                <div className="flex flex-col items-center justify-center h-full bg-gray-50 border border-gray-200 rounded-lg p-4 sm:p-6">
+                  <p className="text-gray-700 text-base sm:text-sm font-medium text-center">
                     Нет доступных комментариев.
                   </p>
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-gray-500 text-xs sm:text-xs text-center mt-1 sm:mt-2">
                     Пока что комментарии отсутствуют.
                   </p>
                 </div>
@@ -959,7 +959,7 @@ export default function Evaluations({
               </h2>
             </div>
             <div className="p-6">
-              <div className="w-[350px] h-[400px] mx-auto">
+              <div className="w-[350px] h-[400px] EvaluationsCategoryRespond mx-auto">
                 <Pie data={categoryData} options={categoryOptions} />
               </div>
             </div>
@@ -1232,7 +1232,7 @@ export default function Evaluations({
               </h2>
             </div>
             <div className="p-6">
-              <div className="h-[300px] w-[350px] mx-auto">
+              <div className="h-[300px] w-[350px] mx-auto EvaluationsAudio">
                 <Pie
                   data={audioVideoData}
                   options={{
@@ -1253,7 +1253,7 @@ export default function Evaluations({
                         labels: {
                           usePointStyle: true,
                           padding: 20,
-                          font: { size: 14 },
+                          font: { size: windowWidth < 440 ? 11 : 14 },
                         },
                       },
                     },
@@ -1271,7 +1271,7 @@ export default function Evaluations({
               </h2>
             </div>
             <div className="p-6">
-              <div className="h-[300px] w-[350px] mx-auto">
+              <div className="h-[300px] w-[350px] mx-auto EvaluationsTime">
                 <Pie
                   data={startTimeData}
                   options={{
@@ -1292,7 +1292,7 @@ export default function Evaluations({
                         labels: {
                           usePointStyle: true,
                           padding: 20,
-                          font: { size: 14 },
+                          font: { size: windowWidth < 440 ? 11 : 14 },
                         },
                       },
                     },

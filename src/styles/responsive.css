@@ -78,7 +78,6 @@
   .Logo_1024{
     @apply w-8 h-8
   }
-
 }
 
 @media (max-width: 530px) {
@@ -184,10 +183,22 @@
   }
 
   .AgeGenderButtons {
-    @apply text-[0.70rem];
+    @apply text-[0.64rem];
   }
   .ProgressBar {
     @apply h-6;
+  }
+
+  .EvaluationsCategoryRespond{
+    @apply w-[250px]
+  }
+
+  .EvaluationsAudio{
+    @apply w-[250px]
+  }
+
+  .EvaluationsTime{
+    @apply w-[250px]
   }
 
   .DiagrammThreeName {
@@ -214,5 +225,19 @@
   }
 
   .DiagrammNineName {
+  }
+}
+
+@media (max-width: 385px) {
+  .layout {
+    @apply max-w-[320px] 
+  }
+
+  .AgeGenderButtons {
+    @apply text-[0.58rem];
+  }
+
+  .DiagrammElevenName {
+    @apply text-base;
   }
 }

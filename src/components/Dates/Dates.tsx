@@ -76,19 +76,19 @@ export default function Dates() {
       let courtId: number | null = null;
 
       if (
-        pathname === "/results/maps/oblast/Regional-Courts" &&
+        pathname === "/maps/oblast/Regional-Courts" &&
         selectedCourtId
       ) {
         courtId = selectedCourtId;
       } else if (
-        pathname === "/results/maps/rayon/District-Courts" &&
+        pathname === "/maps/rayon/District-Courts" &&
         courtNameId
       ) {
         const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
         courtId = numericCourtId;
-      } else if (pathname === "/results/maps/General") {
+      } else if (pathname === "/maps/General") {
         courtId = 65; // Статичный courtId для пути /maps/General
-      } else if (pathname === "/results") {
+      } else if (pathname === "/") {
         courtId = null; // Для пути '/' не добавляем courtId
       }
 
@@ -191,19 +191,19 @@ export default function Dates() {
         let courtId: number | null = null;
 
         if (
-          pathname === "/results/maps/oblast/Regional-Courts" &&
+          pathname === "/maps/oblast/Regional-Courts" &&
           selectedCourtId
         ) {
           courtId = selectedCourtId;
         } else if (
-          pathname === "/results/maps/rayon/District-Courts" &&
+          pathname === "/maps/rayon/District-Courts" &&
           courtNameId
         ) {
           const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
           courtId = numericCourtId;
-        } else if (pathname === "/results/maps/General") {
+        } else if (pathname === "/maps/General") {
           courtId = 65; // Статичный courtId для пути /maps/General
-        } else if (pathname === "/results") {
+        } else if (pathname === "") {
           courtId = null; // Для пути '/' не добавляем courtId
         }
 
@@ -228,19 +228,19 @@ export default function Dates() {
         let courtId: number | null = null;
 
         if (
-          pathname === "/results/maps/oblast/Regional-Courts" &&
+          pathname === "/maps/oblast/Regional-Courts" &&
           selectedCourtId
         ) {
           courtId = selectedCourtId;
         } else if (
-          pathname === "/results/maps/rayon/District-Courts" &&
+          pathname === "/maps/rayon/District-Courts" &&
           courtNameId
         ) {
           const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
           courtId = numericCourtId;
-        } else if (pathname === "/results/maps/General") {
+        } else if (pathname === "/maps/General") {
           courtId = 65; // Статичный courtId для пути /maps/General
-        } else if (pathname === "/results") {
+        } else if (pathname === "/") {
           courtId = null; // Для пути '/' не добавляем courtId
         }
 

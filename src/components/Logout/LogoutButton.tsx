@@ -18,7 +18,7 @@ const LogoutButton: React.FC = () => {
     // После выполнения logout, закрываем модальное окно
     setIsModalOpen(false);
     // Перенаправляем пользователя на страницу входа
-    router.push('/results/login');
+    router.push('/login');
   };
 
   return (

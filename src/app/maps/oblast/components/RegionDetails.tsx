@@ -14,9 +14,9 @@ import Evaluations from "@/components/Evaluations/page";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import * as d3 from "d3";
 import { GeoPermissibleObjects } from "d3-geo";
-import geoData from "../../../../../../public/gadm41_KGZ_1.json";
-import districtsGeoData from "../../../../../../public/gadm41_KGZ_2.json";
-import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import geoData from "../../../../../public/gadm41_KGZ_1.json";
+import districtsGeoData from "../../../../../public/gadm41_KGZ_2.json";
+import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 
 const getRatingColor = (rating: number) => {
   if (rating === 0) return "bg-gray-100";
@@ -85,95 +85,96 @@ interface GeoJsonData {
   features: GeoFeature[];
 }
 
-const courtPositionsMap: { [key: string]: { [key: string]: [number, number] } } =
-  {
-    "Баткенская область": {
-      "Баткенский областной суд": [69.8785, 40.0553],
-      "Сулюктинский городской суд": [69.5672, 39.9373],
-      "Кызыл-Кийский городской суд": [72.1279, 40.2573],
-      "Лейлекский районный суд": [69.7922, 39.7445],
-      "Баткенский районный суд": [70.8199, 40.0553],
-      "Кадамжайский районный суд": [71.7499, 40.1343],
-      "Административный суд Баткенской области": [70.9499, 40.0553],
-    },
-    "Жалал-Абадская область": {
-      "Жалал-Абадский областной суд": [72.9873, 41.1056],
-      "Жалал-Абадский городской суд": [73.0023, 40.9333],
-      "Кара-Кульский городской суд": [72.8667, 41.6167],
-      "Майлуу-Сууский городской суд": [72.4667, 41.3],
-      "Таш-Кумырский городской суд": [72.2167, 41.3467],
-      "Базар-Коргонский районный суд": [72.75, 41.0333],
-      "Ноокенский районный суд": [72.6167, 41.1833],
-      "Сузакский районный суд": [73.0167, 40.8833],
-      "Токтогульский районный суд": [72.9423, 41.8744],
-      "Тогуз-Тороуский районный суд": [74.3167, 41.7833],
-      "Чаткальский районный суд": [71.8, 41.7667],
-      "Аксыйский районный суд": [71.8667, 41.4333],
-      "Ала-Букинский районный суд": [71.4, 41.4],
-      "Административный суд Жалал-Абадской области": [73.13, 41.1156],
-    },
-    "Иссык-Кульская область": {
-      "Иссык-Кульский областной суд": [77.0667, 42.65],
-      "Балыкчинский городской суд": [76.1833, 42.45],
-      "Каракольский городской суд": [78.3833, 42.4833],
-      "Ак-Суйский районный суд": [78.5333, 42.5],
-      "Жети-Огузский районный суд": [78.0289, 42.0833],
-      "Иссык-Кульский районный суд": [77.2067, 42.6167],
-      "Тонский районный суд": [77.9167, 42.1333],
-      "Тюпский районный суд": [78.3667, 42.7278],
-      "Административный суд Иссык-Кульской области": [77.0867, 42.64],
-    },
-    "Нарынская область": {
-      "Нарынский областной суд": [75.9311, 41.4473],
-      "Нарынский городской суд": [76.0033, 41.5433],
-      "Ат-Башинский районный суд": [75.8067, 41.17],
-      "Ак-Талинский районный суд": [75.3567, 41.42],
-      "Жумгальский районный суд": [74.8333, 41.9333],
-      "Кочкорский районный суд": [75.7833, 42.2167],
-      "Административный суд Нарынской области": [76.0711, 41.4373],
-    },
-    "Ошская область": {
-      "Ошский областной суд": [72.8825, 40.49],
-      "Ошский городской суд": [72.812, 40.5533],
-      "Алайский районный суд": [72.9833, 39.65],
-      "Араванский районный суд": [72.5107, 40.5067],
-      "Кара-Кулжинский районный суд": [73.5, 40.2667],
-      "Кара-Сууский районный суд": [72.8667, 40.7],
-      "Ноокатский районный суд": [72.6167, 40.2667],
-      "Узгенский районный суд": [73.3, 40.7667],
-      "Чон-Алайский районный суд": [72.0, 39.5],
-      "Административный суд Ошской области": [72.7585, 40.48],
-    },
-    "Таласская область": {
-      "Таласский областной суд": [72.2425, 42.555],
-      "Таласский городской суд": [72.203, 42.5167],
-      "Бакай-Атинский районный суд": [72.1667, 42.3333],
-      "Кара-Бууринский районный суд": [71.13, 42.5],
-      "Манасский районный суд": [72.5, 42.5333],
-      "Административный суд Таласской области": [72.2545, 42.515],
-    },
-    "Чуйская область": {
-      "Чуйский областной суд": [74.59, 42.9046],
-      "Токмокский городской суд": [75.3, 42.8333],
-      "Аламудунский районный суд": [74.6833, 42.87],
-      "Жайылский районный суд": [73.6167, 42.8667],
-      "Кеминский районный суд": [75.7, 42.7833],
-      "Московский районный суд": [73.9333, 42.8833],
-      "Панфиловский районный суд": [73.65, 42.8333],
-      "Сокулукский районный суд": [74.0833, 42.8667],
-      "Ысык-Атинский районный суд": [74.9833, 42.8833],
-      "Административный суд Чуйской области": [74.5, 42.8646],
-    },
-    "Город Бишкек": {
-      "Свердловский районный суд": [74.52, 42.8646],
-      "Октябрьский районный суд": [74.6, 42.9246],
-      "Ленинский районный суд": [74.575, 42.8446],
-      "Верховный суд": [74.6012, 42.88],
-      "Административный суд г. Бишкек": [74.5934, 42.9023],
-      "Первомайский районный суд": [74.66, 42.8846],
-      "Бишкекский городской суд": [74.5823, 42.8801],
-    },
-  };
+const courtPositionsMap: {
+  [key: string]: { [key: string]: [number, number] };
+} = {
+  "Баткенская область": {
+    "Баткенский областной суд": [69.8785, 40.0553],
+    "Сулюктинский городской суд": [69.5672, 39.9373],
+    "Кызыл-Кийский городской суд": [72.1279, 40.2573],
+    "Лейлекский районный суд": [69.7922, 39.7445],
+    "Баткенский районный суд": [70.8199, 40.0553],
+    "Кадамжайский районный суд": [71.7499, 40.1343],
+    "Административный суд Баткенской области": [70.9499, 40.0553],
+  },
+  "Жалал-Абадская область": {
+    "Жалал-Абадский областной суд": [72.9873, 41.1056],
+    "Жалал-Абадский городской суд": [73.0023, 40.9333],
+    "Кара-Кульский городской суд": [72.8667, 41.6167],
+    "Майлуу-Сууский городской суд": [72.4667, 41.3],
+    "Таш-Кумырский городской суд": [72.2167, 41.3467],
+    "Базар-Коргонский районный суд": [72.75, 41.0333],
+    "Ноокенский районный суд": [72.6167, 41.1833],
+    "Сузакский районный суд": [73.0167, 40.8833],
+    "Токтогульский районный суд": [72.9423, 41.8744],
+    "Тогуз-Тороуский районный суд": [74.3167, 41.7833],
+    "Чаткальский районный суд": [71.8, 41.7667],
+    "Аксыйский районный суд": [71.8667, 41.4333],
+    "Ала-Букинский районный суд": [71.4, 41.4],
+    "Административный суд Жалал-Абадской области": [73.13, 41.1156],
+  },
+  "Иссык-Кульская область": {
+    "Иссык-Кульский областной суд": [77.0667, 42.65],
+    "Балыкчинский городской суд": [76.1833, 42.45],
+    "Каракольский городской суд": [78.3833, 42.4833],
+    "Ак-Суйский районный суд": [78.5333, 42.5],
+    "Жети-Огузский районный суд": [78.0289, 42.0833],
+    "Иссык-Кульский районный суд": [77.2067, 42.6167],
+    "Тонский районный суд": [77.9167, 42.1333],
+    "Тюпский районный суд": [78.3667, 42.7278],
+    "Административный суд Иссык-Кульской области": [77.0867, 42.64],
+  },
+  "Нарынская область": {
+    "Нарынский областной суд": [75.9311, 41.4473],
+    "Нарынский городской суд": [76.0033, 41.5433],
+    "Ат-Башинский районный суд": [75.8067, 41.17],
+    "Ак-Талинский районный суд": [75.3567, 41.42],
+    "Жумгальский районный суд": [74.8333, 41.9333],
+    "Кочкорский районный суд": [75.7833, 42.2167],
+    "Административный суд Нарынской области": [76.0711, 41.4373],
+  },
+  "Ошская область": {
+    "Ошский областной суд": [72.8825, 40.49],
+    "Ошский городской суд": [72.812, 40.5533],
+    "Алайский районный суд": [72.9833, 39.65],
+    "Араванский районный суд": [72.5107, 40.5067],
+    "Кара-Кулжинский районный суд": [73.5, 40.2667],
+    "Кара-Сууский районный суд": [72.8667, 40.7],
+    "Ноокатский районный суд": [72.6167, 40.2667],
+    "Узгенский районный суд": [73.3, 40.7667],
+    "Чон-Алайский районный суд": [72.0, 39.5],
+    "Административный суд Ошской области": [72.7585, 40.48],
+  },
+  "Таласская область": {
+    "Таласский областной суд": [72.2425, 42.555],
+    "Таласский городской суд": [72.203, 42.5167],
+    "Бакай-Атинский районный суд": [72.1667, 42.3333],
+    "Кара-Бууринский районный суд": [71.13, 42.5],
+    "Манасский районный суд": [72.5, 42.5333],
+    "Административный суд Таласской области": [72.2545, 42.515],
+  },
+  "Чуйская область": {
+    "Чуйский областной суд": [74.59, 42.9046],
+    "Токмокский городской суд": [75.3, 42.8333],
+    "Аламудунский районный суд": [74.6833, 42.87],
+    "Жайылский районный суд": [73.6167, 42.8667],
+    "Кеминский районный суд": [75.7, 42.7833],
+    "Московский районный суд": [73.9333, 42.8833],
+    "Панфиловский районный суд": [73.65, 42.8333],
+    "Сокулукский районный суд": [74.0833, 42.8667],
+    "Ысык-Атинский районный суд": [74.9833, 42.8833],
+    "Административный суд Чуйской области": [74.5, 42.8646],
+  },
+  "Город Бишкек": {
+    "Свердловский районный суд": [74.52, 42.8646],
+    "Октябрьский районный суд": [74.6, 42.9246],
+    "Ленинский районный суд": [74.575, 42.8446],
+    "Верховный суд": [74.6012, 42.88],
+    "Административный суд г. Бишкек": [74.5934, 42.9023],
+    "Первомайский районный суд": [74.66, 42.8846],
+    "Бишкекский городской суд": [74.5823, 42.8801],
+  },
+};
 
 type SortField =
   | "overall"
@@ -244,9 +245,9 @@ const districtNamesRu: { [key: string]: string } = {
 
 const getDisplayName = (name: string): string => {
   return name
-    .replace(' районный суд', ' район')
-    .replace(' городской суд', ' город')
-    .replace(' межрайонный суд', ' район');
+    .replace(" районный суд", " район")
+    .replace(" городской суд", " город")
+    .replace(" межрайонный суд", " район");
 };
 
 const getRegionColor = (rating: number, properties?: any): string => {
@@ -278,7 +279,10 @@ function isLake(properties: any): boolean {
   );
 }
 
-const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) => {
+const RegionDetails: React.FC<RegionDetailsProps> = ({
+  regionName,
+  regions,
+}) => {
   const {
     selectedRegion,
     setSelectedRegion,
@@ -378,7 +382,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
       if (!token) throw new Error("Token is null");
 
       const response = await fetch(
-        `https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`,
+        `https://opros.sot.kg/api/v1/${courtId}/?year=2025`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -422,7 +426,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
     window.history.pushState(
       { regionName: null },
       "",
-      "/results/maps/oblast/Regional-Courts" // Указываем базовый маршрут
+      "/maps/oblast/Regional-Courts" // Указываем базовый маршрут
     );
   };
 
@@ -449,7 +453,14 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [selectedCourtId, selectedRegion, setSelectedCourtId, setSelectedCourtName, setSelectedRegion, setSurveyData]);
+  }, [
+    selectedCourtId,
+    selectedRegion,
+    setSelectedCourtId,
+    setSelectedCourtName,
+    setSelectedRegion,
+    setSurveyData,
+  ]);
 
   const renderRegionMap = useCallback(() => {
     if (!regionName || !selectedRegion) return null;
@@ -480,7 +491,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
     );
 
     return (
-      <div className="w-full h-[400px] relative mb-6 bg-white rounded-lg shadow-sm p-4">
+      <div className="w-full h-[400px] relative mb-6 bg-white rounded-lg shadow-sm p-4 RegionDetailsMap">
         <style>
           {`
             #tooltip {
@@ -547,7 +558,9 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                   .attr("fill", (d: any) => {
                     if (isLake(d.properties)) return "#7CC9F0";
                     const courtName = districtNamesRu[d.properties.NAME_2];
-                    const court = selectedRegion?.find(c => c.name === courtName);
+                    const court = selectedRegion?.find(
+                      (c) => c.name === courtName
+                    );
                     return getRegionColor(court?.overall || 0);
                   })
                   .attr("stroke", "#4B5563")
@@ -559,18 +572,22 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                     const tooltip = d3.select("#tooltip");
                     const coordinates = getEventCoordinates(event);
                     const districtName = d.properties.NAME_2;
-                    const russianName = districtNamesRu[districtName] || districtName;
+                    const russianName =
+                      districtNamesRu[districtName] || districtName;
                     const displayName = getDisplayName(russianName);
-                    const court = selectedRegion?.find(c => c.name === russianName);
+                    const court = selectedRegion?.find(
+                      (c) => c.name === russianName
+                    );
                     const rating = court?.overall || 0;
 
                     tooltip
                       .style("display", "block")
                       .style("left", `${coordinates.x + 10}px`)
-                      .style("top", `${coordinates.y + 10}px`)
-                      .html(`
+                      .style("top", `${coordinates.y + 10}px`).html(`
                         <div class="font-medium">${displayName}</div>
-                        <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
+                        <div class="text-sm text-gray-600">Общая оценка: ${
+                          rating ? rating.toFixed(1) : "Нет данных"
+                        }</div>
                       `);
                   })
                   .on("mousemove", function (event) {
@@ -585,23 +602,25 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                   });
 
                 // Добавляем текст с оценками
-                const textGroup = g.append('g')
-                  .attr('class', 'rating-labels');
+                const textGroup = g.append("g").attr("class", "rating-labels");
 
-                textGroup.selectAll('text')
+                textGroup
+                  .selectAll("text")
                   .data(districtFeatures)
-                  .join('text')
-                  .attr('x', (d: any) => path.centroid(d)[0])
-                  .attr('y', (d: any) => path.centroid(d)[1])
-                  .attr('text-anchor', 'middle')
-                  .style('pointer-events', 'none')
-                  .attr('font-weight', 'bold')
-                  .attr('font-size', '10px')
+                  .join("text")
+                  .attr("x", (d: any) => path.centroid(d)[0])
+                  .attr("y", (d: any) => path.centroid(d)[1])
+                  .attr("text-anchor", "middle")
+                  .style("pointer-events", "none")
+                  .attr("font-weight", "bold")
+                  .attr("font-size", "10px")
                   .text((d: any) => {
-                    if (isLake(d.properties)) return '';
+                    if (isLake(d.properties)) return "";
                     const courtName = districtNamesRu[d.properties.NAME_2];
-                    const court = selectedRegion?.find(c => c.name === courtName);
-                    return court?.overall ? court.overall.toFixed(1) : '0.0';
+                    const court = selectedRegion?.find(
+                      (c) => c.name === courtName
+                    );
+                    return court?.overall ? court.overall.toFixed(1) : "0.0";
                   });
               }
 
@@ -629,8 +648,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                         tooltip
                           .style("display", "block")
                           .style("left", `${coordinates.x}px`)
-                          .style("top", `${coordinates.y}px`)
-                          .html(`
+                          .style("top", `${coordinates.y}px`).html(`
                         <div class="bg-white rounded-lg shadow-lg border border-gray-100 p-3 max-w-[240px]">
                           <div class="font-semibold text-base mb-2 text-gray-800 border-b pb-1.5" style="border-color: #4B5563">
                             ${court.name}
@@ -800,7 +818,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
               {renderRegionMap()}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100">
                 <div className="overflow-x-auto">
-                  <div className="relative w-full max-w-[13rem] my-2 ml-4">
+                  <div className="relative w-full max-w-[13rem] my-2 ml-4 RegionDetailsSearch">
                     <input
                       type="text"
                       value={searchQuery}
@@ -825,128 +843,206 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                       </svg>
                     </div>
                   </div>
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="border-b border-gray-200">
-                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                          №
-                        </th>
-                        <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                          Наименование суда
-                        </th>
-                        <th
-                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                          onClick={() => handleSort("overall")}
-                        >
-                          <div className="flex items-center justify-between px-2">
-                            <span>Общая оценка</span>
-                            {getSortIcon("overall")}
-                          </div>
-                        </th>
-                        <th
-                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                          onClick={() => handleSort("building")}
-                        >
-                          <div className="flex items-center justify-between px-2">
-                            <span>Здание</span>
-                            {getSortIcon("building")}
-                          </div>
-                        </th>
-                        <th
-                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                          onClick={() => handleSort("office")}
-                        >
-                          <div className="flex items-center justify-between px-2">
-                            <span>Канцелярия</span>
-                            {getSortIcon("office")}
-                          </div>
-                        </th>
-                        <th
-                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                          onClick={() => handleSort("process")}
-                        >
-                          <div className="flex items-center justify-between px-2">
-                            <span>Процесс</span>
-                            {getSortIcon("process")}
-                          </div>
-                        </th>
-                        <th
-                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                          onClick={() => handleSort("staff")}
-                        >
-                          <div className="flex items-center justify-between px-2">
-                            <span>Сотрудники</span>
-                            {getSortIcon("staff")}
-                          </div>
-                        </th>
-                        <th
-                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                          onClick={() => handleSort("judge")}
-                        >
-                          <div className="flex items-center justify-between px-2">
-                            <span>Судья</span>
-                            {getSortIcon("judge")}
-                          </div>
-                        </th>
-                        <th
-                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                          onClick={() => handleSort("count")}
-                        >
-                          <div className="flex items-center justify-between px-2">
-                            <span>Количество отзывов</span>
-                          </div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="min-h-[300px]">
-                      {filteredCourts.map((court, index) => (
-                        <tr
-                          key={court.name}
-                          className="hover:bg-gray-50 transition-colors"
-                        >
-                          <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
-                            {index + 1}
-                          </td>
-                          <td
-                            className="px-3 py-2.5 text-left text-xs text-gray-600 cursor-pointer hover:text-blue-500"
-                            onClick={() => handleCourtClick(court.id, court.name)}
+
+                  {/* Таблица для десктопа (≥ 640px) */}
+                  <div className="hidden sm:block overflow-x-auto">
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="border-b border-gray-200">
+                          <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                            №
+                          </th>
+                          <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                            Наименование суда
+                          </th>
+                          <th
+                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                            onClick={() => handleSort("overall")}
                           >
-                            {court.name}
-                          </td>
-                          <td
-                            className={`border border-gray-300 px-4 py-2 text-center text-sm text-gray-900 ${getRatingColor(
-                              court.overall
-                            )}`}
+                            <div className="flex items-center justify-between px-2">
+                              <span>Общая оценка</span>
+                              {getSortIcon("overall")}
+                            </div>
+                          </th>
+                          <th
+                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                            onClick={() => handleSort("building")}
                           >
-                            {court.overall.toFixed(1)}
-                          </td>
-                          {court.ratings.map((rating: number, idx: number) => (
+                            <div className="flex items-center justify-between px-2">
+                              <span>Здание</span>
+                              {getSortIcon("building")}
+                            </div>
+                          </th>
+                          <th
+                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                            onClick={() => handleSort("office")}
+                          >
+                            <div className="flex items-center justify-between px-2">
+                              <span>Канцелярия</span>
+                              {getSortIcon("office")}
+                            </div>
+                          </th>
+                          <th
+                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                            onClick={() => handleSort("process")}
+                          >
+                            <div className="flex items-center justify-between px-2">
+                              <span>Процесс</span>
+                              {getSortIcon("process")}
+                            </div>
+                          </th>
+                          <th
+                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                            onClick={() => handleSort("staff")}
+                          >
+                            <div className="flex items-center justify-between px-2">
+                              <span>Сотрудники</span>
+                              {getSortIcon("staff")}
+                            </div>
+                          </th>
+                          <th
+                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                            onClick={() => handleSort("judge")}
+                          >
+                            <div className="flex items-center justify-between px-2">
+                              <span>Судья</span>
+                              {getSortIcon("judge")}
+                            </div>
+                          </th>
+                          <th
+                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                            onClick={() => handleSort("count")}
+                          >
+                            <div className="flex items-center justify-between px-2">
+                              <span>Количество отзывов</span>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="min-h-[300px]">
+                        {filteredCourts.map((court, index) => (
+                          <tr
+                            key={court.name}
+                            className="hover:bg-gray-50 transition-colors"
+                          >
+                            <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
+                              {index + 1}
+                            </td>
                             <td
-                              key={idx}
+                              className="px-3 py-2.5 text-left text-xs text-gray-600 cursor-pointer hover:text-blue-500"
+                              onClick={() =>
+                                handleCourtClick(court.id, court.name)
+                              }
+                            >
+                              {court.name}
+                            </td>
+                            <td
                               className={`border border-gray-300 px-4 py-2 text-center text-sm text-gray-900 ${getRatingColor(
-                                rating
+                                court.overall
                               )}`}
                             >
-                              {rating.toFixed(1)}
+                              {court.overall.toFixed(1)}
                             </td>
-                          ))}
-                          <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
-                            {court.totalAssessments}
-                          </td>
-                        </tr>
-                      ))}
-                      {filteredCourts.length === 0 && (
-                        <tr>
-                          <td
-                            colSpan={9}
-                            className="px-6 py-4 text-center text-gray-500 h-[300px]"
-                          >
-                            {searchQuery ? "Ничего не найдено" : "Нет данных"}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                            {court.ratings.map(
+                              (rating: number, idx: number) => (
+                                <td
+                                  key={idx}
+                                  className={`border border-gray-300 px-4 py-2 text-center text-sm text-gray-900 ${getRatingColor(
+                                    rating
+                                  )}`}
+                                >
+                                  {rating.toFixed(1)}
+                                </td>
+                              )
+                            )}
+                            <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
+                              {court.totalAssessments}
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredCourts.length === 0 && (
+                          <tr>
+                            <td
+                              colSpan={9}
+                              className="px-6 py-4 text-center text-gray-500 h-[300px]"
+                            >
+                              {searchQuery ? "Ничего не найдено" : "Нет данных"}
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Карточки для мобильных (< 640px) */}
+                  <div className="block sm:hidden p-3">
+                    {filteredCourts.length === 0 ? (
+                      <div className="text-center text-gray-500 py-8">
+                        {searchQuery ? "Ничего не найдено" : "Нет данных"}
+                      </div>
+                    ) : (
+                      filteredCourts.map((court, index) => (
+                        <div
+                          key={court.name}
+                          className="mb-3 p-3 border border-gray-100 rounded-lg bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                          onClick={() => handleCourtClick(court.id, court.name)}
+                        >
+                          {/* Заголовок карточки */}
+                          <div className="flex justify-between items-center mb-2">
+                            <div className="text-sm font-semibold text-gray-800 hover:text-blue-600 truncate">
+                              {index + 1}. {court.name}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <FaStar className="text-yellow-400 text-sm" />
+                              <span className="text-sm font-medium text-gray-700">
+                                {court.overall.toFixed(1)}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Данные в виде компактного списка */}
+                          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs text-gray-600">
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">Здание:</span>
+                              <span className="text-gray-600">
+                                {court.ratings[0].toFixed(1)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">Канцелярия:</span>
+                              <span className="text-gray-600">
+                                {court.ratings[1].toFixed(1)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">Процесс:</span>
+                              <span className="text-gray-600">
+                                {court.ratings[2].toFixed(1)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">Сотрудники:</span>
+                              <span className="text-gray-600">
+                                {court.ratings[3].toFixed(1)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">Судья:</span>
+                              <span className="text-gray-600">
+                                {court.ratings[4].toFixed(1)}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="font-medium">Отзывы:</span>
+                              <span className="text-gray-600">
+                                {court.totalAssessments}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
