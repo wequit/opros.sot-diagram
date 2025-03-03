@@ -8,7 +8,7 @@ import React, {
   useCallback,
 } from "react";
 import * as d3 from "d3";
-import geoData from "../../../../../../public/gadm41_KGZ_1.json";
+import geoData from "../../../../../public/gadm41_KGZ_1.json";
 import { FiMinus, FiPlus, FiRefreshCw } from "react-icons/fi";
 
 interface SVGFeature {
