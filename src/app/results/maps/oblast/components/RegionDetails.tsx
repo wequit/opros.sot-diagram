@@ -242,6 +242,13 @@ const districtNamesRu: { [key: string]: string } = {
   "Ysyk-Ata": "Ысык-Атинский районный суд",
 };
 
+const getDisplayName = (name: string): string => {
+  return name
+    .replace(' районный суд', ' район')
+    .replace(' городской суд', ' город')
+    .replace(' межрайонный суд', ' район');
+};
+
 const getRegionColor = (rating: number, properties?: any): string => {
   if (properties && isLake(properties)) {
     return "#7CC9F0";
@@ -270,62 +277,6 @@ function isLake(properties: any): boolean {
     properties.NAME_2 === "Song-kol"
   );
 }
-
-const rayonToCourtMapping: { [key: string]: string } = {
-  Biskek: "Бишкекский межрайонный суд",
-  Batken: "Баткенский районный суд",
-  Lailak: "Лейлекский районный суд",
-  Kadamjai: "Кадамжайский районный суд",
-  "Kyzyl-Kiya": "Кызыл-Кийский городской суд",
-  Suluktu: "Сулюктинский городской суд",
-  Alamüdün: "Аламудунский районный суд",
-  Sokuluk: "Сокулукский районный суд",
-  Moskovsky: "Московский районный суд",
-  Jaiyl: "Жайылский районный суд",
-  Panfilov: "Панфиловский районный суд",
-  Kemin: "Кеминский районный суд",
-  Chui: "Чуйский районный суд",
-  "Ysyk-Ata": "Ысык-Атинский районный суд",
-  Tokmok: "Токмокский городской суд",
-  "Ak-Suu": "Ак-Суйский районный суд",
-  "Djety-Oguz": "Джети-Огузский районный суд",
-  Ton: "Тонский районный суд",
-  Tüp: "Тюпский районный суд",
-  "Ysyk-Köl": "Иссык-Кульский районный суд",
-  Karakol: "Каракольский городской суд",
-  Balykchy: "Балыкчинский городской суд",
-  "Ak-Talaa": "Ак-Талинский районный суд",
-  "At-Bashi": "Ат-Башинский районный суд",
-  Jumgal: "Жумгальский районный суд",
-  Kochkor: "Кочкорский районный суд",
-  Naryn: "Нарынский районный суд",
-  "Naryn City": "Нарынский городской суд",
-  Talas: "Таласский районный суд",
-  "Bakai-Ata": "Бакай-Атинский районный суд",
-  "Kara-Buura": "Кара-Буринский районный суд",
-  Manas: "Манасский районный суд",
-  "Talas City": "Таласский городской суд",
-  Alay: "Алайский районный суд",
-  Aravan: "Араванский районный суд",
-  "Kara-Kulja": "Кара-Кульджинский районный суд",
-  "Kara-Suu": "Кара-Суйский районный суд",
-  Nookat: "Ноокатский районный суд",
-  Uzgen: "Узгенский районный суд",
-  "Chong-Alay": "Чон-Алайский районный суд",
-  "Osh City": "Ошский городской суд",
-  Aksy: "Аксыйский районный суд",
-  "Ala-Buka": "Ала-Букинский районный суд",
-  "Bazar-Korgon": "Базар-Коргонский районный суд",
-  Nooken: "Ноокенский районный суд",
-  Suzak: "Сузакский районный суд",
-  "Toguz-Toro": "Тогуз-Тороуский районный суд",
-  Toktogul: "Токтогульский районный суд",
-  Chatkal: "Чаткальский районный суд",
-  "Jalal-Abad City": "Джалал-Абадский городской суд",
-  Mailuusuu: "Майлуу-Сууский городской суд",
-  "Tash-Kumyr": "Таш-Кумырский городской суд",
-  "Kara-Kul": "Кара-Кульский городской суд",
-};
 
 const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) => {
   const {
@@ -593,7 +544,12 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                   .append("path")
                   .attr("class", "district-border")
                   .attr("d", path as any)
-                  .attr("fill", "none")
+                  .attr("fill", (d: any) => {
+                    if (isLake(d.properties)) return "#7CC9F0";
+                    const courtName = districtNamesRu[d.properties.NAME_2];
+                    const court = selectedRegion?.find(c => c.name === courtName);
+                    return getRegionColor(court?.overall || 0);
+                  })
                   .attr("stroke", "#4B5563")
                   .attr("stroke-width", 1)
                   .attr("pointer-events", "all")
@@ -602,27 +558,20 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                     d3.select(this).attr("stroke-width", "1.5");
                     const tooltip = d3.select("#tooltip");
                     const coordinates = getEventCoordinates(event);
+                    const districtName = d.properties.NAME_2;
+                    const russianName = districtNamesRu[districtName] || districtName;
+                    const displayName = getDisplayName(russianName);
+                    const court = selectedRegion?.find(c => c.name === russianName);
+                    const rating = court?.overall || 0;
+
                     tooltip
                       .style("display", "block")
-                      .style("left", `${coordinates.x}px`)
-                      .style("top", `${coordinates.y}px`)
+                      .style("left", `${coordinates.x + 10}px`)
+                      .style("top", `${coordinates.y + 10}px`)
                       .html(`
-                      <div class="bg-white rounded-lg shadow-lg border border-gray-100 p-3">
-                        <div class="font-semibold text-gray-800 mb-1">
-                          ${
-                            districtNamesRu[d.properties.NAME_2] ||
-                            d.properties.NAME_2
-                          }
-                        </div>
-                        <div class="text-sm text-gray-600">
-                          Общая оценка: ${
-                            d.properties.overall
-                              ? d.properties.overall.toFixed(1)
-                              : "Нет данных"
-                          }
-                        </div>
-                      </div>
-                    `);
+                        <div class="font-medium">${displayName}</div>
+                        <div class="text-sm text-gray-600">Общая оценка: ${rating ? rating.toFixed(1) : 'Нет данных'}</div>
+                      `);
                   })
                   .on("mousemove", function (event) {
                     const coordinates = getEventCoordinates(event);
@@ -631,8 +580,28 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                       .style("top", `${coordinates.y}px`);
                   })
                   .on("mouseout", function () {
-                    d3.select(this).attr("stroke-width", "1");
+                    d3.select(this).attr("fill-opacity", 1);
                     d3.select("#tooltip").style("display", "none");
+                  });
+
+                // Добавляем текст с оценками
+                const textGroup = g.append('g')
+                  .attr('class', 'rating-labels');
+
+                textGroup.selectAll('text')
+                  .data(districtFeatures)
+                  .join('text')
+                  .attr('x', (d: any) => path.centroid(d)[0])
+                  .attr('y', (d: any) => path.centroid(d)[1])
+                  .attr('text-anchor', 'middle')
+                  .style('pointer-events', 'none')
+                  .attr('font-weight', 'bold')
+                  .attr('font-size', '10px')
+                  .text((d: any) => {
+                    if (isLake(d.properties)) return '';
+                    const courtName = districtNamesRu[d.properties.NAME_2];
+                    const court = selectedRegion?.find(c => c.name === courtName);
+                    return court?.overall ? court.overall.toFixed(1) : '0.0';
                   });
               }
 
