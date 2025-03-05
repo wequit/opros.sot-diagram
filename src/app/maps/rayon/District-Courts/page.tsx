@@ -329,7 +329,7 @@ export default function Courts() {
               headerKey="HeaderNavFour"
             />
             <h2 className="text-2xl font-bold mt-2 DistrictName">
-              Районные суды
+            {getTranslation("District_Courts_MainName", language)}
             </h2>
           </div>
           <div className="border border-gray-300 rounded-2xl bg-white">
@@ -375,14 +375,14 @@ export default function Courts() {
                         №
                       </th>
                       <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                        Наименование суда
+                     {getTranslation("Regional_Courts_Table_Overall", language)}
                       </th>
                       <th
                         className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                         onClick={() => handleSort("overall")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>Общая оценка</span>
+                          <span>  {getTranslation("Regional_Courts_Table_Overall", language)}</span>
                           {getSortIcon("overall")}
                         </div>
                       </th>
@@ -391,7 +391,7 @@ export default function Courts() {
                         onClick={() => handleSort("judge")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>Судья</span>
+                          <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
                           {getSortIcon("judge")}
                         </div>
                       </th>
@@ -400,7 +400,7 @@ export default function Courts() {
                         onClick={() => handleSort("process")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>Процесс</span>
+                          <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
                           {getSortIcon("process")}
                         </div>
                       </th>
@@ -409,7 +409,7 @@ export default function Courts() {
                         onClick={() => handleSort("staff")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>Сотрудники</span>
+                          <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
                           {getSortIcon("staff")}
                         </div>
                       </th>
@@ -418,7 +418,7 @@ export default function Courts() {
                         onClick={() => handleSort("office")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>Канцелярия</span>
+                          <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
                           {getSortIcon("office")}
                         </div>
                       </th>
@@ -427,12 +427,12 @@ export default function Courts() {
                         onClick={() => handleSort("building")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>Здание</span>
+                          <span>{getTranslation("Regional_Courts_Table_Build", language)}</span>
                           {getSortIcon("building")}
                         </div>
                       </th>
                       <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                        Кол-во оценок
+                      {getTranslation("Regional_Courts_Table_Number of reviews", language)}
                       </th>
                     </tr>
                   </thead>

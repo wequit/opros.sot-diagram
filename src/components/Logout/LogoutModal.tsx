@@ -1,4 +1,5 @@
 'use client';
+import { getTranslation, useSurveyData } from '@/context/SurveyContext';
 import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -9,6 +10,7 @@ interface LogoutModalProps {
 }
 
 const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onConfirm }) => {
+    const {  language  } = useSurveyData();
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -69,20 +71,20 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onConfirm })
           zIndex: 1000000,
         }}
       >
-        <h2 className="text-xl font-semibold mb-4">Подтверждение выхода</h2>
-        <p className="text-gray-600 mb-6">Вы уверены, что хотите выйти из системы?</p>
+        <h2 className="text-xl font-semibold mb-4"> {getTranslation("LogoutModal_TextOne", language)}</h2>
+        <p className="text-gray-600 mb-6">{getTranslation("LogoutModal_TextTwo", language)}</p>
         <div className="flex justify-end space-x-4">
           <button
             onClick={onClose}
             className="px-4 py-2 text-gray-600 hover:text-gray-800 rounded transition-colors"
           >
-            Отмена
+           {getTranslation("LogoutModal_Cancel", language)}
           </button>
           <button
             onClick={onConfirm}
             className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
           >
-            Выйти
+             {getTranslation("LogoutModal_Exit", language)}
           </button>
         </div>
       </div>

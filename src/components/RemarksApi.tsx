@@ -41,6 +41,8 @@ export function useRemarks() {
     const storedCourtName = localStorage.getItem("selectedCourtName");
     const courtNameId = localStorage.getItem("courtNameId");
     const courtNAME = localStorage.getItem("courtName");
+    const setCourtName = localStorage.getItem("courtName2");
+    console.log("setCourtName",setCourtName)
     
     return remarks.filter((item: Remark) => {
       if (
@@ -95,18 +97,13 @@ export function useRemarks() {
       }
 
       if (
-        user.role === "Председатель 2 инстанции" &&
-        selectedCourtName &&
-        selectedCourtName === item.court
+        user.role === "Председатель 2 инстанции" 
       ) {
         return (
           item.custom_answer !== null &&
-          item.custom_answer !== "Необязательный вопрос"
+          item.custom_answer !== "Необязательный вопрос" &&
+          item.court === setCourtName
         );
-      }
-
-      if (user.role === "Председатель 2 инстанции") {
-        return false;
       }
 
       // Default condition

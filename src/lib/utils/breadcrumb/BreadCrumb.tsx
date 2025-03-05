@@ -40,7 +40,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
             href="/"
             className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
           >
-            Главная
+            {getTranslation("Regional_Courts_Breadcrumbs_Main", language)}
           </Link>
           {(showHome || regionName || courtName) && (
             <ChevronRight className="w-4 h-4 mx-1 text-gray-400" />

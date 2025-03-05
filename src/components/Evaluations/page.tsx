@@ -854,13 +854,13 @@ export default function Evaluations({
 
   if (pathname.includes("/maps/General")) {
     remarksPath = "/remarks/General";
-  } else if (pathname.includes("/maps/oblast/Regional-Courts")) {
+  } else if (pathname.includes("/Region-details/")) {
     remarksPath = "/remarks/Regional-Courts";
   } else if (pathname.includes("/maps/rayon/District-Courts")) {
     remarksPath = "/remarks/District-Courts";
   }
 
-  if (selectedCourtId) {
+  if (selectedCourtId  ) {
     remarksPath += `/${selectedCourtId}`;
   }
   if (courtNameId) {
@@ -1060,7 +1060,7 @@ export default function Evaluations({
                           font: {
                             weight: "bold", // Шрифт метки
                           },
-                          formatter: (value: number) => `${value}%`, // Форматируем метки как проценты
+                          formatter: (value: number) => `${Math.abs(value)}%`, // Убираем минус в ageGenderData эту строку
                         },
                         tooltip: {
                           callbacks: {

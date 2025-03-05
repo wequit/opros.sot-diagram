@@ -57,18 +57,6 @@ const LoginForm: React.FC = () => {
 
       <div className=" lg:w-1/2 flex items-center justify-center p-8 bg-gray-50" style={{width: '70%'}}>
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex flex-col items-center mb-10">
-            <Image
-              src="/logo.png"
-              alt="Логотип"
-              width={100}
-              height={100}
-              className="rounded-2xl shadow-lg mb-4"
-            />
-            <h2 className="text-2xl font-bold text-gray-800 text-center">
-              Ноокенский районный суд
-            </h2>
-          </div>
 
           <div className="bg-white rounded-2xl shadow-2xl p-8 space-y-6">
             <h3 className="text-2xl font-semibold text-gray-800 mb-6 text-center">

@@ -1,7 +1,7 @@
 "use client";
 
 import { getCookie } from "@/lib/login";
-import { useSurveyData } from "@/context/SurveyContext";
+import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import React, {
   useCallback,
   useState,
@@ -297,6 +297,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const {  language  } = useSurveyData();
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -382,7 +383,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
       if (!token) throw new Error("Token is null");
 
       const response = await fetch(
-        `https://opros.sot.kg/api/v1/${courtId}/?year=2025`,
+        `https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -404,7 +405,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
       window.history.pushState(
         { courtId, courtName },
         "",
-        `/region-details/${regionName}/${courtId}`
+        `/Region-details/${courtId}`
       );
     } catch (error) {
       console.error("Ошибка при получении данных суда:", error);
@@ -823,7 +824,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Поиск суда"
+                      placeholder={getTranslation("Regional_Courts_Table_Search", language)}
                       className="w-full pl-10 pr-4 py-2.5 text-sm text-gray-900 bg-white rounded-lg focus:outline-none transition-all duration-200 ease-in-out placeholder-gray-500"
                     />
                     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -853,14 +854,14 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             №
                           </th>
                           <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                            Наименование суда
+                          {getTranslation("Regional_Courts_Table_NameRegion", language)}
                           </th>
                           <th
                             className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                             onClick={() => handleSort("overall")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>Общая оценка</span>
+                              <span>  {getTranslation("Regional_Courts_Table_Overall", language)}</span>
                               {getSortIcon("overall")}
                             </div>
                           </th>
@@ -869,7 +870,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("building")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>Здание</span>
+                              <span> {getTranslation("Regional_Courts_Table_Build", language)}</span>
                               {getSortIcon("building")}
                             </div>
                           </th>
@@ -878,7 +879,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("office")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>Канцелярия</span>
+                              <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
                               {getSortIcon("office")}
                             </div>
                           </th>
@@ -887,7 +888,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("process")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>Процесс</span>
+                              <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
                               {getSortIcon("process")}
                             </div>
                           </th>
@@ -896,7 +897,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("staff")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>Сотрудники</span>
+                              <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
                               {getSortIcon("staff")}
                             </div>
                           </th>
@@ -905,7 +906,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("judge")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>Судья</span>
+                              <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
                               {getSortIcon("judge")}
                             </div>
                           </th>
@@ -914,7 +915,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("count")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>Количество отзывов</span>
+                              <span>{getTranslation("Regional_Courts_Table_Number of reviews", language)}</span>
                             </div>
                           </th>
                         </tr>

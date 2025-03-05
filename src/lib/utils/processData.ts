@@ -748,60 +748,92 @@ function getEmptyDisrespectData() {
     };
   }
 
- export function processAgeGenderData(
-  genderResponses: QuestionResponse[],
-  ageResponses: QuestionResponse[]
-) {
-  // Статичные возрастные группы
-  const ageGroups = ["18-29", "30-44", "45-59", "60+"];
-
-  // Структура для хранения данных
-  const groupedData: Record<string, { Мужской: number; Женский: number }> = {
-    "18-29": { Мужской: 0, Женский: 0 },
-    "30-44": { Мужской: 0, Женский: 0 },
-    "45-59": { Мужской: 0, Женский: 0 },
-    "60+": { Мужской: 0, Женский: 0 },
-  };
-
-  for (let i = 0; i < genderResponses.length; i++) {
-    const gender = genderResponses[i]?.selected_option?.text_ru;
-    let age = ageResponses[i]?.selected_option?.text_ru;
-    
-    if (age) {
-      // Нормализуем возраст: убираем пробелы и заменяем en‑dash на дефис
-      age = age.replace(/–/g, "-").replace(/\s/g, "");
+  export function processAgeGenderData(
+    genderResponses: QuestionResponse[],
+    ageResponses: QuestionResponse[]
+  ) {
+    // Статичные возрастные группы
+    const ageGroups = ["18-29", "30-44", "45-59", "60+"];
+  
+    // Структура для хранения данных
+    const groupedData: Record<string, { Мужской: number; Женский: number }> = {
+      "18-29": { Мужской: 0, Женский: 0 },
+      "30-44": { Мужской: 0, Женский: 0 },
+      "45-59": { Мужской: 0, Женский: 0 },
+      "60+": { Мужской: 0, Женский: 0 },
+    };
+  
+    // Заполняем данные
+    for (let i = 0; i < genderResponses.length; i++) {
+      const gender = genderResponses[i]?.selected_option?.text_ru;
+      let age = ageResponses[i]?.selected_option?.text_ru;
+  
+      if (age) {
+        // Нормализуем возраст: убираем пробелы и заменяем en‑dash на дефис
+        age = age.replace(/–/g, "-").replace(/\s/g, "");
+      }
+  
+      if (gender && age && ageGroups.includes(age)) {
+        groupedData[age][gender as 'Мужской' | 'Женский']++;
+      }
     }
-
-
-    if (gender && age && ageGroups.includes(age)) {
-      groupedData[age][gender as 'Мужской' | 'Женский']++;
-    }
-  }
-
-
-  // Вычисляем процентное соотношение
-  const maleData = ageGroups.map((age) => {
-    const total = groupedData[age]["Мужской"] + groupedData[age]["Женский"];
-    return total > 0 ? -Math.round((groupedData[age]["Мужской"] / total) * 100) : 0;
-  });
-  const femaleData = ageGroups.map((age) => {
-    const total = groupedData[age]["Мужской"] + groupedData[age]["Женский"];
-    return total > 0 ? Math.round((groupedData[age]["Женский"] / total) * 100) : 0;
-  });
-
-  return {
-    labels: ageGroups, // Статичные возрастные группы
-    datasets: [
-      {
+  
+    // Вычисляем процентное соотношение для каждой возрастной группы
+    const maleData: number[] = [];
+    const femaleData: number[] = [];
+  
+    ageGroups.forEach((age) => {
+      const total = groupedData[age]["Мужской"] + groupedData[age]["Женский"];
+      const malePercentage = total > 0 ? -Math.round((groupedData[age]["Мужской"] / total) * 100) : 0;
+      const femalePercentage = total > 0 ? Math.round((groupedData[age]["Женский"] / total) * 100) : 0;
+      maleData.push(malePercentage);
+      femaleData.push(femalePercentage);
+    });
+  
+    // Проверяем, есть ли данные для каждого пола
+    const hasMaleData = maleData.some((value) => value !== 0); // Есть ли ненулевые данные для Мужского
+    const hasFemaleData = femaleData.some((value) => value !== 0); // Есть ли ненулевые данные для Женского
+  
+    // Формируем datasets, исключая гендерные категории без данных
+    const datasets: Array<{ label: string; data: number[]; backgroundColor: string }> = [];
+  
+    if (hasMaleData) {
+      datasets.push({
         label: "Мужской",
         data: maleData, // Отрицательные проценты для торнадо-диаграммы
         backgroundColor: "rgb(51, 153, 255)",
-      },
-      {
+      });
+    }
+  
+    if (hasFemaleData) {
+      datasets.push({
         label: "Женский",
         data: femaleData,
         backgroundColor: "rgb(255, 99, 132)",
-      },
-    ],
-  };
-}
+      });
+    }
+  
+    // Если нет данных вообще, возвращаем пустую диаграмму
+    if (datasets.length === 0) {
+      return {
+        labels: ageGroups,
+        datasets: [
+          {
+            label: "Мужской",
+            data: ageGroups.map(() => 0),
+            backgroundColor: "rgb(51, 153, 255)",
+          },
+          {
+            label: "Женский",
+            data: ageGroups.map(() => 0),
+            backgroundColor: "rgb(255, 99, 132)",
+          },
+        ],
+      };
+    }
+  
+    return {
+      labels: ageGroups, // Оставляем все возрастные группы
+      datasets: datasets, // Только те гендерные категории, у которых есть данные
+    };
+  }

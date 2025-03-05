@@ -142,10 +142,7 @@ const Header: React.FC = () => {
               ) : (
                 <span className="text-lg font-semibold text-black uppercase">
                   {user?.role === "Председатель 2 инстанции"
-                    ? courtName || user.court
-                    : user
-                    ? user.court
-                    : "Загрузка..."}
+                    ? '' : ''}
                 </span>
               )}
             </div>
