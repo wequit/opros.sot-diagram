@@ -1,6 +1,6 @@
 "use client";
 
-import { getCookie } from "@/lib/login";
+import { getCookie } from "@/lib/api/login";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import React, {
   useCallback,
@@ -401,7 +401,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
       setSurveyData(data);
       setIsLoading(false);
 
-      // Добавляем состояние в историю браузера
       window.history.pushState(
         { courtId, courtName },
         "",
@@ -416,7 +415,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     setSelectedCourtId(null);
     setSelectedCourtName(null);
     setSurveyData(null);
-    window.history.back(); // Возвращаемся назад в истории
+    window.history.back();
   };
 
   const handleRegionBackClick = () => {
@@ -427,26 +426,23 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     window.history.pushState(
       { regionName: null },
       "",
-      "/maps/oblast/Regional-Courts" // Указываем базовый маршрут
+      "/maps/oblast/Regional-Courts" 
     );
   };
 
-  // Перехватываем событие "назад" для очистки состояния
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       if (selectedCourtId) {
-        // Если мы в деталях суда, очищаем только детали суда
         setSelectedCourtId(null);
         setSelectedCourtName(null);
         setSurveyData(null);
       } else if (selectedRegion) {
-        // Если мы в списке судов региона, очищаем регион
         setSelectedRegion(null);
         setSelectedCourtId(null);
         setSelectedCourtName(null);
         setSurveyData(null);
       }
-      event.preventDefault(); // Предотвращаем стандартное поведение
+      event.preventDefault(); 
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -602,7 +598,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                     d3.select("#tooltip").style("display", "none");
                   });
 
-                // Добавляем текст с оценками
                 const textGroup = g.append("g").attr("class", "rating-labels");
 
                 textGroup

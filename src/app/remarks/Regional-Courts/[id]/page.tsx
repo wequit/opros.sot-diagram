@@ -8,12 +8,10 @@ function page() {
 }
 
 export function generateStaticParams() {
-  // Генерация всех возможных ID от 1 до 81
-  const ids = Array.from({ length: 75 }, (_, index) => (index + 1).toString()); // От 1 до 81
+  const ids = Array.from({ length: 75 }, (_, index) => (index + 1).toString()); 
 
-  // Генерируем параметры для каждой страницы
   return ids.map((id) => ({
-    id: id, // Убедитесь, что id передается как строка
+    id: id,
   }));
 }
 

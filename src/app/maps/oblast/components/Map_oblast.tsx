@@ -64,17 +64,14 @@ export default function Map_oblast({ oblastData }: MapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 480 });
 
-  // Создаём объект zoom для управления масштабом
- // Создаём объект zoom для управления масштабом
 const zoom = useMemo(
   () =>
     d3
       .zoom<SVGSVGElement, unknown>()
-      .scaleExtent([1, 8]) // Ограничиваем масштаб от 1x до 8x
-      .touchable(true) // Включаем поддержку сенсорных событий
+      .scaleExtent([1, 8]) 
+      .touchable(true) 
       .wheelDelta((event) => -event.deltaY * 0.002)
       .on("start", () => {
-        // Сбрасываем флаг перемещения при начале зума
       })
       .on("zoom", (event) => {
         d3.select(svgRef.current)
@@ -82,7 +79,6 @@ const zoom = useMemo(
           .attr("transform", event.transform);
       })
       .on("end", () => {
-        // Ничего не делаем, просто завершаем событие
       }),
   []
 );
@@ -149,21 +145,17 @@ const zoom = useMemo(
 
     const path = d3.geoPath().projection(projection);
 
-    // Создаём группу для регионов
     const regionsGroup = svg.append("g").attr("class", "regions");
 
-    // Применяем зум к SVG
     svg.call(zoom);
 
-    // Ограничиваем перемещение карты
     zoom.translateExtent([
-      [0, 0], // Минимальные координаты (верхний левый угол)
-      [width, height], // Максимальные координаты (нижний правый угол)
+      [0, 0],
+      [width, height], 
     ]);
 
     const hasData = oblastData && oblastData.length > 0;
 
-    // Рисуем области
     regionsGroup
       .selectAll("path")
       .data(geoData.features as SVGFeature[])
@@ -245,7 +237,6 @@ const zoom = useMemo(
         d3.select(tooltipRef.current).style("display", "none");
       });
 
-    // Добавляем текст с оценками только если данные есть
     if (hasData) {
       regionsGroup
         .selectAll("text")
@@ -256,7 +247,7 @@ const zoom = useMemo(
         .attr("text-anchor", "middle")
         .attr("class", "region-label")
         .attr("font-weight", "bold")
-        .attr("font-size", width < 640 ? "10px" : "11px") // Адаптивный размер текста
+        .attr("font-size", width < 640 ? "10px" : "11px") 
         .style("pointer-events", "none")
         .text((d: SVGFeature) => {
           const rating = getOblastRating(d.properties.NAME_1);
@@ -264,7 +255,6 @@ const zoom = useMemo(
         });
     }
 
-    // Добавляем легенду только если данные есть
     if (hasData) {
       const legend = svg
         .append("g")
@@ -303,7 +293,6 @@ const zoom = useMemo(
         });
     }
 
-    // Сбрасываем масштаб при изменении размера окна
     return () => {
       svg.call(zoom.transform, d3.zoomIdentity);
     };

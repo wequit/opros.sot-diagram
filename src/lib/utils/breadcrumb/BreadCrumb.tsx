@@ -1,17 +1,18 @@
 "use client";
 
 import React from "react";
-import Link from "next/link"; // Импортируем Link
+import Link from "next/link"; 
 import { ChevronRight } from "lucide-react";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { useAuth } from "@/context/AuthContext";
 
 interface BreadcrumbProps {
   regionName?: string | null;
   courtName?: string | null;
-  onCourtBackClick?: () => void; // Возврат к списку судов
-  onRegionBackClick?: () => void; // Возврат к списку регионов
-  showHome?: boolean; // Управление отображением второго "Главная" (HeaderNavThree/HeaderNavFour)
-  headerKey?: "HeaderNavThree" | "HeaderNavFour"; // Новый проп для выбора ключа перевода
+  onCourtBackClick?: () => void;
+  onRegionBackClick?: () => void; 
+  showHome?: boolean; 
+  headerKey?: "HeaderNavThree" | "HeaderNavFour"; 
 }
 
 const Breadcrumb: React.FC<BreadcrumbProps> = ({
@@ -19,12 +20,12 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   courtName,
   onCourtBackClick,
   onRegionBackClick,
-  showHome = true, // По умолчанию второй "Главная" отображается
-  headerKey = "HeaderNavThree", // По умолчанию используем HeaderNavThree
+  showHome = true, 
+  headerKey = "HeaderNavThree", 
 }) => {
   const { language } = useSurveyData();
+    const { user } = useAuth();
 
-  // Определяем ключ перевода, если headerKey не передан
   const effectiveHeaderKey =
     headerKey || (regionName ? "HeaderNavThree" : "HeaderNavFour");
 
@@ -35,6 +36,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
     >
       <ol className="flex items-center space-x-2 BreadCrumbText">
         {/* Фиксированная "Главная" с href="/" */}
+        {user?.role !== "Председатель 2 инстанции" ? (
         <li className="flex items-center">
           <Link
             href="/"
@@ -45,7 +47,8 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
           {(showHome || regionName || courtName) && (
             <ChevronRight className="w-4 h-4 mx-1 text-gray-400" />
           )}
-        </li>
+        </li>) : '' }
+        
 
         {/* Вторая "Главная" (HeaderNavThree или HeaderNavFour) - отображается только если showHome === true */}
         {showHome && (

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRemarks } from "@/components/RemarksApi";
-import { getCookie } from "@/lib/login";
+import { getCookie } from "@/lib/api/login";
 import { ArrowLeft, FileSearch } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";

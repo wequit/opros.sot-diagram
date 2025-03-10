@@ -2,7 +2,7 @@
 import React, { useEffect } from "react";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
-import { getCookie } from "@/lib/login";
+import { getCookie } from "@/lib/api/login";
 import { useSurveyData } from "@/context/SurveyContext";
 import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 

@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { getAssessmentData, getCookie } from "@/lib/login";
+import { getAssessmentData, getCookie } from "@/lib/api/login";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import RegionDetails from "../components/RegionDetails";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
@@ -179,17 +179,16 @@ export default function RegionalCourts() {
         throw new Error("Данные по региону отсутствуют или неверного формата.");
       }
 
-      // Маппируем данные
       const updatedRegions = data.map((courtData: any) => ({
         id: courtData.court_id,
         name: courtData.court,
         overall: courtData.overall_assessment,
         ratings: courtData.assessment.map((item: any) => item.court_avg),
         totalAssessments: courtData.total_survey_responses,
-        coordinates: [courtData.latitude, courtData.longitude], // добавляем координаты
+        coordinates: [courtData.latitude, courtData.longitude],
+        instantiation: courtData.instantiation
       }));
 
-      // Обновляем `selectedRegion`
       setSelectedRegion(updatedRegions);
       setRegionName(court.name);
     } catch (error) {

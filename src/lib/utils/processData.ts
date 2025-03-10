@@ -19,7 +19,6 @@ export function processFirstQuestion(
   responses: QuestionResponse[],
   language: "ru" | "ky"
 ) {
-  // Определяем категории в зависимости от языка
   const allCategories =
     language === "ru"
       ? [
@@ -33,23 +32,20 @@ export function processFirstQuestion(
           "Другое:"
         ]
       : [
-          "QR коддуу стенддерден",                   // Пример перевода для "Стенды с qr кодом"
-          "Жогорку Соттун расмий сайты аркылуу",                  // "Через официальный сайт ВС"
-          "Санариптик Адилеттиги порталынан",            // "Через портал “Цифрового правосудия КР”" (подберите корректное название)
-          "WhatsApp аркылуу",                         // "Через WhatsАpp"
-          "Көз карандысыз юристтер аркылуу",          // "Через независимых юристов"
-          "Соцроликтер жана соцтармактар аркылуу.", // "Через мероприятия, соцролики и соцсети."
-          "Сот кызматкерлери аркылуу",         // "Через сотрудников суда"
-          "Башка:"                                    // "Другое:"
+          "QR коддуу стенддерден",                  
+          "Жогорку Соттун расмий сайты аркылуу",                 
+          "Санариптик Адилеттиги порталынан",            
+          "WhatsApp аркылуу",                       
+          "Көз карандысыз юристтер аркылуу",       
+          "Соцроликтер жана соцтармактар аркылуу.",
+          "Сот кызматкерлери аркылуу",       
+          "Башка:"                                  
         ];
 
-  // Фильтруем ответы, исключая null и "Необязательный вопрос"
   const validResponses = responses.filter(
     r => r.selected_option !== null && r.custom_answer !== "Необязательный вопрос"
   );
-  const totalResponses = validResponses.length;
 
-  // Группируем ответы по выбранному варианту
   const grouped = validResponses.reduce((acc, response) => {
     const optionText =
       language === "ru"
@@ -59,11 +55,9 @@ export function processFirstQuestion(
     return acc;
   }, {} as Record<string, number>);
 
-  // Формируем массив данных для всех категорий
   const labels = allCategories;
   const data = labels.map(label => grouped[label] ? grouped[label] : 0);
 
-  // Опционально: сортируем данные по количеству (если нужно)
   const sortedEntries = labels
     .map((label, index) => [label, data[index]] as [string, number])
     .sort((a, b) => b[1] - a[1]);
@@ -98,7 +92,6 @@ export function processSecondQuestion(
   responses: QuestionResponse[],
   language: "ru" | "ky"
 ) {
-  // Определяем категории в зависимости от языка
   const allCategories =
     language === "ru"
       ? [
@@ -114,11 +107,9 @@ export function processSecondQuestion(
           "Келүүчү   (тууганы, досу, кошунасы, бир тараптын кесиптеши ж.б.)"
         ];
 
-  // Фильтруем ответы (отбрасываем те, у которых selected_option равен null)
   const validResponses = responses.filter(r => r.selected_option !== null);
   const totalResponses = validResponses.length;
 
-  // Группируем ответы по выбранному варианту
   const grouped = validResponses.reduce((acc, response) => {
     const optionText =
       language === "ru"
@@ -128,7 +119,6 @@ export function processSecondQuestion(
     return acc;
   }, {} as Record<string, number>);
 
-  // Формируем массив данных
   const labels = allCategories;
   const data = labels.map(label =>
     grouped[label] ? Math.round((grouped[label] / totalResponses) * 100) : null
@@ -138,7 +128,7 @@ export function processSecondQuestion(
     labels,
     datasets: [
       {
-        data: data.map(value => (value !== null ? value : NaN)), // NaN не будет отображаться в диаграмме
+        data: data.map(value => (value !== null ? value : NaN)), 
         backgroundColor: [
           'rgb(54, 162, 235)',
           'rgb(255, 99, 132)',
@@ -159,15 +149,12 @@ export function processThirdQuestion(
   responses: QuestionResponse[],
   language: "ru" | "ky"
 ) {
-  // Определяем категории в зависимости от языка
   const allCategories =
     language === "ru" ? ["Женский", "Мужской"] : ["Аял", "Эркек"];
 
-  // Фильтруем только ответы, где выбран вариант
   const validResponses = responses.filter((r) => r.selected_option !== null);
   const totalResponses = validResponses.length;
 
-  // Группируем ответы по выбранным вариантам
   const grouped = validResponses.reduce((acc, response) => {
     const optionText =
       language === "ru"
@@ -177,7 +164,6 @@ export function processThirdQuestion(
     return acc;
   }, {} as Record<string, number>);
 
-  // Формируем массив данных для всех категорий (если в группе нет — ставим NaN)
   const labels = allCategories;
   const data = labels.map((label) =>
     grouped[label] ? Math.round((grouped[label] / totalResponses) * 100) : NaN
@@ -189,8 +175,8 @@ export function processThirdQuestion(
       {
         data,
         backgroundColor: [
-          "rgb(255, 99, 132)", // Цвет для первой категории (Женский/Аял)
-          "rgb(51, 153, 255)", // Цвет для второй категории (Мужской/Эркек)
+          "rgb(255, 99, 132)",
+          "rgb(51, 153, 255)", 
         ],
         datalabels: {
           color: "#FFFFFF",
@@ -225,14 +211,14 @@ export function processFifthQuestion(
 
   const data = allCategories.map((label) => {
     const count = grouped[label] || 0;
-    return totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0; // Оставляем 0
+    return totalResponses > 0 ? Math.round((count / totalResponses) * 100) : 0;
   });
 
   return {
     labels: allCategories,
     datasets: [
       {
-        data, // Оставляем 0, но скрываем его отображение в процентах
+        data, 
         backgroundColor: [
           "rgb(54, 162, 235)",
           "rgb(255, 99, 132)",
@@ -241,7 +227,7 @@ export function processFifthQuestion(
         ],
         datalabels: {
           color: "#FFFFFF",
-          formatter: (value: number): string => (value === 0 ? "" : `${value}%`), // Скрываем 0%
+          formatter: (value: number): string => (value === 0 ? "" : `${value}%`),
         },
         label: "",
       },
@@ -283,14 +269,14 @@ export function processAudioVideoQuestion(
       datasets: [{
         data,
         backgroundColor: [
-          'rgb(54, 162, 235)',  // для "Да" или "Ооба"
-          'rgb(255, 99, 132)',  // для "Нет" или "Жок"
-          'rgb(255, 159, 64)',  // для "Не знаю/Не уверен(а)" или "Билбейм/Белгисиз"
-          'rgb(153, 102, 255)'  // для "Другое:" или "Башка:"
+          'rgb(54, 162, 235)',  
+          'rgb(255, 99, 132)', 
+          'rgb(255, 159, 64)', 
+          'rgb(153, 102, 255)' 
         ],
         datalabels: {
           color: "#FFFFFF",
-          formatter: (value: number): string => (value === 0 ? "" : `${value}%`), // Скрываем 0%
+          formatter: (value: number): string => (value === 0 ? "" : `${value}%`), 
         }
       }]
     };
@@ -309,7 +295,6 @@ export function processProgressRatings(
   questions: Question[],
   language: "ru" | "ky"
 ): { [key: string]: number } {
-  // Задаем заголовки вопросов в зависимости от языка
   const questionTitles: { [key: number]: string } =
     language === "ru"
       ? {
@@ -325,19 +310,16 @@ export function processProgressRatings(
           17: "Судьянын ишине жалпы баа берүү",
         };
 
-  // Инициализируем объект для хранения сумм и количества ответов
   const ratingSums: { [key: string]: { sum: number; count: number } } = {};
   Object.values(questionTitles).forEach((title) => {
     ratingSums[title] = { sum: 0, count: 0 };
   });
 
-  // Обрабатываем каждый вопрос
   questions.forEach((question) => {
     if (questionTitles[question.id]) {
       const title = questionTitles[question.id];
       question.question_responses.forEach((response) => {
         if (response.selected_option) {
-          // Выбираем текст ответа в зависимости от языка
           const ratingStr =
             language === "ru"
               ? response.selected_option!.text_ru
@@ -352,7 +334,6 @@ export function processProgressRatings(
     }
   });
 
-  // Вычисляем средние значения
   const averageRatings: { [key: string]: number } = {};
   Object.entries(ratingSums).forEach(([title, { sum, count }]) => {
     averageRatings[title] = count > 0 ? Number((sum / count).toFixed(1)) : 0;
@@ -365,7 +346,6 @@ export function processStaffRatings(
   questions: Question[],
   language: "ru" | "ky"
 ): { [key: string]: number } {
-  // Задаём заголовки вопросов в зависимости от языка
   const questionTitles: { [key: number]: string } =
     language === "ru"
       ? {
@@ -377,15 +357,12 @@ export function processStaffRatings(
           9: "Бардык керектүү маалыматтарды берүү"
         };
 
-  // Инициализируем объект для хранения сумм и количества ответов
   const ratingSums: { [key: string]: { sum: number; count: number } } = {};
   
-  // Инициализируем все заголовки с нулевыми значениями
   Object.values(questionTitles).forEach(title => {
     ratingSums[title] = { sum: 0, count: 0 };
   });
 
-  // Обрабатываем каждый вопрос
   questions.forEach(question => {
     if (questionTitles[question.id]) {
       const title = questionTitles[question.id];
@@ -406,7 +383,6 @@ export function processStaffRatings(
     }
   });
 
-  // Вычисляем средние значения
   const averageRatings: { [key: string]: number } = {};
   Object.entries(ratingSums).forEach(([title, { sum, count }]) => {
     averageRatings[title] = count > 0 ? Number((sum / count).toFixed(1)) : 0;
@@ -419,19 +395,16 @@ export function processProcessRatings(
   questions: Question[],
   language: "ru" | "ky"
 ): { [key: string]: number } {
-  // Определяем заголовки вопросов в зависимости от языка
   const questionTitles: { [key: number]: string } =
     language === "ru"
       ? { 10: "Оценка судебного процесса" }
-      : { 10: "Сот процессине баа берүү" }; // Пример перевода для кыргызского
+      : { 10: "Сот процессине баа берүү" }; 
 
-  // Инициализируем объект для хранения сумм и количества ответов
   const ratingSums: { [key: string]: { sum: number; count: number } } = {};
   Object.values(questionTitles).forEach(title => {
     ratingSums[title] = { sum: 0, count: 0 };
   });
 
-  // Обрабатываем каждый вопрос
   questions.forEach(question => {
     if (questionTitles[question.id]) {
       const title = questionTitles[question.id];
@@ -451,7 +424,6 @@ export function processProcessRatings(
     }
   });
 
-  // Вычисляем средние значения
   const averageRatings: { [key: string]: number } = {};
   Object.entries(ratingSums).forEach(([title, { sum, count }]) => {
     averageRatings[title] = count > 0 ? Number((sum / count).toFixed(1)) : 0;
@@ -464,19 +436,16 @@ export function processOfficeRatings(
   questions: Question[],
   language: "ru" | "ky"
 ): { [key: string]: number } {
-  // Определяем заголовки вопросов в зависимости от языка
   const questionTitles: { [key: number]: string } =
     language === "ru"
       ? { 8: "Предоставление всей необходимой информации" }
       : { 8: "Бардык керектүү маалыматтарды берүү" }; 
 
-  // Инициализируем объект для хранения сумм и количества ответов
   const ratingSums: { [key: string]: { sum: number; count: number } } = {};
   Object.values(questionTitles).forEach(title => {
     ratingSums[title] = { sum: 0, count: 0 };
   });
 
-  // Обрабатываем каждый вопрос
   questions.forEach(question => {
     if (questionTitles[question.id]) {
       const title = questionTitles[question.id];
@@ -496,7 +465,6 @@ export function processOfficeRatings(
     }
   });
 
-  // Вычисляем средние значения
   const averageRatings: { [key: string]: number } = {};
   Object.entries(ratingSums).forEach(([title, { sum, count }]) => {
     averageRatings[title] = count > 0 ? Number((sum / count).toFixed(1)) : 0;
@@ -509,19 +477,16 @@ export function processAccessibilityRatings(
   questions: Question[],
   language: "ru" | "ky"
 ): { [key: string]: number } {
-  // Определяем заголовки вопросов в зависимости от языка
   const questionTitles: { [key: number]: string } =
     language === "ru"
       ? { 6: "Доступность здания суда для людей с инвалидностью и маломобильных категорий" }
-      : { 6: "Майыптыгы бар жана аз кыймылдуу категориядагы адамдар үчүн сот имаратынын жеткиликтүүлүгү" }; // Пример перевода на кыргызский
+      : { 6: "Майыптыгы бар жана аз кыймылдуу категориядагы адамдар үчүн сот имаратынын жеткиликтүүлүгү" }; 
 
-  // Инициализируем объект для хранения сумм и количества ответов
   const ratingSums: { [key: string]: { sum: number; count: number } } = {};
   Object.values(questionTitles).forEach(title => {
     ratingSums[title] = { sum: 0, count: 0 };
   });
 
-  // Обрабатываем каждый вопрос
   questions.forEach(question => {
     if (questionTitles[question.id]) {
       const title = questionTitles[question.id];
@@ -541,7 +506,6 @@ export function processAccessibilityRatings(
     }
   });
 
-  // Вычисляем средние значения
   const averageRatings: { [key: string]: number } = {};
   Object.entries(ratingSums).forEach(([title, { sum, count }]) => {
     averageRatings[title] = count > 0 ? Number((sum / count).toFixed(1)) : 0;
@@ -587,9 +551,9 @@ export function processStartTimeQuestion(
     });
 
     const colors = [
-      "rgb(54, 162, 235)", // Да / Ооба — синий
-      "rgb(255, 99, 132)", // Нет / Жок — красный
-      "rgb(153, 102, 255)" // Другое / Башка — фиолетовый
+      "rgb(54, 162, 235)",
+      "rgb(255, 99, 132)", 
+      "rgb(153, 102, 255)" 
     ];
 
     return {
@@ -600,7 +564,7 @@ export function processStartTimeQuestion(
           backgroundColor: colors,
           datalabels: {
             color: "#FFFFFF",
-            formatter: (value: number): string => (value === 0 ? "" : `${value}%`), // Скрываем 0%
+            formatter: (value: number): string => (value === 0 ? "" : `${value}%`), 
           }
         }
       ]
@@ -721,7 +685,7 @@ function getEmptyDisrespectData() {
 
     responses.forEach(response => {
       if (response.selected_option) {
-        const ageGroupIndex = response.selected_option.id - 13; // Измените 13 на минимальный id для возрастных групп
+        const ageGroupIndex = response.selected_option.id - 13;
         if (ageGroupIndex >= 0 && ageGroupIndex < ageCounts.length) {
           ageCounts[ageGroupIndex]++;
         }
@@ -752,10 +716,8 @@ function getEmptyDisrespectData() {
     genderResponses: QuestionResponse[],
     ageResponses: QuestionResponse[]
   ) {
-    // Статичные возрастные группы
     const ageGroups = ["18-29", "30-44", "45-59", "60+"];
   
-    // Структура для хранения данных
     const groupedData: Record<string, { Мужской: number; Женский: number }> = {
       "18-29": { Мужской: 0, Женский: 0 },
       "30-44": { Мужской: 0, Женский: 0 },
@@ -763,13 +725,11 @@ function getEmptyDisrespectData() {
       "60+": { Мужской: 0, Женский: 0 },
     };
   
-    // Заполняем данные
     for (let i = 0; i < genderResponses.length; i++) {
       const gender = genderResponses[i]?.selected_option?.text_ru;
       let age = ageResponses[i]?.selected_option?.text_ru;
   
       if (age) {
-        // Нормализуем возраст: убираем пробелы и заменяем en‑dash на дефис
         age = age.replace(/–/g, "-").replace(/\s/g, "");
       }
   
@@ -778,7 +738,6 @@ function getEmptyDisrespectData() {
       }
     }
   
-    // Вычисляем процентное соотношение для каждой возрастной группы
     const maleData: number[] = [];
     const femaleData: number[] = [];
   
@@ -790,17 +749,15 @@ function getEmptyDisrespectData() {
       femaleData.push(femalePercentage);
     });
   
-    // Проверяем, есть ли данные для каждого пола
-    const hasMaleData = maleData.some((value) => value !== 0); // Есть ли ненулевые данные для Мужского
-    const hasFemaleData = femaleData.some((value) => value !== 0); // Есть ли ненулевые данные для Женского
+    const hasMaleData = maleData.some((value) => value !== 0); 
+    const hasFemaleData = femaleData.some((value) => value !== 0); 
   
-    // Формируем datasets, исключая гендерные категории без данных
     const datasets: Array<{ label: string; data: number[]; backgroundColor: string }> = [];
   
     if (hasMaleData) {
       datasets.push({
         label: "Мужской",
-        data: maleData, // Отрицательные проценты для торнадо-диаграммы
+        data: maleData,
         backgroundColor: "rgb(51, 153, 255)",
       });
     }
@@ -813,7 +770,6 @@ function getEmptyDisrespectData() {
       });
     }
   
-    // Если нет данных вообще, возвращаем пустую диаграмму
     if (datasets.length === 0) {
       return {
         labels: ageGroups,
@@ -833,7 +789,7 @@ function getEmptyDisrespectData() {
     }
   
     return {
-      labels: ageGroups, // Оставляем все возрастные группы
-      datasets: datasets, // Только те гендерные категории, у которых есть данные
+      labels: ageGroups, 
+      datasets: datasets, 
     };
   }

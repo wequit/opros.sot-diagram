@@ -1,7 +1,7 @@
 'use client'
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { setCookie, getCookie, deleteCookie, getCurrentUser } from '@/lib/login';
+import { setCookie, getCookie, deleteCookie, getCurrentUser } from '@/lib/api/login';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -18,7 +18,6 @@ const AuthContext = createContext<AuthContextType>({
   getToken: () => null,
   user: null
 });
-// const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

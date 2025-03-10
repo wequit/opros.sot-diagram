@@ -17,18 +17,15 @@
 //     }
 //   }
 
-//   console.log("⏳ Zustand store initialized. Stored data:", storedData);
 
 //   return {
 //     data: storedData,
 //     isLoading: storedData ? false : true,
 //     setData: (data) => {
-//       console.log("✅ Data set in Zustand:", data);
 //       set({ data, isLoading: false });
 //       localStorage.setItem("surveyData", JSON.stringify(data));
 //     },
 //     setIsLoading: (loading) => {
-//       console.log(`🔄 isLoading changed: ${loading}`);
 //       set({ isLoading: loading });
 //     },
 //   };

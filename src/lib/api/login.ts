@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useState, useEffect, useRef } from 'react';
 
@@ -25,6 +25,9 @@ interface RegionAssessmentData {
   total_survey_responses: number;
 }
 
+const cache: { [key: string]: { data: any; timestamp: number } } = {};
+const CACHE_TTL = 1000 * 60 * 60; 
+
 export const setCookie = (name: string, value: string, days = 7) => {
   const expires = new Date(Date.now() + days * 864e5).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; Secure; SameSite=Strict`;
@@ -47,7 +50,7 @@ export const deleteCookie = (name: string) => {
 
 export const isTokenExpired = (token: string): boolean => {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1])); 
+    const payload = JSON.parse(atob(token.split('.')[1]));
     const currentTime = Math.floor(Date.now() / 1000);
     return payload.exp < currentTime;
   } catch (error) {
@@ -56,13 +59,21 @@ export const isTokenExpired = (token: string): boolean => {
 };
 
 export const reLogin = async (refreshToken: string): Promise<string | null> => {
+  const cacheKey = `reLogin-${refreshToken}`;
+  const cached = cache[cacheKey];
+  const now = Date.now();
+
+  if (cached && now - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
   try {
     const response = await fetch('https://opros.sot.kg:443/api/v1/login/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ refresh: refreshToken }), 
+      body: JSON.stringify({ refresh: refreshToken }),
     });
 
     if (!response.ok) {
@@ -74,6 +85,7 @@ export const reLogin = async (refreshToken: string): Promise<string | null> => {
     const data: LoginResponse = await response.json();
     setCookie('access_token', data.access);
     setCookie('refresh_token', data.refresh);
+    cache[cacheKey] = { data: data.access, timestamp: now };
     return data.access;
   } catch (error) {
     console.error('Ошибка при обновлении токенов:', error);
@@ -88,6 +100,14 @@ const handleUnauthorized = () => {
 };
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  const cacheKey = `${url}-${JSON.stringify(options)}`;
+  const cached = cache[cacheKey];
+  const now = Date.now();
+
+  if (cached && now - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
   let accessToken = getCookie('access_token');
   const refreshToken = getCookie('refresh_token');
 
@@ -123,7 +143,9 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
     throw new Error('Ошибка выполнения запроса');
   }
 
-  return response.json();
+  const data = await response.json();
+  cache[cacheKey] = { data, timestamp: now };
+  return data;
 };
 
 export const getAssessmentData = async () => {
@@ -139,8 +161,16 @@ export const getRadarRepublicData = async () => {
 };
 
 export const getRayonAssessmentData = async () => {
+  const cacheKey = 'getRayonAssessmentData';
+  const cached = cache[cacheKey];
+  const now = Date.now();
+
+  if (cached && now - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
   const token = getCookie('access_token');
-  
+
   try {
     const response = await fetch('https://opros.sot.kg/api/v1/assessment/rayon/', {
       method: 'GET',
@@ -155,15 +185,24 @@ export const getRayonAssessmentData = async () => {
     }
 
     const data = await response.json();
+    cache[cacheKey] = { data, timestamp: now };
     return data;
   } catch (error) {
-    console.error('Error fetching rayon assessment data:', error);
+    console.error('Ошибка при получении данных rayon assessment:', error);
     throw error;
   }
 };
 
 export const loginApi = {
   login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
+    const cacheKey = `login-${JSON.stringify(credentials)}`;
+    const cached = cache[cacheKey];
+    const now = Date.now();
+
+    if (cached && now - cached.timestamp < CACHE_TTL) {
+      return cached.data;
+    }
+
     const response = await fetch('https://opros.sot.kg:443/api/v1/login/', {
       method: 'POST',
       headers: {
@@ -180,6 +219,7 @@ export const loginApi = {
     const data: LoginResponse = await response.json();
     setCookie('access_token', data.access);
     setCookie('refresh_token', data.refresh);
+    cache[cacheKey] = { data, timestamp: now };
     return data;
   },
 };
@@ -201,7 +241,8 @@ export const useFetchAssessmentData = () => {
           dataRef.current = response;
           setData(response);
         }
-      } catch (error) {
+      } catch (err) {
+        setError(err instanceof Error ? err : new Error('Неизвестная ошибка'));
       } finally {
         setIsLoading(false);
       }
@@ -210,5 +251,9 @@ export const useFetchAssessmentData = () => {
     fetchData();
   }, []);
 
-  return { data, isLoading, error };  
+  return { data, isLoading, error };
+};
+
+export const clearCache = () => {
+  Object.keys(cache).forEach((key) => delete cache[key]);
 };

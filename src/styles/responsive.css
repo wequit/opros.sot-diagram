@@ -224,7 +224,8 @@
     @apply text-lg;
   }
 
-  .DiagrammNineName {
+  .RadarHeight{
+    @apply h-[300px]
   }
 }
 

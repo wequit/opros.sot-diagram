@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { loginApi } from "@/lib/login";
+import { loginApi } from "@/lib/api/login";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import { FiUser, FiLock } from "react-icons/fi";

@@ -71,14 +71,15 @@ interface RegionData {
 interface SurveyContextType {
   surveyData: SurveyData | null;
   setSurveyData: (data: SurveyData | null) => void;
+  totalResponses: number; 
   isLoading: boolean;
   setIsLoading: (loading: boolean) => void;
   userCourt: string | null;
   setUserCourt: (court: string | null) => void;
   courtName: string | null;
   setCourtName: (name: string | null) => void;
-  courtNameId: string | null; // Добавляем тип для нового состояния
-  setCourtNameId: (nameId: string | null) => void; // Типизируем setter
+  courtNameId: string | null;
+  setCourtNameId: (nameId: string | null) => void;
   language: Language;
   setLanguage: (lang: Language) => void;
   toggleLanguage: () => void;
@@ -96,15 +97,22 @@ const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
 
 export function SurveyProvider({ children }: { children: ReactNode }) {
   const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true); // Явно указываем тип boolean
+  const [totalResponses, setTotalResponses] = useState<number>(0); 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userCourt, setUserCourt] = useState<string | null>(null);
   const [courtName, setCourtName] = useState<string | null>(null);
-  const [courtNameId, setCourtNameId] = useState<string | null>(null); // Добавляем тип для нового состояния
+  const [courtNameId, setCourtNameId] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("ru");
   const [selectedCourt, setSelectedCourt] = useState<CourtData | null>(null);
   const [selectedCourtName, setSelectedCourtName] = useState<string | null>(null);
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionData[] | null>(null);
+
+  useEffect(() => {
+    if (typeof surveyData?.total_responses === "number" && surveyData?.total_responses >= 0) {
+      setTotalResponses(surveyData.total_responses);
+    }
+  }, [surveyData]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -126,6 +134,7 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
       value={{
         surveyData,
         setSurveyData,
+        totalResponses, 
         isLoading,
         setIsLoading,
         userCourt,
@@ -152,15 +161,11 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function getTranslation(
-  key: keyof typeof ru,
-  language: Language
-): string {
+export function getTranslation(key: keyof typeof ru, language: Language): string {
   const translations: Record<Language, typeof ru> = {
     ru,
     ky,
   };
-
   return translations[language][key] || key;
 }
 

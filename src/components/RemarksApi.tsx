@@ -1,6 +1,6 @@
 "use client";
 
-import { getCookie, getCurrentUser } from "@/lib/login";
+import { getCookie, getCurrentUser } from "@/lib/api/login";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useSurveyData } from "@/context/SurveyContext";
@@ -28,7 +28,6 @@ export function useRemarks() {
   const { selectedCourt, courtName, selectedCourtName, selectedCourtId,  } =
     useSurveyData();
 
-  // Функция фильтрации внутри хука
   const filterRemarks = (
     remarks: Remark[],
     user: any,
@@ -42,7 +41,6 @@ export function useRemarks() {
     const courtNameId = localStorage.getItem("courtNameId");
     const courtNAME = localStorage.getItem("courtName");
     const setCourtName = localStorage.getItem("courtName2");
-    console.log("setCourtName",setCourtName)
     
     return remarks.filter((item: Remark) => {
       if (
@@ -106,7 +104,6 @@ export function useRemarks() {
         );
       }
 
-      // Default condition
       return (
         item.custom_answer !== null &&
         item.custom_answer !== "Необязательный вопрос"
@@ -123,7 +120,6 @@ export function useRemarks() {
       setIsLoading(true);
       const token = getCookie("access_token");
 
-      // Получаем текущего пользователя
       const user = await getCurrentUser();
 
       const response = await fetch("https://opros.sot.kg/api/v1/comments/", {
@@ -140,7 +136,6 @@ export function useRemarks() {
 
       const data = await response.json();
 
-      // Применяем фильтр к данным
       const filteredData = filterRemarks(
         data,
         user,
@@ -169,7 +164,7 @@ export function useRemarks() {
 
   useEffect(() => {
     fetchRemarks();
-  }, [selectedCourt, courtName, selectedCourtName, selectedCourtId]); // Обновляем данные при изменении зависимостей
+  }, [selectedCourt, courtName, selectedCourtName, selectedCourtId]);
 
   return { remarks, isLoading, error, fetchRemarks };
 }

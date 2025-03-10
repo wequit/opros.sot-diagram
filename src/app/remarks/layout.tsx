@@ -2,7 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import { SurveyProvider } from "@/context/SurveyContext";
-import "@/styles/responsiveRemarks.css"; // Только этот файл будет влиять на компонент
+import "@/styles/responsiveRemarks.css";
 
 export default function RegionalCourtsLayout({ children }: { children: React.ReactNode }) {
   return (

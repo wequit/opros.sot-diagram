@@ -46,10 +46,8 @@ export class ApiClient {
         queryParams.append('end_date', params.endDate || '2025-12-31');
       }
 
-      // Формируем URL без лишнего слэша
       let path = this.endpoint;
       if (courtId) {
-        // Если courtId — строка, преобразуем её в число или используем как есть, если это не число
         const effectiveCourtId = typeof courtId === 'string' ? parseInt(courtId, 10) || courtId : courtId;
         path += `${effectiveCourtId}/`;
       }

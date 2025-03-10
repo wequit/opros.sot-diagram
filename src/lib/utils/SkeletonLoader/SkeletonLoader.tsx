@@ -22,7 +22,6 @@ export default function SkeletonDashboard() {
                   </div>
                 </>
               ) : index === 1 ? (
-                // Вторая карточка
                 <>
                   <div className="flex justify-between">
                     <div className="h-6 w-1/3 bg-gray-300 rounded-md animate-shimmer"></div>
@@ -39,7 +38,6 @@ export default function SkeletonDashboard() {
                   <div className="h-8 w-full bg-gray-200 rounded-md animate-shimmer"></div>
                 </>
               ) : (
-                // Остальные карточки
                 <>
                   <div className="h-6 w-1/3 bg-gray-300 rounded-md animate-shimmer"></div>
                   <div className="h-[400px] bg-gray-100 rounded-lg animate-shimmer"></div>

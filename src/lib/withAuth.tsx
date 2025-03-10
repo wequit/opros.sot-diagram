@@ -1,7 +1,7 @@
 "use client";
 import React, { ComponentType, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getCookie, deleteCookie, isTokenExpired, reLogin } from "@/lib/login";
+import { getCookie, deleteCookie, isTokenExpired, reLogin } from "@/lib/api/login";
 
 export const withAuth = (WrappedComponent: ComponentType) => {
   return function AuthenticatedComponent(props: any) {

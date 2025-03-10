@@ -15,7 +15,6 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onConfirm })
     if (isOpen) {
       document.body.style.overflow = 'hidden';
       
-      // Добавляем стили для предотвращения скролла
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.paddingRight = `${scrollbarWidth}px`;
     } else {

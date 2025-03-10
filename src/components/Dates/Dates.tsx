@@ -16,7 +16,6 @@ interface Period {
   label: string;
 }
 
-// Define the structure of a question's selected option
 interface SelectedOption {
   id: number;
   text_ru: string;
@@ -87,9 +86,9 @@ export default function Dates() {
         const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
         courtId = numericCourtId;
       } else if (pathname === "/maps/General") {
-        courtId = 65; // Статичный courtId для пути /maps/General
+        courtId = 65;
       } else if (pathname === "/") {
-        courtId = null; // Для пути '/' не добавляем courtId
+        courtId = null; 
       }
 
       const params = { year: selectedYear };
@@ -100,7 +99,6 @@ export default function Dates() {
     }
   };
 
-  // Объединяем кварталы и месяцы в один массив
   const periods: Period[] = [
     { id: 0, type: "quarter", label: "I" },
     { id: 1, type: "quarter", label: "II" },
@@ -202,13 +200,13 @@ export default function Dates() {
           const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
           courtId = numericCourtId;
         } else if (pathname === "/maps/General") {
-          courtId = 65; // Статичный courtId для пути /maps/General
+          courtId = 65;
         } else if (pathname === "") {
-          courtId = null; // Для пути '/' не добавляем courtId
+          courtId = null; 
         }
 
         const response = await fetchDataWithParams(courtId, params);
-        setSurveyData(response);
+        setSurveyData({ ...response })
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
       }
@@ -239,9 +237,9 @@ export default function Dates() {
           const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
           courtId = numericCourtId;
         } else if (pathname === "/maps/General") {
-          courtId = 65; // Статичный courtId для пути /maps/General
+          courtId = 65;
         } else if (pathname === "/") {
-          courtId = null; // Для пути '/' не добавляем courtId
+          courtId = null;
         }
 
         const response = await fetchDataWithParams(courtId, params);
@@ -317,7 +315,7 @@ export default function Dates() {
                     onClick={() => handleYearSelect(year)}
                     className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors ${
                       dateRange.year === year ? "bg-blue-100 font-semibold" : ""
-                    }`} // Подсвечивает 2025 по умолчанию
+                    }`} 
                   >
                     {year}
                   </button>
@@ -384,7 +382,7 @@ export default function Dates() {
                         onClick={() => handleYearSelect(year)}
                         className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors ${
                           dateRange.year === year ? "bg-blue-100 font-semibold" : ""
-                        }`} // Подсвечивает 2025 по умолчанию
+                        }`} 
                       >
                         {year}
                       </button>

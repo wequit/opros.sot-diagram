@@ -9,7 +9,7 @@ import {
   FaStar,
   FaArrowUp,
 } from "react-icons/fa";
-import { getRayonAssessmentData, getCookie } from "@/lib/login";
+import { getRayonAssessmentData, getCookie } from "@/lib/api/login";
 import Evaluations from "@/components/Evaluations/page";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Dates from "@/components/Dates/Dates";
@@ -150,7 +150,6 @@ export default function Courts() {
 
   const handleScroll = useCallback(() => {
     if (window.scrollY > 300) {
-      // Показываем кнопку после прокрутки на 300px
       setShowScrollTop(true);
     } else {
       setShowScrollTop(false);
@@ -207,7 +206,7 @@ export default function Courts() {
         const data = await getRayonAssessmentData();
         const transformedCourts = transformApiData(data);
         setCourts(transformedCourts);
-        setFilteredCourts(transformedCourts); // Инициализируем filteredCourts
+        setFilteredCourts(transformedCourts); 
       } catch (error) {
         console.error("Error fetching courts:", error);
       }
@@ -283,7 +282,6 @@ export default function Courts() {
     });
   }, [filteredCourts, sortField, sortDirection]);
 
-  // Обработчик поиска с debounce
   const debouncedSearch = useCallback(
     debounce((query: string) => {
       setSearchQuery(query);

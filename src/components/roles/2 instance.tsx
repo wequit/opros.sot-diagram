@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getAssessmentData, getCookie } from "@/lib/login";
+import { getAssessmentData, getCookie } from "@/lib/api/login";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
@@ -63,7 +63,6 @@ const SecondInstance = () => {
         const data = await response.json();
         setCurrentUser(data);
         
-        // Определяем регион на основе суда пользователя
         if (data.role === "Председатель 2 инстанции") {
           const regionName = getRegionFromCourt(data.court);
           setUserRegion(regionName);
@@ -189,7 +188,6 @@ const SecondInstance = () => {
     setCourtName(court.court);
     await fetchResults(court.court_id);
     localStorage.setItem("courtName2", court.court);
-    console.log("courtName2", courtName)
   };
 
   const handleBackClick = () => {

@@ -17,7 +17,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const { language } = useSurveyData();
 
-  // Не показываем сайдбар на странице логина
   if (!isAuthenticated || pathname === "/login") {
     return null;
   }
