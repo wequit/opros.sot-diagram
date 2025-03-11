@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
-import rayonData from "../../../../../public/gadm41_KGZ_2.json";
+import rayonData from "../../../../public/gadm41_KGZ_2.json";
 import { FiMinus, FiPlus, FiRefreshCw } from "react-icons/fi";
 
 const rayonToCourtMapping: { [key: string]: string } = {

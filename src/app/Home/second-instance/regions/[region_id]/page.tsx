@@ -1,7 +1,7 @@
 "use client";
 
 import { getCookie } from "@/lib/api/login";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { useSurveyData } from "@/context/SurveyContext";
 import React, {
   useCallback,
   useState,
@@ -14,8 +14,8 @@ import Evaluations from "@/components/Evaluations/page";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import * as d3 from "d3";
 import { GeoPermissibleObjects } from "d3-geo";
-import geoData from "../../../../../public/gadm41_KGZ_1.json";
-import districtsGeoData from "../../../../../public/gadm41_KGZ_2.json";
+import geoData from "../../../../../../public/gadm41_KGZ_1.json";
+import districtsGeoData from "../../../../../../public/gadm41_KGZ_2.json";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 
 const getRatingColor = (rating: number) => {
@@ -184,6 +184,7 @@ type SortField =
   | "office"
   | "building"
   | "count"
+  | "name"
   | null;
 type SortDirection = "asc" | "desc" | null;
 
@@ -294,10 +295,10 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     setSelectedCourtId,
   } = useSurveyData();
 
-  const [sortField, setSortField] = useState<SortField>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(null);
+  const [sortField, setSortField] = useState<SortField>("name");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [searchQuery, setSearchQuery] = useState("");
-  const {  language  } = useSurveyData();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -358,6 +359,10 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
           aValue = a.overall;
           bValue = b.overall;
           break;
+        case "name":
+          aValue = a.name.localeCompare(b.name, 'ru', {sensitivity: 'base'});
+          bValue = b.name.localeCompare(a.name, 'ru', {sensitivity: 'base'});
+          break;
         default:
           return 0;
       }
@@ -383,7 +388,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
       if (!token) throw new Error("Token is null");
 
       const response = await fetch(
-        `https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`,
+        `https://opros.sot.kg/api/v1/${courtId}/?year=2025`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -401,10 +406,11 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
       setSurveyData(data);
       setIsLoading(false);
 
+      // Добавляем состояние в историю браузера
       window.history.pushState(
         { courtId, courtName },
         "",
-        `/Region-details/${courtId}`
+        `/region-details/${regionName}/${courtId}`
       );
     } catch (error) {
       console.error("Ошибка при получении данных суда:", error);
@@ -415,7 +421,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     setSelectedCourtId(null);
     setSelectedCourtName(null);
     setSurveyData(null);
-    window.history.back();
+    window.history.back(); // Возвращаемся назад в истории
   };
 
   const handleRegionBackClick = () => {
@@ -426,23 +432,26 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     window.history.pushState(
       { regionName: null },
       "",
-      "/maps/oblast/Regional-Courts" 
+      "/Home/second-instance/regions" // Указываем базовый маршрут
     );
   };
 
+  // Перехватываем событие "назад" для очистки состояния
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       if (selectedCourtId) {
+        // Если мы в деталях суда, очищаем только детали суда
         setSelectedCourtId(null);
         setSelectedCourtName(null);
         setSurveyData(null);
       } else if (selectedRegion) {
+        // Если мы в списке судов региона, очищаем регион
         setSelectedRegion(null);
         setSelectedCourtId(null);
         setSelectedCourtName(null);
         setSurveyData(null);
       }
-      event.preventDefault(); 
+      event.preventDefault(); // Предотвращаем стандартное поведение
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -598,6 +607,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                     d3.select("#tooltip").style("display", "none");
                   });
 
+                // Добавляем текст с оценками
                 const textGroup = g.append("g").attr("class", "rating-labels");
 
                 textGroup
@@ -735,7 +745,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     return "bg-green-100";
   }
 
-  const svgRef = useRef<SVGSVGElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
@@ -784,6 +793,28 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     };
   }, [selectedRegion, regionName]);
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (!value) {
+      setIsSearchOpen(false);
+    }
+  };
+
+  const handleSearchIconClick = () => {
+    setIsSearchOpen(!isSearchOpen);
+    if (isSearchOpen) {
+      setSearchQuery('');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setIsSearchOpen(false);
+      setSearchQuery('');
+    }
+  };
+
   return (
     <>
       {selectedCourtId ? (
@@ -814,32 +845,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
               {renderRegionMap()}
               <div className="bg-white rounded-xl shadow-sm border border-gray-100">
                 <div className="overflow-x-auto">
-                  <div className="relative w-full max-w-[13rem] my-2 ml-4 RegionDetailsSearch">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder={getTranslation("Regional_Courts_Table_Search", language)}
-                      className="w-full pl-10 pr-4 py-2.5 text-sm text-gray-900 bg-white rounded-lg focus:outline-none transition-all duration-200 ease-in-out placeholder-gray-500"
-                    />
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                      <svg
-                        className="w-5 h-5 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                      </svg>
-                    </div>
-                  </div>
-
                   {/* Таблица для десктопа (≥ 640px) */}
                   <div className="hidden sm:block overflow-x-auto">
                     <table className="w-full border-collapse">
@@ -848,15 +853,53 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                           <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                             №
                           </th>
-                          <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                          {getTranslation("Regional_Courts_Table_NameRegion", language)}
+                          <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200" style={{ width: '20%', minWidth: '250px' }}>
+                            <div className="flex items-center justify-between">
+                              <span className="truncate mr-2">НАИМЕНОВАНИЕ СУДА</span>
+                              <div className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${
+                                isSearchOpen ? 'w-36' : 'w-8'
+                              }`}>
+                                <div className={`flex-grow transition-all duration-500 ease-in-out ${
+                                  isSearchOpen ? 'opacity-100 w-full' : 'opacity-0 w-0'
+                                }`}>
+                                  <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={handleSearchChange}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Поиск суда"
+                                    className="w-full px-2 py-1.5 text-xs text-gray-900 bg-white border border-gray-300 rounded-lg outline-none"
+                                    autoFocus={isSearchOpen}
+                                  />
+                                </div>
+                                <div 
+                                  className="cursor-pointer p-1.5 hover:bg-gray-100 rounded-full flex-shrink-0"
+                                  onClick={handleSearchIconClick}
+                                >
+                                  <svg
+                                    className="w-4 h-4 text-gray-500"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
+                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                    />
+                                  </svg>
+                                </div>
+                              </div>
+                            </div>
                           </th>
                           <th
                             className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                             onClick={() => handleSort("overall")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>  {getTranslation("Regional_Courts_Table_Overall", language)}</span>
+                              <span>Общая оценка</span>
                               {getSortIcon("overall")}
                             </div>
                           </th>
@@ -865,7 +908,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("building")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span> {getTranslation("Regional_Courts_Table_Build", language)}</span>
+                              <span>Здание</span>
                               {getSortIcon("building")}
                             </div>
                           </th>
@@ -874,7 +917,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("office")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
+                              <span>Канцелярия</span>
                               {getSortIcon("office")}
                             </div>
                           </th>
@@ -883,7 +926,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("process")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
+                              <span>Процесс</span>
                               {getSortIcon("process")}
                             </div>
                           </th>
@@ -892,7 +935,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("staff")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
+                              <span>Сотрудники</span>
                               {getSortIcon("staff")}
                             </div>
                           </th>
@@ -901,7 +944,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("judge")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
+                              <span>Судья</span>
                               {getSortIcon("judge")}
                             </div>
                           </th>
@@ -910,7 +953,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             onClick={() => handleSort("count")}
                           >
                             <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Number of reviews", language)}</span>
+                              <span>Количество оценок</span>
                             </div>
                           </th>
                         </tr>

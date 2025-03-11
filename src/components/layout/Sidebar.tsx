@@ -84,29 +84,29 @@ export default function Sidebar({ onClose }: SidebarProps) {
             </Link>
 
             <Link
-              href="/maps/oblast/Regional-Courts"
+              href="/Home/second-instance/regions"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/maps/oblast/Regional-Courts")
+              isActivePath("/Home/second-instance/regions")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
           `}
             >
-              <MdMap className="w-6 h-6" />
+              <MdMap className="w-6 h-6 " />
               <span>{getTranslation("HeaderNavThree", language)}</span>
             </Link>
 
 
             <Link
-              href="/maps/rayon/District-Courts"
+              href="/Home/first-instance/ratings"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/maps/rayon/District-Courts")
+              isActivePath("/Home/first-instance/ratings")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }

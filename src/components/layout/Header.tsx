@@ -62,7 +62,7 @@ const Header: React.FC = () => {
               >
                 <HiMenu className="w-6 h-6 text-gray-600" />
               </button>
-              <Link href="/">
+              <Link href="/Home/summary/ratings">
                 <Image
                   src={logo}
                   alt="Логотип"
@@ -75,7 +75,7 @@ const Header: React.FC = () => {
           )}
           {windowWidth > 1024 && (
             <div className="flex items-center gap-3">
-              <Link href="/">
+              <Link href="/Home/summary/ratings">
                 <Image
                   src={logo}
                   alt="Логотип"
@@ -88,11 +88,11 @@ const Header: React.FC = () => {
               {user?.role === "Председатель 3 инстанции" ? (
                 <div className="flex space-x-3 p-2 rounded-xl  ">
                   <Link
-                    href="/"
+                    href="/Home/summary/ratings"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                     pathname === "/"
+                     pathname === "/Home/summary/ratings"
                        ? "text-gray-600 bg-blue-50 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}
@@ -101,11 +101,11 @@ const Header: React.FC = () => {
                   </Link>
 
                   <Link
-                    href="//maps/General"
+                    href="/Home/supreme-court/ratings"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                     pathname === "/maps/General"
+                     pathname === "/Home/supreme-court/ratings"
                        ? "text-blue-600 bg-blue-100 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}
@@ -114,11 +114,11 @@ const Header: React.FC = () => {
                   </Link>
 
                   <Link
-                    href="/maps/oblast/Regional-Courts"
+                    href="/Home/second-instance/regions"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                     pathname === "/maps/oblast/Regional-Courts"
+                     pathname === "/Home/second-instance/regions"
                        ? "text-blue-600 bg-blue-100 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}
@@ -127,11 +127,11 @@ const Header: React.FC = () => {
                   </Link>
 
                   <Link
-                    href="/maps/rayon/District-Courts"
+                    href="/Home/first-instance/ratings"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                     pathname === "/maps/rayon/District-Courts"
+                     pathname === "/Home/first-instance/ratings"
                        ? "text-blue-600 bg-blue-100 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}

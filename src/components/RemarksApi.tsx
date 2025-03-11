@@ -60,7 +60,7 @@ export function useRemarks() {
             item.custom_answer !== null &&
             item.custom_answer !== "Необязательный вопрос"
           );
-        } else if (pathname === "/maps/oblast/Regional-Courts") {
+        } else if (pathname === "/Home/second-instance/regions") {
 
           if (selectedCourtName && selectedCourtName === item.court) {
             return (

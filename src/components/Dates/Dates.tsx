@@ -75,7 +75,7 @@ export default function Dates() {
       let courtId: number | null = null;
 
       if (
-        pathname === "/maps/oblast/Regional-Courts" &&
+        pathname === "/Home/second-instance/regions" &&
         selectedCourtId
       ) {
         courtId = selectedCourtId;
@@ -189,7 +189,7 @@ export default function Dates() {
         let courtId: number | null = null;
 
         if (
-          pathname === "/maps/oblast/Regional-Courts" &&
+          pathname === "/Home/second-instance/regions" &&
           selectedCourtId
         ) {
           courtId = selectedCourtId;
@@ -226,7 +226,7 @@ export default function Dates() {
         let courtId: number | null = null;
 
         if (
-          pathname === "/maps/oblast/Regional-Courts" &&
+          pathname === "/Home/second-instance/regions" &&
           selectedCourtId
         ) {
           courtId = selectedCourtId;

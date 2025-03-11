@@ -172,7 +172,7 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
             ];
           } else if (
             user?.role === "Председатель 3 инстанции" &&
-            pathname.includes("/maps/oblast/Regional-Courts")
+            pathname.includes("/Home/second-instance/regions")
           ) {
             newRadarData = [
               {

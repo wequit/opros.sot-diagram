@@ -1,13 +1,13 @@
 "use client";
 
-import Map from "../components/Map_oblast";
+import Map from "../../../../lib/utils/Maps/Map_oblast";
 import { useState, useEffect } from "react";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getAssessmentData, getCookie } from "@/lib/api/login";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
-import RegionDetails from "../components/RegionDetails";
+import RegionDetails from "./[region_id]/page";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 
 type SortDirection = "asc" | "desc" | null;

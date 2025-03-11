@@ -2,7 +2,6 @@
 
 import React, { useCallback, useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
-import { GeoPermissibleObjects } from "d3-geo";
 import geoData from "../../../public/gadm41_KGZ_1.json";
 import districtsGeoData from "../../../public/gadm41_KGZ_2.json";
 
@@ -71,6 +70,7 @@ function getEventCoordinates(event: any) {
   };
 }
 
+// Обновляем интерфейсы
 export interface RegionData {
   id: number;
   name: string;
@@ -86,6 +86,7 @@ interface RegionMapProps {
   onCourtClick: (courtId: number, courtName: string) => void;
 }
 
+// Добавляем типизацию для courtPositionsMap
 interface CourtPositions {
   [key: string]: { [key: string]: [number, number] };
 }
@@ -179,6 +180,7 @@ const courtPositionsMap: CourtPositions = {
   },
 };
 
+// Добавляем типизацию для districtNamesRu
 interface DistrictNames {
   [key: string]: string;
 }
@@ -238,6 +240,7 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
+  // Обработка изменения размера
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current) {
@@ -253,10 +256,12 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Добавляем дополнительный тултип для улучшенного отображения
   useEffect(() => {
     d3.selectAll(".tooltip").remove();
     d3.selectAll("#tooltip").remove();
     
+    // Создаем улучшенный тултип
     d3.select("body")
       .append("div")
       .attr("id", "tooltip")
@@ -272,6 +277,7 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
     };
   }, []);
 
+  // Рендеринг карты
   useEffect(() => {
     if (!regionName || !selectedRegion || !svgRef.current) return;
 
@@ -311,10 +317,12 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
 
     const path = d3.geoPath().projection(projection);
 
+    // Добавляем расчет средней оценки для Бишкека
     const bishkekOverall = isBishkek 
       ? selectedRegion.reduce((sum, court) => sum + court.overall, 0) / (selectedRegion.length || 1)
       : 0;
 
+    // В существующем коде меняем только fill для Бишкека
     g.append("path")
       .datum(regionFeature)
       .attr("d", path as any)
@@ -335,6 +343,7 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
       d3.select("#tooltip").style("display", "none");
     });
 
+    // Если это не Бишкек, рисуем границы районов
     if (!isBishkek) {
       g.selectAll("path.district-border")
         .data(districtFeatures)
@@ -387,6 +396,7 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
           d3.select("#tooltip").style("display", "none");
         });
 
+      // Добавляем текст с оценками
       const textGroup = g.append("g").attr("class", "rating-labels");
 
       textGroup
@@ -409,6 +419,7 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
         });
     }
 
+    // Добавляем маркеры судов
     selectedRegion.forEach((court: any) => {
       const position = courtPositions[court.name];
       if (position) {
