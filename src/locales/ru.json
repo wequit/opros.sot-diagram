@@ -78,6 +78,8 @@
     "RemarksLogic_Error":"Ошибка",
     "RemarksLogic_Loading":"Загрузка данных...",
     "RemarksLogic_Error_Adding":"Ошибка при добавлении комментария",
-    "RemarksLogic_ModalPlaceholder":"Введите ваш комментарий..."
+    "RemarksLogic_ModalPlaceholder":"Введите ваш комментарий...",
+
+    "BreadCrumb_RegionName": "Области"
 
 }

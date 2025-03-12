@@ -149,45 +149,8 @@ export default function Map_oblast({ oblastData }: MapProps) {
       .translate([width / 2, height / 2]);
 
     const path = d3.geoPath().projection(projection);
-
-    // Добавляем статистику
-    const stats = svg
-      .append("g")
-      .attr("class", "stats")
-      .attr("transform", `translate(${width - 1200}, 20)`);
-
-    stats
-      .append("rect")
-      .attr("width", 200)
-      .attr("height", 80)
-      .attr("fill", "white")
-      .attr("rx", 8)
-      .attr("opacity", 0.9)
-      .attr("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.1))");
-
-    // Вычисляем среднюю оценку
-    const averageRating = oblastData.reduce((acc, curr) => acc + curr.overall, 0) / oblastData.length;
-
-    // Вычисляем общее количество отзывов
-    const totalAssessments = oblastData.reduce((acc, curr) => acc + curr.totalAssessments, 0);
-
-    // Добавляем текст статистики
-    stats
-      .append("text")
-      .attr("x", 10)
-      .attr("y", 30)
-      .attr("fill", "#374151")
-      .attr("font-size", "12px")
-      .text(`Средняя оценка областей: ${averageRating.toFixed(1)}`);
-
-    stats
-      .append("text")
-      .attr("x", 10)
-      .attr("y", 55)
-      .attr("fill", "#374151")
-      .attr("font-size", "12px")
-      .text(`Общее количество оценок: ${totalAssessments}`);
-
+   
+    
     // Улучшенная легенда
     const hasData = oblastData && oblastData.length > 0;
     if (hasData) {
@@ -203,7 +166,7 @@ export default function Map_oblast({ oblastData }: MapProps) {
         .attr("fill", "white")
         .attr("rx", 8)
         .attr("opacity", 0.9)
-        .attr("filter", "drop-shadow(0 2px 4px rgba(0,0,0,0.1))");
+        .attr("filter")
 
       legend
         .append("text")

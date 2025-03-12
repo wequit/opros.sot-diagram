@@ -71,5 +71,7 @@
     "RemarksLogic_Error": "Ката",
     "RemarksLogic_Loading": "Маалымат Жүктөө...",
     "RemarksLogic_Error_Adding": "Эскертүү жазылышында үлгүлөр",
-    "RemarksLogic_ModalPlaceholder": "Сиздин эскертүүңүздү жазыңыз..."
+    "RemarksLogic_ModalPlaceholder": "Сиздин эскертүүңүздү жазыңыз...",
+
+      "BreadCrumb_RegionName": "Аймактар"
 }

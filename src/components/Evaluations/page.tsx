@@ -27,13 +27,13 @@ export default function Evaluations({
   const pathname = usePathname();
   const [demographicsView, setDemographicsView] = useState("пол");
 
-  let remarksPath = "/remarks";
-  if (pathname.includes("/maps/General")) {
-    remarksPath = "/remarks/General";
-  } else if (pathname.includes("/Region-details/")) {
-    remarksPath = "/remarks/Regional-Courts";
-  } else if (pathname.includes("/maps/rayon/District-Courts")) {
-    remarksPath = "/remarks/District-Courts";
+  let remarksPath = "/Home/summary/feedbacks";
+  if (pathname.includes("/Home/supreme-court/rating")) {
+    remarksPath = "/Home/supreme-court/feedbacks";
+  } else if (pathname.includes("/Home/second-instance/rating")) {
+    remarksPath = `/Home/second-instance/feedbacks`;
+  } else if (pathname.includes("/Home/first-instance")) {
+    remarksPath = `/Home/first-instance/feedbacks`;
   }
   if (selectedCourtId) remarksPath += `/${selectedCourtId}`;
   if (courtNameId) remarksPath += `/${courtNameId}`;

@@ -14,8 +14,8 @@ import Evaluations from "@/components/Evaluations/page";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import * as d3 from "d3";
 import { GeoPermissibleObjects } from "d3-geo";
-import geoData from "../../../../../../public/gadm41_KGZ_1.json";
-import districtsGeoData from "../../../../../../public/gadm41_KGZ_2.json";
+import geoData from "../../../../../../../public/gadm41_KGZ_1.json";
+import districtsGeoData from "../../../../../../../public/gadm41_KGZ_2.json";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 
 const getRatingColor = (rating: number) => {
@@ -388,7 +388,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
       if (!token) throw new Error("Token is null");
 
       const response = await fetch(
-        `https://opros.sot.kg/api/v1/${courtId}/?year=2025`,
+        `https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -410,7 +410,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
       window.history.pushState(
         { courtId, courtName },
         "",
-        `/region-details/${regionName}/${courtId}`
+        `/results/Home/second-instance/rating/${courtId}`
       );
     } catch (error) {
       console.error("Ошибка при получении данных суда:", error);
@@ -421,7 +421,11 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     setSelectedCourtId(null);
     setSelectedCourtName(null);
     setSurveyData(null);
-    window.history.back(); // Возвращаемся назад в истории
+    window.history.pushState(
+      { regionName: null, courtId: null }, 
+      "",                                 
+      "/Home/second-instance/regions"     
+    );
   };
 
   const handleRegionBackClick = () => {

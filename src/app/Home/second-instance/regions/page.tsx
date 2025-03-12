@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getAssessmentData, getCookie } from "@/lib/api/login";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
-import RegionDetails from "./[region_id]/page";
+import RegionDetails from '@/app/Home/second-instance/regions/[courtId]/rating/page'
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 
 type SortDirection = "asc" | "desc" | null;
@@ -209,7 +209,7 @@ export default function RegionalCourts() {
               regionName={null}
               onRegionBackClick={handleRegionBackClick}
               showHome={true}
-              headerKey="HeaderNavThree"
+              headerKey="BreadCrumb_RegionName"
             />
             <h2 className="text-2xl font-bold RegionName">
             {getTranslation("Regional_Courts_MainName", language)}

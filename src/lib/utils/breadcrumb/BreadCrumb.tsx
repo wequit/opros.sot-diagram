@@ -12,7 +12,7 @@ interface BreadcrumbProps {
   onCourtBackClick?: () => void;
   onRegionBackClick?: () => void; 
   showHome?: boolean; 
-  headerKey?: "HeaderNavThree" | "HeaderNavFour"; 
+  headerKey?: "BreadCrumb_RegionName" | "HeaderNavFour"; 
 }
 
 const Breadcrumb: React.FC<BreadcrumbProps> = ({
@@ -21,13 +21,13 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   onCourtBackClick,
   onRegionBackClick,
   showHome = true, 
-  headerKey = "HeaderNavThree", 
+  headerKey = "BreadCrumb_RegionName", 
 }) => {
   const { language } = useSurveyData();
     const { user } = useAuth();
 
   const effectiveHeaderKey =
-    headerKey || (regionName ? "HeaderNavThree" : "HeaderNavFour");
+    headerKey || (regionName ? "BreadCrumb_RegionName" : "HeaderNavFour");
 
   return (
     <nav
@@ -39,7 +39,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
         {user?.role !== "Председатель 2 инстанции" ? (
         <li className="flex items-center">
           <Link
-            href="/"
+            href="/Home/summary/ratings"
             className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
           >
             {getTranslation("Regional_Courts_Breadcrumbs_Main", language)}

@@ -90,12 +90,13 @@ const Header: React.FC = () => {
                   <Link
                     href="/Home/summary/ratings"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
-                   flex items-center gap-2
-                   ${
-                     pathname === "/Home/summary/ratings"
-                       ? "text-gray-600 bg-blue-50 shadow-inner"
-                       : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
-                   }`}
+    flex items-center gap-2
+    ${
+      pathname === "/Home/summary/ratings" ||
+      pathname === "/Home/summary/feedbacks"
+        ? "text-gray-600 bg-blue-50 shadow-inner"
+        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+    }`}
                   >
                     {getTranslation("HeaderNavOne", language)}
                   </Link>
@@ -105,7 +106,8 @@ const Header: React.FC = () => {
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                     pathname === "/Home/supreme-court/ratings"
+                     pathname === "/Home/supreme-court/ratings" ||
+                     pathname === "/Home/supreme-court/feedbacks" 
                        ? "text-blue-600 bg-blue-100 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}
@@ -118,7 +120,9 @@ const Header: React.FC = () => {
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                     pathname === "/Home/second-instance/regions"
+                     pathname === "/Home/second-instance/regions" ||
+                     pathname === "/Home/second-instance/rating/" ||
+                     pathname === "/Home/second-instance/feedbacks" 
                        ? "text-blue-600 bg-blue-100 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}
@@ -141,8 +145,7 @@ const Header: React.FC = () => {
                 </div>
               ) : (
                 <span className="text-lg font-semibold text-black uppercase">
-                  {user?.role === "Председатель 2 инстанции"
-                    ? '' : ''}
+                  {user?.role === "Председатель 2 инстанции" ? "" : ""}
                 </span>
               )}
             </div>

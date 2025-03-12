@@ -165,10 +165,10 @@ export default function RemarksPage() {
             <h1 className="text-2xl max-sm:text-xl font-bold text-gray-800 tracking-tight text-center sm:text-left RemarksText">
               {getTranslation("RemarksLogic_Remarks", language)}
             </h1>
-            <button
-              onClick={() => router.back()}
-              className="max-sm:px-2 max-sm:py-2  flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
-            >
+              <button
+                onClick={() => router.back()}
+                className="max-sm:px-2 max-sm:py-2  flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+              >
               <ArrowLeft size={18} />
               {getTranslation("RemarksLogic_Back", language)}
             </button>

@@ -187,6 +187,11 @@ export default function Courts() {
       const data = await response.json();
       setSurveyData(data);
       setShowEvaluations(true);
+      window.history.pushState(
+        { courtNameId, courtName },
+        "",
+        `/Home/first-instance/${court.id}`
+      );
     } catch (error) {
       console.error("Error fetching court details:", error);
     } finally {
