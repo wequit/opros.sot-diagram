@@ -151,7 +151,7 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
           };
 
           let newRadarData;
-          if (user?.role === "Председатель 3 инстанции" && pathname === "/") {
+          if (user?.role === "Председатель 3 инстанции" && pathname === "/Home/summary/ratings") {
             newRadarData = [
               {
                 label: "Средние оценки по республике",
@@ -308,27 +308,23 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
         }
 
         if (remarks) {
-          const count = remarks.filter(
-            (remark: { custom_answer: string | null }) =>
-              remark.custom_answer && remark.custom_answer !== "Необязательный вопрос"
-          ).length;
-          setTotalResponsesAnswer(count);
+          setTotalResponsesAnswer(remarks.length); // Устанавливаем общее количество всех замечаний
         }
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
       }
     };
-
+  
     fetchData();
   }, [surveyData, language, user, selectedCourtName, courtName, pathname, remarks]);
-
+  
   const comments =
     remarks
-      ?.slice()
-      .reverse()
-      .slice(0, 5)
+      ?.slice() // Копируем массив
+      .reverse() // Разворачиваем, чтобы последние комментарии были первыми
+      .slice(0, 5) // Берём последние 5
       .map((remark) => ({
-        text: remark.custom_answer || "Нет текста",
+        text: remark.custom_answer || "Нет текста", // Если текста нет, показываем "Нет текста"
       })) || [];
 
   return {

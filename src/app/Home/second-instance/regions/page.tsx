@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getAssessmentData, getCookie } from "@/lib/api/login";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
-import RegionDetails from '@/app/Home/second-instance/regions/[courtId]/rating/page'
+import RegionDetails from '@/app/Home/second-instance/regions/RegionDetails/page'
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 
 type SortDirection = "asc" | "desc" | null;
@@ -41,14 +41,14 @@ interface Region {
 
 export default function RegionalCourts() {
   const [regions, setRegions] = useState<OblastData[]>([]);
-  const [regionName, setRegionName] = useState<string | null>(null);
-  const { selectedRegion, setSelectedRegion } = useSurveyData();
-  const {  language  } = useSurveyData();
+
+  const { selectedRegion,language  , setSelectedRegion, regionName, setRegionName } = useSurveyData();
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const router = useRouter();
 
   useEffect(() => {
+    console.log("regionNameMain",regionName)
     const fetchData = async () => {
       try {
         const token = getCookie("access_token");

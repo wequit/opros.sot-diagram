@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 
@@ -14,6 +14,11 @@ export default function CommentsSection({
   remarksPath,
 }: CommentsSectionProps) {
   const { language } = useSurveyData();
+
+  useEffect(() => {
+    console.log("comments length:", comments.length);
+    console.log("comments:", comments);
+  });
 
   return (
     <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex flex-col justify-between h-full">
@@ -32,15 +37,12 @@ export default function CommentsSection({
         {comments.length > 0 ? (
           <div className="space-y-3">
             {comments.map((comment, index) => {
-              const absoluteIndex = totalResponsesAnswer - index;
               return (
                 <div
                   key={index}
                   className="flex gap-4 p-3 border rounded bg-gray-50"
                 >
-                  <span className="text-gray-500 min-w-[24px]">
-                    {absoluteIndex}
-                  </span>
+                  <div key={index}>{totalResponsesAnswer - index}</div>
                   <span>{comment.text}</span>
                 </div>
               );

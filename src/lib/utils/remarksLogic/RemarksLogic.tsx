@@ -151,7 +151,7 @@ export default function RemarksPage() {
           {getTranslation("RemarksLogic_NoRemarksMessage", language)}
           </p>
           <Link
-            href="/"
+            href="/Home/summary/ratings"
             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-600 transition"
           >
             <ArrowLeft size={18} />
