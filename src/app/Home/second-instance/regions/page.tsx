@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getAssessmentData, getCookie } from "@/lib/api/login";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
-import RegionDetails from '@/app/Home/second-instance/regions/RegionDetails/page'
+import RegionDetails from '@/app/Home/second-instance/regions/RegionDetails/page';
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 
 type SortDirection = "asc" | "desc" | null;
@@ -42,13 +42,23 @@ interface Region {
 export default function RegionalCourts() {
   const [regions, setRegions] = useState<OblastData[]>([]);
 
-  const { selectedRegion,language  , setSelectedRegion, regionName, setRegionName } = useSurveyData();
+  const { selectedRegion, language, setSelectedRegion, regionName, setRegionName } = useSurveyData();
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"courts" | "regions">("regions"); // Изначально активна "По областям"
+
+  const handleTabClick = (tab: "courts" | "regions") => {
+    setActiveTab(tab);
+    if (tab === "courts") {
+      router.push("/Home/second-instance/");
+    } else if (tab === "regions") {
+      router.push("/Home/second-instance/regions");
+    }
+  };
 
   useEffect(() => {
-    console.log("regionNameMain",regionName)
+    console.log("regionNameMain", regionName);
     const fetchData = async () => {
       try {
         const token = getCookie("access_token");
@@ -186,7 +196,7 @@ export default function RegionalCourts() {
         ratings: courtData.assessment.map((item: any) => item.court_avg),
         totalAssessments: courtData.total_survey_responses,
         coordinates: [courtData.latitude, courtData.longitude],
-        instantiation: courtData.instantiation
+        instantiation: courtData.instantiation,
       }));
 
       setSelectedRegion(updatedRegions);
@@ -211,12 +221,32 @@ export default function RegionalCourts() {
               showHome={true}
               headerKey="BreadCrumb_RegionName"
             />
-            <h2 className="text-2xl font-bold RegionName">
-            {getTranslation("Regional_Courts_MainName", language)}
-            </h2>
+            <div>
+              <div className="flex gap-4 mt-2">
+                <button
+                  className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
+                    activeTab === "courts"
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                  onClick={() => handleTabClick("courts")}
+                >
+                  По судам
+                </button>
+                <button
+                  className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
+                    activeTab === "regions"
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                  onClick={() => handleTabClick("regions")}
+                >
+                  По областям
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Условный рендеринг таблицы */}
           <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
             <Map oblastData={regions} />
           </div>
@@ -231,16 +261,14 @@ export default function RegionalCourts() {
                       №
                     </th>
                     <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                    {getTranslation("Regional_Courts_Table_NameRegion", language)}
+                      {getTranslation("Regional_Courts_Table_NameRegion", language)}
                     </th>
                     <th
                       className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                       onClick={() => handleSort("overall")}
                     >
                       <div className="flex items-center justify-between px-2">
-                        <span>
-                           {getTranslation("Regional_Courts_Table_Overall", language)}
-                       </span>
+                        <span>{getTranslation("Regional_Courts_Table_Overall", language)}</span>
                         {getSortIcon("overall")}
                       </div>
                     </th>
@@ -249,7 +277,7 @@ export default function RegionalCourts() {
                       onClick={() => handleSort("judge")}
                     >
                       <div className="flex items-center justify-between px-2">
-                        <span> {getTranslation("Regional_Courts_Table_Build", language)}</span>
+                        <span>{getTranslation("Regional_Courts_Table_Build", language)}</span>
                         {getSortIcon("judge")}
                       </div>
                     </th>
@@ -290,7 +318,7 @@ export default function RegionalCourts() {
                       </div>
                     </th>
                     <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                    {getTranslation("Regional_Courts_Table_Number of reviews", language)}
+                      {getTranslation("Regional_Courts_Table_Number of reviews", language)}
                     </th>
                   </tr>
                 </thead>
@@ -368,7 +396,6 @@ export default function RegionalCourts() {
                   className="mb-3 p-3 border border-gray-100 rounded-lg bg-white duration-200 cursor-pointer"
                   onClick={() => handleCourtClick(oblast)}
                 >
-                  {/* Заголовок карточки */}
                   <div className="flex justify-between items-center mb-2">
                     <div className="text-sm font-semibold text-gray-800 hover:text-blue-600 truncate">
                       {oblast.id}. {oblast.name}
@@ -380,8 +407,6 @@ export default function RegionalCourts() {
                       </span>
                     </div>
                   </div>
-
-                  {/* Данные в виде минималистичной сетки */}
                   <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-gray-600">
                     <div className="flex items-center gap-1">
                       <span className="font-medium">Здание:</span>

@@ -116,11 +116,12 @@ const Header: React.FC = () => {
                   </Link>
 
                   <Link
-                    href="/Home/second-instance/regions"
+                    href="/Home/second-instance"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
                      pathname === "/Home/second-instance/regions" ||
+                     pathname === "/Home/second-instance" ||
                      pathname === "/Home/second-instance/rating/" ||
                      pathname === "/Home/second-instance/feedbacks" 
                        ? "text-blue-600 bg-blue-100 shadow-inner"
