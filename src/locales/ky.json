@@ -73,5 +73,6 @@
     "RemarksLogic_Error_Adding": "Эскертүү жазылышында үлгүлөр",
     "RemarksLogic_ModalPlaceholder": "Сиздин эскертүүңүздү жазыңыз...",
 
-      "BreadCrumb_RegionName": "Аймактар"
+      "BreadCrumb_RegionName": "Аймактар",
+      "BreadCrumb_CourtName": "Облустук соттор"
 }

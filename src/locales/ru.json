@@ -80,6 +80,7 @@
     "RemarksLogic_Error_Adding":"Ошибка при добавлении комментария",
     "RemarksLogic_ModalPlaceholder":"Введите ваш комментарий...",
 
-    "BreadCrumb_RegionName": "Области"
+    "BreadCrumb_RegionName": "Области",
+    "BreadCrumb_CourtName": "Областные суды"
 
 }

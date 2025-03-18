@@ -12,7 +12,7 @@ interface BreadcrumbProps {
   onCourtBackClick?: () => void;
   onRegionBackClick?: () => void; 
   showHome?: boolean; 
-  headerKey?: "BreadCrumb_RegionName" | "HeaderNavFour"; 
+  headerKey?: "BreadCrumb_RegionName" | "HeaderNavFour" | "BreadCrumb_CourtName"; 
 }
 
 const Breadcrumb: React.FC<BreadcrumbProps> = ({
@@ -26,8 +26,11 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   const { language } = useSurveyData();
     const { user } = useAuth();
 
-  const effectiveHeaderKey =
-    headerKey || (regionName ? "BreadCrumb_RegionName" : "HeaderNavFour");
+    const effectiveHeaderKey =
+    headerKey === "BreadCrumb_CourtName"
+      ? "BreadCrumb_CourtName"
+      : headerKey || (regionName ? "BreadCrumb_RegionName" : "HeaderNavFour");
+
 
   return (
     <nav
