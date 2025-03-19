@@ -1,12 +1,12 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useSurveyData } from "@/context/SurveyContext";
 import { useEffect, useState } from "react";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { getCookie } from "@/lib/api/login";
+import { useSurveyData } from "@/context/SurveyContext";
 
 const CourtRatingPage = () => {
   const params = useParams();
@@ -20,7 +20,7 @@ const CourtRatingPage = () => {
     setSurveyData,
     setIsLoading,
     regionName,
-    setRegionName
+    setRegionName,
   } = useSurveyData();
 
   const [isDataLoading, setIsDataLoading] = useState(true);
@@ -28,15 +28,12 @@ const CourtRatingPage = () => {
 
   useEffect(() => {
     const loadCourtData = async () => {
-      // ... (существующий код)
-  
-      // Загружаем regionName из localStorage, если оно не определено в контексте
       const storedRegionName = localStorage.getItem("regionName");
       if (storedRegionName && !regionName) {
         setRegionName(storedRegionName);
       }
     };
-  
+
     loadCourtData();
   }, [
     courtId,
@@ -64,7 +61,6 @@ const CourtRatingPage = () => {
   };
 
   useEffect(() => {
-    console.log("regionName",regionName)
     const loadCourtData = async () => {
       if (!courtId) {
         setError("ID суда не указан в URL");
@@ -114,7 +110,6 @@ const CourtRatingPage = () => {
       } catch (error) {
         console.error("Ошибка при получении данных суда:", error);
         setError(error instanceof Error ? error.message : "Неизвестная ошибка");
-        // Устанавливаем базовые данные, чтобы страница не была пустой
         if (courtId) {
           setSelectedCourtId(Number(courtId));
           setSelectedCourtName(storedCourtName || "Неизвестный суд (данные недоступны)");
@@ -141,6 +136,10 @@ const CourtRatingPage = () => {
     return <div>Loading...</div>;
   }
 
+  // Определяем headerKey на основе breadcrumbSource из localStorage
+  const breadcrumbSource = localStorage.getItem("breadcrumbSource");
+  const headerKey = breadcrumbSource === "courts" ? "BreadCrumb_CourtName" : "BreadCrumb_RegionName";
+
   return (
     <div className="mt-8 max-w-[1250px] mx-auto px-4 py-4">
       <Breadcrumb
@@ -148,6 +147,7 @@ const CourtRatingPage = () => {
         courtName={selectedCourtName}
         onCourtBackClick={handleCourtBackClick}
         onRegionBackClick={handleRegionBackClick}
+        headerKey={headerKey} // Передаем динамический headerKey
       />
       <h2 className="text-3xl font-bold mb-4 mt-4">{selectedCourtName}</h2>
       <div className="space-y-6">

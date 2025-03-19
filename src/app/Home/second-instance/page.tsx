@@ -39,14 +39,10 @@ interface OblastData {
 }
 
 export default function SecondInstanceUnifiedPage() {
-  // Данные из контекста для работы с выбранным регионом, языком и т.п.
   const { selectedRegion, language, setSelectedRegion, regionName, setRegionName } = useSurveyData();
 
-  // Данные для таблицы судов (на вкладке "По судам")
   const [regionCourts, setRegionCourts] = useState<CourtData[]>([]);
-  // Данные для карты и таблицы по регионам (на вкладке "По областям")
   const [regions, setRegions] = useState<OblastData[]>([]);
-  // Общая информация для карты (можно использовать для обеих вкладок)
   const [oblastData, setOblastData] = useState<OblastData[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
@@ -63,14 +59,13 @@ export default function SecondInstanceUnifiedPage() {
         const token = getCookie("access_token");
         if (!token) throw new Error("Token is null");
 
-        // Загружаем данные для регионов/областей
         const assessmentData = await getAssessmentData();
         const processedRegions = assessmentData.regions.map((region: any) => ({
           id: region.region_id,
           name: region.region_name,
           overall: region.overall_region_assessment,
           totalAssessments: region.total_assessments,
-          coordinates: [0, 0], // Здесь можно заменить на реальные координаты
+          coordinates: [0, 0],
           courtId: region.region_id,
           ratings: [
             region.average_scores["Судья"] || 0,
@@ -83,7 +78,6 @@ export default function SecondInstanceUnifiedPage() {
         setOblastData(processedRegions);
         setRegions(processedRegions);
 
-        // Загружаем данные для таблицы судов (отдельный запрос)
         const response = await fetch("https://opros.sot.kg:443/api/v1/assessment/region_courts/", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -102,7 +96,6 @@ export default function SecondInstanceUnifiedPage() {
     fetchData();
   }, [router]);
 
-  // Обработчик переключения вкладок
   const handleTabClick = (tab: "courts" | "regions") => {
     setActiveTab(tab);
     if (tab === "courts") {
@@ -112,7 +105,6 @@ export default function SecondInstanceUnifiedPage() {
     }
   };
 
-  // Функции сортировки для вкладки "По областям"
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc");
@@ -167,6 +159,46 @@ export default function SecondInstanceUnifiedPage() {
     return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
   });
 
+  const sortedRegionCourts = [...regionCourts].sort((a, b) => {
+    if (!sortField || !sortDirection) return 0;
+    let aValue: number, bValue: number;
+    const aRatings = Object.fromEntries(a.assessment.map((item) => [item.aspect, item.court_avg]));
+    const bRatings = Object.fromEntries(b.assessment.map((item) => [item.aspect, item.court_avg]));
+    switch (sortField) {
+      case "judge":
+        aValue = aRatings["Судья"] || 0;
+        bValue = bRatings["Судья"] || 0;
+        break;
+      case "staff":
+        aValue = aRatings["Сотрудники"] || 0;
+        bValue = bRatings["Сотрудники"] || 0;
+        break;
+      case "process":
+        aValue = aRatings["Процесс"] || 0;
+        bValue = bRatings["Процесс"] || 0;
+        break;
+      case "office":
+        aValue = aRatings["Канцелярия"] || 0;
+        bValue = bRatings["Канцелярия"] || 0;
+        break;
+      case "accessibility":
+        aValue = aRatings["Здание"] || 0;
+        bValue = bRatings["Здание"] || 0;
+        break;
+      case "count":
+        aValue = a.total_survey_responses;
+        bValue = b.total_survey_responses;
+        break;
+      case "overall":
+        aValue = a.overall_assessment;
+        bValue = b.overall_assessment;
+        break;
+      default:
+        return 0;
+    }
+    return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+  });
+
   const getRatingColor = (rating: number) => {
     if (rating === 0) return "bg-gray-100";
     if (rating <= 2) return "bg-red-100";
@@ -174,55 +206,38 @@ export default function SecondInstanceUnifiedPage() {
     return "bg-green-100";
   };
 
-  // При нажатии на регион загружаются данные для детального отображения (детали региона)  
-  const handleCourtClick = async (court: OblastData) => {
-    try {
-      const token = getCookie("access_token");
-      if (!token) throw new Error("Token is null");
+  const handleCourtClick = (item: OblastData | CourtData) => {
+    const isCourt = "court" in item;
+    const courtId = isCourt ? item.court_id : item.courtId;
+    const name = isCourt ? item.court : item.name;
 
-      const response = await fetch(`https://opros.sot.kg/api/v1/assessment/region/${court.id}/`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (response.status === 401) {
-        router.push("/login");
-        return;
-      }
-      if (!response.ok) {
-        router.push("/login");
-        throw new Error(`Ошибка TP: ${response.status} ${response.statusText}`);
-      }
-      const data = await response.json();
-      if (!Array.isArray(data) || data.length === 0) {
-        throw new Error("Данные по региону отсутствуют или неверного формата.");
-      }
-      const updatedRegions = data.map((courtData: any) => ({
-        id: courtData.court_id,
-        name: courtData.court,
-        overall: courtData.overall_assessment,
-        ratings: courtData.assessment.map((item: any) => item.court_avg),
-        totalAssessments: courtData.total_survey_responses,
-        coordinates: [courtData.latitude, courtData.longitude],
-        instantiation: courtData.instantiation,
-      }));
-      setSelectedRegion(updatedRegions);
-      setRegionName(court.name);
-    } catch (error) {
-      console.error("Ошибка при получении данных для региона:", error);
+    // Сохраняем контекст для хлебных крошек
+    localStorage.setItem("selectedCourtId", courtId.toString());
+    localStorage.setItem("selectedCourtName", name);
+    localStorage.setItem("breadcrumbSource", activeTab); // "courts" или "regions"
+
+    if (!isCourt) {
+      localStorage.setItem("regionName", name); // Для "По областям" сохраняем название региона
+    } else {
+      localStorage.removeItem("regionName"); // Для "По судам" убираем регион
     }
+
+    // Перенаправляем на страницу рейтинга суда без параметра source в URL
+    router.push(`/Home/second-instance/${courtId}/ratings`);
   };
 
   const handleRegionBackClick = () => {
     setSelectedRegion(null);
   };
 
-  // Если в контексте выбран регион, отображаем детальную страницу
   if (selectedRegion) {
     return <RegionDetails regionName={regionName} regions={regions} />;
   }
 
+  const displayedData = activeTab === "courts" ? sortedRegionCourts : sortedRegions;
+
   return (
-    <div className="max-w-[1250px] mx-auto w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 my-8">
-      {/* Заголовок и переключение вкладок */}
+    <div className="max-w-[1250px] mx-auto w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray erasing-100 my-8">
       <div className="mb-4 flex justify-between items-center">
         <Breadcrumb
           regionName={null}
@@ -231,204 +246,268 @@ export default function SecondInstanceUnifiedPage() {
           headerKey="BreadCrumb_CourtName"
         />
         <div className="flex gap-4 mt-2">
-      <button
-        className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-          activeTab === "courts"
-            ? "bg-blue-600 text-white shadow-md"
-            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-        }`}
-        onClick={() => handleTabClick("courts")}
-      >
-        По судам
-      </button>
-      <button
-        className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-          activeTab === "regions"
-            ? "bg-blue-600 text-white shadow-md"
-            : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-        }`}
-        onClick={() => handleTabClick("regions")}
-      >
-        По областям
-      </button>
-    </div>
+          <button
+            className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
+              activeTab === "courts"
+                ? "bg-blue-600 text-white shadow-md"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+            onClick={() => handleTabClick("courts")}
+          >
+            По судам
+          </button>
+          <button
+            className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
+              activeTab === "regions"
+                ? "bg-blue-600 text-white shadow-md"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+            onClick={() => handleTabClick("regions")}
+          >
+            По областям
+          </button>
+        </div>
       </div>
-        <>
-          <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
-            <Map oblastData={regions} />
-          </div>
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-            {/* Таблица для десктопа (≥ 640px) */}
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                      №
-                    </th>
-                    <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                      {getTranslation("Regional_Courts_Table_NameRegion", language)}
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                      onClick={() => handleSort("overall")}
+
+      <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
+        <Map oblastData={regions} />
+      </div>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div className="hidden sm:block overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                  №
+                </th>
+                <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                  {activeTab === "courts"
+                    ? getTranslation("Regional_Courts_Table_NameCourt", language)
+                    : getTranslation("Regional_Courts_Table_NameRegion", language)}
+                </th>
+                <th
+                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                  onClick={() => handleSort("overall")}
+                >
+                  <div className="flex items-center justify-between px-2">
+                    <span>{getTranslation("Regional_Courts_Table_Overall", language)}</span>
+                    {getSortIcon("overall")}
+                  </div>
+                </th>
+                <th
+                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                  onClick={() => handleSort("judge")}
+                >
+                  <div className="flex items-center justify-between px-2">
+                    <span>{getTranslation("Regional_Courts_Table_Build", language)}</span>
+                    {getSortIcon("judge")}
+                  </div>
+                </th>
+                <th
+                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                  onClick={() => handleSort("process")}
+                >
+                  <div className="flex items-center justify-between px-2">
+                    <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
+                    {getSortIcon("process")}
+                  </div>
+                </th>
+                <th
+                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                  onClick={() => handleSort("staff")}
+                >
+                  <div className="flex items-center justify-between px-2">
+                    <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
+                    {getSortIcon("staff")}
+                  </div>
+                </th>
+                <th
+                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                  onClick={() => handleSort("office")}
+                >
+                  <div className="flex items-center justify-between px-2">
+                    <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
+                    {getSortIcon("office")}
+                  </div>
+                </th>
+                <th
+                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                  onClick={() => handleSort("accessibility")}
+                >
+                  <div className="flex items-center justify-between px-2">
+                    <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
+                    {getSortIcon("accessibility")}
+                  </div>
+                </th>
+                <th
+                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                  onClick={() => handleSort("count")}
+                >
+                  <div className="flex items-center justify-between px-2">
+                    <span>{getTranslation("Regional_Courts_Table_Number of reviews", language)}</span>
+                    {getSortIcon("count")}
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {isLoading ? (
+                <tr>
+                  <td colSpan={9} className="text-center py-4">
+                    Загрузка...
+                  </td>
+                </tr>
+              ) : displayedData.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="text-center py-4">
+                    Данные отсутствуют
+                  </td>
+                </tr>
+              ) : (
+                displayedData.map((item, index) => {
+                  const isCourt = "court" in item;
+                  const ratings = isCourt
+                    ? Object.fromEntries(item.assessment.map((a) => [a.aspect, a.court_avg]))
+                    : {
+                        Судья: item.ratings[0],
+                        Сотрудники: item.ratings[1],
+                        Процесс: item.ratings[2],
+                        Канцелярия: item.ratings[3],
+                        Здание: item.ratings[4],
+                      };
+                  return (
+                    <tr
+                      key={isCourt ? item.court_id : item.id}
+                      className="hover:bg-gray-50/50 border-b border-gray-200"
                     >
-                      <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Overall", language)}</span>
-                        {getSortIcon("overall")}
-                      </div>
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                      onClick={() => handleSort("judge")}
-                    >
-                      <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Build", language)}</span>
-                        {getSortIcon("judge")}
-                      </div>
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                      onClick={() => handleSort("process")}
-                    >
-                      <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
-                        {getSortIcon("process")}
-                      </div>
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                      onClick={() => handleSort("staff")}
-                    >
-                      <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
-                        {getSortIcon("staff")}
-                      </div>
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                      onClick={() => handleSort("office")}
-                    >
-                      <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
-                        {getSortIcon("office")}
-                      </div>
-                    </th>
-                    <th
-                      className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                      onClick={() => handleSort("accessibility")}
-                    >
-                      <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
-                        {getSortIcon("accessibility")}
-                      </div>
-                    </th>
-                    <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                      {getTranslation("Regional_Courts_Table_Number of reviews", language)}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedRegions.map((oblast, index) => (
-                    <tr key={oblast.id} className="hover:bg-gray-50/50 border-b border-gray-200">
                       <td className="px-3 py-2.5 text-sm text-gray-900 text-center border-r border-gray-200">
                         {index + 1}
                       </td>
                       <td
                         className="px-3 py-2.5 text-sm text-gray-900 border-r border-gray-200 cursor-pointer hover:text-blue-600"
-                        onClick={() => handleCourtClick(oblast)}
+                        onClick={() => handleCourtClick(item)}
                       >
-                        {oblast.name}
+                        {isCourt ? item.court : item.name}
                       </td>
-                      <td className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        oblast.overall
-                      )}`}>
-                        {oblast.overall.toFixed(1)}
+                      <td
+                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                          isCourt ? item.overall_assessment : item.overall
+                        )}`}
+                      >
+                        {(isCourt ? item.overall_assessment : item.overall).toFixed(1)}
                       </td>
-                      <td className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        oblast.ratings[0]
-                      )}`}>
-                        {oblast.ratings[0].toFixed(1)}
+                      <td
+                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                          ratings["Здание"] || 0
+                        )}`}
+                      >
+                        {(ratings["Здание"] || 0).toFixed(1)}
                       </td>
-                      <td className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        oblast.ratings[1]
-                      )}`}>
-                        {oblast.ratings[1].toFixed(1)}
+                      <td
+                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                          ratings["Канцелярия"] || 0
+                        )}`}
+                      >
+                        {(ratings["Канцелярия"] || 0).toFixed(1)}
                       </td>
-                      <td className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        oblast.ratings[2]
-                      )}`}>
-                        {oblast.ratings[2].toFixed(1)}
+                      <td
+                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                          ratings["Процесс"] || 0
+                        )}`}
+                      >
+                        {(ratings["Процесс"] || 0).toFixed(1)}
                       </td>
-                      <td className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        oblast.ratings[3]
-                      )}`}>
-                        {oblast.ratings[3].toFixed(1)}
+                      <td
+                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                          ratings["Сотрудники"] || 0
+                        )}`}
+                      >
+                        {(ratings["Сотрудники"] || 0).toFixed(1)}
                       </td>
-                      <td className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        oblast.ratings[4]
-                      )}`}>
-                        {oblast.ratings[4].toFixed(1)}
+                      <td
+                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                          ratings["Судья"] || 0
+                        )}`}
+                      >
+                        {(ratings["Судья"] || 0).toFixed(1)}
                       </td>
                       <td className="px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200">
-                        {oblast.totalAssessments}
+                        {isCourt ? item.total_survey_responses : item.totalAssessments}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-  
-            {/* Карточки для мобильных (< 640px) */}  
-            <div className="block sm:hidden p-3">
-              {sortedRegions.map((oblast) => (
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="block sm:hidden p-3">
+          {isLoading ? (
+            <div className="text-center py-4">Загрузка...</div>
+          ) : displayedData.length === 0 ? (
+            <div className="text-center py-4">Данные отсутствуют</div>
+          ) : (
+            displayedData.map((item) => {
+              const isCourt = "court" in item;
+              const ratings = isCourt
+                ? Object.fromEntries(item.assessment.map((a) => [a.aspect, a.court_avg]))
+                : {
+                    Судья: item.ratings[0],
+                    Сотрудники: item.ratings[1],
+                    Процесс: item.ratings[2],
+                    Канцелярия: item.ratings[3],
+                    Здание: item.ratings[4],
+                  };
+              return (
                 <div
-                  key={oblast.id}
+                  key={isCourt ? item.court_id : item.id}
                   className="mb-3 p-3 border border-gray-100 rounded-lg bg-white duration-200 cursor-pointer"
-                  onClick={() => handleCourtClick(oblast)}
+                  onClick={() => handleCourtClick(item)}
                 >
                   <div className="flex justify-between items-center mb-2">
                     <div className="text-sm font-semibold text-gray-800 hover:text-blue-600 truncate">
-                      {oblast.id}. {oblast.name}
+                      {(isCourt ? item.court_id : item.id)}. {isCourt ? item.court : item.name}
                     </div>
                     <div className="flex items-center gap-1">
                       <FaStar className="text-yellow-400 text-sm" />
                       <span className="text-sm font-medium text-gray-700">
-                        {oblast.overall.toFixed(1)}
+                        {(isCourt ? item.overall_assessment : item.overall).toFixed(1)}
                       </span>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-xs text-gray-600">
                     <div className="flex items-center gap-1">
                       <span className="font-medium">Здание:</span>
-                      <span>{oblast.ratings[0].toFixed(1)}</span>
+                      <span>{(ratings["Здание"] || 0).toFixed(1)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="font-medium">Канцелярия:</span>
-                      <span>{oblast.ratings[1].toFixed(1)}</span>
+                      <span>{(ratings["Канцелярия"] || 0).toFixed(1)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="font-medium">Процесс:</span>
-                      <span>{oblast.ratings[2].toFixed(1)}</span>
+                      <span>{(ratings["Процесс"] || 0).toFixed(1)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="font-medium">Сотрудники:</span>
-                      <span>{oblast.ratings[3].toFixed(1)}</span>
+                      <span>{(ratings["Сотрудники"] || 0).toFixed(1)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="font-medium">Судья:</span>
-                      <span>{oblast.ratings[4].toFixed(1)}</span>
+                      <span>{(ratings["Судья"] || 0).toFixed(1)}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <span className="font-medium">Отзывы:</span>
-                      <span>{oblast.totalAssessments}</span>
+                      <span>{isCourt ? item.total_survey_responses : item.totalAssessments}</span>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </>
+              );
+            })
+          )}
+        </div>
+      </div>
     </div>
   );
 }
