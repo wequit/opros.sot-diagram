@@ -1,86 +1,77 @@
-'use client'
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { setCookie, getCookie, deleteCookie, getCurrentUser } from '@/lib/api/login';
+"use client";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { setCookie, getCookie, deleteCookie, getCurrentUser } from "@/lib/api/login";
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isLoading: boolean; // Добавляем состояние загрузки
   login: (token: string) => void;
   logout: () => void;
-  getToken: () => string | null;
   user: { first_name: string; last_name: string; court: string; role: string } | null;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
+  isLoading: true,
   login: () => {},
   logout: () => {},
-  getToken: () => null,
-  user: null
+  user: null,
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<{ first_name: string; last_name: string; court: string; role: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = getCookie('access_token');
-      setIsAuthenticated(!!token);
+      setIsLoading(true);
+      const token = getCookie("access_token");
       if (token) {
         try {
           const currentUser = await getCurrentUser();
           setUser(currentUser);
+          setIsAuthenticated(true);
         } catch (error) {
-          console.error('Ошибка при получении текущего пользователя:', error);
+          console.error("Ошибка при проверке пользователя:", error);
+          setIsAuthenticated(false);
         }
+      } else {
+        setIsAuthenticated(false);
       }
       setIsLoading(false);
     };
-
     checkAuth();
   }, []);
 
   const login = async (token: string) => {
+    setIsLoading(true);
     try {
-      setCookie('access_token', token);
-      setIsAuthenticated(true);
+      setCookie("access_token", token);
       const currentUser = await getCurrentUser();
       setUser(currentUser);
-      await router.push('/Home/summary/ratings');
-      router.refresh();
+      setIsAuthenticated(true);
+      router.push("/Home/summary/ratings");
     } catch (error) {
-      console.error('Ошибка при логине:', error);
+      console.error("Ошибка при логине:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const logout = () => {
-    deleteCookie('access_token');
+    deleteCookie("access_token");
     setIsAuthenticated(false);
-    router.push('/login');
+    router.push("/login");
   };
-
-  const getToken = () => {
-    return getCookie('access_token');
-  };
-
-  if (isLoading) {
-    return null;
-  }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, getToken, user }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout, user }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-};
+export const useAuth = () => useContext(AuthContext);

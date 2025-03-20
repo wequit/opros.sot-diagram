@@ -7,7 +7,7 @@ import { getTranslation, useSurveyData } from '@/context/SurveyContext';
 interface RadarChartProps {
   radarData: any;
   windowWidth: number;
-  totalResponses: number
+  totalResponses: number;
 }
 
 export default function RadarChart({ radarData, windowWidth, totalResponses }: RadarChartProps) {
@@ -66,11 +66,10 @@ export default function RadarChart({ radarData, windowWidth, totalResponses }: R
       <div className="px-6 py-4 border-b">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-medium DiagrammOne">
-            {/* Здесь можно добавить перевод */}
-           {getTranslation("DiagrammOne", language)}
+            {getTranslation("DiagrammOne", language)}
           </h2>
           <span className="text-gray-600 DiagrammOneTotal">
-           {getTranslation("DiagrammOneTotal", language)}{totalResponses}
+            {getTranslation("DiagrammOneTotal", language)}{totalResponses}
           </span>
         </div>
       </div>

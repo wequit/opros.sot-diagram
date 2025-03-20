@@ -96,7 +96,6 @@ export const reLogin = async (refreshToken: string): Promise<string | null> => {
 const handleUnauthorized = () => {
   deleteCookie('access_token');
   deleteCookie('refresh_token');
-  window.location.href = '/login';
 };
 
 export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {

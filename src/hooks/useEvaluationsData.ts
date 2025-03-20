@@ -3,7 +3,6 @@ import { useSurveyData } from "@/context/SurveyContext";
 import { useRemarks } from "@/components/RemarksApi";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
-import { getRadarRepublicData } from "@/lib/api/login";
 import {
   processSecondQuestion,
   processThirdQuestion,
@@ -21,11 +20,6 @@ import {
   processAgeGenderData,
 } from "@/lib/utils/processData";
 import { ChartData } from "chart.js";
-
-const getAverageFromData = (data: number[]) => {
-  const sum = data.reduce((a, b) => a + b, 0);
-  return sum ? Number((sum / data.length).toFixed(1)) : 0;
-};
 
 export default function useEvaluationData(selectedCourtName?: string, courtName?: string) {
   const { surveyData, language, totalResponses, isLoading } = useSurveyData();
@@ -66,16 +60,6 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
     labels: ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"],
     datasets: [
       {
-        label: user ? user.court : "Загрузка...",
-        data: [0, 0, 0, 0, 0],
-        fill: true,
-        backgroundColor: "rgba(255, 206, 86, 0.2)",
-        borderColor: "rgba(255, 206, 86, 1)",
-        borderWidth: 2,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-      },
-      {
         label: "Средние оценки по республике",
         data: [0, 0, 0, 0, 0],
         fill: true,
@@ -90,9 +74,7 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
   const [totalResponsesAnswer, setTotalResponsesAnswer] = useState<number>(0);
   const [disrespectData, setDisrespectData] = useState<any>({
     labels: [],
-    datasets: [
-      { data: [], backgroundColor: "rgb(139, 69, 19)", barThickness: 20 },
-    ],
+    datasets: [{ data: [], backgroundColor: "rgb(139, 69, 19)", barThickness: 20 }],
   });
   const [ageData, setAgeData] = useState<ChartData<"bar">>({
     labels: [],
@@ -107,7 +89,6 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
   });
 
   useEffect(() => {
-
     const fetchData = async () => {
       try {
         if (surveyData && surveyData.questions && surveyData.questions.length > 0) {
@@ -117,8 +98,7 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
             surveyData.questions[2]?.question_responses || [],
             surveyData.questions[3]?.question_responses || []
           ));
-          const trafficData = processFirstQuestion(surveyData.questions[0]?.question_responses || [], language);
-          setTrafficSourceData(trafficData);
+          setTrafficSourceData(processFirstQuestion(surveyData.questions[0]?.question_responses || [], language));
           setCaseTypesData(processFifthQuestion(surveyData.questions[4]?.question_responses || [], language));
           setJudgeRatings(processProgressRatings(surveyData.questions, language));
           setStaffRatings(processStaffRatings(surveyData.questions, language));
@@ -134,159 +114,39 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
             setAgeData(processAgeData(ageQuestion.question_responses || []));
           }
 
-          const republicData = await getRadarRepublicData();
-          const allCourtsAvgMap = (
-            republicData as Array<{ aspect: string; all_courts_avg?: number }>
-          ).reduce((acc, item) => {
-            acc[item.aspect] = item.all_courts_avg || 0;
-            return acc;
-          }, {} as Record<string, number>);
-
-          const currentCourtAverageSS = {
-            judge: getAverageFromData(Object.values(processProgressRatings(surveyData.questions, language))),
-            secretary: getAverageFromData(Object.values(processStaffRatings(surveyData.questions, language))),
-            office: getAverageFromData(Object.values(processOfficeRatings(surveyData.questions, language))),
-            process: getAverageFromData(Object.values(processProcessRatings(surveyData.questions, language))),
-            building: getAverageFromData(Object.values(processAccessibilityRatings(surveyData.questions, language))),
-          };
-
-          let newRadarData;
-          if (user?.role === "Председатель 3 инстанции" && pathname === "/Home/summary/ratings") {
-            newRadarData = [
-              {
-                label: "Средние оценки по республике",
-                data: [
-                  allCourtsAvgMap["Судья"] || 0,
-                  allCourtsAvgMap["Сотрудники"] || 0,
-                  allCourtsAvgMap["Канцелярия"] || 0,
-                  allCourtsAvgMap["Процесс"] || 0,
-                  allCourtsAvgMap["Здание"] || 0,
-                ],
-                fill: true,
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-              },
-            ];
-          } else if (
-            user?.role === "Председатель 3 инстанции" &&
-            pathname.includes("/Home/second-instance/regions")
-          ) {
-            newRadarData = [
-              {
-                label: selectedCourtName || "Загрузка...",
-                data: [
-                  currentCourtAverageSS.judge || 0,
-                  currentCourtAverageSS.secretary || 0,
-                  currentCourtAverageSS.office || 0,
-                  currentCourtAverageSS.process || 0,
-                  currentCourtAverageSS.building || 0,
-                ],
-                fill: true,
-                backgroundColor: "rgba(255, 206, 86, 0.2)",
-                borderColor: "rgba(255, 206, 86, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-              },
-              {
-                label: "Средние оценки по республике",
-                data: [
-                  allCourtsAvgMap["Судья"] || 0,
-                  allCourtsAvgMap["Сотрудники"] || 0,
-                  allCourtsAvgMap["Канцелярия"] || 0,
-                  allCourtsAvgMap["Процесс"] || 0,
-                  allCourtsAvgMap["Здание"] || 0,
-                ],
-                fill: true,
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-              },
-            ];
-          } else if (
-            user?.role === "Председатель 3 инстанции" &&
-            pathname.includes("/maps/rayon/District-Courts")
-          ) {
-            newRadarData = [
-              {
-                label: courtName || "Загрузка...",
-                data: [
-                  currentCourtAverageSS.judge || 0,
-                  currentCourtAverageSS.secretary || 0,
-                  currentCourtAverageSS.office || 0,
-                  currentCourtAverageSS.process || 0,
-                  currentCourtAverageSS.building || 0,
-                ],
-                fill: true,
-                backgroundColor: "rgba(255, 206, 86, 0.2)",
-                borderColor: "rgba(255, 206, 86, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-              },
-              {
-                label: "Средние оценки по республике",
-                data: [
-                  allCourtsAvgMap["Судья"] || 0,
-                  allCourtsAvgMap["Сотрудники"] || 0,
-                  allCourtsAvgMap["Канцелярия"] || 0,
-                  allCourtsAvgMap["Процесс"] || 0,
-                  allCourtsAvgMap["Здание"] || 0,
-                ],
-                fill: true,
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-              },
-            ];
-          } else {
-            newRadarData = [
-              {
-                label: user ? user.court : "Загрузка...",
-                data: [
-                  currentCourtAverageSS.judge || 0,
-                  currentCourtAverageSS.secretary || 0,
-                  currentCourtAverageSS.office || 0,
-                  currentCourtAverageSS.process || 0,
-                  currentCourtAverageSS.building || 0,
-                ],
-                fill: true,
-                backgroundColor: "rgba(255, 206, 86, 0.2)",
-                borderColor: "rgba(255, 206, 86, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-              },
-              {
-                label: "Средние оценки по республике",
-                data: [
-                  allCourtsAvgMap["Судья"] || 0,
-                  allCourtsAvgMap["Сотрудники"] || 0,
-                  allCourtsAvgMap["Канцелярия"] || 0,
-                  allCourtsAvgMap["Процесс"] || 0,
-                  allCourtsAvgMap["Здание"] || 0,
-                ],
-                fill: true,
-                backgroundColor: "rgba(54, 162, 235, 0.2)",
-                borderColor: "rgba(54, 162, 235, 1)",
-                borderWidth: 2,
-                pointRadius: 5,
-                pointHoverRadius: 7,
-              },
-            ];
+          // Запрашиваем данные радара через наш API-роут
+          const response = await fetch("/api/radar");
+          if (!response.ok) {
+            throw new Error("Ошибка при получении данных радара");
           }
+          const republicData = await response.json();
+
+          // Определяем порядок меток
+          const radarLabels = ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"];
+          // Преобразуем данные в массив значений в правильном порядке
+          const allCourtsAvg = radarLabels.map(label => {
+            const item = republicData.find((data: any) => data.aspect === label);
+            return item ? item.all_courts_avg : 0;
+          });
+
+          // Устанавливаем данные для радара
           setRadarData({
-            labels: ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"],
-            datasets: newRadarData,
+            labels: radarLabels,
+            datasets: [
+              {
+                label: "Средние оценки по республике",
+                data: allCourtsAvg,
+                fill: true,
+                backgroundColor: "rgba(54, 162, 235, 0.2)",
+                borderColor: "rgba(54, 162, 235, 1)",
+                borderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7,
+              },
+            ],
           });
         } else {
+          // Обработка случая, когда данных нет
           setCategoryData({ labels: [], datasets: [{ data: [], backgroundColor: [] }] });
           setGenderData({ labels: [], datasets: [{ data: [], backgroundColor: [] }] });
           setAgeGenderData({ labels: [], datasets: [{ data: [], backgroundColor: [] }] });
@@ -308,23 +168,23 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
         }
 
         if (remarks) {
-          setTotalResponsesAnswer(remarks.length); // Устанавливаем общее количество всех замечаний
+          setTotalResponsesAnswer(remarks.length);
         }
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
       }
     };
-  
+
     fetchData();
   }, [surveyData, language, user, selectedCourtName, courtName, pathname, remarks]);
-  
+
   const comments =
     remarks
-      ?.slice() // Копируем массив
-      .reverse() // Разворачиваем, чтобы последние комментарии были первыми
-      .slice(0, 5) // Берём последние 5
+      ?.slice()
+      .reverse()
+      .slice(0, 5)
       .map((remark) => ({
-        text: remark.custom_answer || "Нет текста", // Если текста нет, показываем "Нет текста"
+        text: remark.custom_answer || "Нет текста",
       })) || [];
 
   return {

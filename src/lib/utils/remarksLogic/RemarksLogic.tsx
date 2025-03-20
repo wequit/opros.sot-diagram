@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRemarks } from "@/components/RemarksApi";
 import { getCookie } from "@/lib/api/login";
-import { ArrowLeft, FileSearch } from "lucide-react";
+import { ArrowLeft, FileSearch, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
@@ -14,7 +14,7 @@ export default function RemarksPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [localRemarks, setLocalRemarks] = useState<any[]>([]);
-  const itemsPerPage = 35;
+  const itemsPerPage = 8;
   const router = useRouter();
   const pathname = usePathname();
   const {language, } = useSurveyData();
@@ -124,6 +124,67 @@ export default function RemarksPage() {
     return localRemarks.slice().reverse().slice(startIndex, endIndex);
   };
 
+  const totalPages = Math.ceil(localRemarks.length / itemsPerPage);
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const goToPreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const goToPage = (pageNumber: number) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
+  // Функция для создания массива номеров страниц
+  const getPaginationNumbers = () => {
+    let pages = [];
+    const maxButtons = 5; // Максимальное количество кнопок пагинации
+    
+    if (totalPages <= maxButtons) {
+      // Если страниц меньше или равно максимальному количеству кнопок, показываем все
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Иначе показываем только часть
+      if (currentPage <= 3) {
+        // Если текущая страница - одна из первых
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push(null); // null означает ...
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Если текущая страница - одна из последних
+        pages.push(1);
+        pages.push(null);
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        // Где-то в середине
+        pages.push(1);
+        pages.push(null);
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push(null);
+        pages.push(totalPages);
+      }
+    }
+    
+    return pages;
+  };
+
   const handleCommentClick = (item: any) => {
     setSelectedItem(item);
     setIsModalOpen(true);
@@ -138,7 +199,7 @@ export default function RemarksPage() {
   }
 
   return (
-    <div className=" mx-auto p-4">
+    <div className="min-h-screen bg-gray-50">
       {localRemarks.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-6">
           <div className="animate-bounce mb-4">
@@ -159,7 +220,7 @@ export default function RemarksPage() {
           </Link>
         </div>
       ) : (
-        <div className=" mx-auto px-4 py-6">
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-6 mx-auto">
           {/* Заголовок и кнопка "Назад" */}
           <div className="flex  sm:flex-row items-center justify-between mb-6 gap-4 sm:gap-0">
             <h1 className="text-2xl max-sm:text-xl font-bold text-gray-800 tracking-tight text-center sm:text-left RemarksText">
@@ -174,128 +235,86 @@ export default function RemarksPage() {
             </button>
           </div>
 
-          {/* Таблица для десктопов, карточки для мобильных */}
-          <div className="shadow-lg rounded-xl border border-gray-200 bg-white">
-            {/* Таблица для десктопов */}
-            <div className="hidden sm:block overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gradient-to-r from-gray-100 to-gray-200">
+          {/* Контейнер с фиксированной высотой и шириной 100% */}
+          <div className="bg-white shadow-md rounded-lg w-full overflow-hidden">
+            {/* Контейнер с горизонтальной прокруткой */}
+            <div className="w-full overflow-x-auto">
+              <table className="w-full table-fixed">
+                <thead className="bg-gray-50">
                   <tr>
-                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-16">
+                    <th scope="col" className="w-16 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       №
                     </th>
-                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th scope="col" className="w-1/5 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {getTranslation("RemarksLogic_Court", language)}
                     </th>
-                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th scope="col" className="w-1/3 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {getTranslation("RemarksLogic_Message", language)}
                     </th>
-                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {getTranslation("RemarksLogic_Chairman", language)}
                     </th>
-                    <th className="py-3 px-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {getTranslation("RemarksLogic_Reply", language)}
                     </th>
-                    <th className="py-3 px-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th scope="col" className="w-1/6 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {getTranslation("RemarksLogic_Actions", language)}
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {getCurrentPageData().map((item, index) => {
-                    const absoluteIndex =
-                      localRemarks.length -
-                      (currentPage - 1) * itemsPerPage -
-                      index;
-                    return (
-                      <tr
-                        key={item.id}
-                        className="hover:bg-gray-50 transition-colors duration-200"
-                      >
-                        <td className="py-4 px-4 text-sm text-gray-700 text-center">
-                          {absoluteIndex}
-                        </td>
-                        <td className="py-4 px-4 text-sm text-gray-900">
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {getCurrentPageData().map((item, index) => (
+                    <tr key={index} className="hover:bg-gray-50 h-16">
+                      <td className="px-6 py-4 text-sm text-gray-700 text-center">
+                        {(currentPage - 1) * itemsPerPage + index + 1}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-900">
+                        <div className="truncate" title={item.court || "Не указано"}>
                           {item.court || "Не указано"}
-                        </td>
-                        <td className="py-4 px-4 text-sm text-gray-700 ">
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        <div className="line-clamp-2 h-10 overflow-hidden" title={item.custom_answer || "—"}>
                           {item.custom_answer || "—"}
-                        </td>
-                        <td className="py-4 px-4 text-sm text-gray-700 text-center">
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 text-center">
+                        <div className="truncate" title={item.author || "—"}>
                           {item.author || "—"}
-                        </td>
-                        <td className="py-4 px-4 text-sm text-gray-700 text-center">
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 text-center">
+                        <div className="truncate" title={item.reply_to_comment || "—"}>
                           {item.reply_to_comment || "—"}
-                        </td>
-                        <td className="py-4 px-4 text-center">
-                          <button
-                            onClick={() => handleCommentClick(item)}
-                            className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
-                          >
-                            {getTranslation("RemarksLogic_Comment", language)}
-                          </button>
-                        </td>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => handleCommentClick(item)}
+                          className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                        >
+                          {getTranslation("RemarksLogic_Comment", language)}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {/* Если записей меньше 6, добавляем пустые строки для поддержания высоты */}
+                  {getCurrentPageData().length < itemsPerPage && 
+                    Array(itemsPerPage - getCurrentPageData().length).fill(0).map((_, index) => (
+                      <tr key={`empty-${index}`} className="h-16">
+                        <td colSpan={6}>&nbsp;</td>
                       </tr>
-                    );
-                  })}
+                    ))
+                  }
                 </tbody>
               </table>
-            </div>
-
-            {/* Карточки для мобильных */}
-            <div className="block sm:hidden p-4 space-y-4">
-              {getCurrentPageData().map((item, index) => {
-                const absoluteIndex =
-                  localRemarks.length -
-                  (currentPage - 1) * itemsPerPage -
-                  index;
-                return (
-                  <div
-                    key={item.id}
-                    className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
-                  >
-                    <div className="flex justify-between items-start">
-                      <span className="text-sm font-semibold text-gray-800">
-                        № {absoluteIndex}
-                      </span>
-                      <button
-                        onClick={() => handleCommentClick(item)}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors duration-200"
-                      >
-                        {getTranslation("RemarksLogic_Comment", language)}
-                      </button>
-                    </div>
-                    <div className="mt-2 space-y-2">
-                      <p className="text-xs text-gray-700">
-                        <span className="font-medium">{getTranslation("RemarksLogic_Court", language)}:</span>{" "}
-                        {item.court || "Не указано"}
-                      </p>
-                      <p className="text-xs text-gray-700">
-                        <span className="font-medium">{getTranslation("RemarksLogic_Chairman", language)}:</span>{" "}
-                        {item.author || "—"}
-                      </p>
-                      <p className="text-xs text-gray-700">
-                        <span className="font-medium">{getTranslation("RemarksLogic_Reply", language)}:</span>{" "}
-                        {item.reply_to_comment || "—"}
-                      </p>
-                      {/* Акцент на комментарии */}
-                      <p className="text-sm text-gray-900 bg-gray-100 p-2 rounded-md">
-                        <span className="font-medium text-gray-800">
-                          {getTranslation("RemarksLogic_Message", language)}:
-                        </span>{" "}
-                        {item.custom_answer || "—"}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
             </div>
           </div>
 
           {/* Пагинация */}
           <div className="flex justify-center items-center mt-6 gap-2 sm:gap-3">
             <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              onClick={goToPreviousPage}
               disabled={currentPage === 1}
               className="px-3 py-1 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 disabled:bg-gray-100 disabled:text-gray-400 transition-colors duration-200 text-sm"
             >
@@ -305,7 +324,8 @@ export default function RemarksPage() {
               {currentPage}
             </span>
             <button
-              onClick={() => setCurrentPage((prev) => prev + 1)}
+              onClick={goToNextPage}
+              disabled={currentPage === totalPages}
               className="px-3 py-1 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors duration-200 text-sm"
             >
               {getTranslation("RemarksLogic_Next", language)}

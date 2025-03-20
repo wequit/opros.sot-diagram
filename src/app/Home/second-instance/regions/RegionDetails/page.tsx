@@ -416,7 +416,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     setSelectedCourtId(null);
     setSelectedCourtName(null);
     setSurveyData(null);
-    window.history.back(); // Возвращаемся назад в истории
   };
 
   const handleRegionBackClick = () => {

@@ -39,7 +39,7 @@ const Header: React.FC = () => {
   }, []);
 
   if (!isAuthenticated || pathname === "/login") {
-    return null;
+    return null; 
   }
 
   return (
