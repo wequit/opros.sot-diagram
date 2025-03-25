@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRemarks } from "@/components/RemarksApi";
 import { getCookie } from "@/lib/api/login";
 import { ArrowLeft, FileSearch, ChevronLeft, ChevronRight } from "lucide-react";
@@ -14,10 +14,40 @@ export default function RemarksPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [localRemarks, setLocalRemarks] = useState<any[]>([]);
+  const [courtColumnWidth, setCourtColumnWidth] = useState<number>(250); // Начальная ширина столбца СУД
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+  const resizingRef = useRef<HTMLDivElement>(null);
+  const startXRef = useRef<number>(0);
+  const startWidthRef = useRef<number>(0);
+  
   const itemsPerPage = 8;
   const router = useRouter();
   const pathname = usePathname();
   const {language, } = useSurveyData();
+
+  // Новая функция для начала изменения размера столбца
+  const startResize = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsResizing(true);
+    startXRef.current = e.clientX;
+    startWidthRef.current = courtColumnWidth;
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', stopResize);
+  };
+
+  // Обработчик перемещения мыши
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isResizing) return;
+    const diff = e.clientX - startXRef.current;
+    const newWidth = Math.max(150, startWidthRef.current + diff); // Минимальная ширина 150px
+    setCourtColumnWidth(newWidth);
+  };
+
+  // Завершение изменения размера
+  const stopResize = () => {
+    setIsResizing(false);
+    document.removeEventListener('mousemove', handleMouseMove);
+    document.removeEventListener('mouseup', stopResize);
+  };
 
   const CommentModal = ({
     isOpen,
@@ -222,14 +252,14 @@ export default function RemarksPage() {
       ) : (
         <div className="w-full px-4 sm:px-6 lg:px-8 py-6 mx-auto">
           {/* Заголовок и кнопка "Назад" */}
-          <div className="flex  sm:flex-row items-center justify-between mb-6 gap-4 sm:gap-0">
+          <div className="flex sm:flex-row items-center justify-between mb-6 gap-4 sm:gap-0">
             <h1 className="text-2xl max-sm:text-xl font-bold text-gray-800 tracking-tight text-center sm:text-left RemarksText">
               {getTranslation("RemarksLogic_Remarks", language)}
             </h1>
-              <button
-                onClick={() => router.back()}
-                className="max-sm:px-2 max-sm:py-2  flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
-              >
+            <button
+              onClick={() => router.back()}
+              className="max-sm:px-2 max-sm:py-2 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-300"
+            >
               <ArrowLeft size={18} />
               {getTranslation("RemarksLogic_Back", language)}
             </button>
@@ -239,22 +269,28 @@ export default function RemarksPage() {
           <div className="bg-white shadow-md rounded-lg w-full overflow-hidden">
             {/* Контейнер с горизонтальной прокруткой */}
             <div className="w-full overflow-x-auto">
-              <table className="w-full table-fixed">
+              <table className="w-full table-fixed border-collapse">
                 <thead className="bg-gray-50">
-                  <tr>
-                    <th scope="col" className="w-16 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <tr className="border-b border-gray-200">
+                    <th scope="col" className="w-16 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                       №
                     </th>
-                    <th scope="col" className="w-1/5 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" style={{ width: `${courtColumnWidth}px` }} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider relative border-r border-gray-200">
                       {getTranslation("RemarksLogic_Court", language)}
+                      {/* Ручка для изменения размера столбца */}
+                      <div 
+                        ref={resizingRef}
+                        className="absolute right-0 top-0 bottom-0 w-2 bg-transparent hover:bg-blue-300 cursor-col-resize"
+                        onMouseDown={startResize}
+                      ></div>
                     </th>
-                    <th scope="col" className="w-1/3 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="w-1/3 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                       {getTranslation("RemarksLogic_Message", language)}
                     </th>
-                    <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                       {getTranslation("RemarksLogic_Chairman", language)}
                     </th>
-                    <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                       {getTranslation("RemarksLogic_Reply", language)}
                     </th>
                     <th scope="col" className="w-1/6 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -262,28 +298,28 @@ export default function RemarksPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="min-h-[320px]">
                   {getCurrentPageData().map((item, index) => (
-                    <tr key={index} className="hover:bg-gray-50 h-16">
-                      <td className="px-6 py-4 text-sm text-gray-700 text-center">
+                    <tr key={index} className="hover:bg-gray-50 h-16 border-b border-gray-100">
+                      <td className="px-6 py-4 text-sm text-gray-700 text-center border-r border-gray-200">
                         {(currentPage - 1) * itemsPerPage + index + 1}
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-900">
-                        <div className="truncate" title={item.court || "Не указано"}>
+                      <td className="px-6 py-4 text-sm text-gray-900 border-r border-gray-200" style={{ width: `${courtColumnWidth}px` }}>
+                        <div className="truncate hover:text-clip hover:overflow-visible" title={item.court || "Не указано"}>
                           {item.court || "Не указано"}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-6 py-4 text-sm text-gray-700 border-r border-gray-200">
                         <div className="line-clamp-2 h-10 overflow-hidden" title={item.custom_answer || "—"}>
                           {item.custom_answer || "—"}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 text-center">
+                      <td className="px-6 py-4 text-sm text-gray-700 text-center border-r border-gray-200">
                         <div className="truncate" title={item.author || "—"}>
                           {item.author || "—"}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 text-center">
+                      <td className="px-6 py-4 text-sm text-gray-700 text-center border-r border-gray-200">
                         <div className="truncate" title={item.reply_to_comment || "—"}>
                           {item.reply_to_comment || "—"}
                         </div>
@@ -298,14 +334,6 @@ export default function RemarksPage() {
                       </td>
                     </tr>
                   ))}
-                  {/* Если записей меньше 6, добавляем пустые строки для поддержания высоты */}
-                  {getCurrentPageData().length < itemsPerPage && 
-                    Array(itemsPerPage - getCurrentPageData().length).fill(0).map((_, index) => (
-                      <tr key={`empty-${index}`} className="h-16">
-                        <td colSpan={6}>&nbsp;</td>
-                      </tr>
-                    ))
-                  }
                 </tbody>
               </table>
             </div>

@@ -89,12 +89,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(currentUser);
       setIsAuthenticated(true);
       
-      // Проверяем URL для определения нужного перенаправления
-      const currentUrl = window.location.href;
-      let redirectUrl = "/results/Home/summary/ratings"; // Стандартный путь
+      // Определяем URL перенаправления в зависимости от инстанции пользователя
+      let redirectUrl;
       
-      // Если мы находимся в URL с /results/, то добавляем этот префикс к редиректу
-      if (currentUrl.includes("/results/")) {
+      // Проверяем роль пользователя
+      if (currentUser.role === "Председатель 1 инстанции") {
+        redirectUrl = "/results/Home/summary/ratings";
+      } else if (currentUser.role === "Председатель 2 инстанции") {
+        // Возвращаем первоначальный маршрут
+        redirectUrl = "/results/Home/first_instance/ratings";
+      } else if (currentUser.role === "Председатель 3 инстанции") {
+        redirectUrl = "/results/Home/summary/ratings";
+      } else {
+        // Если роль не соответствует ни одной из инстанций
         redirectUrl = "/results/Home/summary/ratings";
       }
       
@@ -138,3 +145,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 };
 
 export const useAuth = () => useContext(AuthContext);
+
+function getRegionSlug(courtName: string): string {
+  const regionMap: { [key: string]: string } = {
+    "Таласский областной суд": "Talas",
+    "Иссык-кульский областной суд": "Issyk-Kyl",
+    "Нарынский областной суд": "Naryn",
+    "Баткенский областной суд": "Batken",
+    "Чуйский областной суд": "Chyi",
+    "Ошский областной суд": "Osh",
+    "Жалал-Абадский областной суд": "Djalal-Abad",
+    "Бишкекский городской суд": "Bishkek",
+  };
+  
+  return regionMap[courtName] || "unknown";
+}

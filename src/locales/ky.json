@@ -43,9 +43,14 @@
     "Regional_Courts_Table_Chancellery": "Кеңсе",
     "Regional_Courts_Table_Procces": "Иштетүү",
     "Regional_Courts_Table_Staff": "Кызматкерлер",
-    "Regional_Courts_Table_Judge": "Судья",
+    "Regional_Courts_Table_Judge": "Сот",
     "Regional_Courts_Table_Number of reviews": "Сын-пикирлердин саны",
     "Regional_Courts_Table_Search": "Сот издөө",
+    "Regional_Courts_Button_Courts": "Соттар",
+    "Regional_Courts_Button_Regions": "Аймактар",
+    "Regional_Courts_Table_NumberResponses": "Сын-пикирлердин саны",
+    "Regional_Courts_Table_Building": "Имарат",
+    
 
     "District_Courts_MainName": "Райондук соттор",
 
@@ -77,7 +82,8 @@
       "BreadCrumb_RegionName": "Аймактар",
       "BreadCrumb_CourtName": "Облустук соттор",
 
-      "HeaderNavSummary": "cel",
-      "HeaderNavRegionalRatings": "wel"
+      "HeaderNavRegionalRatings": "Аймактар ​​боюнча баало"
+
+
    
 }

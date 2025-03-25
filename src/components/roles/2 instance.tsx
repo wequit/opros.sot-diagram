@@ -225,7 +225,7 @@ const SecondInstance = () => {
       {selectedCourt ? (
         <div className="space-y-6 mt-4">
           <Breadcrumb
-            regionName={userRegion}
+            regionName={userRegion || ""}
             courtName={selectedCourt.court}
             onCourtBackClick={handleBackClick}
             showHome={false}
