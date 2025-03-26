@@ -6,7 +6,6 @@ import RemarksPage from "@/lib/utils/remarksLogic/RemarksLogic";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import Dates from "@/components/Dates/Dates";
 import { getCookie } from "@/lib/api/login";
-import SkeletonLoader from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
 export default function SummaryFeedbacksPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -55,26 +54,13 @@ export default function SummaryFeedbacksPage() {
   };
   
   if (loading) {
-    return (
-      <div className="max-w-[1250px] mx-auto px-4 py-4">
-        <SkeletonLoader />
-      </div>
-    );
+    return <div className="flex justify-center items-center h-screen">Загрузка...</div>;
   }
 
   return (
     <div className="max-w-[1250px] mx-auto px-4 py-4">
       <h1 className="text-2xl font-bold mb-6">Замечания и предложения</h1>
-      
-      <div className="mb-4">
-        <Breadcrumb 
-          showHome={true}
-          regionName={userRegion || "Общий свод"}
-          headerKey="BreadCrumb_RegionName"
-          onRegionBackClick={() => router.push('/Home/first_instance/ratings')}
-        />
-      </div>
-      <Dates />
+    
       <RemarksPage />
     </div>
   );

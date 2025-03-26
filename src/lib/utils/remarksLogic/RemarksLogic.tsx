@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRemarks } from "@/components/RemarksApi";
 import { getCookie } from "@/lib/api/login";
 import { ArrowLeft, FileSearch, ChevronLeft, ChevronRight } from "lucide-react";
@@ -20,7 +20,7 @@ export default function RemarksPage() {
   const startXRef = useRef<number>(0);
   const startWidthRef = useRef<number>(0);
   
-  const itemsPerPage = 8;
+  const itemsPerPage = 6;
   const router = useRouter();
   const pathname = usePathname();
   const {language, } = useSurveyData();
@@ -103,8 +103,13 @@ export default function RemarksPage() {
     );
   };
   useEffect(() => {
-    if (remarks) {
-      setLocalRemarks(remarks);
+    try {
+      if (remarks) {
+        setLocalRemarks(remarks);
+      }
+    } catch (error) {
+      console.error("Ошибка при обработке данных замечаний:", error);
+      setLocalRemarks([]); // Устанавливаем пустой массив при ошибке
     }
   }, [remarks]);
 
@@ -148,13 +153,17 @@ export default function RemarksPage() {
     }
   };
 
-  const getCurrentPageData = () => {
+  // Мемоизируем вычисление пагинации
+  const getCurrentPageData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return localRemarks.slice().reverse().slice(startIndex, endIndex);
-  };
+  }, [localRemarks, currentPage, itemsPerPage]);
 
-  const totalPages = Math.ceil(localRemarks.length / itemsPerPage);
+  // Мемоизируем вычисление общего числа страниц
+  const totalPages = useMemo(() => {
+    return Math.ceil(localRemarks.length / itemsPerPage);
+  }, [localRemarks.length, itemsPerPage]);
 
   const goToNextPage = () => {
     if (currentPage < totalPages) {
@@ -214,6 +223,11 @@ export default function RemarksPage() {
     
     return pages;
   };
+
+  // Мемоизируем вычисление номеров страниц для пагинации
+  const paginationNumbers = useMemo(() => {
+    return getPaginationNumbers();
+  }, [currentPage, totalPages]);
 
   const handleCommentClick = (item: any) => {
     setSelectedItem(item);
@@ -299,7 +313,7 @@ export default function RemarksPage() {
                   </tr>
                 </thead>
                 <tbody className="min-h-[320px]">
-                  {getCurrentPageData().map((item, index) => (
+                  {getCurrentPageData.map((item: any, index: number) => (
                     <tr key={index} className="hover:bg-gray-50 h-16 border-b border-gray-100">
                       <td className="px-6 py-4 text-sm text-gray-700 text-center border-r border-gray-200">
                         {(currentPage - 1) * itemsPerPage + index + 1}
@@ -340,25 +354,27 @@ export default function RemarksPage() {
           </div>
 
           {/* Пагинация */}
-          <div className="flex justify-center items-center mt-6 gap-2 sm:gap-3">
-            <button
-              onClick={goToPreviousPage}
-              disabled={currentPage === 1}
-              className="px-3 py-1 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 disabled:bg-gray-100 disabled:text-gray-400 transition-colors duration-200 text-sm"
-            >
-              {getTranslation("RemarksLogic_Back", language)}
-            </button>
-            <span className="px-3 py-1 sm:px-4 sm:py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm text-sm">
-              {currentPage}
-            </span>
-            <button
-              onClick={goToNextPage}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors duration-200 text-sm"
-            >
-              {getTranslation("RemarksLogic_Next", language)}
-            </button>
-          </div>
+          {localRemarks.length > itemsPerPage ? (
+            <div className="flex justify-center items-center mt-6 gap-2 sm:gap-3">
+              <button
+                onClick={goToPreviousPage}
+                disabled={currentPage === 1}
+                className="px-3 py-1 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 disabled:bg-gray-100 disabled:text-gray-400 transition-colors duration-200 text-sm"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="px-3 py-1 sm:px-4 sm:py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm text-sm">
+                {currentPage}
+              </span>
+              <button
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors duration-200 text-sm"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          ) : null}
 
           <CommentModal
             isOpen={isModalOpen}

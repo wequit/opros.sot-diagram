@@ -11,6 +11,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SurveyProvider, useSurveyData } from "@/context/SurveyContext";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
+import { fetchCurrentUser, fetchRemarks } from '@/lib/api/cacheService';
 
 const inter = Inter({
   subsets: ["latin", "cyrillic"],
@@ -19,6 +20,17 @@ const inter = Inter({
 });
 
 const LoginPage = dynamic(() => import("@/app/login/page"));
+
+// Добавьте эту функцию для предварительной загрузки данных
+const preloadCommonData = async () => {
+  try {
+    // Загружаем часто используемые данные в фоне
+    fetchCurrentUser();
+    fetchRemarks();
+  } catch (error) {
+    console.error("Ошибка предзагрузки данных:", error);
+  }
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -52,6 +64,11 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+  
+  // Должен быть всегда на том же месте в порядке хуков
+  useEffect(() => {
+    preloadCommonData();
+  }, []);
 
   // Страница логина только если не авторизован и путь явно /results/login
   if (!isAuthenticated && pathname === "/login") {
