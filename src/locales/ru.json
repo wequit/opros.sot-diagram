@@ -44,7 +44,7 @@
     "Regional_Courts_MainName": "Оценки по областям",
     
     "Regional_Courts_Table_NameRegion": "Наименование области",
-    "Regional_Courts_Table_NameCourt": "Наименование суда",
+    "Regional_Courts_Table_NameCourt": "Наименование судов",
     "Regional_Courts_Table_Overall": "Общая оценка",
     "Regional_Courts_Table_Build": "Здание",
     "Regional_Courts_Table_Chancellery": "Канцелярия",
@@ -53,8 +53,16 @@
     "Regional_Courts_Table_Judge": "Судья",
     "Regional_Courts_Table_Number of reviews": "Количество отзывов",
     "Regional_Courts_Table_Search": "Поиск суда",
-    
+    "Regional_Courts_Button_Courts": "По судам",
+    "Regional_Courts_Button_Regions": "По областям",
+    "Regional_Courts_Table_List": "Список судов",
+    "Regional_Courts_Table_NumberResponses": "Количество ответов",
+    "Regional_Courts_Table_Building": "Здание",
     "District_Courts_MainName": "Районные суды",
+
+    "First_Instance_Table_Instantiation": "Инстанция",
+    
+
 
     "LogoutModal_TextOne": "Подтверждение выхода",
     "LogoutModal_TextTwo": "Вы уверены, что хотите выйти из системы?",

@@ -238,16 +238,18 @@ export default function SecondInstanceUnifiedPage() {
 
   return (
     <div className="max-w-[1250px] mx-auto w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray erasing-100 my-8">
-      <div className="mb-4 flex justify-between items-center">
-        <Breadcrumb
-          regionName={null}
-          onRegionBackClick={handleRegionBackClick}
-          showHome={true}
-          headerKey="BreadCrumb_CourtName"
-        />
-        <div className="flex gap-4 mt-2">
+      <div className="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <div className="text-xs sm:text-base">
+          <Breadcrumb
+            regionName={null}
+            onRegionBackClick={handleRegionBackClick}
+            showHome={true}
+            headerKey="BreadCrumb_CourtName"
+          />
+        </div>
+        <div className="flex gap-2 sm:gap-4 mt-2">
           <button
-            className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
+            className={`py-1 px-2 sm:py-2 sm:px-4 text-xs sm:text-base rounded-lg font-medium transition-all duration-200 ${
               activeTab === "courts"
                 ? "bg-blue-600 text-white shadow-md"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -257,7 +259,7 @@ export default function SecondInstanceUnifiedPage() {
             По судам
           </button>
           <button
-            className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
+            className={`py-1 px-2 sm:py-2 sm:px-4 text-xs sm:text-base rounded-lg font-medium transition-all duration-200 ${
               activeTab === "regions"
                 ? "bg-blue-600 text-white shadow-md"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"

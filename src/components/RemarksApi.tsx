@@ -93,13 +93,19 @@ export function useRemarks() {
       }
 
       if (
-        user.role === "Председатель 2 инстанции" 
+        user.role === "Председатель 2 инстанции" &&
+        pathname.startsWith("/Home/first_instance/feedbacks/")
       ) {
-        return (
-          item.custom_answer !== null &&
-          item.custom_answer !== "Необязательный вопрос" &&
-          item.court === setCourtName
-        );
+        const currentRegion = localStorage.getItem("currentRegion");
+        const regionSlug = localStorage.getItem("regionSlug");
+        
+        if (pathname.includes(regionSlug || '')) {
+          return (
+            item.custom_answer !== null &&
+            item.custom_answer !== "Необязательный вопрос" &&
+            isCourtInRegion(item.court, currentRegion)
+          );
+        }
       }
 
       return (
@@ -164,4 +170,29 @@ export function useRemarks() {
   }, [selectedCourt, courtName, selectedCourtName, selectedCourtId]);
 
   return { remarks, isLoading, error, fetchRemarks };
+}
+
+function isCourtInRegion(courtName: string, regionName: string | null) {
+  if (!regionName) return false;
+  
+  switch (regionName) {
+    case "Таласская область":
+      return courtName.includes("Талас");
+    case "Иссык-Кульская область":
+      return courtName.includes("Иссык") || courtName.includes("Каракол");
+    case "Нарынская область":
+      return courtName.includes("Нарын");
+    case "Баткенская область":
+      return courtName.includes("Баткен");
+    case "Чуйская область":
+      return courtName.includes("Чуй");
+    case "Ошская область":
+      return courtName.includes("Ош") && !courtName.includes("город Ош");
+    case "Жалал-Абадская область":
+      return courtName.includes("Жалал") || courtName.includes("Джалал");
+    case "Город Бишкек":
+      return courtName.includes("Бишкек") || courtName.includes("бишкек");
+    default:
+      return false;
+  }
 }

@@ -95,7 +95,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
         {/* Название суда */}
         {courtName && (
           <li className="flex items-center">
-            <span className="text-gray-800 font-medium truncate max-w-[15ch]">
+            <span className="text-gray-800 font-medium md:truncate-none md:max-w-none truncate max-w-[15ch]">
               {courtName}
             </span>
           </li>

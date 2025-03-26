@@ -151,13 +151,34 @@ export default function Map_oblast({ oblastData }: MapProps) {
     const path = d3.geoPath().projection(projection);
    
     
-    // Улучшенная легенда
+    // Объявляем функцию handleResize в начале useEffect
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        svg.select(".legend")?.style("display", "none");
+      } else {
+        svg.select(".legend")?.style("display", "block");
+      }
+    };
+
+    // Создаём базовую группу для всего содержимого (важно для правильного порядка слоёв)
+    const baseGroup = svg.append("g").attr("class", "base-group");
+    
+    // Создаём группу для регионов, которая будет трансформироваться при зуме
+    const regionsGroup = baseGroup.append("g").attr("class", "regions");
+    
+    // Улучшенная легенда - теперь добавляем легенду ПОСЛЕ создания группы регионов в базовую группу
     const hasData = oblastData && oblastData.length > 0;
     if (hasData) {
+      // Легенда добавляется в svg напрямую, НЕ в baseGroup, чтобы она не трансформировалась при зуме
       const legend = svg
         .append("g")
         .attr("class", "legend")
         .attr("transform", `translate(${width - 200}, 20)`);
+
+      // Проверяем размер экрана и скрываем легенду на мобильных
+      if (window.innerWidth < 640) {
+        legend.style("display", "none");
+      }
 
       legend
         .append("rect")
@@ -207,6 +228,9 @@ export default function Map_oblast({ oblastData }: MapProps) {
             .attr("fill", "#4B5563")
             .text((d) => d.label);
         });
+
+      // Добавляем обработчик изменения размера экрана
+      window.addEventListener("resize", handleResize);
     }
 
     // Добавляем CSS для анимации областей
@@ -222,18 +246,6 @@ export default function Map_oblast({ oblastData }: MapProps) {
       }
     `;
     document.head.appendChild(style);
-
-    // Создаём группу для регионов
-    const regionsGroup = svg.append("g").attr("class", "regions");
-
-    // Применяем зум к SVG
-    svg.call(zoom);
-
-    // Ограничиваем перемещение карты
-    zoom.translateExtent([
-      [0, 0], // Минимальные координаты (верхний левый угол)
-      [width, height], // Максимальные координаты (нижний правый угол)
-    ]);
 
     // Рисуем области
     regionsGroup
@@ -336,9 +348,24 @@ export default function Map_oblast({ oblastData }: MapProps) {
         });
     }
 
+    // ВАЖНО: Изменяем код назначения зума, теперь он применяется только к группе регионов
+    zoom.on("zoom", (event) => {
+      regionsGroup.attr("transform", event.transform);
+    });
+
+    // Применяем зум к SVG элементу
+    svg.call(zoom);
+
+    // Ограничиваем перемещение карты
+    zoom.translateExtent([
+      [0, 0], // Минимальные координаты (верхний левый угол)
+      [width, height], // Максимальные координаты (нижний правый угол)
+    ]);
+
     return () => {
       svg.call(zoom.transform, d3.zoomIdentity);
       style.remove(); // Удаляем стили при размонтировании
+      window.removeEventListener("resize", handleResize);
     };
   }, [oblastData, getOblastRating, getColor, zoom]);
 

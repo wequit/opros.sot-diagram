@@ -56,6 +56,21 @@ const Header: React.FC = () => {
     return courtMap[userCourt] || "";
   };
 
+  const getRegionSlug = (courtName: string): string => {
+    const regionMap: { [key: string]: string } = {
+      "Таласский областной суд": "Talas",
+      "Иссык-кульский областной суд": "Issyk-Kyl", 
+      "Нарынский областной суд": "Naryn",
+      "Баткенский областной суд": "Batken",
+      "Чуйский областной суд": "Chyi",
+      "Ошский областной суд": "Osh",
+      "Жалал-Абадский областной суд": "Djalal-Abad",
+      "Бишкекский городской суд": "Bishkek",
+    };
+
+    return regionMap[courtName] || "court-id";
+  };
+
   const renderSecondInstanceNav = () => {
     if (user?.role !== "Председатель 2 инстанции") return null;
 
@@ -64,11 +79,11 @@ const Header: React.FC = () => {
     return (
       <div className="flex space-x-3 p-2 rounded-xl">
         <Link
-          href="/Home/summary/ratings"
+          href="/Home/summary2/ratings"
           className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
           flex items-center gap-2
           ${
-            pathname === "/Home/second-instance/ratings"
+            pathname === "/Home/summary2/ratings"
               ? "text-blue-600 bg-blue-100 shadow-inner"
               : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
           }`}
@@ -77,12 +92,11 @@ const Header: React.FC = () => {
         </Link>
 
         <Link
-          href="/Home/summary/ratings"
+          href="/Home/first_instance/ratings"
           className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
           flex items-center gap-2
           ${
-            pathname === "/Home/summary/ratings" ||
-            pathname === "/Home/summary/region-feedbacks"
+            pathname === "/Home/first_instance/ratings"
               ? "text-blue-600 bg-blue-100 shadow-inner"
               : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
           }`}
@@ -91,12 +105,12 @@ const Header: React.FC = () => {
         </Link>
 
         <Link
-          href={`/Home/second-instance/court/${encodeURIComponent(regionalCourt)}`}
+          href={`/Home/${getRegionSlug(regionalCourt)}/ratings`}
           className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
           flex items-center gap-2
           ${
-            pathname.includes("/Home/second-instance/court/") ||
-            pathname.includes("/Home/second-instance/court-feedbacks/")
+            pathname.includes(`/Home/${getRegionSlug(regionalCourt)}/ratings`) ||
+            pathname.includes(`/Home/${getRegionSlug(regionalCourt)}/feedbacks`)
               ? "text-blue-600 bg-blue-100 shadow-inner"
               : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
           }`}
@@ -105,6 +119,14 @@ const Header: React.FC = () => {
         </Link>
       </div>
     );
+  };
+
+  const logoLink = () => {
+    if (user?.role === "Председатель 2 инстанции") {
+      return "/Home/first_instance/ratings";
+    } else {
+      return "/Home/summary/ratings";
+    }
   };
 
   return (
@@ -127,7 +149,7 @@ const Header: React.FC = () => {
               >
                 <HiMenu className="w-6 h-6 text-gray-600" />
               </button>
-              <Link href="/Home/summary/ratings">
+              <Link href={logoLink()} className="flex items-center">
                 <Image
                   src={logo}
                   alt="Логотип"
@@ -140,7 +162,7 @@ const Header: React.FC = () => {
           )}
           {windowWidth > 1024 && (
             <div className="flex items-center gap-3">
-              <Link href="/Home/summary/ratings">
+              <Link href={logoLink()} className="flex items-center">
                 <Image
                   src={logo}
                   alt="Логотип"
