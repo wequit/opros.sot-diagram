@@ -15,10 +15,6 @@ export default function CommentsSection({
 }: CommentsSectionProps) {
   const { language } = useSurveyData();
 
-  useEffect(() => {
-    console.log("comments length:", comments.length);
-    console.log("comments:", comments);
-  });
 
   return (
     <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex flex-col justify-between h-full">

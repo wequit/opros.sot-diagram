@@ -37,6 +37,26 @@ export function useRemarks() {
     selectedCourtId: number | null
   ): Remark[] => {
 
+    
+    // Дополнительная проверка для страниц региона, чтобы показать ВСЕ замечания
+    if (pathname.includes("/first_instance/feedbacks/") && localStorage.getItem("viewMode") === "region") {
+      const currentRegion = localStorage.getItem("currentRegion");
+      
+      // Показать все замечания кроме "Необязательный вопрос"
+      const filtered = remarks.filter((item: Remark) => 
+        item.custom_answer !== null && 
+        item.custom_answer !== "Необязательный вопрос" &&
+        isCourtInRegion(item.court, currentRegion)
+      );
+      
+      console.log("Отфильтрованных замечаний для региона:", filtered.length);
+      filtered.forEach((item, index) => {
+        console.log(`${index+1}: ${item.court} - ${item.custom_answer?.substring(0, 30)}...`);
+      });
+      
+      return filtered;
+    }
+    
     const storedCourtName = localStorage.getItem("selectedCourtName");
     const courtNameId = localStorage.getItem("courtNameId");
     const courtNAME = localStorage.getItem("courtName");
@@ -175,23 +195,132 @@ export function useRemarks() {
 function isCourtInRegion(courtName: string, regionName: string | null) {
   if (!regionName) return false;
   
+  // Карта судов по регионам
+  const courtsInRegions: Record<string, string[]> = {
+    "Иссык-Кульская область": [
+      "Иссык-кульский областной суд",
+      "Каракольский городской суд",
+      "Жети-Огузский районный суд",
+      "Ак-Суйский районный суд", 
+      "Балыкчинский городской суд",
+      "Тонский районный суд",
+      "Тюпский районный суд",
+      "Иссык-Кульский районный суд"
+    ],
+    "Таласская область": [
+      "Таласский областной суд",
+      "Таласский городской суд",
+      "Таласский районный суд",
+      "Бакай-Атинский районный суд",
+      "Кара-Бууринский районный суд",
+      "Манасский районный суд"
+    ],
+    "Нарынская область": [
+      "Нарынский областной суд",
+      "Нарынский городской суд",
+      "Нарынский районный суд",
+      "Ак-Талинский районный суд",
+      "Ат-Башинский районный суд",
+      "Жумгальский районный суд",
+      "Кочкорский районный суд"
+    ],
+    "Баткенская область": [
+      "Баткенский областной суд",
+      "Баткенский районный суд",
+      "Кадамжайский районный суд",
+      "Лейлекский районный суд",
+      "Сулюктинский городской суд",
+      "Кызыл-Кийский городской суд"
+    ],
+    "Чуйская область": [
+      "Чуйский областной суд",
+      "Токмакский городской суд",
+      "Аламудунский районный суд",
+      "Московский районный суд",
+      "Жайылский районный суд",
+      "Ысык-Атинский районный суд",
+      "Кеминский районный суд",
+      "Панфиловский районный суд",
+      "Сокулукский районный суд",
+      "Чуйский районный суд"
+    ],
+    "Ошская область": [
+      "Ошский областной суд",
+      "Алайский районный суд",
+      "Араванский районный суд",
+      "Кара-Кулджинский районный суд",
+      "Кара-Сууский районный суд",
+      "Ноокатский районный суд",
+      "Узгенский районный суд",
+      "Чон-Алайский районный суд"
+    ],
+    "Жалал-Абадская область": [
+      "Жалал-Абадский областной суд",
+      "Джалал-Абадский городской суд",
+      "Сузакский районный суд",
+      "Ноокенский районный суд",
+      "Базар-Коргонский районный суд",
+      "Аксыйский районный суд",
+      "Ала-Букинский районный суд",
+      "Токтогульский районный суд",
+      "Чаткальский районный суд",
+      "Тогуз-Тороуский районный суд"
+    ],
+    "город Бишкек": [
+      "Бишкекский городской суд",
+      "Ленинский районный суд города Бишкек",
+      "Октябрьский районный суд города Бишкек",
+      "Первомайский районный суд города Бишкек",
+      "Свердловский районный суд города Бишкек"
+    ]
+  };
+  
+  // Проверяем точное вхождение в список судов региона
+  if (courtsInRegions[regionName]) {
+    return courtsInRegions[regionName].some(courtNameInRegion => 
+      courtName === courtNameInRegion || 
+      courtName.includes(courtNameInRegion) || 
+      courtNameInRegion.includes(courtName)
+    );
+  }
+  
+  // Резервный метод (старый) - используем только если нет точного совпадения
   switch (regionName) {
     case "Таласская область":
       return courtName.includes("Талас");
     case "Иссык-Кульская область":
-      return courtName.includes("Иссык") || courtName.includes("Каракол");
+      return courtName.includes("Иссык") || courtName.includes("Каракол") || 
+             courtName.includes("Жети-Огуз") || courtName.includes("Ак-Суй") || 
+             courtName.includes("Балыкчи") || courtName.includes("Тон") || 
+             courtName.includes("Тюп");
     case "Нарынская область":
       return courtName.includes("Нарын");
     case "Баткенская область":
-      return courtName.includes("Баткен");
+      return courtName.includes("Баткен") || courtName.includes("Кадамжай") || 
+             courtName.includes("Лейлек") || courtName.includes("Сулюкт") || 
+             courtName.includes("Кызыл-Кия");
     case "Чуйская область":
-      return courtName.includes("Чуй");
+      return courtName.includes("Чуй") || courtName.includes("Токмак") || 
+             courtName.includes("Аламудун") || courtName.includes("Московск") || 
+             courtName.includes("Жайыл") || courtName.includes("Ысык-Ат") || 
+             courtName.includes("Кемин") || courtName.includes("Панфилов") || 
+             courtName.includes("Сокулук");
     case "Ошская область":
-      return courtName.includes("Ош") && !courtName.includes("город Ош");
+      return (courtName.includes("Ош") && !courtName.includes("город Ош")) || 
+             courtName.includes("Алай") || courtName.includes("Араван") || 
+             courtName.includes("Кара-Кулдж") || courtName.includes("Кара-Суу") || 
+             courtName.includes("Ноокат") || courtName.includes("Узген") || 
+             courtName.includes("Чон-Алай");
     case "Жалал-Абадская область":
-      return courtName.includes("Жалал") || courtName.includes("Джалал");
-    case "Город Бишкек":
-      return courtName.includes("Бишкек") || courtName.includes("бишкек");
+      return courtName.includes("Жалал") || courtName.includes("Джалал") || 
+             courtName.includes("Сузак") || courtName.includes("Ноокен") || 
+             courtName.includes("Базар-Коргон") || courtName.includes("Аксы") || 
+             courtName.includes("Ала-Бук") || courtName.includes("Токтогул") || 
+             courtName.includes("Чаткал") || courtName.includes("Тогуз-Тороу");
+    case "город Бишкек":
+      return courtName.includes("Бишкек") || courtName.includes("Ленинский") || 
+             courtName.includes("Октябрьский") || courtName.includes("Первомайский") || 
+             courtName.includes("Свердловский");
     default:
       return false;
   }

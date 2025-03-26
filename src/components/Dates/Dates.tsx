@@ -1,7 +1,7 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { fetchDataWithParams } from "@/components/DataFetcher";
-import { useSurveyData } from "@/context/SurveyContext";
+import { useSurveyData, getTranslation } from "@/context/SurveyContext";
 import { usePathname } from "next/navigation";
 
 interface DateRange {
@@ -39,23 +39,64 @@ export interface Question {
 export default function Dates() {
   const [activePeriod, setActivePeriod] = useState<number | null>(null);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
+  const [showMonthDropdown, setShowMonthDropdown] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: "2025-01-01",
     endDate: "2025-12-31",
     year: "2025",
   });
-  const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0
   );
+  
+  const yearDropdownRef = useRef<HTMLDivElement>(null);
+  const monthDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Функции для преобразования формата даты
+  const formatDateToDisplay = (isoDate: string): string => {
+    // Преобразование из YYYY-MM-DD в DD.MM.YY
+    const parts = isoDate.split("-");
+    if (parts.length !== 3) return isoDate;
+    return `${parts[2]}.${parts[1]}.${parts[0].slice(2)}`;
+  };
+
+  const formatDateToISO = (displayDate: string): string => {
+    // Преобразование из DD.MM.YY в YYYY-MM-DD
+    const parts = displayDate.split(".");
+    if (parts.length !== 3) return displayDate;
+    
+    let year = parts[2];
+    if (year.length === 2) {
+      year = `20${year}`; // Предполагаем, что все года будут в диапазоне 2000-2099
+    }
+    
+    return `${year}-${parts[1]}-${parts[0]}`;
+  };
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    
+    // Добавляем обработчик клика для закрытия выпадающих меню
+    const handleClickOutside = (event: MouseEvent) => {
+      if (yearDropdownRef.current && !yearDropdownRef.current.contains(event.target as Node)) {
+        setShowYearDropdown(false);
+      }
+      if (monthDropdownRef.current && !monthDropdownRef.current.contains(event.target as Node)) {
+        setShowMonthDropdown(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
-  const { setSurveyData, selectedCourtId, courtNameId } = useSurveyData();
+  const { setSurveyData, selectedCourtId, courtNameId, language } = useSurveyData();
   const pathname = usePathname();
 
   const years = Array.from({ length: 11 }, (_, i) => (2025 + i).toString());
@@ -216,11 +257,14 @@ export default function Dates() {
 
   const handleDateChange = useCallback(
     async (field: keyof DateRange, value: string) => {
-      setDateRange((prev) => ({ ...prev, [field]: value }));
+      // Преобразуем введённое значение в формат ISO для внутреннего использования
+      const isoValue = formatDateToISO(value);
+      
+      setDateRange((prev) => ({ ...prev, [field]: isoValue }));
       try {
         const params = {
-          startDate: field === "startDate" ? value : dateRange.startDate,
-          endDate: field === "endDate" ? value : dateRange.endDate,
+          startDate: field === "startDate" ? isoValue : dateRange.startDate,
+          endDate: field === "endDate" ? isoValue : dateRange.endDate,
         };
 
         let courtId: number | null = null;
@@ -245,214 +289,230 @@ export default function Dates() {
         const response = await fetchDataWithParams(courtId, params);
         setSurveyData(response);
       } catch (error) {
-        console.error("Ошибка при получении данных:", error);
+        console.error("Ошибка при изменении даты:", error);
       }
     },
-    [
-      dateRange.startDate,
-      dateRange.endDate,
-      setSurveyData,
-      pathname,
-      selectedCourtId,
-      courtNameId,
-    ]
+    [dateRange.startDate, dateRange.endDate, setSurveyData, pathname, selectedCourtId, courtNameId]
   );
 
+  // Полные названия месяцев
+  const monthNames = [
+    'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
+    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+  ];
+  
+  // Короткие названия месяцев с заглавной буквы
+  const monthLabels = [
+    'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 
+    'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
+  ];
+
+  const handleMonthSelect = (monthIndex: number) => {
+    const period = periods.find(p => p.id === monthIndex + 4);
+    if (period) {
+      handlePeriodClick(period);
+      setSelectedMonth(monthLabels[monthIndex]);
+    }
+    setShowMonthDropdown(false);
+  };
+
+  // Функция сброса фильтров
+  const handleReset = async () => {
+    const currentYear = new Date().getFullYear().toString();
+    
+    setActivePeriod(null);
+    setSelectedMonth(null);
+    setDateRange({
+      startDate: `${currentYear}-01-01`,
+      endDate: `${currentYear}-12-31`,
+      year: currentYear,
+    });
+
+    try {
+      let courtId: number | null = null;
+
+      if (pathname === "/Home/second-instance/regions" && selectedCourtId) {
+        courtId = selectedCourtId;
+      } else if (pathname === "/maps/rayon/District-Courts" && courtNameId) {
+        const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
+        courtId = numericCourtId;
+      } else if (pathname === "/maps/General") {
+        courtId = 65;
+      } else if (pathname === "/") {
+        courtId = null;
+      }
+
+      const params = { year: currentYear };
+      const response = await fetchDataWithParams(courtId, params);
+      setSurveyData(response);
+    } catch (error) {
+      console.error("Ошибка при сбросе фильтров:", error);
+    }
+  };
+
   return (
-    <div className="w-full bg-gradient-to-r from-blue-700 to-indigo-400 p-6 rounded-2xl mb-4">
-      <div className="flex flex-wrap gap-6 mb-6 Dates max-[470px]:mb-4">
-        <div className="flex items-center bg-white rounded-xl shadow-sm p-2">
-          <div className="flex items-center gap-3">
-            <span className="font-medium px-2">С</span>
+    <div className="w-full bg-gradient-to-r from-blue-700 to-indigo-400 p-4 rounded-2xl mb-4 shadow-lg">
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Ввод диапазона дат */}
+        <div className="flex items-center bg-white rounded-xl shadow-sm p-2 border-b-2 border-indigo-100">
+          <div className="flex items-center gap-2 ml-3">
+            <span className="font-medium text-gray-700">С</span>
             <input
               type="text"
-              value={dateRange.startDate}
+              value={formatDateToDisplay(dateRange.startDate)}
               onChange={(e) => handleDateChange("startDate", e.target.value)}
-              className="border-0 focus:ring-0 text-gray-600 font-medium w-24 DatesInputText"
+              className="border-0 focus:ring-0 text-gray-600 font-medium w-20 text-center"
             />
           </div>
-          <div className="w-px h-6 bg-gray-200 mx-2"></div>
-          <div className="flex items-center gap-3">
-            <span className="font-medium px-2">По</span>
+          <div className="w-px h-6 bg-gray-200 mx-1"></div>
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-gray-700">По</span>
             <input
               type="text"
-              value={dateRange.endDate}
+              value={formatDateToDisplay(dateRange.endDate)}
               onChange={(e) => handleDateChange("endDate", e.target.value)}
-              className="border-0 focus:ring-0 text-gray-600 font-medium w-24 DatesInputText"
+              className="border-0 focus:ring-0 text-gray-600 font-medium w-20 text-center"
             />
           </div>
         </div>
-
-        {windowWidth > 470 ? (
-          <div className="relative">
-            <button
-              onClick={() => setShowYearDropdown(!showYearDropdown)}
-              className="bg-white px-4 py-2 rounded-xl font-medium text-gray-600 hover:bg-blue-50 transition-all duration-200 flex items-center gap-2"
+        
+        {/* Выбор года */}
+        <div className="relative" ref={yearDropdownRef}>
+          <button
+            onClick={() => setShowYearDropdown(!showYearDropdown)}
+            className="bg-white px-4 py-2 rounded-xl font-medium text-gray-700 hover:bg-blue-50 transition-all duration-200 flex items-center gap-2 shadow-sm border-b-2 border-indigo-100"
+          >
+            {dateRange.year}
+            <svg
+              className={`w-4 h-4 transition-transform ${
+                showYearDropdown ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              {dateRange.year}{" "}
-              {/* Отображает текущий год (по умолчанию 2025) */}
-              <svg
-                className={`w-4 h-4 transition-transform ${
-                  showYearDropdown ? "rotate-180" : ""
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </button>
-            {showYearDropdown && (
-              <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto">
-                {years.map((year) => (
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+          {showYearDropdown && (
+            <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg z-30 w-full border border-indigo-50">
+              {years.map((year, index) => (
+                <>
                   <button
                     key={year}
                     onClick={() => handleYearSelect(year)}
-                    className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors ${
-                      dateRange.year === year ? "bg-blue-100 font-semibold" : ""
-                    }`} 
+                    className={`w-full px-4 py-2 text-center hover:bg-blue-50 transition-colors ${
+                      dateRange.year === year ? "bg-blue-100 font-medium" : ""
+                    }`}
                   >
                     {year}
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          ""
-        )}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-4 justify-between">
-        <div className="flex flex-wrap items-center gap-3 DatesQuarter_Month">
-          <div className="flex flex-wrap gap-3 border-r border-white/20 pr-4 lg:border-none md:border-none lg:pr-0 max-[470px]:border-none max-[470px]:pr-0">
-            {periods.slice(0, 4).map((period) => (
-              <button
-                key={period.id}
-                onClick={() => handlePeriodClick(period)}
-                className={
-                  "px-5 py-2 rounded-xl font-medium transition-all duration-200 " +
-                  (activePeriod === period.id
-                    ? "bg-indigo-950 text-white shadow-lg shadow-blue-900 scale-105"
-                    : "bg-white text-black hover:bg-[#003494] hover:text-white")
-                }
-              >
-                {period.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            {windowWidth < 640 ? (
-              <div className="relative flex gap-3">
-                {windowWidth < 470 ? 
-                <div className="relative">
-                <button
-                  onClick={() => setShowYearDropdown(!showYearDropdown)}
-                  className="bg-white px-4 py-2 rounded-xl font-medium text-gray-600 hover:bg-blue-50 transition-all duration-200 flex items-center gap-2"
-                >
-                  {dateRange.year}{" "}
-                  {/* Отображает текущий год (по умолчанию 2025) */}
-                  <svg
-                    className={`w-4 h-4 transition-transform ${
-                      showYearDropdown ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                {showYearDropdown && (
-                  <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto">
-                    {years.map((year) => (
-                      <button
-                        key={year}
-                        onClick={() => handleYearSelect(year)}
-                        className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors ${
-                          dateRange.year === year ? "bg-blue-100 font-semibold" : ""
-                        }`} 
-                      >
-                        {year}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-                 : ""}
-
-                <button
-                  onClick={() => setShowMonthDropdown(!showMonthDropdown)}
-                  className="bg-white px-4 py-2 rounded-xl font-medium text-gray-600 hover:bg-blue-50 transition-all duration-200 flex items-center gap-2"
-                >
-                  Месяц
-                  <svg
-                    className={`w-4 h-4 transition-transform ${
-                      showMonthDropdown ? "rotate-180" : ""
-                    }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-                {showMonthDropdown && (
-                  <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-xl z-30 max-h-60 overflow-y-auto">
-                    {periods.slice(4).map((period) => (
-                      <button
-                        key={period.id}
-                        onClick={() => {
-                          handlePeriodClick(period);
-                          setShowMonthDropdown(false);
-                        }}
-                        className={`w-full px-6 py-2 text-left hover:bg-blue-50 transition-colors ${
-                          activePeriod === period.id ? "bg-blue-100" : ""
-                        }`}
-                      >
-                        {period.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex flex-wrap gap-3">
-                {periods.slice(4).map((period) => (
-                  <button
-                    key={period.id}
-                    onClick={() => handlePeriodClick(period)}
-                    className={
-                      "px-4 py-2 rounded-xl font-medium transition-all duration-200 " +
-                      (windowWidth <= 1281 ? "w-16 text-center" : "") +
-                      (activePeriod === period.id
-                        ? " bg-indigo-950 text-white shadow-lg shadow-blue-900 scale-105"
-                        : " bg-white text-black hover:bg-[#003494] hover:text-white")
-                    }
-                  >
-                    {period.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+                  {index < years.length - 1 && (
+                    <div className="w-full h-px bg-indigo-50"></div>
+                  )}
+                </>
+              ))}
+            </div>
+          )}
         </div>
+        
+        {/* Кварталы */}
+        <div className="flex items-center gap-2">
+          {periods.slice(0, 4).map((period) => (
+            <button
+              key={period.id}
+              onClick={() => {
+                handlePeriodClick(period);
+                setSelectedMonth(null);
+              }}
+              className={
+                "px-4 py-2 rounded-xl font-medium transition-all duration-200 shadow-sm " +
+                (activePeriod === period.id && !selectedMonth
+                  ? "bg-indigo-900 text-white shadow-md"
+                  : "bg-white text-gray-700 hover:bg-blue-50 border-b-2 border-indigo-100")
+              }
+            >
+              {period.label}
+            </button>
+          ))}
+        </div>
+        
+        {/* Выбор месяца */}
+        <div className="relative" ref={monthDropdownRef}>
+          <button
+            onClick={() => setShowMonthDropdown(!showMonthDropdown)}
+            className={
+              "px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 shadow-sm " +
+              (selectedMonth
+                ? "bg-indigo-900 text-white shadow-md"
+                : "bg-white text-gray-700 hover:bg-blue-50 border-b-2 border-indigo-100")
+            }
+          >
+            {selectedMonth || "Месяц"}
+            <svg
+              className={`w-4 h-4 transition-transform ${
+                showMonthDropdown ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+          
+          {showMonthDropdown && (
+            <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg z-30 w-36 border border-indigo-50">
+              {monthNames.map((month, index) => (
+                <>
+                  <button
+                    key={index}
+                    onClick={() => handleMonthSelect(index)}
+                    className={`w-full px-4 py-2 text-center hover:bg-blue-50 transition-colors ${
+                      selectedMonth === monthLabels[index] ? "bg-blue-100 font-medium" : ""
+                    }`}
+                  >
+                    {month}
+                  </button>
+                  {index < monthNames.length - 1 && (
+                    <div className="w-full h-px bg-indigo-50"></div>
+                  )}
+                </>
+              ))}
+            </div>
+          )}
+        </div>
+        
+        {/* Кнопка сброса */}
+        <button
+          onClick={handleReset}
+          className="px-4 py-2 rounded-xl font-medium transition-all duration-200 bg-white text-gray-700 hover:bg-blue-50 flex items-center gap-2 shadow-sm border-b-2 border-red-100 hover:border-red-200"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          Сбросить
+        </button>
       </div>
     </div>
   );

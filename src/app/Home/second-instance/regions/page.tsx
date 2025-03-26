@@ -58,7 +58,6 @@ export default function RegionalCourts() {
   };
 
   useEffect(() => {
-    console.log("regionNameMain", regionName);
     const fetchData = async () => {
       try {
         const token = getCookie("access_token");

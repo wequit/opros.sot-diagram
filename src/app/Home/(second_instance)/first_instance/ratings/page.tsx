@@ -9,6 +9,7 @@ import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import RegionMap, { RegionData } from "@/components/Maps/RegionMap";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import SkeletonLoader from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
 interface Assessment {
   aspect: string;
@@ -37,6 +38,7 @@ const FirstInstance = () => {
   const {language, } = useSurveyData();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchAssessmentData = async () => {
@@ -49,6 +51,8 @@ const FirstInstance = () => {
         setAssessmentData(data.courts);
       } catch (error) {
         console.error("Ошибка при получении данных оценки:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -107,7 +111,7 @@ const FirstInstance = () => {
       "Чуйский областной суд": "Чуйская область",
       "Ошский областной суд": "Ошская область",
       "Жалал-Абадский областной суд": "Жалал-Абадская область",
-      "Бишкекский городской суд": "Бишкек",
+      "Бишкекский городской суд": "Город Бишкек",
     };
     return regionMap[userCourt] || "";
   };
@@ -121,7 +125,7 @@ const FirstInstance = () => {
       "Чуйская область": "Chyi",
       "Ошская область": "Osh",
       "Жалал-Абадская область": "Djalal-Abad",
-      "Бишкек": "Bishkek",
+      "Город Бишкек": "Bishkek",
     };
     
     return regionMap[userRegion] || "";
@@ -200,6 +204,26 @@ const FirstInstance = () => {
     
     return transformedData;
   };
+
+  const handleCourtClick = (court: any) => {
+    const courtId = court.court_id;
+    const courtName = court.court;
+    
+    // Сохраняем данные в localStorage
+    localStorage.setItem("selectedCourtId", courtId.toString());
+    localStorage.setItem("selectedCourtName", courtName);
+    
+    // Перенаправляем на страницу суда напрямую с ID
+    router.push(`/Home/first_instance/court/${courtId}`);
+  };
+
+  if (loading) {
+    return (
+      <div className="max-w-[1250px] mx-auto px-4 py-4">
+        <SkeletonLoader />
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -361,8 +385,8 @@ const FirstInstance = () => {
                             {index + 1}
                           </td>
                           <td 
-                            className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 border-r border-gray-200 cursor-pointer hover:text-blue-600"
-                            onClick={() => router.push(`/Home/first_instance/court/${court.court_id}`)}
+                            className="px-3 py-2.5 text-left text-xs text-gray-600 cursor-pointer hover:text-blue-500"
+                            onClick={() => handleCourtClick(court)}
                           >
                             {court.court}
                           </td>

@@ -7,6 +7,7 @@ import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Dates from "@/components/Dates/Dates";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import RemarksPage from "@/lib/utils/remarksLogic/RemarksLogic";
+import SkeletonLoader from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
 export default function RegionFeedbacksPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -41,13 +42,13 @@ export default function RegionFeedbacksPage() {
           setRegionName(userRegionName);
           
           // Очищаем предыдущие настройки в localStorage
-          localStorage.removeItem("courtId");
-          localStorage.removeItem("courtName2");
+          localStorage.removeItem("selectedCourtId");
+          localStorage.removeItem("selectedCourtName");
           
-          // Сохраняем данные для RemarksApi, указывая, что это режим региона
+          // Устанавливаем режим просмотра как "регион"
           localStorage.setItem("currentRegion", userRegionName);
           localStorage.setItem("regionSlug", regionSlug);
-          localStorage.setItem("viewMode", "region"); // Важно! Это указывает RemarksPage показывать все суды в регионе
+          localStorage.setItem("viewMode", "region");
         } else {
           // Перенаправить, если нет прав
           router.push('/Home/summary/ratings');
@@ -91,24 +92,16 @@ export default function RegionFeedbacksPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Загрузка...</div>;
+    return (
+      <div className="max-w-[1250px] mx-auto px-4 py-4">
+        <SkeletonLoader />
+      </div>
+    );
   }
 
   return (
     <div className="max-w-[1250px] mx-auto px-4 py-4 pb-10">
       <div className="flex flex-col">
-        <div className="mb-4">
-          <Breadcrumb 
-            regionName={regionName} 
-            showHome={false}
-            onRegionBackClick={() => router.push('/Home/first_instance/ratings')}
-          />
-        </div>
-        
-        <h1 className="text-2xl font-bold mb-4">{getTranslation("RemarksLogic_Remarks", language)}</h1>
-        
-        <Dates />
-        
         <div className="mt-4">
           <RemarksPage />
         </div>

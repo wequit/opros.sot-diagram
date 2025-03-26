@@ -18,6 +18,7 @@ import geoData from "../../../../../../public/gadm41_KGZ_1.json";
 import districtsGeoData from "../../../../../../public/gadm41_KGZ_2.json";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import debounce from "lodash/debounce";
+import { getRadarCourtData } from "@/lib/api/charts";
 
 const getRatingColor = (rating: number) => {
   if (rating === 0) return "bg-gray-100";

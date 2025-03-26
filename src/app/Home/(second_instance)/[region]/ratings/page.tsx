@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getCookie } from "@/lib/api/login";
+import { getCookie, getCurrentUser } from "@/lib/api/login";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { useSurveyData } from "@/context/SurveyContext";
 import { useParams, useRouter } from "next/navigation";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
+import SkeletonLoader from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
 export default function RegionalCourtPage() {
   const { setCourtName, setSurveyData, setIsLoading } = useSurveyData();
@@ -20,13 +21,8 @@ export default function RegionalCourtPage() {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await fetch("https://opros.sot.kg/api/v1/current_user/", {
-          headers: {
-            Authorization: `Bearer ${getCookie("access_token")}`,
-          },
-        });
-        const data = await response.json();
-        setCurrentUser(data);
+        const data = await getCurrentUser();
+               setCurrentUser(data);
         
         if (data.role === "Председатель 2 инстанции") {
           const courtName = data.court;
@@ -126,7 +122,11 @@ export default function RegionalCourtPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Загрузка...</div>;
+    return (
+      <div className="max-w-[1250px] mx-auto px-4 py-4">
+        <SkeletonLoader />
+      </div>
+    );
   }
 
   return (

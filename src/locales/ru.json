@@ -89,9 +89,11 @@
     "RemarksLogic_Error_Adding":"Ошибка при добавлении комментария",
     "RemarksLogic_ModalPlaceholder":"Введите ваш комментарий...",
 
-    "BreadCrumb_RegionName": "Области",
+    "BreadCrumb_RegionName": "Оценки по области",
+    
     "BreadCrumb_CourtName": "Областные суды",
 
-    "HeaderNavRegionalRatings": "Оценки по областям"
+    "HeaderNavRegionalRatings": "Оценки по области"
+
 
 }

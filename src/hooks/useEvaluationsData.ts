@@ -4,22 +4,6 @@ import { useSurveyData } from "@/context/SurveyContext";
 import { useRemarks } from "@/components/RemarksApi";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
-import {
-  processSecondQuestion,
-  processThirdQuestion,
-  processFirstQuestion,
-  processFifthQuestion,
-  processProgressRatings,
-  processStaffRatings,
-  processProcessRatings,
-  processAccessibilityRatings,
-  processOfficeRatings,
-  processAudioVideoQuestion,
-  processStartTimeQuestion,
-  processDisrespectQuestion,
-  processAgeData,
-  processAgeGenderData,
-} from "@/lib/utils/processData";
 import { ChartData } from "chart.js";
 import {
   getRadarRepublicData,
@@ -41,8 +25,6 @@ export default function useEvaluationData(
   const { surveyData, language, totalResponses, isLoading, selectedCourtId } =
     useSurveyData();
   const { remarks } = useRemarks();
-  const { user } = useAuth();
-  const pathname = usePathname();
 
   const [progressData, setProgressData] = useState<ChartData<"bar">>({
     labels: [],
@@ -144,6 +126,7 @@ export default function useEvaluationData(
     ],
   });
 
+  // Эффект для загрузки данных диаграмм
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -212,7 +195,7 @@ export default function useEvaluationData(
             }
           });
         }
-  
+
         // Радарная диаграмма
         let radarSource;
         if (selectedCourtId) {
@@ -244,7 +227,7 @@ export default function useEvaluationData(
             ],
           });
         }
-  
+
         // Столбчатые данные
         let barData;
         if (selectedCourtId) {
@@ -282,26 +265,26 @@ export default function useEvaluationData(
                 break;
             }
           });
-  
+
           const ageQuestion = barData.find((q: any) => q.question_id === 4);
           const genderQuestion = circleData.find((q: any) => q.question_id === 3);
-  
+
           if (ageQuestion && genderQuestion) {
             const ageLabels = ageQuestion.options.map((opt: any) => opt.answer_option_ru);
             const ageCounts = ageQuestion.options.map((opt: any) => opt.count);
             const totalResponses = ageCounts.reduce((sum: number, count: number) => sum + count, 0);
             const agePercentages = ageCounts.map((count: number) => (count / totalResponses) * 100);
-  
+
             const femalePercentage = parseFloat(
               genderQuestion.options.find((opt: any) => opt.answer_option_ru === "Женский").percentage.replace("%", "")
             );
             const malePercentage = parseFloat(
               genderQuestion.options.find((opt: any) => opt.answer_option_ru === "Мужской").percentage.replace("%", "")
             );
-  
+
             const maleData = agePercentages.map((percent: number) => -(percent * malePercentage) / 100);
             const femaleData = agePercentages.map((percent: number) => (percent * femalePercentage) / 100);
-  
+
             setAgeGenderData({
               labels: ageLabels,
               datasets: [
@@ -319,7 +302,7 @@ export default function useEvaluationData(
             });
           }
         }
-  
+
         // Данные прогресса
         let progressData;
         if (selectedCourtId) {
@@ -332,17 +315,17 @@ export default function useEvaluationData(
           const staffQuestions = [7, 9];
           const officeQuestions = [8];
           const accessibilityQuestions = [6];
-  
+
           const judgeRatingsData: { [key: string]: number } = {};
           const staffRatingsData: { [key: string]: number } = {};
           const officeRatingsData: { [key: string]: number } = {};
           const accessibilityRatingsData: { [key: string]: number } = {};
           const processRatingsData: { [key: string]: number } = {};
-  
+
           progressData.forEach((item: any) => {
             const questionText = item.question_text_ru.replace(/^\d+\.\s*/, '');
             const score = item.average_score;
-  
+
             if (judgeQuestions.includes(item.question_id)) {
               judgeRatingsData[questionText] = score;
             } else if (staffQuestions.includes(item.question_id)) {
@@ -353,14 +336,14 @@ export default function useEvaluationData(
               accessibilityRatingsData[questionText] = score;
             }
           });
-  
+
           setJudgeRatings(judgeRatingsData);
           setStaffRatings(staffRatingsData);
           setOfficeRatings(officeRatingsData);
           setAccessibilityRatings(accessibilityRatingsData);
           setProcessRatings(processRatingsData);
         }
-  
+
         // Данные колонн (DisrespectChart)
         let columnData;
         if (selectedCourtId) {
@@ -385,7 +368,6 @@ export default function useEvaluationData(
             });
           }
         }
-  
       } catch (error) {
         console.error("Ошибка при получении данных:", error);
         setCategoryData({ labels: [], datasets: [{ data: [], backgroundColor: [] }] });
@@ -404,9 +386,15 @@ export default function useEvaluationData(
         setDisrespectData({ labels: [], datasets: [{ data: [], backgroundColor: [], barThickness: 20 }] });
       }
     };
-  
+
     fetchData();
   }, [selectedCourtId, selectedCourtName, courtName]);
+
+  useEffect(() => {
+    if (remarks) {
+      setTotalResponsesAnswer(remarks.length);
+    }
+  }, [remarks]);
 
   const comments =
     remarks
