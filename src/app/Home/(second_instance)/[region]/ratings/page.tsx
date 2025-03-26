@@ -7,6 +7,7 @@ import Evaluations from "@/components/Evaluations/page";
 import { useSurveyData } from "@/context/SurveyContext";
 import { useParams, useRouter } from "next/navigation";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
+import SkeletonLoader from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
 export default function RegionalCourtPage() {
   const { setCourtName, setSurveyData, setIsLoading } = useSurveyData();
@@ -126,7 +127,11 @@ export default function RegionalCourtPage() {
   };
 
   if (loading) {
-    return <div className="flex justify-center items-center h-screen">Загрузка...</div>;
+    return (
+      <div className="max-w-[1250px] mx-auto px-4 py-4">
+        <SkeletonLoader />
+      </div>
+    );
   }
 
   return (

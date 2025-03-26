@@ -8,6 +8,7 @@ import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import RegionMap, { RegionData } from "@/components/Maps/RegionMap";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 interface Assessment {
   aspect: string;
@@ -34,6 +35,7 @@ const SecondInstance = () => {
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const {language, } = useSurveyData();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchAssessmentData = async () => {
@@ -183,11 +185,15 @@ const SecondInstance = () => {
     }
   };
 
- const handleCourtClick = async (court: CourtData) => {
-    setSelectedCourt(court);
-    setCourtName(court.court);
-    await fetchResults(court.court_id);
-    localStorage.setItem("courtName2", court.court);
+  const handleCourtClick = (court: any) => {
+    const courtId = court.court_id;
+    
+    // Сохраняем нужные данные
+    localStorage.setItem("selectedCourtId", courtId.toString());
+    localStorage.setItem("selectedCourtName", court.court);
+    
+    // Перенаправляем на страницу суда
+    router.push(`/Home/second-instance/court/${courtId}`);
   };
 
   const handleBackClick = () => {

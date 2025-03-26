@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Evaluations from "@/components/Evaluations/page";
-import Dates from "@/components/Dates/Dates";
-import { getCookie, getAssessmentData } from "@/lib/api/login";
-import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import { useRouter } from "next/navigation";
+import RemarksPage from "@/lib/utils/remarksLogic/RemarksLogic";
+import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
+import Dates from "@/components/Dates/Dates";
+import { getCookie } from "@/lib/api/login";
 import SkeletonLoader from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
-export default function SecondInstanceSummaryPage() {
+export default function SummaryFeedbacksPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userRegion, setUserRegion] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-
+  
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
@@ -53,7 +53,7 @@ export default function SecondInstanceSummaryPage() {
     };
     return regionMap[courtName] || "";
   };
-
+  
   if (loading) {
     return (
       <div className="max-w-[1250px] mx-auto px-4 py-4">
@@ -64,6 +64,8 @@ export default function SecondInstanceSummaryPage() {
 
   return (
     <div className="max-w-[1250px] mx-auto px-4 py-4">
+      <h1 className="text-2xl font-bold mb-6">Замечания и предложения</h1>
+      
       <div className="mb-4">
         <Breadcrumb 
           showHome={true}
@@ -73,7 +75,7 @@ export default function SecondInstanceSummaryPage() {
         />
       </div>
       <Dates />
-      <Evaluations />
+      <RemarksPage />
     </div>
   );
 }
