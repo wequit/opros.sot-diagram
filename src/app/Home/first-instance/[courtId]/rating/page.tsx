@@ -7,6 +7,7 @@ import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { getCookie } from "@/lib/api/login";
+import { getRadarCourtData } from "@/lib/api/charts";
 
 const CourtRatingPage = () => {
   const params = useParams();
@@ -38,46 +39,33 @@ const CourtRatingPage = () => {
         setIsDataLoading(false);
         return;
       }
-
-      // Загружаем данные из localStorage, если они есть
+  
       const storedCourtName = localStorage.getItem("courtName") || courtName;
       const storedCourtId = localStorage.getItem("courtNameId") || courtId;
-
+  
       if (storedCourtId === courtId && storedCourtName && courtNameId) {
         setIsDataLoading(false);
         return;
       }
-
+  
       try {
         setIsLoading(true);
         setIsDataLoading(true);
-
-        if (!token) throw new Error("Token is null");
-
-        const response = await fetch(
-          `https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`,
-          {
-            headers: {
-              Accept: "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+  
+        const data = await getRadarCourtData(courtId);
+        if (!data) {
+          throw new Error("Не удалось получить данные радара для суда");
         }
-
-        const data = await response.json();
+  
         const newCourtName = storedCourtName || data.court || "Неизвестный суд";
-
+  
         setCourtName(newCourtName);
         setCourtNameId(courtId);
         setSurveyData(data);
         localStorage.setItem("courtNameId", courtId);
         localStorage.setItem("courtName", newCourtName);
         localStorage.setItem("selectedCourtName", newCourtName);
-
+  
         setError(null);
       } catch (error) {
         console.error("Ошибка при получении данных суда:", error);
@@ -93,7 +81,7 @@ const CourtRatingPage = () => {
         setIsDataLoading(false);
       }
     };
-
+  
     loadCourtData();
   }, [
     courtId,

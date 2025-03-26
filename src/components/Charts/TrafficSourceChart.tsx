@@ -49,7 +49,13 @@ export default function TrafficSourceChart({
         },
       },
     },
-    plugins: { legend: { display: false } },
+    plugins: { 
+      legend: { display: false },
+      datalabels: {
+        display: true,
+        color: '#FFFFFF', 
+      },
+    },
     maintainAspectRatio: false,
     layout: { padding: { left: 1 } },
   };

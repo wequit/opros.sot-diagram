@@ -82,6 +82,8 @@
     "RemarksLogic_ModalPlaceholder":"Введите ваш комментарий...",
 
     "BreadCrumb_RegionName": "Области",
-    "BreadCrumb_CourtName": "Областные суды"
+    "BreadCrumb_CourtName": "Областные суды",
+
+    "HeaderNavRegionalRatings": "Оценки по областям"
 
 }

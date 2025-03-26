@@ -14,12 +14,23 @@ import ReusablePieChart from "../Charts/ReusablePieChart";
 import DisrespectChart from "../Charts/DisrespectChart";
 import useEvaluationData from "@/hooks/useEvaluationsData";
 
+interface RegionSummaryData {
+  overall_rating: number;
+  total_responses: number;
+  courts_count: number;
+  ratings_by_category: {
+    [key: string]: number;
+  };
+}
+
 export default function Evaluations({
   selectedCourtId,
   courtNameId,
+  summaryData,
 }: {
   selectedCourtId?: number | null;
   courtNameId?: string | null;
+  summaryData?: RegionSummaryData | null;
 }) {
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0
@@ -68,7 +79,6 @@ export default function Evaluations({
   } = useEvaluationData();
 
   if (isLoading) return <SkeletonDashboard />;
-  if (totalResponses === 0) return <NoData />;
 
   return (
     <div className="min-h-screen mb-4">

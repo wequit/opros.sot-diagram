@@ -25,7 +25,18 @@ export const withAuth = (WrappedComponent: ComponentType) => {
         
           deleteCookie("access_token");
           deleteCookie("refresh_token");
-          router.push("/results/login");
+          
+          const pathname = window.location.pathname;
+          let loginPath = "/login";
+          
+          if (pathname.startsWith("/results")) {
+            loginPath = "/results/login";
+          } else if (pathname.includes("/results/")) {
+            const parts = pathname.split('/results/');
+            loginPath = parts[0] + "/results/login";
+          }
+          
+          window.location.href = window.location.origin + loginPath;
         } else {
           setIsAuthenticated(true); 
         }

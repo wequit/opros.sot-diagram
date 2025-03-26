@@ -42,6 +42,71 @@ const Header: React.FC = () => {
     return null; 
   }
 
+  const getRegionalCourtName = (userCourt: string): string => {
+    const courtMap: { [key: string]: string } = {
+      "Таласский областной суд": "Таласский областной суд",
+      "Иссык-кульский областной суд": "Иссык-кульский областной суд",
+      "Нарынский областной суд": "Нарынский областной суд",
+      "Баткенский областной суд": "Баткенский областной суд",
+      "Чуйский областной суд": "Чуйский областной суд",
+      "Ошский областной суд": "Ошский областной суд",
+      "Жалал-Абадский областной суд": "Жалал-Абадский областной суд",
+      "Бишкекский городской суд": "Бишкекский городской суд ",
+    };
+    return courtMap[userCourt] || "";
+  };
+
+  const renderSecondInstanceNav = () => {
+    if (user?.role !== "Председатель 2 инстанции") return null;
+
+    const regionalCourt = getRegionalCourtName(user.court);
+    
+    return (
+      <div className="flex space-x-3 p-2 rounded-xl">
+        <Link
+          href="/Home/summary/ratings"
+          className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
+          flex items-center gap-2
+          ${
+            pathname === "/Home/second-instance/ratings"
+              ? "text-blue-600 bg-blue-100 shadow-inner"
+              : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+          }`}
+        >
+          {getTranslation("HeaderNavOne", language)}
+        </Link>
+
+        <Link
+          href="/Home/summary/ratings"
+          className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
+          flex items-center gap-2
+          ${
+            pathname === "/Home/summary/ratings" ||
+            pathname === "/Home/summary/region-feedbacks"
+              ? "text-blue-600 bg-blue-100 shadow-inner"
+              : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+          }`}
+        >
+          {getTranslation("HeaderNavRegionalRatings", language)}
+        </Link>
+
+        <Link
+          href={`/Home/second-instance/court/${encodeURIComponent(regionalCourt)}`}
+          className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
+          flex items-center gap-2
+          ${
+            pathname.includes("/Home/second-instance/court/") ||
+            pathname.includes("/Home/second-instance/court-feedbacks/")
+              ? "text-blue-600 bg-blue-100 shadow-inner"
+              : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+          }`}
+        >
+          {regionalCourt}
+        </Link>
+      </div>
+    );
+  };
+
   return (
     <>
       <header
@@ -145,9 +210,7 @@ const Header: React.FC = () => {
                   </Link>
                 </div>
               ) : (
-                <span className="text-lg font-semibold text-black uppercase">
-                  {user?.role === "Председатель 2 инстанции" ? "" : ""}
-                </span>
+                renderSecondInstanceNav()
               )}
             </div>
           )}

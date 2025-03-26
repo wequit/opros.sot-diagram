@@ -36,40 +36,35 @@ const LoginForm: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex w-full">
-      <div
-        className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 to-blue-800 
-                    relative overflow-hidden"
-        style={{ width: "30%" }}
-      >
-        <div className="absolute inset-0 bg-pattern opacity-10"></div>
-        <div className="relative z-10 flex flex-col items-center justify-center w-full p-12 text-white">
+    <div className="h-screen w-full flex flex-col lg:flex-row overflow-hidden">
+      {/* Синяя панель - для мобильных сверху, для десктопа слева */}
+      <div className="w-full lg:w-1/3 bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center p-4 lg:p-12">
+        <div className="flex flex-row lg:flex-col items-center lg:items-center text-white max-w-md">
           <Image
             src={logo}
             alt="Логотип"
-            width={160}
-            height={160}
-            className="rounded-2xl mb-4 transform  transition-transform duration-300"
+            width={80}
+            height={80}
+            className="lg:w-[160px] lg:h-[160px] rounded-2xl mr-4 lg:mr-0 lg:mb-4"
           />
+          <div className="text-center">
+            <p className="text-base lg:text-xl text-gray-200 font-medium uppercase font-inter lg:mt-4">
+              <span className="block">МОНИТОРИНГ ОЦЕНКИ ДЕЯТЕЛЬНОСТИ СУДОВ</span>
 
-          <p className="text-xl text-gray-200 font-medium uppercase font-inter text-center max-w-md">
-            Мониторинг оценки деятельности судов
-          </p>
+            </p>
+          </div>
         </div>
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-900/50 to-transparent"></div>
       </div>
 
-      <div
-        className=" lg:w-1/2 flex items-center justify-center p-8 bg-gray-50"
-        style={{ width: "70%" }}
-      >
+      {/* Форма входа - для мобильных снизу, для десктопа справа */}
+      <div className="w-full lg:w-2/3 flex flex-grow items-center justify-center p-4 lg:p-8 bg-gray-50">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 space-y-6">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 lg:p-8 space-y-4 lg:space-y-6">
+            <h3 className="text-xl lg:text-2xl font-semibold text-gray-800 mb-4 lg:mb-6 text-center">
               Вход в систему
             </h3>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 lg:space-y-6">
               <div className="relative">
                 <FiUser className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input
@@ -78,9 +73,9 @@ const LoginForm: React.FC = () => {
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="Имя пользователя"
                   className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 
-                 rounded-xl text-gray-800 text-sm transition-all duration-300
-                 focus:outline-none focus:border-blue-500 focus:ring-4 
-                 focus:ring-blue-200/50"
+                   rounded-xl text-gray-800 text-sm transition-all duration-300
+                   focus:outline-none focus:border-blue-500 focus:ring-4 
+                   focus:ring-blue-200/50"
                   required
                 />
               </div>
@@ -93,9 +88,9 @@ const LoginForm: React.FC = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Пароль"
                   className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 
-                 rounded-xl text-gray-800 text-sm transition-all duration-300
-                 focus:outline-none focus:border-blue-500 focus:ring-4 
-                 focus:ring-blue-200/50"
+                   rounded-xl text-gray-800 text-sm transition-all duration-300
+                   focus:outline-none focus:border-blue-500 focus:ring-4 
+                   focus:ring-blue-200/50"
                   required
                 />
               </div>
@@ -110,10 +105,10 @@ const LoginForm: React.FC = () => {
                 type="submit"
                 disabled={isLoading}
                 className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white 
-               py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300
-               hover:from-blue-700 hover:to-blue-800 focus:outline-none 
-               focus:ring-4 focus:ring-blue-300/50 disabled:opacity-50 
-               disabled:cursor-not-allowed transform hover:scale-[1.02]"
+                 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-300
+                 hover:from-blue-700 hover:to-blue-800 focus:outline-none 
+                 focus:ring-4 focus:ring-blue-300/50 disabled:opacity-50 
+                 disabled:cursor-not-allowed transform hover:scale-[1.02]"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">

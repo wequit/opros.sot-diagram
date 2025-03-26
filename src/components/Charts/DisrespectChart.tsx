@@ -53,6 +53,9 @@ export default function DisrespectChart({
       legend: {
         display: false,
       },
+      datalabels: {
+        color: '#FFFFFF',
+      },
       tooltip: {
         callbacks: {
           label: (context: any) => {

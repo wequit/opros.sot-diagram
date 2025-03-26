@@ -17,6 +17,7 @@ import { GeoPermissibleObjects } from "d3-geo";
 import geoData from "../../../../../../public/gadm41_KGZ_1.json";
 import districtsGeoData from "../../../../../../public/gadm41_KGZ_2.json";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
+import { getRadarCourtData } from "@/lib/api/charts";
 
 const getRatingColor = (rating: number) => {
   if (rating === 0) return "bg-gray-100";
@@ -377,36 +378,17 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     localStorage.setItem("selectedCourtId", courtId.toString());
     localStorage.setItem("selectedCourtName", courtName);
     setSelectedCourtName(courtName);
-
+  
     try {
-      const token = getCookie("access_token");
-      if (!token) throw new Error("Token is null");
-
-      const response = await fetch(
-        `https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          `Ошибка HTTP: ${response.status} ${response.statusText}`
-        );
+      const data = await getRadarCourtData(courtId.toString());
+      if (!data) {
+        throw new Error("Не удалось получить данные радара для суда");
       }
-
-      const data = await response.json();
+  
       setSurveyData(data);
       setIsLoading(false);
-
-      // Добавляем состояние в историю браузера
-      window.history.pushState(
-        { courtId, courtName },
-        "",
-        `/Region-details/${courtId}`
-      );
+  
+      
     } catch (error) {
       console.error("Ошибка при получении данных суда:", error);
     }

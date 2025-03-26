@@ -37,6 +37,7 @@
     "Regional_Courts_Breadcrumbs_Main": "Башкы",
     "Regional_Courts_MainName": "Аймактар боюнча баалоо",
     "Regional_Courts_Table_NameRegion": "Облустун аталышы",
+    "Regional_Courts_Table_NameCourt": "Соттун аталышы",
     "Regional_Courts_Table_Overall": "Жалпы баа",
     "Regional_Courts_Table_Build": "Имарат",
     "Regional_Courts_Table_Chancellery": "Кеңсе",
@@ -73,6 +74,8 @@
     "RemarksLogic_Error_Adding": "Эскертүү жазылышында үлгүлөр",
     "RemarksLogic_ModalPlaceholder": "Сиздин эскертүүңүздү жазыңыз...",
 
-      "BreadCrumb_RegionName": "Аймактар",
-      "BreadCrumb_CourtName": "Облустук соттор"
+    "BreadCrumb_RegionName": "Аймактар",
+    "BreadCrumb_CourtName": "Облустук соттор",
+
+     "HeaderNavRegionalRatings": "Аймактар боюнча баалоо"
 }

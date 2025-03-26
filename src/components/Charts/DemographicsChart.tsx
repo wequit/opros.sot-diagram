@@ -57,7 +57,7 @@ export default function DemographicsChart({
         stacked: true,
         ticks: {
           callback: function (value: string | number) {
-            return `${Math.abs(Number(value))}%`;
+            return `${Math.abs(Number(value))}`; // Уже используем Math.abs для оси
           },
           display: true,
         },
@@ -82,17 +82,17 @@ export default function DemographicsChart({
       },
       datalabels: {
         display: true,
-        color: 'white',
+        color: '#FFFFFF', // Белый текст
         font: {
           weight: 'bold',
         },
-        formatter: (value: number) => `${Math.abs(value)}%`,
+        formatter: (value: number) => `${Math.abs(Math.round(value))}`, // Используем Math.abs для убирания минуса
       },
       tooltip: {
         callbacks: {
           label: function (tooltipItem: any) {
-            const value = Math.abs(tooltipItem.raw);
-            return `${value}%`;
+            const value = Math.abs(Math.round(tooltipItem.raw)); // Убираем минус в тултипе
+            return `${tooltipItem.dataset.label}: ${value}`;
           },
         },
       },
@@ -116,6 +116,13 @@ export default function DemographicsChart({
     },
     plugins: {
       legend: { display: false },
+      datalabels: {
+        display: true,
+        color: '#FFFFFF', // Белый текст
+        font: {
+          weight: 'bold',
+        },
+      },
     },
     maintainAspectRatio: false,
   };

@@ -116,7 +116,9 @@ const transformApiData = (apiData: any): Court[] => {
 };
 
 const scrollToTop = () => {
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  if (typeof window !== "undefined") {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 };
 
 export default function Courts() {
@@ -140,27 +142,33 @@ export default function Courts() {
   };
 
   const handleScroll = useCallback(() => {
-    if (window.scrollY > 300) {
-      setShowScrollTop(true);
-    } else {
-      setShowScrollTop(false);
+    if (typeof window !== "undefined") {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
     }
   }, []);
 
   const handleCourtClick = (court: Court) => {
     setCourtName(court.name);
     setCourtNameId(court.id.toString());
-    localStorage.setItem("courtNameId", court.id.toString());
-    localStorage.setItem("courtName", court.name);
-    localStorage.setItem("selectedCourtName", court.name);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("courtNameId", court.id.toString());
+      localStorage.setItem("courtName", court.name);
+      localStorage.setItem("selectedCourtName", court.name);
+    }
     router.push(`/Home/first-instance/${court.id}/rating`);
   };
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    if (typeof window !== "undefined") {
+      window.addEventListener("scroll", handleScroll);
+      return () => {
+        window.removeEventListener("scroll", handleScroll);
+      };
+    }
   }, [handleScroll]);
 
   useEffect(() => {

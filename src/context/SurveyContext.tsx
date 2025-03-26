@@ -42,10 +42,15 @@ export interface Question {
 
 // Тип для данных опроса
 export interface SurveyData {
-  questions: Question[];
-  period_start: string;
-  period_end: string;
-  total_responses: number;
+  questions?: Question[];
+  period_start?: string;
+  period_end?: string;
+  total_responses?: number;
+  circle?: any;
+  radar?: any;
+  bar?: any;
+  progress?: any;
+  column?: any;
 }
 
 // Тип для оценки аспекта суда
