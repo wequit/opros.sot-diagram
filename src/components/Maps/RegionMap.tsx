@@ -70,7 +70,6 @@ function getEventCoordinates(event: any) {
   };
 }
 
-// Обновляем интерфейсы
 export interface RegionData {
   id: number;
   name: string;

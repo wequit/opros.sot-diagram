@@ -168,7 +168,6 @@ export default function Map_rayon({
     }
     const courtName = rayonToCourtMapping[rayonName];
     if (!courtName) {
-      console.warn(`Нет маппинга для района: ${rayonName}`);
       return 0;
     }
     const court = courts.find((c: Court) => c.name === courtName);

@@ -7,7 +7,6 @@ import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Dates from "@/components/Dates/Dates";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import RemarksPage from "@/lib/utils/remarksLogic/RemarksLogic";
-import SkeletonLoader from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 
 export default function RegionFeedbacksPage() {
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -42,13 +41,13 @@ export default function RegionFeedbacksPage() {
           setRegionName(userRegionName);
           
           // Очищаем предыдущие настройки в localStorage
-          localStorage.removeItem("selectedCourtId");
-          localStorage.removeItem("selectedCourtName");
+          localStorage.removeItem("courtId");
+          localStorage.removeItem("courtName2");
           
-          // Устанавливаем режим просмотра как "регион"
+          // Сохраняем данные для RemarksApi, указывая, что это режим региона
           localStorage.setItem("currentRegion", userRegionName);
           localStorage.setItem("regionSlug", regionSlug);
-          localStorage.setItem("viewMode", "region");
+          localStorage.setItem("viewMode", "region"); // Важно! Это указывает RemarksPage показывать все суды в регионе
         } else {
           // Перенаправить, если нет прав
           router.push('/Home/summary/ratings');
@@ -92,11 +91,7 @@ export default function RegionFeedbacksPage() {
   };
 
   if (loading) {
-    return (
-      <div className="max-w-[1250px] mx-auto px-4 py-4">
-        <SkeletonLoader />
-      </div>
-    );
+    return <div className="flex justify-center items-center h-screen">Загрузка...</div>;
   }
 
   return (

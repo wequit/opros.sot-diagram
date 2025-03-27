@@ -5,15 +5,11 @@
     "HeaderNavFour": "Районные суды",
     "HeaderNavExit": "Выйти",
     "HeaderNavRemarks": "Замечания и предложения",
-
-
     "DiagrammOne": "Общие показатели",
     "DiagrammOneTotal": "Количество ответов:",
-
     "DiagrammTwo": "Замечания и предложения",
     "DiagrammTwoTotal": "Количество ответов:",
     "DiagrammTwoButton": "Все замечания и предложения",
-
     "DiagrammThree": "Категории респондентов",
     "DiagrammFour": "Демографические показатели",
     "DiagrammFive": "Источник трафика",
@@ -26,7 +22,6 @@
     "DiagrammTwelve": "Начало заседания в назначенное время",
     "DiagrammThirteen": "Оценки канцелярии",
     "DiagrammFourteen": "Оценки доступности здания",
-    
     "OblastMapTittle": "Оценки по областным судам",
     "OblastMapLinkOne": "Средние оценки по областям",
     "OblastMapLinkTwo": "Замечания и предложения",
@@ -39,10 +34,8 @@
     "OblastMapStaff": "Сотрудники",
     "OblastMapJudge": "Судья",
     "OblastMapRatings": "Кол-во оценок",
-
     "Regional_Courts_Breadcrumbs_Main": "Главная",
     "Regional_Courts_MainName": "Оценки по областям",
-    
     "Regional_Courts_Table_NameRegion": "Наименование области",
     "Regional_Courts_Table_NameCourt": "Наименование судов",
     "Regional_Courts_Table_Overall": "Общая оценка",
@@ -59,16 +52,11 @@
     "Regional_Courts_Table_NumberResponses": "Количество ответов",
     "Regional_Courts_Table_Building": "Здание",
     "District_Courts_MainName": "Районные суды",
-
     "First_Instance_Table_Instantiation": "Инстанция",
-    
-
-
     "LogoutModal_TextOne": "Подтверждение выхода",
     "LogoutModal_TextTwo": "Вы уверены, что хотите выйти из системы?",
     "LogoutModal_Cancel": "Отмена",
     "LogoutModal_Exit": "Выйти",
-
     "RemarksLogic_Remarks": "Замечания и предложения",
     "RemarksLogic_Chairman": "Председатель",
     "RemarksLogic_Message": "Сообщение от гражданина",
@@ -77,23 +65,18 @@
     "RemarksLogic_Comment": "Комментировать",
     "RemarksLogic_Court": "Суд",
     "RemarksLogic_ModalTitle": "Добавить комментарий",
-    "RemarksLogic_ModalMessage":"Замечание: ",
-    "RemarksLogic_ModalButton":"Сохранить",
-    "RemarksLogic_ModalClose":"Отмена",
-    "RemarksLogic_NoRemarks":"Нет доступных замечаний",
-    "RemarksLogic_NoRemarksMessage":"Для вашего суда пока не поступило ни одного замечания.",
-    "RemarksLogic_Back":"Назад",
-    "RemarksLogic_Next":"Вперед",
-    "RemarksLogic_Error":"Ошибка",
-    "RemarksLogic_Loading":"Загрузка данных...",
-    "RemarksLogic_Error_Adding":"Ошибка при добавлении комментария",
-    "RemarksLogic_ModalPlaceholder":"Введите ваш комментарий...",
-
+    "RemarksLogic_ModalMessage": "Замечание: ",
+    "RemarksLogic_ModalButton": "Сохранить",
+    "RemarksLogic_ModalClose": "Отмена",
+    "RemarksLogic_NoRemarks": "Нет доступных замечаний",
+    "RemarksLogic_NoRemarksMessage": "Для вашего суда пока не поступило ни одного замечания.",
+    "RemarksLogic_Back": "Назад",
+    "RemarksLogic_Next": "Вперед",
+    "RemarksLogic_Error": "Ошибка",
+    "RemarksLogic_Loading": "Загрузка данных...",
+    "RemarksLogic_Error_Adding": "Ошибка при добавлении комментария",
+    "RemarksLogic_ModalPlaceholder": "Введите ваш комментарий...",
     "BreadCrumb_RegionName": "Оценки по области",
-    
     "BreadCrumb_CourtName": "Областные суды",
-
     "HeaderNavRegionalRatings": "Оценки по области"
-
-
 }

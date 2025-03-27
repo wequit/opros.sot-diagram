@@ -4,7 +4,7 @@ import "@/styles/globals.css";
 import "@/styles/skeleton.css";
 import "@/styles/map.css";
 import "@/styles/spinner.css";
-import "@/styles/responsive.css";
+import "@/styles/responsive/responsive.css";
 import Header from "@/components/layout/Header";
 import { Inter } from "next/font/google";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
@@ -19,6 +19,7 @@ const inter = Inter({
 });
 
 const LoginPage = dynamic(() => import("@/app/login/page"));
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -52,6 +53,7 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
+  
 
   // Страница логина только если не авторизован и путь явно /results/login
   if (!isAuthenticated && pathname === "/login") {

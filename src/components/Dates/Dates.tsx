@@ -1,6 +1,5 @@
 "use client";
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { fetchDataWithParams } from "@/components/DataFetcher";
 import { useSurveyData, getTranslation } from "@/context/SurveyContext";
 import { usePathname } from "next/navigation";
 
@@ -16,26 +15,6 @@ interface Period {
   label: string;
 }
 
-interface SelectedOption {
-  id: number;
-  text_ru: string;
-  text_kg: string;
-}
-
-interface QuestionResponse {
-  multiple_selected_options?: any;
-  question: number;
-  selected_option: SelectedOption | null;
-  custom_answer: string | null;
-  gender: string;
-}
-
-export interface Question {
-  id: number;
-  text: string;
-  question_responses: QuestionResponse[];
-}
-
 export default function Dates() {
   const [activePeriod, setActivePeriod] = useState<number | null>(null);
   const [showYearDropdown, setShowYearDropdown] = useState(false);
@@ -49,36 +28,33 @@ export default function Dates() {
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0
   );
-  
+
   const yearDropdownRef = useRef<HTMLDivElement>(null);
   const monthDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Функции для преобразования формата даты
+  const { setDateParams, language } = useSurveyData();
+  const pathname = usePathname();
+
   const formatDateToDisplay = (isoDate: string): string => {
-    // Преобразование из YYYY-MM-DD в DD.MM.YY
     const parts = isoDate.split("-");
     if (parts.length !== 3) return isoDate;
     return `${parts[2]}.${parts[1]}.${parts[0].slice(2)}`;
   };
 
   const formatDateToISO = (displayDate: string): string => {
-    // Преобразование из DD.MM.YY в YYYY-MM-DD
     const parts = displayDate.split(".");
     if (parts.length !== 3) return displayDate;
-    
     let year = parts[2];
     if (year.length === 2) {
-      year = `20${year}`; // Предполагаем, что все года будут в диапазоне 2000-2099
+      year = `20${year}`;
     }
-    
     return `${year}-${parts[1]}-${parts[0]}`;
   };
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
-    
-    // Добавляем обработчик клика для закрытия выпадающих меню
+
     const handleClickOutside = (event: MouseEvent) => {
       if (yearDropdownRef.current && !yearDropdownRef.current.contains(event.target as Node)) {
         setShowYearDropdown(false);
@@ -87,58 +63,31 @@ export default function Dates() {
         setShowMonthDropdown(false);
       }
     };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    
+
+    document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       window.removeEventListener("resize", handleResize);
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  const { setSurveyData, selectedCourtId, courtNameId, language } = useSurveyData();
-  const pathname = usePathname();
-
   const years = Array.from({ length: 11 }, (_, i) => (2025 + i).toString());
 
-  const handleYearSelect = async (selectedYear: string) => {
+  const handleYearSelect = useCallback((selectedYear: string) => {
     setDateRange((prev) => ({
       ...prev,
       startDate: `${selectedYear}-01-01`,
       endDate: `${selectedYear}-12-31`,
       year: selectedYear,
     }));
-
     setShowYearDropdown(false);
     setActivePeriod(null);
+    setSelectedMonth(null);
 
-    try {
-      let courtId: number | null = null;
-
-      if (
-        pathname === "/Home/second-instance/regions" &&
-        selectedCourtId
-      ) {
-        courtId = selectedCourtId;
-      } else if (
-        pathname === "/maps/rayon/District-Courts" &&
-        courtNameId
-      ) {
-        const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
-        courtId = numericCourtId;
-      } else if (pathname === "/maps/General") {
-        courtId = 65;
-      } else if (pathname === "/") {
-        courtId = null; 
-      }
-
-      const params = { year: selectedYear };
-      const response = await fetchDataWithParams(courtId, params);
-      setSurveyData(response);
-    } catch (error) {
-      console.error("Ошибка при получении данных за год:", error);
-    }
-  };
+    // Обновляем dateParams в контексте
+    setDateParams({ year: selectedYear });
+  }, [setDateParams]);
 
   const periods: Period[] = [
     { id: 0, type: "quarter", label: "I" },
@@ -160,8 +109,9 @@ export default function Dates() {
   ];
 
   const handlePeriodClick = useCallback(
-    async (period: Period) => {
+    (period: Period) => {
       setActivePeriod(period.id);
+      setSelectedMonth(period.type === "month" ? period.label : null);
 
       let newStartDate = dateRange.startDate;
       let newEndDate = dateRange.endDate;
@@ -192,17 +142,16 @@ export default function Dates() {
 
         let lastDay;
         switch (month) {
-          case "02": // Февраль
+          case "02":
             const isLeapYear =
               Number(dateRange.year) % 4 === 0 &&
-              (Number(dateRange.year) % 100 !== 0 ||
-                Number(dateRange.year) % 400 === 0);
+              (Number(dateRange.year) % 100 !== 0 || Number(dateRange.year) % 400 === 0);
             lastDay = isLeapYear ? 29 : 28;
             break;
-          case "04": // Апрель
-          case "06": // Июнь
-          case "09": // Сентябрь
-          case "11": // Ноябрь
+          case "04":
+          case "06":
+          case "09":
+          case "11":
             lastDay = 30;
             break;
           default:
@@ -217,98 +166,70 @@ export default function Dates() {
         endDate: newEndDate,
       }));
 
-      try {
-        let params: { year?: string; quarter?: number; month?: number } = {
-          year: dateRange.year,
-        };
-        if (period.type === "quarter") {
-          params.quarter = Math.floor(period.id) + 1;
-        } else if (period.type === "month") {
-          params.month = period.id - 3;
-        }
-
-        let courtId: number | null = null;
-
-        if (
-          pathname === "/Home/second-instance/regions" &&
-          selectedCourtId
-        ) {
-          courtId = selectedCourtId;
-        } else if (
-          pathname === "/maps/rayon/District-Courts" &&
-          courtNameId
-        ) {
-          const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
-          courtId = numericCourtId;
-        } else if (pathname === "/maps/General") {
-          courtId = 65;
-        } else if (pathname === "") {
-          courtId = null; 
-        }
-
-        const response = await fetchDataWithParams(courtId, params);
-        setSurveyData({ ...response })
-      } catch (error) {
-        console.error("Ошибка при получении данных:", error);
+      const params: { year?: string; quarter?: number; month?: number } = {
+        year: dateRange.year,
+      };
+      if (period.type === "quarter") {
+        params.quarter = Math.floor(period.id) + 1;
+      } else if (period.type === "month") {
+        params.month = period.id - 3; // Например, февраль = 2
       }
+
+      // Обновляем dateParams в контексте
+      setDateParams(params);
     },
-    [dateRange.year, setSurveyData, pathname, selectedCourtId, courtNameId]
+    [dateRange.year, setDateParams]
   );
 
   const handleDateChange = useCallback(
-    async (field: keyof DateRange, value: string) => {
-      // Преобразуем введённое значение в формат ISO для внутреннего использования
+    (field: keyof DateRange, value: string) => {
       const isoValue = formatDateToISO(value);
-      
       setDateRange((prev) => ({ ...prev, [field]: isoValue }));
-      try {
-        const params = {
-          startDate: field === "startDate" ? isoValue : dateRange.startDate,
-          endDate: field === "endDate" ? isoValue : dateRange.endDate,
-        };
 
-        let courtId: number | null = null;
+      const params = {
+        year: dateRange.year,
+        startDate: field === "startDate" ? isoValue : dateRange.startDate,
+        endDate: field === "endDate" ? isoValue : dateRange.endDate,
+      };
 
-        if (
-          pathname === "/Home/second-instance/regions" &&
-          selectedCourtId
-        ) {
-          courtId = selectedCourtId;
-        } else if (
-          pathname === "/maps/rayon/District-Courts" &&
-          courtNameId
-        ) {
-          const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
-          courtId = numericCourtId;
-        } else if (pathname === "/maps/General") {
-          courtId = 65;
-        } else if (pathname === "/") {
-          courtId = null;
-        }
-
-        const response = await fetchDataWithParams(courtId, params);
-        setSurveyData(response);
-      } catch (error) {
-        console.error("Ошибка при изменении даты:", error);
-      }
+      // Обновляем dateParams в контексте
+      setDateParams(params);
     },
-    [dateRange.startDate, dateRange.endDate, setSurveyData, pathname, selectedCourtId, courtNameId]
+    [dateRange.startDate, dateRange.endDate, dateRange.year, setDateParams]
   );
 
-  // Полные названия месяцев
   const monthNames = [
-    'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 
-    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    "Январь",
+    "Февраль",
+    "Март",
+    "Апрель",
+    "Май",
+    "Июнь",
+    "Июль",
+    "Август",
+    "Сентябрь",
+    "Октябрь",
+    "Ноябрь",
+    "Декабрь",
   ];
-  
-  // Короткие названия месяцев с заглавной буквы
+
   const monthLabels = [
-    'Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 
-    'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'
+    "Янв",
+    "Фев",
+    "Мар",
+    "Апр",
+    "Май",
+    "Июн",
+    "Июл",
+    "Авг",
+    "Сен",
+    "Окт",
+    "Ноя",
+    "Дек",
   ];
 
   const handleMonthSelect = (monthIndex: number) => {
-    const period = periods.find(p => p.id === monthIndex + 4);
+    const period = periods.find((p) => p.id === monthIndex + 4);
     if (period) {
       handlePeriodClick(period);
       setSelectedMonth(monthLabels[monthIndex]);
@@ -316,10 +237,9 @@ export default function Dates() {
     setShowMonthDropdown(false);
   };
 
-  // Функция сброса фильтров
-  const handleReset = async () => {
+  const handleReset = useCallback(() => {
     const currentYear = new Date().getFullYear().toString();
-    
+
     setActivePeriod(null);
     setSelectedMonth(null);
     setDateRange({
@@ -328,27 +248,9 @@ export default function Dates() {
       year: currentYear,
     });
 
-    try {
-      let courtId: number | null = null;
-
-      if (pathname === "/Home/second-instance/regions" && selectedCourtId) {
-        courtId = selectedCourtId;
-      } else if (pathname === "/maps/rayon/District-Courts" && courtNameId) {
-        const numericCourtId = courtNameId ? parseInt(courtNameId, 10) : null;
-        courtId = numericCourtId;
-      } else if (pathname === "/maps/General") {
-        courtId = 65;
-      } else if (pathname === "/") {
-        courtId = null;
-      }
-
-      const params = { year: currentYear };
-      const response = await fetchDataWithParams(courtId, params);
-      setSurveyData(response);
-    } catch (error) {
-      console.error("Ошибка при сбросе фильтров:", error);
-    }
-  };
+    // Обновляем dateParams в контексте
+    setDateParams({ year: currentYear });
+  }, [setDateParams]);
 
   return (
     <div className="w-full bg-gradient-to-r from-blue-700 to-indigo-400 p-4 rounded-2xl mb-4 shadow-lg">
@@ -375,7 +277,7 @@ export default function Dates() {
             />
           </div>
         </div>
-        
+
         {/* Выбор года */}
         <div className="relative" ref={yearDropdownRef}>
           <button
@@ -384,19 +286,12 @@ export default function Dates() {
           >
             {dateRange.year}
             <svg
-              className={`w-4 h-4 transition-transform ${
-                showYearDropdown ? "rotate-180" : ""
-              }`}
+              className={`w-4 h-4 transition-transform ${showYearDropdown ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
           {showYearDropdown && (
@@ -412,24 +307,19 @@ export default function Dates() {
                   >
                     {year}
                   </button>
-                  {index < years.length - 1 && (
-                    <div className="w-full h-px bg-indigo-50"></div>
-                  )}
+                  {index < years.length - 1 && <div className="w-full h-px bg-indigo-50"></div>}
                 </>
               ))}
             </div>
           )}
         </div>
-        
+
         {/* Кварталы */}
         <div className="flex items-center gap-2">
           {periods.slice(0, 4).map((period) => (
             <button
               key={period.id}
-              onClick={() => {
-                handlePeriodClick(period);
-                setSelectedMonth(null);
-              }}
+              onClick={() => handlePeriodClick(period)}
               className={
                 "px-4 py-2 rounded-xl font-medium transition-all duration-200 shadow-sm " +
                 (activePeriod === period.id && !selectedMonth
@@ -441,7 +331,7 @@ export default function Dates() {
             </button>
           ))}
         </div>
-        
+
         {/* Выбор месяца */}
         <div className="relative" ref={monthDropdownRef}>
           <button
@@ -455,22 +345,15 @@ export default function Dates() {
           >
             {selectedMonth || "Месяц"}
             <svg
-              className={`w-4 h-4 transition-transform ${
-                showMonthDropdown ? "rotate-180" : ""
-              }`}
+              className={`w-4 h-4 transition-transform ${showMonthDropdown ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          
+
           {showMonthDropdown && (
             <div className="absolute top-full left-0 mt-1 bg-white rounded-lg shadow-lg z-30 w-36 border border-indigo-50">
               {monthNames.map((month, index) => (
@@ -484,26 +367,19 @@ export default function Dates() {
                   >
                     {month}
                   </button>
-                  {index < monthNames.length - 1 && (
-                    <div className="w-full h-px bg-indigo-50"></div>
-                  )}
+                  {index < monthNames.length - 1 && <div className="w-full h-px bg-indigo-50"></div>}
                 </>
               ))}
             </div>
           )}
         </div>
-        
+
         {/* Кнопка сброса */}
         <button
           onClick={handleReset}
           className="px-4 py-2 rounded-xl font-medium transition-all duration-200 bg-white text-gray-700 hover:bg-blue-50 flex items-center gap-2 shadow-sm border-b-2 border-red-100 hover:border-red-200"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

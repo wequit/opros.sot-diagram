@@ -1,23 +1,22 @@
-import React from 'react';
-import { Radar } from 'react-chartjs-2';
+import React from "react";
+import { Radar } from "react-chartjs-2";
 import "@/types/chartSetup";
-import { ChartOptions } from 'chart.js';
-import { getTranslation, useSurveyData } from '@/context/SurveyContext';
+import { ChartOptions } from "chart.js";
+import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 
 interface RadarChartProps {
   radarData: any;
   windowWidth: number;
-  totalResponses: number;
 }
 
-export default function RadarChart({ radarData, windowWidth, totalResponses }: RadarChartProps) {
-  const { language } = useSurveyData();
+export default function RadarChart({ radarData, windowWidth }: RadarChartProps) {
+  const { language, surveyResponsesCount } = useSurveyData();
 
-  const radarOptions: ChartOptions<'radar'> = {
+  const radarOptions: ChartOptions<"radar"> = {
     plugins: {
       legend: {
-        position: 'bottom' as const,
-        align: 'start' as const,
+        position: "bottom" as const,
+        align: "start" as const,
         labels: {
           padding: 20,
           boxWidth: 15,
@@ -29,7 +28,7 @@ export default function RadarChart({ radarData, windowWidth, totalResponses }: R
       tooltip: {
         callbacks: {
           label: (context: any) => {
-            const label = context.dataset.label || '';
+            const label = context.dataset.label || "";
             const value = context.raw || 0;
             return `${label}: ${value.toFixed(1)}`;
           },
@@ -41,7 +40,7 @@ export default function RadarChart({ radarData, windowWidth, totalResponses }: R
       r: {
         angleLines: {
           display: true,
-          color: 'rgba(0, 0, 0, 0.2)',
+          color: "rgba(0, 0, 0, 0.2)",
         },
         suggestedMin: 0,
         suggestedMax: 5,
@@ -50,7 +49,7 @@ export default function RadarChart({ radarData, windowWidth, totalResponses }: R
           stepSize: 1,
         },
         grid: {
-          color: 'rgba(0, 0, 0, 0.1)',
+          color: "rgba(0, 0, 0, 0.1)",
         },
         pointLabels: {
           font: {
@@ -69,7 +68,8 @@ export default function RadarChart({ radarData, windowWidth, totalResponses }: R
             {getTranslation("DiagrammOne", language)}
           </h2>
           <span className="text-gray-600 DiagrammOneTotal">
-            {getTranslation("DiagrammOneTotal", language)}{totalResponses}
+            {getTranslation("DiagrammOneTotal", language)}
+            {surveyResponsesCount}
           </span>
         </div>
       </div>

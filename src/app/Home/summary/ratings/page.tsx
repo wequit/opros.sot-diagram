@@ -2,7 +2,7 @@
 import React from "react";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
-import DataFetcher from "@/components/DataFetcher";
+import DataFetcher from "@/lib/api/SummaryAPI";
 import { useAuth } from "@/context/AuthContext";
 import SecondInstance from "@/components/roles/2 instance";
 import ThirdInstance from "@/components/roles/3 instance ";

@@ -49,10 +49,7 @@ export function useRemarks() {
         isCourtInRegion(item.court, currentRegion)
       );
       
-      console.log("Отфильтрованных замечаний для региона:", filtered.length);
-      filtered.forEach((item, index) => {
-        console.log(`${index+1}: ${item.court} - ${item.custom_answer?.substring(0, 30)}...`);
-      });
+      
       
       return filtered;
     }

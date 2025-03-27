@@ -2,7 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import { SurveyProvider } from "@/context/SurveyContext";
-import  '@/styles/responsiveRegion.css'
+import  '@/styles/responsive/responsiveRegion.css'
 
 export default function RegionalCourtsLayout({ children }: { children: React.ReactNode }) {
   return (

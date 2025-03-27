@@ -1,6 +1,6 @@
 import React from "react";
 import Dates from "@/components/Dates/Dates";
-import DataFetcher from "../DataFetcher";
+import DataFetcher from "../../lib/api/SummaryAPI";
 import Evaluations  from '@/components/Evaluations/page';
 
 const ThirdInstance = () => {

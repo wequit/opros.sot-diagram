@@ -1,10 +1,7 @@
-/* Сбрасываем все стили для изоляции */
-/* responsive.css */
 
-/* Сбрасываем влияние .layout для remarks */
 .root-layout-wrapper .remarks-mode {
-    all: initial; /* Сбрасываем все стили */
-    width: 100%; /* Восстанавливаем нужные стили */
+    all: initial; 
+    width: 100%; 
     display: block;
   }
   
@@ -19,7 +16,6 @@
     width: 100%;
   }
   
-  /* Оставляем стили для не-remarks путей */
   .root-layout-wrapper .layout {
     max-width: 1250px;
     margin-left: auto;

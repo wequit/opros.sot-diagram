@@ -81,7 +81,6 @@ const CourtDetailsPage = () => {
         const token = getCookie("access_token");
         if (!token) throw new Error("Токен не найден");
 
-        console.log(`Запрос к API: https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`);
 
         const response = await fetch(
           `https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`,

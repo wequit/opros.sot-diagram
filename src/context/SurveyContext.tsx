@@ -107,8 +107,12 @@ interface SurveyContextType {
   setSelectedCourtName: Dispatch<SetStateAction<string | null>>;
   selectedCourtId: number | null;
   setSelectedCourtId: Dispatch<SetStateAction<number | null>>;
-  regionName: string | null; // Добавлено regionName
-  setRegionName: Dispatch<SetStateAction<string | null>>; // Добавлено setRegionName
+  regionName: string | null; 
+  setRegionName: Dispatch<SetStateAction<string | null>>; 
+  dateParams: { year?: string; quarter?: number; month?: number };
+  setDateParams: (params: { year?: string; quarter?: number; month?: number }) => void;
+  surveyResponsesCount: number; 
+  setSurveyResponsesCount: (count: number) => void;
 }
 
 // Создание контекста с типом
@@ -127,12 +131,13 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   const [selectedCourtName, setSelectedCourtName] = useState<string | null>(
     null
   );
+  const [surveyResponsesCount, setSurveyResponsesCount] = useState(0);
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<RegionData[] | null>(
     null
   );
   const [regionName, setRegionName] = useState<string | null>(null);
-
+  const [dateParams, setDateParams] = useState<{ year?: string; quarter?: number; month?: number }>({ year: "2025" });
   useEffect(() => {
     if (
       typeof surveyData?.total_responses === "number" &&
@@ -182,6 +187,10 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
     setSelectedCourtId,
     regionName,
     setRegionName,
+    dateParams,
+    setDateParams,
+    surveyResponsesCount,
+    setSurveyResponsesCount,
   };
 
   return (

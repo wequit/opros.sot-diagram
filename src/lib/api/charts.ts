@@ -2,85 +2,94 @@
 
 import { fetchWithAuth } from "./login"; 
 
-// Объект для кэширования результатов запросов
 const cache: { [key: string]: Promise<any> } = {};
 
-export const getRadarRepublicData = async () => {
-  const cacheKey = "radar_republic";
+const buildQueryAndCacheKey = (baseKey: string, params: { year?: string; quarter?: number; month?: number }) => {
+  const queryString = new URLSearchParams();
+  if (params.year) queryString.append("year", params.year);
+  if (params.quarter) queryString.append("quarter", params.quarter.toString());
+  if (params.month) queryString.append("month", params.month.toString());
+
+  const cacheKey = `${baseKey}_${queryString.toString()}`;
+  return { queryString: queryString.toString(), cacheKey };
+};
+
+export const getRadarRepublicData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("radar_republic", params);
   if (!cache[cacheKey]) {
-    cache[cacheKey] = fetchWithAuth("chart/radar/republic/");
+    cache[cacheKey] = fetchWithAuth(`chart/radar/republic/?${queryString}`);
   }
   return await cache[cacheKey];
 };
 
-export const getRadarCourtData = async (courtId: string) => {
-  const cacheKey = `radar_court_${courtId}`;
+export const getRadarCourtData = async (courtId: string, params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey(`radar_court_${courtId}`, params);
   if (!cache[cacheKey]) {
-    cache[cacheKey] = fetchWithAuth(`chart/radar/${courtId}/`);
+    cache[cacheKey] = fetchWithAuth(`chart/radar/${courtId}/?${queryString}`);
   }
   return await cache[cacheKey];
 };
 
-export const getBarRepublicData = async () => {
-  const cacheKey = "bar_republic";
+export const getBarRepublicData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("bar_republic", params);
   if (!cache[cacheKey]) {
-    cache[cacheKey] = fetchWithAuth("chart/bar/republic/");
+    cache[cacheKey] = fetchWithAuth(`chart/bar/republic/?${queryString}`);
   }
   return await cache[cacheKey];
 };
 
-export const getBarCourtData = async (courtId: string) => {
-  const cacheKey = `bar_court_${courtId}`;
+export const getBarCourtData = async (courtId: string, params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey(`bar_court_${courtId}`, params);
   if (!cache[cacheKey]) {
-    cache[cacheKey] = fetchWithAuth(`chart/bar/${courtId}/`);
+    cache[cacheKey] = fetchWithAuth(`chart/bar/${courtId}/?${queryString}`);
   }
   return await cache[cacheKey];
 };
 
-export const getCircleRepublicData = async () => {
-  const cacheKey = "circle_republic";
+export const getCircleRepublicData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("circle_republic", params);
   if (!cache[cacheKey]) {
-    cache[cacheKey] = fetchWithAuth("chart/circle/republic/");
+    cache[cacheKey] = fetchWithAuth(`chart/circle/republic/?${queryString}`);
   }
   return await cache[cacheKey];
 };
 
-export const getCircleCourtData = async (courtId: string) => {
-  const cacheKey = `circle_court_${courtId}`;
+export const getCircleCourtData = async (courtId: string, params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey(`circle_court_${courtId}`, params);
   if (!cache[cacheKey]) {
-    cache[cacheKey] = fetchWithAuth(`chart/circle/${courtId}/`);
+    cache[cacheKey] = fetchWithAuth(`chart/circle/${courtId}/?${queryString}`);
   }
   return await cache[cacheKey];
 };
 
-export const getColumnRepublicData = async () => {
-  const cacheKey = "column_republic";
+export const getColumnRepublicData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("column_republic", params);
   if (!cache[cacheKey]) {
-    cache[cacheKey] = fetchWithAuth("chart/column/republic/");
+    cache[cacheKey] = fetchWithAuth(`chart/column/republic/?${queryString}`);
   }
   return await cache[cacheKey];
 };
 
-export const getColumnCourtData = async (courtId: string) => {
-  const cacheKey = `column_court_${courtId}`;
+export const getColumnCourtData = async (courtId: string, params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey(`column_court_${courtId}`, params);
   if (!cache[cacheKey]) {
-    cache[cacheKey] = fetchWithAuth(`chart/column/${courtId}/`);
+    cache[cacheKey] = fetchWithAuth(`chart/column/${courtId}/?${queryString}`);
   }
   return await cache[cacheKey];
 };
 
-export const getProgressRepublicData = async () => {
-  const cacheKey = "progress_republic";
+export const getProgressRepublicData = async (params: { year?: string; quarter?: number; month?: number }) => {
+   const { queryString, cacheKey } = buildQueryAndCacheKey("progress_republic", params);
   if (!cache[cacheKey]) {
-    cache[cacheKey] = fetchWithAuth("chart/progress/republic/");
+    cache[cacheKey] = fetchWithAuth(`chart/progress/republic/?${queryString}`);
   }
   return await cache[cacheKey];
 };
 
-export const getProgressCourtData = async (courtId: string) => {
-  const cacheKey = `progress_court_${courtId}`;
+export const getProgressCourtData = async (courtId: string, params: { year?: string; quarter?: number; month?: number }) => {
+   const { queryString, cacheKey } = buildQueryAndCacheKey(`progress_court_${courtId}`, params);
   if (!cache[cacheKey]) {
-    cache[cacheKey] = fetchWithAuth(`chart/progress/${courtId}/`);
+    cache[cacheKey] = fetchWithAuth(`chart/progress/${courtId}/?${queryString}`);
   }
   return await cache[cacheKey];
 };

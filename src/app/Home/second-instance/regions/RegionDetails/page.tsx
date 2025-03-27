@@ -1,14 +1,6 @@
 "use client";
-
-import { getCookie } from "@/lib/api/login";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
-import React, {
-  useCallback,
-  useState,
-  useMemo,
-  useEffect,
-  useRef,
-} from "react";
+import React, { useCallback, useState, useMemo, useEffect, useRef } from "react";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
@@ -18,11 +10,12 @@ import geoData from "../../../../../../public/gadm41_KGZ_1.json";
 import districtsGeoData from "../../../../../../public/gadm41_KGZ_2.json";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import debounce from "lodash/debounce";
-import { getRadarCourtData } from "@/lib/api/charts";
+import CourtDataFetcher from "@/lib/api/CourtAPI"; // Импортируем новый компонент
 
+// Утилитные функции остаются без изменений
 const getRatingColor = (rating: number) => {
   if (rating === 0) return "bg-gray-100";
-  if (rating < 2) return "bg-red-100image.png";
+  if (rating < 2) return "bg-red-100";
   if (rating < 2.5) return "bg-red-100";
   if (rating < 3) return "bg-orange-100";
   if (rating < 3.5) return "bg-yellow-100";
@@ -87,9 +80,7 @@ interface GeoJsonData {
   features: GeoFeature[];
 }
 
-const courtPositionsMap: {
-  [key: string]: { [key: string]: [number, number] };
-} = {
+const courtPositionsMap: { [key: string]: { [key: string]: [number, number] } } = {
   "Баткенская область": {
     "Баткенский областной суд": [69.8785, 40.0553],
     "Сулюктинский городской суд": [69.5672, 39.9373],
@@ -178,28 +169,14 @@ const courtPositionsMap: {
   },
 };
 
-type SortField =
-  | "overall"
-  | "judge"
-  | "staff"
-  | "process"
-  | "office"
-  | "building"
-  | "count"
-  | null;
+type SortField = "overall" | "judge" | "staff" | "process" | "office" | "building" | "count" | null;
 type SortDirection = "asc" | "desc" | null;
 
 function getEventCoordinates(event: any) {
   if (event.touches && event.touches[0]) {
-    return {
-      x: event.touches[0].clientX,
-      y: event.touches[0].clientY,
-    };
+    return { x: event.touches[0].clientX, y: event.touches[0].clientY };
   }
-  return {
-    x: event.clientX,
-    y: event.clientY,
-  };
+  return { x: event.clientX, y: event.clientY };
 }
 
 const districtNamesRu: { [key: string]: string } = {
@@ -281,10 +258,7 @@ function isLake(properties: any): boolean {
   );
 }
 
-const RegionDetails: React.FC<RegionDetailsProps> = ({
-  regionName,
-  regions,
-}) => {
+const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) => {
   const {
     selectedRegion,
     setSelectedRegion,
@@ -294,24 +268,18 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     setSelectedCourtName,
     selectedCourtId,
     setSelectedCourtId,
+    language,
   } = useSurveyData();
 
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const {  language  } = useSurveyData();
-
-  // Добавьте состояние для анимированного поиска
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(
-        sortDirection === "asc"
-          ? "desc"
-          : sortDirection === "desc"
-          ? null
-          : "asc"
+        sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc"
       );
       if (sortDirection === "desc") setSortField(null);
     } else {
@@ -322,8 +290,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return <FaSort className="ml-1 inline-block" />;
-    if (sortDirection === "asc")
-      return <FaSortUp className="ml-1 inline-block text-blue-600" />;
+    if (sortDirection === "asc") return <FaSortUp className="ml-1 inline-block text-blue-600" />;
     return <FaSortDown className="ml-1 inline-block text-blue-600" />;
   };
 
@@ -377,11 +344,9 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     );
   }, [searchQuery, sortedCourts]);
 
-  // Обновленная логика поиска с дебаунсингом
   const debouncedSearch = useCallback(
     debounce((query: string) => {
       setSearchQuery(query);
-      // Фильтрация происходит в useMemo filteredCourts, который уже существует
     }, 300),
     [sortedCourts]
   );
@@ -402,25 +367,12 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     }
   };
 
-  const handleCourtClick = async (courtId: number, courtName: string) => {
+  const handleCourtClick = (courtId: number, courtName: string) => {
     setSelectedCourtId(courtId);
     localStorage.setItem("selectedCourtId", courtId.toString());
     localStorage.setItem("selectedCourtName", courtName);
     setSelectedCourtName(courtName);
-  
-    try {
-      const data = await getRadarCourtData(courtId.toString());
-      if (!data) {
-        throw new Error("Не удалось получить данные радара для суда");
-      }
-  
-      setSurveyData(data);
-      setIsLoading(false);
-  
-      
-    } catch (error) {
-      console.error("Ошибка при получении данных суда:", error);
-    }
+    // Данные суда будут загружены через CourtDataFetcher
   };
 
   const handleCourtBackClick = () => {
@@ -434,36 +386,25 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     setSelectedCourtId(null);
     setSelectedCourtName(null);
     setSurveyData(null);
-    window.history.pushState(
-      { regionName: null },
-      "",
-      "/maps/oblast/Regional-Courts" // Указываем базовый маршрут
-    );
   };
 
-  // Перехватываем событие "назад" для очистки состояния
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       if (selectedCourtId) {
-        // Если мы в деталях суда, очищаем только детали суда
         setSelectedCourtId(null);
         setSelectedCourtName(null);
         setSurveyData(null);
       } else if (selectedRegion) {
-        // Если мы в списке судов региона, очищаем регион
         setSelectedRegion(null);
         setSelectedCourtId(null);
         setSelectedCourtName(null);
         setSurveyData(null);
       }
-      event.preventDefault(); // Предотвращаем стандартное поведение
+      event.preventDefault();
     };
 
     window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [
     selectedCourtId,
     selectedRegion,
@@ -612,7 +553,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                     d3.select("#tooltip").style("display", "none");
                   });
 
-                // Добавляем текст с оценками
                 const textGroup = g.append("g").attr("class", "rating-labels");
 
                 textGroup
@@ -766,10 +706,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
 
     handleResize();
     window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   useEffect(() => {
@@ -812,6 +749,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
           <h2 className="text-3xl font-bold mb-4 mt-4">{selectedCourtName}</h2>
           <div className="space-y-6">
             <Dates />
+            <CourtDataFetcher courtId={selectedCourtId.toString()} /> {/* Добавляем CourtDataFetcher */}
             <Evaluations selectedCourtId={selectedCourtId} />
           </div>
         </div>
@@ -949,18 +887,13 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                       </thead>
                       <tbody className="min-h-[300px]">
                         {filteredCourts.map((court, index) => (
-                          <tr
-                            key={court.name}
-                            className="hover:bg-gray-50 transition-colors"
-                          >
+                          <tr key={court.name} className="hover:bg-gray-50 transition-colors">
                             <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
                               {index + 1}
                             </td>
                             <td
                               className="px-3 py-2.5 text-left text-xs text-gray-600 cursor-pointer hover:text-blue-500"
-                              onClick={() =>
-                                handleCourtClick(court.id, court.name)
-                              }
+                              onClick={() => handleCourtClick(court.id, court.name)}
                             >
                               {court.name}
                             </td>
@@ -971,18 +904,16 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             >
                               {court.overall.toFixed(1)}
                             </td>
-                            {court.ratings.map(
-                              (rating: number, idx: number) => (
-                                <td
-                                  key={idx}
-                                  className={`border border-gray-300 px-4 py-2 text-center text-sm text-gray-900 ${getRatingColor(
-                                    rating
-                                  )}`}
-                                >
-                                  {rating.toFixed(1)}
-                                </td>
-                              )
-                            )}
+                            {court.ratings.map((rating: number, idx: number) => (
+                              <td
+                                key={idx}
+                                className={`border border-gray-300 px-4 py-2 text-center text-sm text-gray-900 ${getRatingColor(
+                                  rating
+                                )}`}
+                              >
+                                {rating.toFixed(1)}
+                              </td>
+                            ))}
                             <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
                               {court.totalAssessments}
                             </td>
@@ -990,10 +921,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                         ))}
                         {filteredCourts.length === 0 && (
                           <tr>
-                            <td
-                              colSpan={9}
-                              className="px-6 py-4 text-center text-gray-500 h-[300px]"
-                            >
+                            <td colSpan={9} className="px-6 py-4 text-center text-gray-500 h-[300px]">
                               {searchQuery ? "Ничего не найдено" : "Нет данных"}
                             </td>
                           </tr>
@@ -1015,7 +943,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                           className="mb-3 p-3 border border-gray-100 rounded-lg bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
                           onClick={() => handleCourtClick(court.id, court.name)}
                         >
-                          {/* Заголовок карточки */}
                           <div className="flex justify-between items-center mb-2">
                             <div className="text-sm font-semibold text-gray-800 hover:text-blue-600 truncate">
                               {index + 1}. {court.name}
@@ -1027,44 +954,30 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                               </span>
                             </div>
                           </div>
-
-                          {/* Данные в виде компактного списка */}
                           <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs text-gray-600">
                             <div className="flex items-center gap-1">
                               <span className="font-medium">Здание:</span>
-                              <span className="text-gray-600">
-                                {court.ratings[0].toFixed(1)}
-                              </span>
+                              <span className="text-gray-600">{court.ratings[0].toFixed(1)}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <span className="font-medium">Канцелярия:</span>
-                              <span className="text-gray-600">
-                                {court.ratings[1].toFixed(1)}
-                              </span>
+                              <span className="text-gray-600">{court.ratings[1].toFixed(1)}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <span className="font-medium">Процесс:</span>
-                              <span className="text-gray-600">
-                                {court.ratings[2].toFixed(1)}
-                              </span>
+                              <span className="text-gray-600">{court.ratings[2].toFixed(1)}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <span className="font-medium">Сотрудники:</span>
-                              <span className="text-gray-600">
-                                {court.ratings[3].toFixed(1)}
-                              </span>
+                              <span className="text-gray-600">{court.ratings[3].toFixed(1)}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <span className="font-medium">Судья:</span>
-                              <span className="text-gray-600">
-                                {court.ratings[4].toFixed(1)}
-                              </span>
+                              <span className="text-gray-600">{court.ratings[4].toFixed(1)}</span>
                             </div>
                             <div className="flex items-center gap-1">
                               <span className="font-medium">Отзывы:</span>
-                              <span className="text-gray-600">
-                                {court.totalAssessments}
-                              </span>
+                              <span className="text-gray-600">{court.totalAssessments}</span>
                             </div>
                           </div>
                         </div>
