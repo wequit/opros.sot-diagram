@@ -23,6 +23,7 @@ interface RegionSummaryData {
   };
 }
 
+// Evaluations.tsx
 export default function Evaluations({
   selectedCourtId,
   courtNameId,
@@ -84,7 +85,7 @@ export default function Evaluations({
       <div className="max-w-[1250px] mx-auto">
         <div className="grid grid-cols-2 gap-4 EvalutionCols">
           {radarData.datasets.length > 0 && (
-            <RadarChart radarData={radarData} windowWidth={windowWidth} totalResponses={totalResponses} />
+            <RadarChart radarData={radarData} windowWidth={windowWidth}  />
           )}
           <CommentsSection totalResponsesAnswer={totalResponsesAnswer} remarksPath={remarksPath} comments={comments} />
           {categoryData.datasets[0].data.length > 0 && (

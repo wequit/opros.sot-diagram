@@ -4,29 +4,26 @@ import { useSurveyData } from "@/context/SurveyContext";
 import { useRemarks } from "@/components/RemarksApi";
 import { ChartData } from "chart.js";
 
+// Функция для укорачивания текста
+const shortenText = (text: string, maxLength: number = 15): string => {
+  // Удаляем пояснения в скобках
+  let mainText = text.replace(/\s*\([^)]+\)/, "");
+  // Удаляем префиксы вроде "Сторона по делу"
+  mainText = mainText.replace(/^(Сторона по делу|Иш боюнча тарап)/, "").trim();
+  if (mainText === "") {
+    mainText = text.split(" ")[0]; // Если после удаления ничего не осталось, берём первое слово
+  }
+  // Обрезаем, если слишком длинный
+  if (mainText.length > maxLength) {
+    return mainText.substring(0, maxLength) + "...";
+  }
+  return mainText;
+};
+
 export default function useEvaluationData(selectedCourtName?: string, courtName?: string) {
   const { surveyData, language, surveyResponsesCount, isLoading, selectedCourtId, dateParams } = useSurveyData();
   const { remarks } = useRemarks();
 
-  const [progressData, setProgressData] = useState<ChartData<"bar">>({
-    labels: [],
-    datasets: [
-      {
-        label: "Средний балл",
-        data: [],
-        backgroundColor: [
-          "#4CAF50",
-          "#FFC107",
-          "#2196F3",
-          "#F44336",
-          "#9C27B0",
-          "#FF5722",
-          "#607D8B",
-          "#00BCD4",
-        ],
-      },
-    ],
-  });
   const [categoryData, setCategoryData] = useState<ChartData<"pie">>({
     labels: [],
     datasets: [{ data: [], backgroundColor: [] }],
@@ -44,8 +41,8 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
     datasets: [{ data: [], backgroundColor: [] }],
   });
   const [audioVideoData, setAudioVideoData] = useState<ChartData<"pie">>({
-    labels: ["Да", "Нет", "Не знаю", "Другое:"],
-    datasets: [{ data: [0, 0, 0, 0], backgroundColor: [] }],
+    labels: [],
+    datasets: [{ data: [], backgroundColor: [] }],
   });
   const [judgeRatings, setJudgeRatings] = useState<{ [key: string]: number }>({});
   const [staffRatings, setStaffRatings] = useState<{ [key: string]: number }>({});
@@ -57,11 +54,11 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
     datasets: [{ data: [], backgroundColor: [] }],
   });
   const [radarData, setRadarData] = useState<ChartData<"radar">>({
-    labels: ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"],
+    labels: [],
     datasets: [
       {
-        label: `Средние оценки для суда ${selectedCourtName || courtName || "неизвестно"}`,
-        data: [0, 0, 0, 0, 0],
+        label: "Средние оценки по республике",
+        data: [],
         fill: true,
         backgroundColor: "rgba(54, 162, 235, 0.2)",
         borderColor: "rgba(54, 162, 235, 1)",
@@ -102,13 +99,25 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
   useEffect(() => {
     if (!surveyData) return;
 
+    console.log("surveyData:", surveyData);
+
     try {
       // Круговые диаграммы
       const circleData = surveyData.circle;
+      console.log("circleData:", circleData);
       if (circleData) {
         circleData.forEach((question: any) => {
-          const labels = question.options.map((option: any) => option.answer_option_ru);
-          const data = question.options.map((option: any) => parseFloat(option.percentage.replace("%", "")));
+          console.log("Processing question:", question);
+          const labels = question.options?.map((option: any) =>
+            shortenText(language === "ru" ? option.text_ru : option.text_kg)
+          ) || [];
+          const data = question.options?.map((option: any) => {
+            const percentage = option.percentage?.replace("%", "") || "0";
+            const value = parseFloat(percentage);
+            return isNaN(value) ? 0 : value;
+          }) || [];
+          console.log("Labels for question_id", question.question_id, ":", labels);
+          console.log("Data for question_id", question.question_id, ":", data);
           switch (question.question_id) {
             case 2:
               setCategoryData({
@@ -162,22 +171,24 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
               break;
           }
         });
+      } else {
+        console.log("No circle data available");
       }
 
       // Радарная диаграмма
       const radarSource = surveyData.radar;
-      if (radarSource && radarSource.data) {
-        const radarLabels = ["Судья", "Сотрудники", "Канцелярия", "Процесс", "Здание"];
-        const allCourtsAvg = radarLabels.map((label) => {
-          const item = radarSource.data.find((data: any) => data.aspect_ru === label);
-          return item ? item.all_courts_avg : 0;
-        });
+      console.log("radarSource:", radarSource);
+      if (radarSource && radarSource.data && radarSource.data.length > 0) {
+        const radarLabels = radarSource.data.map((item: any) =>
+          language === "ru" ? item.aspect_ru : item.aspect_kg
+        );
+        const allCourtsAvg = radarSource.data.map((item: any) => item.all_courts_avg || 0);
+        console.log("Radar labels:", radarLabels);
+        console.log("Radar allCourtsAvg:", allCourtsAvg);
 
-        // Определяем метку в зависимости от наличия selectedCourtId
         const radarLabel = selectedCourtId
           ? `Средние оценки для суда ${selectedCourtName || courtName || "неизвестно"}`
-          :  `${selectedCourtName || courtName}`;
-
+          : "Средние оценки по республике";
         setRadarData({
           labels: radarLabels,
           datasets: [
@@ -193,14 +204,20 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
             },
           ],
         });
+      } else {
+        console.log("No radar data available");
       }
 
       // Столбчатые данные
       const barData = surveyData.bar;
-      if (barData) {
+      console.log("barData:", barData);
+      if (barData && barData.length > 0) {
         barData.forEach((question: any) => {
-          const labels = question.options.map((option: any) => option.answer_option_ru);
-          const data = question.options.map((option: any) => option.count);
+          console.log("Bar question:", question);
+          const labels = question.options?.map((option: any) =>
+            shortenText(language === "ru" ? option.text_ru : option.text_kg)
+          ) || [];
+          const data = question.options?.map((option: any) => option.count || 0) || [];
           switch (question.question_id) {
             case 1:
               setTrafficSourceData({
@@ -218,7 +235,7 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
                 labels,
                 datasets: [
                   {
-                    label: "Возраст",
+                    label: language === "ru" ? "Возраст" : "Жаш",
                     data,
                     backgroundColor: ["#5B9BD5", "#C000C0", "#FFC000", "#3CB371"],
                   },
@@ -230,18 +247,20 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
 
         const ageQuestion = barData.find((q: any) => q.question_id === 4);
         const genderQuestion = circleData && circleData.find((q: any) => q.question_id === 3);
+        console.log("ageQuestion:", ageQuestion);
+        console.log("genderQuestion:", genderQuestion);
 
         if (ageQuestion && genderQuestion) {
-          const ageLabels = ageQuestion.options.map((opt: any) => opt.answer_option_ru);
+          const ageLabels = ageQuestion.options.map((opt: any) => opt.text_ru);
           const ageCounts = ageQuestion.options.map((opt: any) => opt.count);
           const totalResponses = ageCounts.reduce((sum: number, count: number) => sum + count, 0);
           const agePercentages = ageCounts.map((count: number) => (count / totalResponses) * 100);
 
           const femalePercentage = parseFloat(
-            genderQuestion.options.find((opt: any) => opt.answer_option_ru === "Женский").percentage.replace("%", "")
+            genderQuestion.options.find((opt: any) => opt.text_ru === "Женский")?.percentage?.replace("%", "") || "0"
           );
           const malePercentage = parseFloat(
-            genderQuestion.options.find((opt: any) => opt.answer_option_ru === "Мужской").percentage.replace("%", "")
+            genderQuestion.options.find((opt: any) => opt.text_ru === "Мужской")?.percentage?.replace("%", "") || "0"
           );
 
           const maleData = agePercentages.map((percent: number) => -(percent * malePercentage) / 100);
@@ -251,23 +270,26 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
             labels: ageLabels,
             datasets: [
               {
-                label: "Мужской",
+                label: language === "ru" ? "Мужской" : "Эркек",
                 data: maleData,
                 backgroundColor: "#36A2EB",
               },
               {
-                label: "Женский",
+                label: language === "ru" ? "Женский" : "Аял",
                 data: femaleData,
                 backgroundColor: "#FF6384",
               },
             ],
           });
         }
+      } else {
+        console.log("No bar data available");
       }
 
-      // Данные прогресса
+      // Данные прогресса (предполагаем, что структура не изменилась)
       const progressData = surveyData.progress;
-      if (progressData) {
+      console.log("progressData:", progressData);
+      if (progressData && progressData.length > 0) {
         const judgeQuestions = [11, 12, 14, 17];
         const staffQuestions = [7, 9];
         const officeQuestions = [8];
@@ -280,8 +302,8 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
         const processRatingsData: { [key: string]: number } = {};
 
         progressData.forEach((item: any) => {
-          const questionText = item.question_text_ru.replace(/^\d+\.\s*/, '');
-          const score = item.average_score;
+          const questionText = (language === "ru" ? item.question_text_ru : item.question_text_kg)?.replace(/^\d+\.\s*/, '') || "Не указано";
+          const score = item.average_score || 0;
 
           if (judgeQuestions.includes(item.question_id)) {
             judgeRatingsData[questionText] = score;
@@ -299,15 +321,20 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
         setOfficeRatings(officeRatingsData);
         setAccessibilityRatings(accessibilityRatingsData);
         setProcessRatings(processRatingsData);
+      } else {
+        console.log("No progress data available");
       }
 
       // Данные колонн (DisrespectChart)
       const columnData = surveyData.column;
-      if (columnData) {
+      console.log("columnData:", columnData);
+      if (columnData && columnData.length > 0) {
         const disrespectQuestion = columnData.find((q: any) => q.question_id === 15);
         if (disrespectQuestion) {
-          const labels = disrespectQuestion.options.map((option: any) => option.answer_option_ru);
-          const data = disrespectQuestion.options.map((option: any) => option.count);
+          const labels = disrespectQuestion.options?.map((option: any) =>
+            shortenText(language === "ru" ? option.text_ru : option.text_kg)
+          ) || [];
+          const data = disrespectQuestion.options?.map((option: any) => option.count || 0) || [];
           setDisrespectData({
             labels,
             datasets: [
@@ -319,6 +346,8 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
             ],
           });
         }
+      } else {
+        console.log("No column data available");
       }
     } catch (error) {
       console.error("Ошибка при обработке данных:", error);
@@ -337,7 +366,7 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
       setAccessibilityRatings({});
       setDisrespectData({ labels: [], datasets: [{ data: [], backgroundColor: [], barThickness: 20 }] });
     }
-  }, [surveyData, selectedCourtId, selectedCourtName, courtName]);
+  }, [surveyData, selectedCourtId, selectedCourtName, courtName, language]);
 
   useEffect(() => {
     if (remarks) {
@@ -367,7 +396,7 @@ export default function useEvaluationData(selectedCourtName?: string, courtName?
     officeRatings,
     startTimeData,
     radarData,
-    totalResponses: surveyResponsesCount, // Заменяем totalResponses на surveyResponsesCount
+    totalResponses: surveyResponsesCount,
     totalResponsesAnswer,
     disrespectData,
     ageData,

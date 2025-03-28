@@ -26,6 +26,7 @@
     "classnames": "^2.5.1",
     "critters": "^0.0.23",
     "d3": "^7.9.0",
+    "html2pdf.js": "^0.10.3",
     "js-cookie": "^3.0.5",
     "jwt-decode": "^4.0.0",
     "lodash": "^4.17.21",

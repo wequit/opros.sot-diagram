@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
@@ -11,7 +11,8 @@ import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
 import { LogoutButton } from "@/components/Logout";
 import logo from "../../../public/logo.png";
-import { FaBuilding, FaCity, FaHome, FaMap } from "react-icons/fa";
+import { FaBuilding, FaCity, FaHome, FaMap, FaPrint } from "react-icons/fa";
+import { BiDownload } from "react-icons/bi";
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -22,6 +23,8 @@ const Header: React.FC = () => {
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0
   );
+  const [isPrintMenuOpen, setIsPrintMenuOpen] = useState(false);
+  const printMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -36,6 +39,19 @@ const Header: React.FC = () => {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (printMenuRef.current && !printMenuRef.current.contains(event.target as Node)) {
+        setIsPrintMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   if (!isAuthenticated || pathname === "/login") {
@@ -127,6 +143,52 @@ const Header: React.FC = () => {
     } else {
       return "/Home/summary/ratings";
     }
+  };
+
+  const handlePrint = () => {
+    setIsPrintMenuOpen(false);
+    
+    // Проверяем, находимся ли мы на странице с диаграммами
+    const isDiagramsPage = pathname.includes('/Home/summary/ratings') || 
+      pathname.includes('/feedback') || 
+      pathname.includes('/ratings');
+    
+    if (isDiagramsPage) {
+      // Добавляем класс для страниц с диаграммами
+      document.body.classList.add('printing-charts');
+    }
+    
+    setTimeout(() => {
+      window.print();
+      
+      // Удаляем класс после печати
+      setTimeout(() => {
+        document.body.classList.remove('printing-charts');
+      }, 500);
+    }, 100);
+  };
+
+  const handleDownloadPDF = async () => {
+    try {
+      const html2pdfModule = await import('html2pdf.js');
+      const html2pdf = html2pdfModule.default;
+      
+      const element = document.querySelector('main') || document.body;
+      
+      const opt = {
+        margin: [10, 10],
+        filename: `${document.title || 'document'}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as 'portrait' }
+      };
+      
+      html2pdf().set(opt).from(element).save();
+    } catch (error) {
+      console.error('Ошибка при создании PDF:', error);
+    }
+    
+    setIsPrintMenuOpen(false);
   };
 
   return (
@@ -239,9 +301,43 @@ const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <div className="relative" ref={printMenuRef}>
+            <button
+              onClick={() => setIsPrintMenuOpen(!isPrintMenuOpen)}
+              className="flex gap-2 items-center px-3 py-1.5 bg-gradient-to-r from-gray-100 to-blue-100 
+              hover:from-gray-200 hover:to-blue-200 transition-all duration-200 cursor-pointer rounded-full"
+            >
+              <FaPrint className="w-4 h-4 text-gray-800" />
+              <span className="text-gray-800 font-medium text-xs sm:text-sm hidden sm:inline">
+                {language === "ru" ? "Печать" : "Басып чыгаруу"}
+              </span>
+            </button>
+            
+            {isPrintMenuOpen && (
+              <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-[999] border border-gray-200">
+                <div className="py-1">
+                  <button
+                    onClick={handleDownloadPDF}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  >
+                    <BiDownload className="w-4 h-4" />
+                    {language === "ru" ? "Скачать PDF" : "PDF жүктөп алуу"}
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
+                  >
+                    <FaPrint className="w-4 h-4" />
+                    {language === "ru" ? "Распечатать" : "Басып чыгаруу"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div
             className="flex gap-2 items-center px-3 py-1.5 bg-gradient-to-r from-gray-100 to-blue-100 
-      hover:from-gray-200 hover:to-blue-200 transition-all duration-200 cursor-pointer rounded-full"
+            hover:from-gray-200 hover:to-blue-200 transition-all duration-200 cursor-pointer rounded-full"
             onClick={toggleLanguage}
           >
             <GrLanguage
