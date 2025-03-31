@@ -78,5 +78,36 @@
     "RemarksLogic_ModalPlaceholder": "Введите ваш комментарий...",
     "BreadCrumb_RegionName": "Оценки по области",
     "BreadCrumb_CourtName": "Областные суды",
-    "HeaderNavRegionalRatings": "Оценки по области"
+    "HeaderNavRegionalRatings": "Оценки по области",
+
+    "Print": "Печать",
+
+    "Month_Label": "Месяц",
+    "Month_January": "Январь",
+    "Month_February": "Февраль",
+    "Month_March": "Март",
+    "Month_April": "Апрель",
+    "Month_May": "Май",
+    "Month_June": "Июнь",
+    "Month_July": "Июль",
+    "Month_August": "Август",
+    "Month_September": "Сентябрь",
+    "Month_October": "Октябрь",
+    "Month_November": "Ноябрь",
+    "Month_December": "Декабрь",
+    
+    "Month_Jan": "Январь",
+    "Month_Feb": "Февраль",
+    "Month_Mar": "Март",
+    "Month_Apr": "Апрель",
+    "Month_Mai": "Май",
+    "Month_Jun": "Июнь",
+    "Month_Jul": "Июль",
+    "Month_Aug": "Август",
+    "Month_Sep": "Сентябрь",
+    "Month_Oct": "Октябрь",
+    "Month_Nov": "Ноябрь",
+    "Month_Dec": "Декабрь",
+    
+    "Reset_Button": "Сбросить"
 }

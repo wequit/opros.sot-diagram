@@ -2,7 +2,7 @@
 
 import { getCookie, getCurrentUser } from "@/lib/api/login";
 import { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useSurveyData } from "@/context/SurveyContext";
 
 export interface Remark {
@@ -25,6 +25,7 @@ export function useRemarks() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const pathname = usePathname();
+  const router = useRouter(); 
   const { selectedCourt, courtName, selectedCourtName, selectedCourtId,  } =
     useSurveyData();
 
@@ -135,27 +136,35 @@ export function useRemarks() {
   const fetchRemarks = async () => {
     const storedCourtId = localStorage.getItem("selectedCourtId");
     const courtId = storedCourtId ? parseInt(storedCourtId, 10) : null;
-
+  
+  
     try {
       setIsLoading(true);
       const token = getCookie("access_token");
-
+  
       const user = await getCurrentUser();
-
+  
       const response = await fetch("https://opros.sot.kg/api/v1/comments/", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-
+  
       if (!response.ok) {
+        // Проверяем, истёк ли токен (401 Unauthorized)
+        if (response.status === 401) {
+          console.warn("Токен устарел, перенаправляем на /login");
+          router.push("/login"); // Перенаправляем на страницу логина
+          return; // Прерываем выполнение функции
+        }
+  
         const errorData = await response.json();
         throw new Error(errorData.detail || "Ошибка при получении данных");
       }
-
+  
       const data = await response.json();
-
+  
       const filteredData = filterRemarks(
         data,
         user,
@@ -172,7 +181,7 @@ export function useRemarks() {
         question_id: item.question_id,
         court: item.court,
       }));
-
+  
       setRemarks(filteredData);
     } catch (err) {
       console.error("Ошибка при получении данных:", err);

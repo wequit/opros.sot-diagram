@@ -49,7 +49,6 @@ export default function SummaryAPI() {
   }, [setSurveyData, setIsLoading, dateParams, setSurveyResponsesCount]);
 
   useEffect(() => {
-    console.log("SummaryAPI useEffect triggered with dateParams:", dateParams); // Логируем вызов
     fetchData();
   }, [fetchData]);
 

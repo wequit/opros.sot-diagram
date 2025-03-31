@@ -78,5 +78,36 @@
   "RemarksLogic_ModalPlaceholder": "Сиздин эскертүүңүздү жазыңыз...",
   "BreadCrumb_RegionName": "Аймактар",
   "BreadCrumb_CourtName": "Облустук соттор",
-  "HeaderNavRegionalRatings": "Аймактар ​​боюнча баалоо"
+  "HeaderNavRegionalRatings": "Аймактар ​​боюнча баалоо", 
+  
+  "Print": "Чыгаруу",
+
+    "Month_Label": "Ай боюнча",
+    "Month_January": "Учтун айы",
+    "Month_February": "Бирдин айы",
+    "Month_March": "Жалган куран",
+    "Month_April": "Чын куран",
+    "Month_May": "Бугу",
+    "Month_June": "Кулжа",
+    "Month_July": "Теке",
+    "Month_August": "Баш оона",
+    "Month_September": "Аяк оона",
+    "Month_October": "Тогуздун айы",
+    "Month_November": "Жетинин айы",
+    "Month_December": "Бештин айы",
+    
+    "Month_Jan": "Учтун айы",
+    "Month_Feb": "Бирдин айы",
+    "Month_Mar": "Жалган куран",
+    "Month_Apr": "Чын куран",
+    "Month_Mai": "Бугу",
+    "Month_Jun": "Кулжа",
+    "Month_Jul": "Теке",
+    "Month_Aug": "Баш оона",
+    "Month_Sep": "Аяк оона",
+    "Month_Oct": "Тогуздун айы", 
+    "Month_Nov": "Жетинин айы",
+    "Month_Dec": "Бештин айы",
+    
+    "Reset_Button": "Баштапкы абалга келтирүү"
 }

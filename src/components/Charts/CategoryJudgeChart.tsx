@@ -3,15 +3,18 @@ import { Pie } from 'react-chartjs-2';
 import { ChartOptions, ChartData } from 'chart.js';
 import { getTranslation, useSurveyData } from '@/context/SurveyContext';
 
-interface CategoryJudgeChart {
-  caseTypesData: ChartData<'pie'>;
+// Глобально отключаем datalabels для null значений
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+interface CategoryJudgeChartProps {
+  caseTypesData: ChartData<'pie', (number | null)[]>;
   windowWidth: number;
 }
 
 export default function CategoryJudgeChart({
   caseTypesData,
   windowWidth,
-}: CategoryJudgeChart) {
+}: CategoryJudgeChartProps) {
   const { language } = useSurveyData();
 
   const caseTypesOptions: ChartOptions<'pie'> = {
@@ -35,13 +38,22 @@ export default function CategoryJudgeChart({
           size: 14,
           weight: 'bold',
         },
-        formatter: (value: number) => `${value}%`,
+        // Отключаем отображение для null и 0
+        display: (context: any) => {
+          const value = context.dataset.data[context.dataIndex];
+          return value !== null && value > 0; // Только для значений больше 0
+        },
+        formatter: (value: number | null) => {
+          if (value === null || value <= 0) return '';
+          return `${value}%`;
+        },
       },
       tooltip: {
         callbacks: {
           label: (context: any) => {
             const label = context.label || '';
-            const value = context.raw || 0;
+            const value = context.raw;
+            if (value === null || value <= 0) return label;
             return `${label}: ${value}%`;
           },
         },
