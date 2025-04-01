@@ -58,6 +58,7 @@ export default function RegionalCourts() {
   };
 
   useEffect(() => {
+    console.log("regionNameMain", regionName);
     const fetchData = async () => {
       try {
         const token = getCookie("access_token");
@@ -210,7 +211,7 @@ export default function RegionalCourts() {
   };
 
   return (
-    <div className="max-w-[1250px] mx-auto w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 my-8 Oblast">
+    <div className="max-w-[1250px] mx-auto w-full min-h-screen bg-transparent from-gray-50 to-gray-100 my-4 Oblast">
       {!selectedRegion ? (
         <>
           <div className="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
@@ -246,7 +247,7 @@ export default function RegionalCourts() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
+      <div className="bg-white rounded-2xl shadow-sm mb-8 overflow-hidden border border-gray-300">
             <Map oblastData={regions} />
           </div>
 

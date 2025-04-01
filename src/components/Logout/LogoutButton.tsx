@@ -15,7 +15,9 @@ const LogoutButton: React.FC = () => {
   const handleLogout = () => {
     logout();
     setIsModalOpen(false);
-    router.push('/login');
+    
+    // Используем полный путь, чтобы обойти любые префиксы маршрутов
+    window.location.href = "/results/login";
   };
 
   return (

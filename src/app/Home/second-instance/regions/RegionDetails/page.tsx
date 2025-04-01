@@ -1,6 +1,14 @@
 "use client";
+
+import { getCookie } from "@/lib/api/login";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
-import React, { useCallback, useState, useMemo, useEffect, useRef } from "react";
+import React, {
+  useCallback,
+  useState,
+  useMemo,
+  useEffect,
+  useRef,
+} from "react";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
@@ -10,12 +18,12 @@ import geoData from "../../../../../../public/gadm41_KGZ_1.json";
 import districtsGeoData from "../../../../../../public/gadm41_KGZ_2.json";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import debounce from "lodash/debounce";
-import CourtDataFetcher from "@/lib/api/CourtAPI"; // Импортируем новый компонент
+import CourtApi from "@/lib/api/CourtAPI";
+import { useRouter } from "next/navigation";
 
-// Утилитные функции остаются без изменений
 const getRatingColor = (rating: number) => {
   if (rating === 0) return "bg-gray-100";
-  if (rating < 2) return "bg-red-100";
+  if (rating < 2) return "bg-red-100image.png";
   if (rating < 2.5) return "bg-red-100";
   if (rating < 3) return "bg-orange-100";
   if (rating < 3.5) return "bg-yellow-100";
@@ -80,7 +88,9 @@ interface GeoJsonData {
   features: GeoFeature[];
 }
 
-const courtPositionsMap: { [key: string]: { [key: string]: [number, number] } } = {
+const courtPositionsMap: {
+  [key: string]: { [key: string]: [number, number] };
+} = {
   "Баткенская область": {
     "Баткенский областной суд": [69.8785, 40.0553],
     "Сулюктинский городской суд": [69.5672, 39.9373],
@@ -169,14 +179,28 @@ const courtPositionsMap: { [key: string]: { [key: string]: [number, number] } } 
   },
 };
 
-type SortField = "overall" | "judge" | "staff" | "process" | "office" | "building" | "count" | null;
+type SortField =
+  | "overall"
+  | "judge"
+  | "staff"
+  | "process"
+  | "office"
+  | "building"
+  | "count"
+  | null;
 type SortDirection = "asc" | "desc" | null;
 
 function getEventCoordinates(event: any) {
   if (event.touches && event.touches[0]) {
-    return { x: event.touches[0].clientX, y: event.touches[0].clientY };
+    return {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY,
+    };
   }
-  return { x: event.clientX, y: event.clientY };
+  return {
+    x: event.clientX,
+    y: event.clientY,
+  };
 }
 
 const districtNamesRu: { [key: string]: string } = {
@@ -258,7 +282,10 @@ function isLake(properties: any): boolean {
   );
 }
 
-const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) => {
+const RegionDetails: React.FC<RegionDetailsProps> = ({
+  regionName,
+  regions,
+}) => {
   const {
     selectedRegion,
     setSelectedRegion,
@@ -268,18 +295,25 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
     setSelectedCourtName,
     selectedCourtId,
     setSelectedCourtId,
-    language,
   } = useSurveyData();
 
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const {  language  } = useSurveyData();
+
+  // Добавьте состояние для анимированного поиска
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const router = useRouter();
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(
-        sortDirection === "asc" ? "desc" : sortDirection === "desc" ? null : "asc"
+        sortDirection === "asc"
+          ? "desc"
+          : sortDirection === "desc"
+          ? null
+          : "asc"
       );
       if (sortDirection === "desc") setSortField(null);
     } else {
@@ -290,7 +324,8 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
 
   const getSortIcon = (field: SortField) => {
     if (sortField !== field) return <FaSort className="ml-1 inline-block" />;
-    if (sortDirection === "asc") return <FaSortUp className="ml-1 inline-block text-blue-600" />;
+    if (sortDirection === "asc")
+      return <FaSortUp className="ml-1 inline-block text-blue-600" />;
     return <FaSortDown className="ml-1 inline-block text-blue-600" />;
   };
 
@@ -344,9 +379,11 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
     );
   }, [searchQuery, sortedCourts]);
 
+  // Обновленная логика поиска с дебаунсингом
   const debouncedSearch = useCallback(
     debounce((query: string) => {
       setSearchQuery(query);
+      // Фильтрация происходит в useMemo filteredCourts, который уже существует
     }, 300),
     [sortedCourts]
   );
@@ -368,11 +405,12 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
   };
 
   const handleCourtClick = (courtId: number, courtName: string) => {
-    setSelectedCourtId(courtId);
+    // Сохраняем данные в localStorage, если это нужно
     localStorage.setItem("selectedCourtId", courtId.toString());
     localStorage.setItem("selectedCourtName", courtName);
-    setSelectedCourtName(courtName);
-    // Данные суда будут загружены через CourtDataFetcher
+  
+    // Выполняем редирект на страницу с рейтингами суда
+    router.push(`/Home/second-instance/${courtId}/ratings`);
   };
 
   const handleCourtBackClick = () => {
@@ -388,23 +426,29 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
     setSurveyData(null);
   };
 
+  // Перехватываем событие "назад" для очистки состояния
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       if (selectedCourtId) {
+        // Если мы в деталях суда, очищаем только детали суда
         setSelectedCourtId(null);
         setSelectedCourtName(null);
         setSurveyData(null);
       } else if (selectedRegion) {
+        // Если мы в списке судов региона, очищаем регион
         setSelectedRegion(null);
         setSelectedCourtId(null);
         setSelectedCourtName(null);
         setSurveyData(null);
       }
-      event.preventDefault();
+      event.preventDefault(); // Предотвращаем стандартное поведение
     };
 
     window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
   }, [
     selectedCourtId,
     selectedRegion,
@@ -443,7 +487,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
     );
 
     return (
-      <div className="w-full h-[400px] relative mb-6 bg-white rounded-lg shadow-sm p-4 RegionDetailsMap">
+      <div className="w-full h-[400px] relative mb-6 bg-white rounded-xl shadow-sm border border-gray-300  p-4 RegionDetailsMap">
         <style>
           {`
             #tooltip {
@@ -524,12 +568,9 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                     const tooltip = d3.select("#tooltip");
                     const coordinates = getEventCoordinates(event);
                     const districtName = d.properties.NAME_2;
-                    const russianName =
-                      districtNamesRu[districtName] || districtName;
+                    const russianName = districtNamesRu[districtName] || districtName;
                     const displayName = getDisplayName(russianName);
-                    const court = selectedRegion?.find(
-                      (c) => c.name === russianName
-                    );
+                    const court = selectedRegion?.find((c) => c.name === russianName);
                     const rating = court?.overall || 0;
 
                     tooltip
@@ -537,9 +578,16 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                       .style("left", `${coordinates.x + 10}px`)
                       .style("top", `${coordinates.y + 10}px`).html(`
                         <div class="font-medium">${displayName}</div>
-                        <div class="text-sm text-gray-600">Общая оценка: ${
-                          rating ? rating.toFixed(1) : "Нет данных"
-                        }</div>
+                        <div class="text-sm text-gray-600">Общая оценка: 
+                          <span class="inline-flex items-center">
+                            <span class="text-yellow-400 mr-1">
+                              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="12" height="12" fill="currentColor">
+                                <path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/>
+                              </svg>
+                            </span>
+                            ${rating ? rating.toFixed(1) : "0.0"} / 5
+                          </span>
+                        </div>
                       `);
                   })
                   .on("mousemove", function (event) {
@@ -553,6 +601,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                     d3.select("#tooltip").style("display", "none");
                   });
 
+                // Добавляем текст с оценками
                 const textGroup = g.append("g").attr("class", "rating-labels");
 
                 textGroup
@@ -610,7 +659,14 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                               <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
                                 court.overall
                               )}">
-                                ${court.overall.toFixed(1)}
+                                <span class="inline-flex items-center">
+                                  <span class="text-yellow-400 mr-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="12" height="12" fill="currentColor">
+                                      <path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/>
+                                    </svg>
+                                  </span>
+                                  ${court.overall.toFixed(1)}
+                                </span>
                               </span>
                             </div>
                             <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
@@ -706,7 +762,10 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
 
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   useEffect(() => {
@@ -738,173 +797,163 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
 
   return (
     <>
-      {selectedCourtId ? (
-        <div className="mt-8">
-          <Breadcrumb
-            regionName={regionName}
-            courtName={selectedCourtName}
-            onCourtBackClick={handleCourtBackClick}
-            onRegionBackClick={handleRegionBackClick}
-          />
-          <h2 className="text-3xl font-bold mb-4 mt-4">{selectedCourtName}</h2>
-          <div className="space-y-6">
-            <Dates />
-            <CourtDataFetcher courtId={selectedCourtId.toString()} /> {/* Добавляем CourtDataFetcher */}
-            <Evaluations selectedCourtId={selectedCourtId} />
-          </div>
-        </div>
-      ) : (
-        <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-          <div className="max-w-[1250px] mx-auto px-4 py-4">
-            <div className="flex flex-col">
-              <Breadcrumb
-                regionName={regionName}
-                onRegionBackClick={handleRegionBackClick}
-              />
-              <h2 className="text-xl font-medium mt-4">
-                {regionName ? regionName : "Выберите регион"}
-              </h2>
-              {renderRegionMap()}
-              <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-                <div className="overflow-x-auto">
-                  {/* Таблица для десктопа (≥ 640px) */}
-                  <div className="hidden sm:block overflow-x-auto">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="border-b border-gray-200">
-                          <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                            №
-                          </th>
-                          <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                            <div className="flex items-center justify-between">
-                              <span className="truncate mr-2">НАИМЕНОВАНИЕ СУДОВ</span>
-                              <div className="relative">
+      <div className="w-full min-h-screen bg-transparent from-gray-50 to-gray-100">
+        <div className="max-w-[1250px] mx-auto px-0 py-3.5">
+          <div className="flex flex-col">
+            <Breadcrumb
+              regionName={regionName}
+              onRegionBackClick={handleRegionBackClick}
+            />
+            <h2 className="text-xl font-medium mt-2 my-4">
+              {regionName ? regionName : "Выберите регион"}
+            </h2>
+            {renderRegionMap()}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="overflow-x-auto">
+                {/* Таблица для десктопа (≥ 640px) */}
+                <div className="hidden sm:block overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                          №
+                        </th>
+                        <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <span className="truncate mr-2">НАИМЕНОВАНИЕ СУДОВ</span>
+                            <div className="relative">
+                              <div
+                                className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${
+                                  isSearchOpen ? "w-36" : "w-8"
+                                }`}
+                              >
                                 <div
-                                  className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${
-                                    isSearchOpen ? "w-36" : "w-8"
+                                  className={`flex-grow transition-all duration-500 ease-in-out ${
+                                    isSearchOpen ? "opacity-100 w-full" : "opacity-0 w-0"
                                   }`}
                                 >
-                                  <div
-                                    className={`flex-grow transition-all duration-500 ease-in-out ${
-                                      isSearchOpen ? "opacity-100 w-full" : "opacity-0 w-0"
-                                    }`}
+                                  <input
+                                    type="text"
+                                    onChange={handleSearchChange}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Поиск суда"
+                                    className="w-full px-2 py-1.5 text-xs text-gray-900 bg-white border border-gray-300 rounded-lg outline-none"
+                                    autoFocus={isSearchOpen}
+                                  />
+                                </div>
+                                <div
+                                  className="cursor-pointer p-1.5 hover:bg-gray-100 rounded-full flex-shrink-0"
+                                  onClick={() => setIsSearchOpen(!isSearchOpen)}
+                                >
+                                  <svg
+                                    className="w-4 h-4 text-gray-500"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
                                   >
-                                    <input
-                                      type="text"
-                                      onChange={handleSearchChange}
-                                      onKeyDown={handleKeyDown}
-                                      placeholder="Поиск суда"
-                                      className="w-full px-2 py-1.5 text-xs text-gray-900 bg-white border border-gray-300 rounded-lg outline-none"
-                                      autoFocus={isSearchOpen}
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
+                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                                     />
-                                  </div>
-                                  <div
-                                    className="cursor-pointer p-1.5 hover:bg-gray-100 rounded-full flex-shrink-0"
-                                    onClick={() => setIsSearchOpen(!isSearchOpen)}
-                                  >
-                                    <svg
-                                      className="w-4 h-4 text-gray-500"
-                                      fill="none"
-                                      stroke="currentColor"
-                                      viewBox="0 0 24 24"
-                                      xmlns="http://www.w3.org/2000/svg"
-                                    >
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                      />
-                                    </svg>
-                                  </div>
+                                  </svg>
                                 </div>
                               </div>
                             </div>
-                          </th>
-                          <th
-                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                            onClick={() => handleSort("overall")}
+                          </div>
+                        </th>
+                        <th
+                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                          onClick={() => handleSort("overall")}
+                        >
+                          <div className="flex items-center justify-between px-2">
+                            <span>{getTranslation("Regional_Courts_Table_Overall", language)}</span>
+                            {getSortIcon("overall")}
+                          </div>
+                        </th>
+                        <th
+                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                          onClick={() => handleSort("building")}
+                        >
+                          <div className="flex items-center justify-between px-2">
+                            <span>{getTranslation("Regional_Courts_Table_Build", language)}</span>
+                            {getSortIcon("building")}
+                          </div>
+                        </th>
+                        <th
+                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                          onClick={() => handleSort("office")}
+                        >
+                          <div className="flex items-center justify-between px-2">
+                            <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
+                            {getSortIcon("office")}
+                          </div>
+                        </th>
+                        <th
+                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                          onClick={() => handleSort("process")}
+                        >
+                          <div className="flex items-center justify-between px-2">
+                            <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
+                            {getSortIcon("process")}
+                          </div>
+                        </th>
+                        <th
+                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                          onClick={() => handleSort("staff")}
+                        >
+                          <div className="flex items-center justify-between px-2">
+                            <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
+                            {getSortIcon("staff")}
+                          </div>
+                        </th>
+                        <th
+                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                          onClick={() => handleSort("judge")}
+                        >
+                          <div className="flex items-center justify-between px-2">
+                            <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
+                            {getSortIcon("judge")}
+                          </div>
+                        </th>
+                        <th
+                          className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                          onClick={() => handleSort("count")}
+                        >
+                          <div className="flex items-center justify-between px-2">
+                            <span>{getTranslation("Regional_Courts_Table_Number of reviews", language)}</span>
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="min-h-[300px]">
+                      {filteredCourts.map((court, index) => (
+                        <tr
+                          key={court.name}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
+                            {index + 1}
+                          </td>
+                          <td
+                            className="px-3 py-2.5 text-left text-xs text-gray-600 cursor-pointer hover:text-blue-500"
+                            onClick={() =>
+                              handleCourtClick(court.id, court.name)
+                            }
                           >
-                            <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Overall", language)}</span>
-                              {getSortIcon("overall")}
-                            </div>
-                          </th>
-                          <th
-                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                            onClick={() => handleSort("building")}
+                            {court.name}
+                          </td>
+                          <td
+                            className={`border border-gray-300 px-4 py-2 text-center text-sm text-gray-900 ${getRatingColor(
+                              court.overall
+                            )}`}
                           >
-                            <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Build", language)}</span>
-                              {getSortIcon("building")}
-                            </div>
-                          </th>
-                          <th
-                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                            onClick={() => handleSort("office")}
-                          >
-                            <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
-                              {getSortIcon("office")}
-                            </div>
-                          </th>
-                          <th
-                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                            onClick={() => handleSort("process")}
-                          >
-                            <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
-                              {getSortIcon("process")}
-                            </div>
-                          </th>
-                          <th
-                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                            onClick={() => handleSort("staff")}
-                          >
-                            <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
-                              {getSortIcon("staff")}
-                            </div>
-                          </th>
-                          <th
-                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                            onClick={() => handleSort("judge")}
-                          >
-                            <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
-                              {getSortIcon("judge")}
-                            </div>
-                          </th>
-                          <th
-                            className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                            onClick={() => handleSort("count")}
-                          >
-                            <div className="flex items-center justify-between px-2">
-                              <span>{getTranslation("Regional_Courts_Table_Number of reviews", language)}</span>
-                            </div>
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="min-h-[300px]">
-                        {filteredCourts.map((court, index) => (
-                          <tr key={court.name} className="hover:bg-gray-50 transition-colors">
-                            <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
-                              {index + 1}
-                            </td>
-                            <td
-                              className="px-3 py-2.5 text-left text-xs text-gray-600 cursor-pointer hover:text-blue-500"
-                              onClick={() => handleCourtClick(court.id, court.name)}
-                            >
-                              {court.name}
-                            </td>
-                            <td
-                              className={`border border-gray-300 px-4 py-2 text-center text-sm text-gray-900 ${getRatingColor(
-                                court.overall
-                              )}`}
-                            >
-                              {court.overall.toFixed(1)}
-                            </td>
-                            {court.ratings.map((rating: number, idx: number) => (
+                            {court.overall.toFixed(1)}
+                          </td>
+                          {court.ratings.map(
+                            (rating: number, idx: number) => (
                               <td
                                 key={idx}
                                 className={`border border-gray-300 px-4 py-2 text-center text-sm text-gray-900 ${getRatingColor(
@@ -913,83 +962,101 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({ regionName, regions }) =>
                               >
                                 {rating.toFixed(1)}
                               </td>
-                            ))}
-                            <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
-                              {court.totalAssessments}
-                            </td>
-                          </tr>
-                        ))}
-                        {filteredCourts.length === 0 && (
-                          <tr>
-                            <td colSpan={9} className="px-6 py-4 text-center text-gray-500 h-[300px]">
-                              {searchQuery ? "Ничего не найдено" : "Нет данных"}
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                            )
+                          )}
+                          <td className="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">
+                            {court.totalAssessments}
+                          </td>
+                        </tr>
+                      ))}
+                      {filteredCourts.length === 0 && (
+                        <tr>
+                          <td
+                            colSpan={9}
+                            className="px-6 py-4 text-center text-gray-500 h-[300px]"
+                          >
+                            {searchQuery ? "Ничего не найдено" : "Нет данных"}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
 
-                  {/* Карточки для мобильных (< 640px) */}
-                  <div className="block sm:hidden p-3">
-                    {filteredCourts.length === 0 ? (
-                      <div className="text-center text-gray-500 py-8">
-                        {searchQuery ? "Ничего не найдено" : "Нет данных"}
-                      </div>
-                    ) : (
-                      filteredCourts.map((court, index) => (
-                        <div
-                          key={court.name}
-                          className="mb-3 p-3 border border-gray-100 rounded-lg bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                          onClick={() => handleCourtClick(court.id, court.name)}
-                        >
-                          <div className="flex justify-between items-center mb-2">
-                            <div className="text-sm font-semibold text-gray-800 hover:text-blue-600 truncate">
-                              {index + 1}. {court.name}
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <FaStar className="text-yellow-400 text-sm" />
-                              <span className="text-sm font-medium text-gray-700">
-                                {court.overall.toFixed(1)}
-                              </span>
-                            </div>
+                {/* Карточки для мобильных (< 640px) */}
+                <div className="block sm:hidden p-3">
+                  {filteredCourts.length === 0 ? (
+                    <div className="text-center text-gray-500 py-8">
+                      {searchQuery ? "Ничего не найдено" : "Нет данных"}
+                    </div>
+                  ) : (
+                    filteredCourts.map((court, index) => (
+                      <div
+                        key={court.name}
+                        className="mb-3 p-3 border border-gray-100 rounded-lg bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                        onClick={() => handleCourtClick(court.id, court.name)}
+                      >
+                        {/* Заголовок карточки */}
+                        <div className="flex justify-between items-center mb-2">
+                          <div className="text-sm font-semibold text-gray-800 hover:text-blue-600 truncate">
+                            {index + 1}. {court.name}
                           </div>
-                          <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs text-gray-600">
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">Здание:</span>
-                              <span className="text-gray-600">{court.ratings[0].toFixed(1)}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">Канцелярия:</span>
-                              <span className="text-gray-600">{court.ratings[1].toFixed(1)}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">Процесс:</span>
-                              <span className="text-gray-600">{court.ratings[2].toFixed(1)}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">Сотрудники:</span>
-                              <span className="text-gray-600">{court.ratings[3].toFixed(1)}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">Судья:</span>
-                              <span className="text-gray-600">{court.ratings[4].toFixed(1)}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <span className="font-medium">Отзывы:</span>
-                              <span className="text-gray-600">{court.totalAssessments}</span>
-                            </div>
+                          <div className="flex items-center gap-1">
+                            <FaStar className="text-yellow-400 text-sm" />
+                            <span className="text-sm font-medium text-gray-700">
+                              {court.overall.toFixed(1)}
+                            </span>
                           </div>
                         </div>
-                      ))
-                    )}
-                  </div>
+
+                        {/* Данные в виде компактного списка */}
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs text-gray-600">
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Здание:</span>
+                            <span className="text-gray-600">
+                              {court.ratings[0].toFixed(1)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Канцелярия:</span>
+                            <span className="text-gray-600">
+                              {court.ratings[1].toFixed(1)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Процесс:</span>
+                            <span className="text-gray-600">
+                              {court.ratings[2].toFixed(1)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Сотрудники:</span>
+                            <span className="text-gray-600">
+                              {court.ratings[3].toFixed(1)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Судья:</span>
+                            <span className="text-gray-600">
+                              {court.ratings[4].toFixed(1)}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span className="font-medium">Отзывы:</span>
+                            <span className="text-gray-600">
+                              {court.totalAssessments}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 };

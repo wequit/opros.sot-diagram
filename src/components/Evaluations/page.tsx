@@ -40,15 +40,18 @@ export default function Evaluations({
   const [demographicsView, setDemographicsView] = useState("пол");
 
   let remarksPath = "/Home/summary/feedbacks";
+
   if (pathname.includes("/Home/supreme-court/rating")) {
     remarksPath = "/Home/supreme-court/feedbacks";
-  } else if (pathname.includes("/Home/second-instance/rating")) {
-    remarksPath = `/Home/second-instance/feedbacks`;
+  } else if (pathname.startsWith("/Home/second-instance/")) {
+    // Формируем путь с selectedCourtId перед /feedbacks
+    remarksPath = `/Home/second-instance${selectedCourtId ? `/${selectedCourtId}` : ""}/feedbacks`;
   } else if (pathname.includes("/Home/first-instance")) {
-    remarksPath = `/Home/first-instance/feedbacks`;
+    remarksPath = "/Home/first-instance/feedbacks";
   }
-  if (selectedCourtId) remarksPath += `/${selectedCourtId}`;
-  if (courtNameId) remarksPath += `/${courtNameId}`;
+  
+// Добавляем selectedCourtId и courtNameId, если они есть
+if (courtNameId) remarksPath += `/${courtNameId}`;
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -85,7 +88,7 @@ export default function Evaluations({
       <div className="max-w-[1250px] mx-auto">
         <div className="grid grid-cols-2 gap-4 EvalutionCols">
           {radarData.datasets.length > 0 && (
-            <RadarChart radarData={radarData} windowWidth={windowWidth}  />
+            <RadarChart radarData={radarData} windowWidth={windowWidth}  totalResponses={totalResponses}/>
           )}
           <CommentsSection totalResponsesAnswer={totalResponsesAnswer} remarksPath={remarksPath} comments={comments} />
           {categoryData.datasets[0].data.length > 0 && (

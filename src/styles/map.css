@@ -1,9 +1,11 @@
 .region-path {
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease;
+  transform-origin: center;
 }
 
 .region-path:hover {
-  filter: brightness(0.95);
+  transform: scale(1.02);
+  z-index: 10;
 }
 
 .region-label {
@@ -29,4 +31,33 @@
 .legend-item text {
   font-size: 12px;
   font-weight: 500;
+}
+
+/* Добавьте эти новые стили для улучшения поведения тултипа */
+.tooltip-wrapper {
+  transition-delay: 100ms;
+  transition: opacity 0.15s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.tooltip-wrapper.visible {
+  opacity: 1;
+}
+
+/* Стиль для контейнера тултипа */
+#tooltip-container {
+  position: absolute;
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* Предотвращение мерцания при наведении */
+.region-wrapper {
+  position: relative;
+}
+
+.region-wrapper:hover .tooltip-wrapper {
+  display: block;
+  opacity: 1;
 }

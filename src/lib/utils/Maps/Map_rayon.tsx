@@ -2,7 +2,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import rayonData from "../../../../public/gadm41_KGZ_2.json";
-import { FiMinus, FiPlus, FiRefreshCw } from "react-icons/fi";
+import { FiMinus, FiPlus, FiRefreshCw, FiInfo, FiX } from "react-icons/fi";
+import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 
 const rayonToCourtMapping: { [key: string]: string } = {
   Biskek: "Бишкекский межрайонный суд",
@@ -119,9 +120,9 @@ const courtCoordinates: { [key: string]: [number, number] } = {
   "Административный суд Ошской области": [72.8085, 40.624],
   "Административный суд Таласской области": [72.2427, 42.538],
   "Административный суд Чуйской области": [74.5698, 42.98],
-  "Административный суд города Бишкек": [74.5698, 42.87],
+  "Административный суд города Бишкек": [74.6, 42.87],
   "Ленинский районный суд города Бишкек": [74.5005, 42.785],
-  "Октябрьский районный суд города Бишкек": [74.408, 42.895],
+  "Октябрьский районный суд города Бишкек": [74.460, 42.880],
   "Первомайский районный суд города Бишкек": [74.7428, 42.8906],
   "Свердловский районный суд города Бишкек": [74.685, 42.8],
   "Балыкчинский городской суд": [76.1055, 42.456],
@@ -161,6 +162,9 @@ export default function Map_rayon({
   const tooltipRef = useRef<HTMLDivElement | null>(null);
   const [dimensions, setDimensions] = useState({ width: 1200, height: 600 });
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
+  const [showLegend, setShowLegend] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const { language } = useSurveyData();
 
   const getRayonRating = (rayonName: string): number => {
     if (!courts || !Array.isArray(courts)) {
@@ -168,6 +172,7 @@ export default function Map_rayon({
     }
     const courtName = rayonToCourtMapping[rayonName];
     if (!courtName) {
+      console.warn(`Нет маппинга для района: ${rayonName}`);
       return 0;
     }
     const court = courts.find((c: Court) => c.name === courtName);
@@ -222,8 +227,8 @@ export default function Map_rayon({
 
     const projection = d3
       .geoMercator()
-      .center([74.5, 41.5])
-      .scale(4500)
+      .center([74.7, 41.3])
+      .scale(6000)
       .translate([1200 / 2, 600 / 2]);
 
     const path = d3.geoPath().projection(projection);
@@ -281,12 +286,13 @@ export default function Map_rayon({
         tooltip
           .style("display", "block")
           .style("position", "fixed")
-          .style("left", `${coordinates.x + 10}px`)
-          .style("top", `${coordinates.y + 10}px`).html(`
-            <div class="font-medium">${russianName}</div>
-            <div class="text-sm text-gray-600">Общая оценка: ${
-              rating ? rating.toFixed(1) : "Нет данных"
-            }</div>
+          .style("left", `${coordinates.x + 15}px`)
+          .style("top", `${coordinates.y - 28}px`)
+          .html(`
+            <div class="p-2">
+              <div>${russianName}</div>
+              <div>${getTranslation("MapRayon_OverallRating", language)}: ${rating > 0 ? formatRating(rating) : "Нет данных"}</div>
+            </div>
           `);
       })
       .on("mousemove", function (event: any) {
@@ -312,7 +318,7 @@ export default function Map_rayon({
           .style("left", `${coordinates.x + 10}px`)
           .style("top", `${coordinates.y + 10}px`).html(`
             <div class="font-medium">${russianName}</div>
-            <div class="text-sm text-gray-600">Общая оценка: ${
+            <div class="text-sm text-gray-600">${getTranslation("MapRayon_OverallRating", language)}: ${
               rating ? rating.toFixed(1) : "Нет данных"
             }</div>
           `);
@@ -366,7 +372,7 @@ export default function Map_rayon({
           .style("left", `${event.pageX + 10}px`)
           .style("top", `${event.pageY + 10}px`).html(`
             <div class="font-medium">${d[0]}</div>
-            <div class="text-sm text-gray-600">Общая оценка: ${
+            <div class="text-sm text-gray-600">${getTranslation("MapRayon_OverallRating", language)}: ${
               court ? court.overall_assessment.toFixed(1) : "Нет данных"
             }</div>
           `);
@@ -385,7 +391,7 @@ export default function Map_rayon({
           .style("left", `${coordinates.x + 10}px`)
           .style("top", `${coordinates.y + 10}px`).html(`
             <div class="font-medium">${d[0]}</div>
-            <div class="text-sm text-gray-600">Общая оценка: ${
+            <div class="text-sm text-gray-600">${getTranslation("MapRayon_OverallRating", language)}: ${
               court ? court.overall_assessment.toFixed(1) : "Нет данных"
             }</div>
           `);
@@ -412,16 +418,173 @@ export default function Map_rayon({
         .style("left", `${coordinates.x + 10}px`)
         .style("top", `${coordinates.y + 10}px`);
     });
-  }, [selectedRayon, onSelectRayon, courts]);
+
+    // Добавляем легенду как в Map_oblast.tsx
+    svg.append("defs")
+      .append("filter")
+      .attr("id", "shadow")
+      .append("feDropShadow")
+      .attr("dx", "0")
+      .attr("dy", "2")
+      .attr("stdDeviation", "3")
+      .attr("flood-opacity", "0.3");
+    
+    const legend = svg
+      .append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(20, 60)`)
+      .style("opacity", 0)
+      .style("display", "none");
+
+    legend
+      .append("rect")
+      .attr("width", 190)
+      .attr("height", 240)
+      .attr("fill", "white")
+      .attr("rx", 10)
+      .attr("stroke", "#e5e7eb")
+      .attr("stroke-width", 1)
+      .attr("filter", "url(#shadow)")
+      .attr("opacity", 0.95);
+
+    legend
+      .append("text")
+      .attr("x", 95)
+      .attr("y", 25)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "14px")
+      .attr("font-weight", "700")
+      .attr("fill", "#1f2937")
+      .text(getTranslation("MapRayon_ScaleTitle", language));
+      
+    legend
+      .append("line")
+      .attr("x1", 15)
+      .attr("y1", 35)
+      .attr("x2", 175)
+      .attr("y2", 35)
+      .attr("stroke", "#e5e7eb")
+      .attr("stroke-width", 1);
+
+    const legendData = [
+      { color: "#66C266", label: "4.5 - 5.0" },
+      { color: "#B4D330", label: "4.0 - 4.4" },
+      { color: "#FFC04D", label: "3.5 - 3.9" },
+      { color: "#F4A460", label: "3.0 - 3.4" },
+      { color: "#ff8300", label: "2.0 - 2.9" },
+      { color: "#ff620d", label: "1.5 - 2.0" },
+      { color: "#fa5d5d", label: "1.0 - 1.5" },
+      { color: "#640202", label: "0.5 - 1.0" },
+    ];
+
+    legend
+      .selectAll(".legend-item")
+      .data(legendData)
+      .join("g")
+      .attr("class", "legend-item")
+      .attr("transform", (d, i) => `translate(15, ${i * 24 + 45})`)
+      .call((g) => {
+        g.append("rect")
+          .attr("width", 18)
+          .attr("height", 18)
+          .attr("rx", 4)
+          .attr("fill", (d) => d.color)
+          .attr("stroke", "#e5e7eb")
+          .attr("stroke-width", 0.5);
+        
+        g.append("text")
+          .attr("x", 28)
+          .attr("y", 13)
+          .attr("font-size", "13px")
+          .attr("fill", "#4B5563")
+          .text((d) => d.label);
+      });
+
+    // Показываем или скрываем легенду внутри существующего useEffect
+    if (showLegend) {
+      legend
+        .style("display", "block")
+        .transition()
+        .duration(300)
+        .style("opacity", 1);
+    } else {
+      legend
+        .transition()
+        .duration(300)
+        .style("opacity", 0)
+        .on("end", () => {
+          legend.style("display", "none");
+        });
+    }
+  }, [selectedRayon, onSelectRayon, courts, showLegend, language]);
 
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div ref={containerRef} className="relative w-full h-full">
       <svg ref={svgRef} className="w-full h-auto"></svg>
-      <div
-        ref={tooltipRef}
-        className="absolute hidden bg-white p-2 rounded shadow-lg"
-      ></div>
-
+      
+      {/* Кнопка информации (точно как в Map_oblast.tsx) */}
+      <button
+        onClick={() => {
+          if (showLegend) {
+            setShowLegend(false);
+          } else {
+            setShowInfo(!showInfo);
+          }
+        }}
+        className="absolute top-4 left-4 z-40 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 flex items-center gap-2 border border-gray-300"
+      >
+        {showLegend ? (
+          <>
+            <FiX className="w-5 h-5" />
+            <span className="text-sm">{getTranslation("MapRayon_HideScale", language)}</span>
+          </>
+        ) : (
+          <>
+            <FiInfo className="w-5 h-5" />
+            <span className="text-sm">{getTranslation("MapRayon_Information", language)}</span>
+          </>
+        )}
+      </button>
+      
+      {/* Информационное окно с правильными размерами шрифта */}
+      {showInfo && !showLegend && (
+        <div className="absolute top-16 left-4 z-50 bg-white p-4 rounded-lg shadow-lg border border-gray-200" 
+             style={{maxWidth: "320px"}}>
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-medium text-gray-900">{getTranslation("MapRayon_Title", language)}</h3>
+            <button 
+              onClick={() => setShowInfo(false)}
+              className="text-gray-400 hover:text-gray-500"
+            >
+              <FiX className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <p className="text-sm text-gray-600 mb-3">
+            {getTranslation("MapRayon_Description", language)}
+          </p>
+          
+          <p className="text-sm text-gray-600 mb-3">
+            {getTranslation("MapRayon_HoverDescription", language)}
+          </p>
+          
+          <p className="text-sm text-gray-600 mb-4">
+            {getTranslation("MapRayon_ZoomDescription", language)}
+          </p>
+          
+          <button
+            onClick={() => {
+              setShowLegend(true);
+              setShowInfo(false);
+            }}
+            className="w-full py-2 px-3 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 flex items-center justify-center gap-2 border border-blue-200"
+          >
+            <FiInfo className="w-4 h-4" />
+            <span className="text-sm">{getTranslation("MapRayon_ShowScale", language)}</span>
+          </button>
+        </div>
+      )}
+      
       {/* Кнопки зума */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-30 ContainerZoomButtons">
         <button
@@ -429,7 +592,7 @@ export default function Map_rayon({
             svgRef.current &&
               d3.select(svgRef.current).call(zoomRef.current!.scaleBy, 1.2);
           }}
-          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600"
+          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 border border-gray-300"
         >
           <FiPlus className="w-7 h-7 ZoomButtons" />
         </button>
@@ -438,7 +601,7 @@ export default function Map_rayon({
             svgRef.current &&
               d3.select(svgRef.current).call(zoomRef.current!.scaleBy, 0.8);
           }}
-          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600"
+          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 border border-gray-300"
         >
           <FiMinus className="w-7 h-7 ZoomButtons" />
         </button>
@@ -449,11 +612,17 @@ export default function Map_rayon({
                 .select(svgRef.current)
                 .call(zoomRef.current!.transform, d3.zoomIdentity);
           }}
-          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600"
+          className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 border border-gray-300"
         >
           <FiRefreshCw className="w-7 h-7 ZoomButtons" />
         </button>
       </div>
+      
+      <div
+        ref={tooltipRef}
+        className="absolute hidden bg-white p-2 rounded shadow-lg border border-gray-200"
+        style={{ minWidth: "150px" }}
+      ></div>
     </div>
   );
 }
@@ -480,4 +649,19 @@ function getEventCoordinates(event: any) {
     };
   }
   return { x: event.clientX, y: event.clientY };
+}
+
+function formatRating(rating: number) {
+  return `
+    <span class="inline-flex items-center">
+      <span class="text-yellow-400 mr-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="14" height="14" fill="currentColor">
+          <path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/>
+        </svg>
+      </span>
+      <span class="font-bold">${rating.toFixed(1)}</span>
+      <span class="font-bold text-gray-900 ml-1">/</span>
+      <span class="font-bold text-gray-900 ml-1">5</span>
+    </span>
+  `;
 }

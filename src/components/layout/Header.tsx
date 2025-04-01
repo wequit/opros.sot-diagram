@@ -267,12 +267,12 @@ const Header: React.FC = () => {
                   <Link
                     href="/Home/second-instance"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
-                          flex items-center gap-2
-                    ${
-                         pathname.startsWith("/Home/second-instance")
-                          ? "text-blue-600 bg-blue-100 shadow-inner"
-                           : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
-                      }`}
+                   flex items-center gap-2
+                   ${
+                   pathname.startsWith("/Home/second-instance") || pathname === "/results/Home/second-instance"
+                      ? "text-blue-600 bg-blue-100 shadow-inner"
+                      : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+                  }`}
                   >
                     {getTranslation("HeaderNavThree", language)}
                   </Link>
@@ -282,7 +282,7 @@ const Header: React.FC = () => {
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                     pathname === "/Home/first-instance/ratings"
+                       pathname.startsWith("/Home/first-instance") || pathname === "/results/Home/first-instance"
                        ? "text-blue-600 bg-blue-100 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}

@@ -226,9 +226,9 @@ const FirstInstance = () => {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="w-full min-h-screen bg-transparent">
       {currentUser?.role === "Председатель 2 инстанции" && (
-        <div className="max-w-[1250px] mx-auto px-4 py-4">
+        <div className="max-w-[1250px] mx-auto px-4 py-5">
           <div className="flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold leading-none py-2">{userRegion}</h2>
@@ -246,17 +246,13 @@ const FirstInstance = () => {
               )}
             </div>
             
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6">
+            <div className="bg-white rounded-xl shadow-sm mb-6  overflow-hidden border border-gray-300">
               <RegionMap
                 regionName={userRegion || ""}
-                selectedRegion={transformCourtData(assessmentData)}
-                onCourtClick={(courtId: number, courtName: string) => {
-                  const selectedCourt = assessmentData.find(
-                    (court) => court.court_id === courtId
-                  );
-                  if (selectedCourt) {
-                    router.push(`/Home/first_instance/court/${courtId}`);
-                  }
+                selectedRegion={transformCourtData(filteredCourts)}
+                onCourtClick={(courtId, courtName) => {
+                  const court = filteredCourts.find(c => c.court_id === courtId);
+                  if (court) handleCourtClick(court);
                 }}
               />
             </div>
@@ -421,7 +417,6 @@ const FirstInstance = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };

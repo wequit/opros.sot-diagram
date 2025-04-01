@@ -7,6 +7,10 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --primary-blue: #2563eb;
+  --primary-dark-blue: #1e40af;
+  --light-blue-bg: #f0f5ff;
+  --header-height: 64px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,6 +23,83 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(135deg, #f0f5ff 0%, #e6f0fd 100%);
+  background-attachment: fixed;
+  background-size: cover;
+  position: relative;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: url('/pattern-grid.svg');
+  background-size: 60px 60px;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Декоративные элементы фона */
+body::after {
+  content: "";
+  position: fixed;
+  top: -10%;
+  right: -10%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0) 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.app-header {
+  background: linear-gradient(to right, #1e40af, #3b82f6);
+  color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 50;
+  overflow: hidden;
+  height: var(--header-height);
+}
+
+.app-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: url('/pattern-grid.svg');
+  background-size: 30px 30px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.app-content {
+  position: relative;
+  z-index: 10;
+  min-height: calc(100vh - var(--header-height));
+}
+
+/* Общие стили для карточек и контейнеров */
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1);
 }
 
 @layer components {

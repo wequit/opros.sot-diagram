@@ -78,7 +78,7 @@ export function useRemarks() {
             item.custom_answer !== null &&
             item.custom_answer !== "Необязательный вопрос"
           );
-        } else if (pathname === `/Home/second-instance/regions`) {
+        } else if (pathname.startsWith(`/Home/second-instance/`) || pathname === '`/results/Home/second-instance/') {
             return (
               item.custom_answer !== null &&
               item.custom_answer !== "Необязательный вопрос" &&
@@ -93,14 +93,12 @@ export function useRemarks() {
           );
         }
 
-        else if (pathname === `/Home/first-instance/${courtNameId}`) {
-          if (courtName && courtName === item.court) {
+        else if (pathname.startsWith(`/Home/first-instance/`)) {
             return (
               item.custom_answer !== null &&
-              item.custom_answer !== "Необязательный вопрос"
+              item.custom_answer !== "Необязательный вопрос" &&
+              item.court === storedCourtName
             );
-          }
-          return false;
         }else if (pathname === `/Home/first-instance/feedbacks/${courtNameId}`) {
           return (
             item.custom_answer !== null &&

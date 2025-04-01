@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useSurveyData } from "@/context/SurveyContext";
 import { useRemarks } from "@/components/RemarksApi";
 import { ChartData } from "chart.js";
+import { usePathname } from "next/navigation";
 
 export default function useEvaluationData(
   selectedCourtName?: string,
@@ -17,6 +18,9 @@ export default function useEvaluationData(
     dateParams,
   } = useSurveyData();
   const { remarks } = useRemarks();
+
+  const storedCourtName = localStorage.getItem("selectedCourtName");
+  const pathname = usePathname();
 
   const [categoryData, setCategoryData] = useState<ChartData<"pie">>({
     labels: [],
@@ -116,7 +120,7 @@ export default function useEvaluationData(
               const value = parseFloat(percentage);
               return isNaN(value) ? 0 : value;
             }) || [];
-          const filteredData = rawData.map((value) =>
+          const filteredData = rawData.map((value: number) =>
             value === 0 ? null : value
           );
 
@@ -205,11 +209,11 @@ export default function useEvaluationData(
           (item: any) => item.all_courts_avg || 0
         );
 
-        const radarLabel = selectedCourtId
-          ? `Средние оценки для суда ${
-              selectedCourtName || courtName || "неизвестно"
-            }`
-          : "Средние оценки по республике";
+        const radarLabel = pathname.startsWith("/Home/summary/")
+          ? "Средние оценки по республике"
+          : pathname.startsWith("/Home/supreme-court/")
+          ? "Верховный суд"
+          : `${storedCourtName}`;
         setRadarData({
           labels: radarLabels,
           datasets: [
@@ -237,7 +241,7 @@ export default function useEvaluationData(
             ) || [];
           const rawData =
             question.options?.map((option: any) => option.count || 0) || [];
-          const filteredData = rawData.map((value) =>
+          const filteredData = rawData.map((value: number) =>
             value === 0 ? null : value
           );
 
@@ -335,7 +339,6 @@ export default function useEvaluationData(
       }
 
       const progressData = surveyData.progress;
-      console.log("progressData:", progressData);
       if (progressData && progressData.length > 0) {
         const judgeQuestions = [11, 12, 14, 17];
         const staffQuestions = [7, 9];
@@ -378,7 +381,6 @@ export default function useEvaluationData(
         setProcessRatings(processRatingsData);
 
         // Для отладки: проверим, что processRatings заполняется
-        console.log("processRatingsData:", processRatingsData);
       } else {
         console.log("No progress data available");
       }
@@ -397,7 +399,7 @@ export default function useEvaluationData(
             disrespectQuestion.options?.map(
               (option: any) => option.count || 0
             ) || [];
-          const filteredData = rawData.map((value) =>
+          const filteredData = rawData.map((value: number) =>
             value === 0 ? null : value
           );
 

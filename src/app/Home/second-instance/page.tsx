@@ -237,7 +237,7 @@ export default function SecondInstanceUnifiedPage() {
   const displayedData = activeTab === "courts" ? sortedRegionCourts : sortedRegions;
 
   return (
-    <div className="max-w-[1250px] mx-auto w-full min-h-screen bg-gradient-to-br from-gray-50 to-gray erasing-100 my-8">
+    <div className="max-w-[1250px] mx-auto w-full min-h-screen bg-transparent my-4">
       <div className="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
         <div className="text-xs sm:text-base">
           <Breadcrumb
@@ -256,7 +256,7 @@ export default function SecondInstanceUnifiedPage() {
             }`}
             onClick={() => handleTabClick("courts")}
           >
-            По судам
+            {getTranslation("Regional_Courts_Button_Courts", language)}
           </button>
           <button
             className={`py-1 px-2 sm:py-2 sm:px-4 text-xs sm:text-base rounded-lg font-medium transition-all duration-200 ${
@@ -266,15 +266,15 @@ export default function SecondInstanceUnifiedPage() {
             }`}
             onClick={() => handleTabClick("regions")}
           >
-            По областям
+            {getTranslation("Regional_Courts_Button_Regions", language)}
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm mb-4 overflow-hidden border border-gray-100">
+      <div className="bg-white rounded-2xl shadow-sm mb-4 overflow-hidden border border-gray-300">
         <Map oblastData={regions} />
       </div>
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-8">
         <div className="hidden sm:block overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
@@ -356,13 +356,13 @@ export default function SecondInstanceUnifiedPage() {
               {isLoading ? (
                 <tr>
                   <td colSpan={9} className="text-center py-4">
-                    Загрузка...
+                    {getTranslation("Loading", language)}
                   </td>
                 </tr>
               ) : displayedData.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="text-center py-4">
-                    Данные отсутствуют
+                    {getTranslation("No_Data", language)}
                   </td>
                 </tr>
               ) : (

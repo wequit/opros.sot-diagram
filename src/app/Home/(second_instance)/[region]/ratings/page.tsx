@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getCookie, getCurrentUser } from "@/lib/api/login";
+import { getCookie } from "@/lib/api/login";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { useSurveyData } from "@/context/SurveyContext";
@@ -21,8 +21,13 @@ export default function RegionalCourtPage() {
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const data = await getCurrentUser();
-               setCurrentUser(data);
+        const response = await fetch("https://opros.sot.kg/api/v1/current_user/", {
+          headers: {
+            Authorization: `Bearer ${getCookie("access_token")}`,
+          },
+        });
+        const data = await response.json();
+        setCurrentUser(data);
         
         if (data.role === "Председатель 2 инстанции") {
           const courtName = data.court;
@@ -130,7 +135,7 @@ export default function RegionalCourtPage() {
   }
 
   return (
-    <div className="max-w-[1250px] mx-auto px-4 py-4">
+    <div className="max-w-[1250px] mx-auto px-4 py-6">
       <div className="mb-4">
         <Breadcrumb 
           courtName={currentUser?.court}
