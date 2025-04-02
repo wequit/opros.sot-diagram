@@ -161,5 +161,6 @@
     "MapRayon_OverallRating": "Общая оценка",
 
     "Loading": "Загрузка...",
-    "No_Data": "Данные отсутствуют"
+    "No_Data": "Данные отсутствуют",
+    "RemarksLogic_ViewMessageTitle":"Сообщение от гражданина"
 }

@@ -1,8 +1,9 @@
 "use client";
+
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { CgProfile } from "react-icons/cg";
 import { HiMenu } from "react-icons/hi";
 import Sidebar from "./Sidebar";
@@ -13,6 +14,7 @@ import { LogoutButton } from "@/components/Logout";
 import logo from "../../../public/logo.png";
 import { FaBuilding, FaCity, FaHome, FaMap, FaPrint } from "react-icons/fa";
 import { BiDownload } from "react-icons/bi";
+import { getCurrentUser } from "@/lib/api/login"; // Импортируем getCurrentUser
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -23,8 +25,24 @@ const Header: React.FC = () => {
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0
   );
+  const [userCourt, setUserCourt] = useState<string | null>(null); // Состояние для хранения суда
   const [isPrintMenuOpen, setIsPrintMenuOpen] = useState(false);
   const printMenuRef = useRef<HTMLDivElement>(null);
+
+  // Получаем court из getCurrentUser
+  useEffect(() => {
+    const fetchUserCourt = async () => {
+      try {
+        const userData = await getCurrentUser();
+        setUserCourt(userData.court || ""); // Устанавливаем court из ответа
+      } catch (error) {
+        console.error("Ошибка при получении данных пользователя:", error);
+        setUserCourt(""); // В случае ошибки устанавливаем пустую строку
+      }
+    };
+
+    fetchUserCourt();
+  }, []);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -55,27 +73,13 @@ const Header: React.FC = () => {
   }, []);
 
   if (!isAuthenticated || pathname === "/login") {
-    return null; 
+    return null;
   }
-
-  const getRegionalCourtName = (userCourt: string): string => {
-    const courtMap: { [key: string]: string } = {
-      "Таласский областной суд": "Таласский областной суд",
-      "Иссык-кульский областной суд": "Иссык-кульский областной суд",
-      "Нарынский областной суд": "Нарынский областной суд",
-      "Баткенский областной суд": "Баткенский областной суд",
-      "Чуйский областной суд": "Чуйский областной суд",
-      "Ошский областной суд": "Ошский областной суд",
-      "Жалал-Абадский областной суд": "Жалал-Абадский областной суд",
-      "Бишкекский городской суд": "Бишкекский городской суд ",
-    };
-    return courtMap[userCourt] || "";
-  };
 
   const getRegionSlug = (courtName: string): string => {
     const regionMap: { [key: string]: string } = {
       "Таласский областной суд": "Talas",
-      "Иссык-кульский областной суд": "Issyk-Kyl", 
+      "Иссык-кульский областной суд": "Issyk-Kyl",
       "Нарынский областной суд": "Naryn",
       "Баткенский областной суд": "Batken",
       "Чуйский областной суд": "Chyi",
@@ -83,15 +87,16 @@ const Header: React.FC = () => {
       "Жалал-Абадский областной суд": "Djalal-Abad",
       "Бишкекский городской суд": "Bishkek",
     };
-
     return regionMap[courtName] || "court-id";
   };
 
   const renderSecondInstanceNav = () => {
     if (user?.role !== "Председатель 2 инстанции") return null;
 
-    const regionalCourt = getRegionalCourtName(user.court);
-    
+    if (!userCourt) return null; // Если court ещё не загружен, ничего не рендерим
+
+    const slug = getRegionSlug(userCourt); // Получаем slug на основе названия суда
+
     return (
       <div className="flex space-x-3 p-2 rounded-xl">
         <Link
@@ -121,17 +126,17 @@ const Header: React.FC = () => {
         </Link>
 
         <Link
-          href={`/Home/${getRegionSlug(regionalCourt)}/ratings`}
+          href={`/Home/${slug}/ratings`}
           className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
           flex items-center gap-2
           ${
-            pathname.includes(`/Home/${getRegionSlug(regionalCourt)}/ratings`) ||
-            pathname.includes(`/Home/${getRegionSlug(regionalCourt)}/feedbacks`)
+            pathname.includes(`/Home/${slug}/ratings`) ||
+            pathname.includes(`/Home/${slug}/feedbacks`)
               ? "text-blue-600 bg-blue-100 shadow-inner"
               : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
           }`}
         >
-          {regionalCourt}
+          {userCourt} {/* Используем court напрямую */}
         </Link>
       </div>
     );
@@ -147,47 +152,45 @@ const Header: React.FC = () => {
 
   const handlePrint = () => {
     setIsPrintMenuOpen(false);
-    
-    // Проверяем, находимся ли мы на странице с диаграммами
-    const isDiagramsPage = pathname.includes('/Home/summary/ratings') || 
-      pathname.includes('/feedback') || 
-      pathname.includes('/ratings');
-    
+
+    const isDiagramsPage =
+      pathname.includes("/Home/summary/ratings") ||
+      pathname.includes("/feedback") ||
+      pathname.includes("/ratings");
+
     if (isDiagramsPage) {
-      // Добавляем класс для страниц с диаграммами
-      document.body.classList.add('printing-charts');
+      document.body.classList.add("printing-charts");
     }
-    
+
     setTimeout(() => {
       window.print();
-      
-      // Удаляем класс после печати
+
       setTimeout(() => {
-        document.body.classList.remove('printing-charts');
+        document.body.classList.remove("printing-charts");
       }, 500);
     }, 100);
   };
 
   const handleDownloadPDF = async () => {
     try {
-      const html2pdfModule = await import('html2pdf.js');
+      const html2pdfModule = await import("html2pdf.js");
       const html2pdf = html2pdfModule.default;
-      
-      const element = document.querySelector('main') || document.body;
-      
+
+      const element = document.querySelector("main") || document.body;
+
       const opt = {
         margin: [10, 10],
-        filename: `${document.title || 'document'}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
+        filename: `${document.title || "document"}.pdf`,
+        image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as 'portrait' }
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" as "portrait" },
       };
-      
+
       html2pdf().set(opt).from(element).save();
     } catch (error) {
-      console.error('Ошибка при создании PDF:', error);
+      console.error("Ошибка при создании PDF:", error);
     }
-    
+
     setIsPrintMenuOpen(false);
   };
 
@@ -235,17 +238,17 @@ const Header: React.FC = () => {
               </Link>
 
               {user?.role === "Председатель 3 инстанции" ? (
-                <div className="flex space-x-3 p-2 rounded-xl  ">
+                <div className="flex space-x-3 p-2 rounded-xl">
                   <Link
                     href="/Home/summary/ratings"
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
-    flex items-center gap-2
-    ${
-      pathname === "/Home/summary/ratings" ||
-      pathname === "/Home/summary/feedbacks"
-        ? "text-gray-600 bg-blue-50 shadow-inner"
-        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
-    }`}
+                    flex items-center gap-2
+                    ${
+                      pathname === "/Home/summary/ratings" ||
+                      pathname === "/Home/summary/feedbacks"
+                        ? "text-gray-600 bg-blue-50 shadow-inner"
+                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+                    }`}
                   >
                     {getTranslation("HeaderNavOne", language)}
                   </Link>
@@ -256,7 +259,7 @@ const Header: React.FC = () => {
                    flex items-center gap-2
                    ${
                      pathname === "/Home/supreme-court/ratings" ||
-                     pathname === "/Home/supreme-court/feedbacks" 
+                     pathname === "/Home/supreme-court/feedbacks"
                        ? "text-blue-600 bg-blue-100 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}
@@ -269,10 +272,11 @@ const Header: React.FC = () => {
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                   pathname.startsWith("/Home/second-instance") || pathname === "/results/Home/second-instance"
-                      ? "text-blue-600 bg-blue-100 shadow-inner"
-                      : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
-                  }`}
+                     pathname.startsWith("/Home/second-instance") ||
+                     pathname === "/results/Home/second-instance"
+                       ? "text-blue-600 bg-blue-100 shadow-inner"
+                       : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+                   }`}
                   >
                     {getTranslation("HeaderNavThree", language)}
                   </Link>
@@ -282,7 +286,8 @@ const Header: React.FC = () => {
                     className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
                    flex items-center gap-2
                    ${
-                       pathname.startsWith("/Home/first-instance") || pathname === "/results/Home/first-instance"
+                     pathname.startsWith("/Home/first-instance") ||
+                     pathname === "/results/Home/first-instance"
                        ? "text-blue-600 bg-blue-100 shadow-inner"
                        : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
                    }`}
@@ -309,7 +314,7 @@ const Header: React.FC = () => {
                 {language === "ru" ? "Печать" : "Басып чыгаруу"}
               </span>
             </button>
-            
+
             {isPrintMenuOpen && (
               <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg z-[999] border border-gray-200">
                 <div className="py-1">

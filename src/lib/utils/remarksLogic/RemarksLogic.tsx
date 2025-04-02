@@ -12,6 +12,7 @@ export default function RemarksPage() {
   const { remarks, isLoading, error } = useRemarks();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [localRemarks, setLocalRemarks] = useState<any[]>([]);
   const [courtColumnWidth, setCourtColumnWidth] = useState<number>(250); // Начальная ширина столбца СУД
@@ -20,7 +21,7 @@ export default function RemarksPage() {
   const startXRef = useRef<number>(0);
   const startWidthRef = useRef<number>(0);
   
-  const itemsPerPage = 6;
+  const itemsPerPage = 9;
   const router = useRouter();
   const pathname = usePathname();
   const {language, } = useSurveyData();
@@ -102,6 +103,39 @@ export default function RemarksPage() {
       </div>
     );
   };
+
+  // Добавляем модальное окно для просмотра сообщения
+  const ViewMessageModal = ({
+    isOpen,
+    onClose,
+    message,
+  }: {
+    isOpen: boolean;
+    onClose: () => void;
+    message: string;
+  }) => {
+    if (!isOpen) return null;
+  
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-lg">
+          <h3 className="text-lg font-semibold mb-4">{getTranslation("RemarksLogic_ViewMessageTitle", language)}</h3>
+          <div className="border rounded p-4 mb-4 bg-gray-50 max-h-60 overflow-auto">
+            <p className="text-gray-700 whitespace-pre-wrap">{message || "—"}</p>
+          </div>
+          <div className="flex justify-end">
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+              onClick={onClose}
+            >
+              {getTranslation("RemarksLogic_ModalClose", language)}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   useEffect(() => {
     try {
       if (remarks) {
@@ -229,6 +263,11 @@ export default function RemarksPage() {
     return getPaginationNumbers();
   }, [currentPage, totalPages]);
 
+  const handleMessageClick = (item: any) => {
+    setSelectedItem(item);
+    setIsViewModalOpen(true);
+  };
+
   const handleCommentClick = (item: any) => {
     setSelectedItem(item);
     setIsModalOpen(true);
@@ -243,7 +282,7 @@ export default function RemarksPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-transparent">
       {localRemarks.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-6">
           <div className="animate-bounce mb-4">
@@ -319,12 +358,16 @@ export default function RemarksPage() {
                         {(currentPage - 1) * itemsPerPage + index + 1}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 border-r border-gray-200" style={{ width: `${courtColumnWidth}px` }}>
-                        <div className="truncate hover:text-clip hover:overflow-visible" title={item.court || "Не указано"}>
+                        <div className="whitespace-normal break-words" title={item.court || "Не указано"}>
                           {item.court || "Не указано"}
                         </div>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700 border-r border-gray-200">
-                        <div className="line-clamp-2 h-10 overflow-hidden" title={item.custom_answer || "—"}>
+                        <div 
+                          className="line-clamp-2 h-10 overflow-hidden cursor-pointer hover:text-blue-600 transition-colors" 
+                          title={item.custom_answer || "—"}
+                          onClick={() => handleMessageClick(item)}
+                        >
                           {item.custom_answer || "—"}
                         </div>
                       </td>
@@ -381,6 +424,12 @@ export default function RemarksPage() {
             onClose={() => setIsModalOpen(false)}
             onSubmit={handleCommentSubmit}
             selectedComment={selectedItem?.custom_answer || ""}
+          />
+
+          <ViewMessageModal
+            isOpen={isViewModalOpen}
+            onClose={() => setIsViewModalOpen(false)}
+            message={selectedItem?.custom_answer || ""}
           />
         </div>
       )}

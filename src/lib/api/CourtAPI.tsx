@@ -8,7 +8,7 @@ import {
   getBarCourtData,
   getProgressCourtData,
   getColumnCourtData,
-} from "@/lib/api/charts";
+} from "@/lib/api/charts/charts";
 
 interface CourtApi {
   courtId?: string;

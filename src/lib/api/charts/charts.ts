@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchWithAuth } from "./login"; 
+import { fetchWithAuth } from "../login"; 
 
 const cache: { [key: string]: Promise<any> } = {};
 
@@ -90,6 +90,47 @@ export const getProgressCourtData = async (courtId: string, params: { year?: str
    const { queryString, cacheKey } = buildQueryAndCacheKey(`progress_court_${courtId}`, params);
   if (!cache[cacheKey]) {
     cache[cacheKey] = fetchWithAuth(`chart/progress/${courtId}/?${queryString}`);
+  }
+  return await cache[cacheKey];
+};
+
+// Запросы для region
+export const getRadarRegionData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("radar_region", params);
+  if (!cache[cacheKey]) {
+    cache[cacheKey] = fetchWithAuth(`chart/radar/region/?${queryString}`);
+  }
+  return await cache[cacheKey];
+};
+
+export const getBarRegionData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("bar_region", params);
+  if (!cache[cacheKey]) {
+    cache[cacheKey] = fetchWithAuth(`chart/bar/region/?${queryString}`);
+  }
+  return await cache[cacheKey];
+};
+
+export const getCircleRegionData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("circle_region", params);
+  if (!cache[cacheKey]) {
+    cache[cacheKey] = fetchWithAuth(`chart/circle/region/?${queryString}`);
+  }
+  return await cache[cacheKey];
+};
+
+export const getColumnRegionData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("column_region", params);
+  if (!cache[cacheKey]) {
+    cache[cacheKey] = fetchWithAuth(`chart/column/region/?${queryString}`);
+  }
+  return await cache[cacheKey];
+};
+
+export const getProgressRegionData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("progress_region", params);
+  if (!cache[cacheKey]) {
+    cache[cacheKey] = fetchWithAuth(`chart/progress/region/?${queryString}`);
   }
   return await cache[cacheKey];
 };

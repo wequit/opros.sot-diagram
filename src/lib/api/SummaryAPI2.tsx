@@ -1,29 +1,30 @@
 "use client";
+
 import { useEffect, useState, useCallback } from "react";
 import { useSurveyData } from "@/context/SurveyContext";
 import {
-  getCircleRepublicData,
-  getRadarRepublicData,
-  getBarRepublicData,
-  getProgressRepublicData,
-  getColumnRepublicData,
+  getCircleRegionData,
+  getRadarRegionData,
+  getBarRegionData,
+  getProgressRegionData,
+  getColumnRegionData,
 } from "@/lib/api/charts/charts";
 
-export default function SummaryAPI() {
+export default function SummaryAPI2() {
   const [error, setError] = useState<string | null>(null);
   const { setSurveyData, setIsLoading, dateParams, setSurveyResponsesCount } = useSurveyData();
 
   const fetchData = useCallback(async () => {
     try {
-      setIsLoading(true);
-      console.time("Fetch Republic Data");
+      setIsLoading(true); // Устанавливаем isLoading в true
+      console.time("Fetch Region Data");
 
       const promises = [
-        getCircleRepublicData(dateParams),
-        getRadarRepublicData(dateParams),
-        getBarRepublicData(dateParams),
-        getProgressRepublicData(dateParams),
-        getColumnRepublicData(dateParams),
+        getCircleRegionData(dateParams),
+        getRadarRegionData(dateParams),
+        getBarRegionData(dateParams),
+        getProgressRegionData(dateParams),
+        getColumnRegionData(dateParams),
       ];
 
       const [circleData, radarData, barData, progressData, columnData] = await Promise.all(promises);
@@ -39,12 +40,12 @@ export default function SummaryAPI() {
       setSurveyData(surveyData);
       setSurveyResponsesCount(radarData.survey_responses_count || 0);
       setError(null);
-      console.timeEnd("Fetch Republic Data");
+      console.timeEnd("Fetch Region Data");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Произошла ошибка");
       console.error("Ошибка при получении данных:", err);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // Сбрасываем isLoading после завершения запросов
     }
   }, [setSurveyData, setIsLoading, dateParams, setSurveyResponsesCount]);
 

@@ -1,151 +1,88 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { getCookie } from "@/lib/api/login";
+import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
-import { useSurveyData } from "@/context/SurveyContext";
-import { useParams, useRouter } from "next/navigation";
-import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
-import SkeletonLoader from "@/lib/utils/SkeletonLoader/SkeletonLoader";
+import { getCurrentUser } from "@/lib/api/login";
+import CourtApi from "@/lib/api/CourtAPI"; 
+import courtIdsData from "../../../../../../public/courtIds.json"; // Импортируем courtIds.json
 
-export default function RegionalCourtPage() {
-  const { setCourtName, setSurveyData, setIsLoading } = useSurveyData();
-  const [currentUser, setCurrentUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [regionName, setRegionName] = useState("");
+const RegionalCourtPage = () => {
   const params = useParams();
-  const region = params?.region as string;
+  const region = params?.region as string; // Это slug, например, "Naryn"
   const router = useRouter();
-  
+
+  const [courtName, setCourtName] = useState<string>("");
+  const [userRegion, setUserRegion] = useState<string | null>(null);
+  const [userCourt, setUserCourt] = useState<string | null>(null); // Для хранения userCourt из getCurrentUser
+  const [selectedCourtId, setSelectedCourtId] = useState<string | null>(null); // Для хранения courtId из JSON
+
+  // Функция для получения названия суда по slug (обратное преобразование из Header)
+  const getCourtNameFromSlug = (slug: string): string => {
+    const regionMap: { [key: string]: string } = {
+      Talas: "Таласский областной суд",
+      "Issyk-Kyl": "Иссык-кульский областной суд",
+      Naryn: "Нарынский областной суд",
+      Batken: "Баткенский областной суд",
+      Chyi: "Чуйский областной суд",
+      Osh: "Ошский областной суд",
+      "Djalal-Abad": "Жалал-Абадский областной суд",
+      Bishkek: "Бишкекский городской суд",
+    };
+    return regionMap[slug] || "";
+  };
+
+  // Получаем данные пользователя и сравниваем суды
   useEffect(() => {
-    const fetchCurrentUser = async () => {
+    const fetchUserData = async () => {
       try {
-        const response = await fetch("https://opros.sot.kg/api/v1/current_user/", {
-          headers: {
-            Authorization: `Bearer ${getCookie("access_token")}`,
-          },
-        });
-        const data = await response.json();
-        setCurrentUser(data);
-        
-        if (data.role === "Председатель 2 инстанции") {
-          const courtName = data.court;
-          const regionSlug = getRegionSlug(courtName);
-          
-          // Проверяем, соответствует ли текущий регион пользователя запрошенному URL
-          if (regionSlug !== region) {
-            router.push(`/Home/${regionSlug}/ratings`);
-            return;
+        const userData = await getCurrentUser();
+        const userCourtFromApi = userData.court || null;
+        setUserCourt(userCourtFromApi);
+
+        // Получаем название суда из slug (region из params)
+        const courtFromSlug = getCourtNameFromSlug(region);
+
+        // Устанавливаем courtName для отображения
+        setCourtName(courtFromSlug);
+
+        // Сравниваем userCourt из getCurrentUser с судом из slug
+        if (userCourtFromApi === courtFromSlug && userData.role === "Председатель 2 инстанции") {
+          const court = courtIdsData.courts.find(
+            (c: { court: string }) => c.court === courtFromSlug
+          );
+          if (court) {
+            setSelectedCourtId(court.court_id.toString()); // Устанавливаем courtId из JSON
           }
-          
-          setCourtName(courtName);
-          await fetchResults(getCourtId(courtName));
-        } else {
-          // Перенаправляем, если у пользователя нет прав
-          router.push('/Home/summary/ratings');
         }
       } catch (error) {
         console.error("Ошибка при получении данных пользователя:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
-    fetchCurrentUser();
-  }, [region, router, setCourtName]);
+    fetchUserData();
+  }, [region]);
 
-  const fetchResults = async (courtId: number) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(
-        `https://opros.sot.kg/api/v1/results/${courtId}/?year=2025`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${getCookie("access_token")}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Ошибка получения результатов");
-      }
-
-      const results = await response.json();
-      setSurveyData(results);
-    } catch (error) {
-      console.error("Ошибка при получении результатов:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleBackClick = () => {
+    router.back();
   };
-
-  const getRegionSlug = (courtName: string): string => {
-    const regionMap: { [key: string]: string } = {
-      "Таласский областной суд": "Talas",
-      "Иссык-кульский областной суд": "Issyk-Kyl",
-      "Нарынский областной суд": "Naryn",
-      "Баткенский областной суд": "Batken",
-      "Чуйский областной суд": "Chyi",
-      "Ошский областной суд": "Osh",
-      "Жалал-Абадский областной суд": "Djalal-Abad",
-      "Бишкекский городской суд": "Bishkek",
-    };
-
-    return regionMap[courtName] || "court-id";
-  };
-
-  const getCourtId = (courtName: string): number => {
-    const courtIdMap: { [key: string]: number } = {
-      "Таласский областной суд": 46,
-      "Иссык-кульский областной суд": 13,
-      "Нарынский областной суд": 24,
-      "Баткенский областной суд": 6,
-      "Чуйский областной суд": 50,
-      "Ошский областной суд": 35,
-      "Жалал-Абадский областной суд": 19,
-      "Бишкекский городской суд": 11,
-    };
-
-    return courtIdMap[courtName] || 0;
-  };
-
-  const getRegionFromCourt = (courtName: string): string => {
-    const regionMap: { [key: string]: string } = {
-      "Таласский областной суд": "Таласская область",
-      "Иссык-кульский областной суд": "Иссык-Кульская область",
-      "Нарынский областной суд": "Нарынская область",
-      "Баткенский областной суд": "Баткенская область",
-      "Чуйский областной суд": "Чуйская область",
-      "Ошский областной суд": "Ошская область",
-      "Жалал-Абадский областной суд": "Жалал-Абадская область",
-      "Бишкекский городской суд": "город Бишкек",
-    };
-    return regionMap[courtName] || "";
-  };
-
-  if (loading) {
-    return (
-      <div className="max-w-[1250px] mx-auto px-4 py-4">
-        <SkeletonLoader />
-      </div>
-    );
-  }
 
   return (
-    <div className="max-w-[1250px] mx-auto px-4 py-6">
-      <div className="mb-4">
-        <Breadcrumb 
-          courtName={currentUser?.court}
-          showHome={true}
-          headerKey="BreadCrumb_RegionName"
-          onRegionBackClick={() => router.push('/Home/first_instance/ratings')}
-        />
-      </div>
+    <div className="max-w-[1250px] mx-auto px-4 py-4">
+      <Breadcrumb
+        regionName={userRegion || "Оценки по области"}
+        courtName={courtName}
+        onCourtBackClick={handleBackClick}
+        showHome={true}
+      />
+      <h2 className="text-3xl font-bold mb-4 mt-4">{courtName}</h2>
       <Dates />
-      <Evaluations />
+      {selectedCourtId && <CourtApi courtId={selectedCourtId} />}
+      <Evaluations courtNameId={region} />
     </div>
   );
-} 
+};
+
+export default RegionalCourtPage;

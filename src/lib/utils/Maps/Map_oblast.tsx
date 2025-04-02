@@ -69,6 +69,9 @@ export default function Map_oblast({ oblastData }: MapProps) {
   const [showLegend, setShowLegend] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const { language } = useSurveyData();
+  
+  // Добавляем новый ref для хранения начального состояния карты
+  const initialTransformRef = useRef(d3.zoomIdentity);
 
   // Создаём объект zoom для управления масштабом
   const zoom = useMemo(
@@ -78,16 +81,19 @@ export default function Map_oblast({ oblastData }: MapProps) {
         .scaleExtent([1, 8]) // Ограничиваем масштаб от 1x до 8x
         .touchable(true) // Включаем поддержку сенсорных событий
         .wheelDelta((event) => -event.deltaY * 0.001)
-        .on("start", () => {
-          // Сбрасываем флаг перемещения при начале зума
+        .filter(event => {
+          // Разрешаем только колесико мыши и события клавиатуры
+          // Блокируем перетаскивание мышью при масштабе 1 (исходное состояние)
+          if (!svgRef.current) return false; // Проверка на null
+          const transform = d3.zoomTransform(svgRef.current);
+          return event.type === 'wheel' || 
+                 event.type === 'dblclick' || 
+                 (event.type === 'mousedown' && transform.k > 1);
         })
         .on("zoom", (event) => {
           d3.select(svgRef.current)
             .select(".regions")
             .attr("transform", event.transform);
-        })
-        .on("end", () => {
-          // Ничего не делаем, просто завершаем событие
         }),
     []
   );
@@ -398,6 +404,8 @@ export default function Map_oblast({ oblastData }: MapProps) {
       [width, height], // Максимальные координаты (нижний правый угол)
     ]);
 
+    // Сохраняем начальное состояние карты
+    initialTransformRef.current = d3.zoomIdentity;
 
     return () => {
       svg.call(zoom.transform, d3.zoomIdentity);
@@ -519,8 +527,13 @@ export default function Map_oblast({ oblastData }: MapProps) {
         </button>
         <button
           onClick={() => {
-            svgRef.current &&
-              d3.select(svgRef.current).call(zoom.transform, d3.zoomIdentity);
+            if (svgRef.current) {
+              // Используем сохраненную начальную трансформацию
+              d3.select(svgRef.current)
+                .transition()
+                .duration(300)
+                .call(zoom.transform, initialTransformRef.current);
+            }
           }}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600"
         >
