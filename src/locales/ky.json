@@ -151,5 +151,9 @@
 
   "Loading": "Жүктөө...",
   "No_Data": "Маалымат жок",
-  "RemarksLogic_ViewMessageTitle": "Жарандан билдирүү"
+  "RemarksLogic_ViewMessageTitle": "Жарандан билдирүү", 
+
+  "LoginForm_EmptyFields": "Колдонуучу аты жана сырсөздү киргизиңиз",
+  "LoginForm_Error": "Колдонуучу аты жана сырсөздү киргизиңиз",
+  "LoginForm_NoToken": "Колдонуучу аты жана сырсөздү киргизиңиз"
 }

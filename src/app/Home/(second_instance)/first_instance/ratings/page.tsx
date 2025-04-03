@@ -1,15 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getAssessmentData, getCookie } from "@/lib/api/login";
-import Dates from "@/components/Dates/Dates";
-import Instance2 from "@/components/roles/2 instance";
+import { getAssessmentData, getCurrentUser } from "@/lib/api/login";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
-import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
-import RegionMap, { RegionData } from "@/components/Maps/RegionMap";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import SkeletonLoader from "@/lib/utils/SkeletonLoader/SkeletonLoader";
+import RegionMap, { RegionData } from "@/components/Maps/RegionMap";
 
 interface Assessment {
   aspect: string;
@@ -29,24 +26,21 @@ interface CourtData {
 
 const FirstInstance = () => {
   const [assessmentData, setAssessmentData] = useState<CourtData[]>([]);
-  const {courtName, setCourtName, setSurveyData, setIsLoading, selectedCourt, setSelectedCourt } = useSurveyData();
+  const { setCourtName } = useSurveyData();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userRegion, setUserRegion] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const {language, } = useSurveyData();
+  const { language } = useSurveyData();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
+  // Получаем данные об оценках судов
   useEffect(() => {
     const fetchAssessmentData = async () => {
       try {
-        const token = getCookie("access_token");
-        if (!token) {
-          throw new Error("Token is null");
-        }
         const data = await getAssessmentData();
         setAssessmentData(data.courts);
       } catch (error) {
@@ -59,17 +53,13 @@ const FirstInstance = () => {
     fetchAssessmentData();
   }, []);
 
+  // Получаем данные текущего пользователя
   useEffect(() => {
     const fetchCurrentUser = async () => {
       try {
-        const response = await fetch("https://opros.sot.kg/api/v1/current_user/", {
-          headers: {
-            Authorization: `Bearer ${getCookie("access_token")}`,
-          },
-        });
-        const data = await response.json();
+        const data = await getCurrentUser();
         setCurrentUser(data);
-        
+
         if (data.role === "Председатель 2 инстанции") {
           const regionName = getRegionFromCourt(data.court);
           setUserRegion(regionName);
@@ -82,6 +72,7 @@ const FirstInstance = () => {
     fetchCurrentUser();
   }, []);
 
+  // Функция для сортировки таблицы
   const handleSort = (field: string) => {
     if (sortField === field) {
       if (sortDirection === "asc") {
@@ -95,6 +86,7 @@ const FirstInstance = () => {
     }
   };
 
+  // Показывает иконку сортировки (стрелка вверх, вниз или нейтральная)
   const getSortIcon = (field: string) => {
     if (sortField !== field) return <FaSort className="ml-1 inline-block" />;
     if (sortDirection === "asc")
@@ -102,6 +94,7 @@ const FirstInstance = () => {
     return <FaSortDown className="ml-1 inline-block text-blue-600" />;
   };
 
+  // Преобразует название суда в название региона
   const getRegionFromCourt = (userCourt: string): string => {
     const regionMap: { [key: string]: string } = {
       "Таласский областной суд": "Таласская область",
@@ -116,39 +109,42 @@ const FirstInstance = () => {
     return regionMap[userCourt] || "";
   };
 
-  const getRegionSlug = (userRegion: string): string => {
+  // Преобразует название суда в slug региона
+  const getRegionSlug = (court: string): string => {
     const regionMap: { [key: string]: string } = {
-      "Таласская область": "Talas",
-      "Иссык-Кульская область": "Issyk-Kyl",
-      "Нарынская область": "Naryn",
-      "Баткенская область": "Batken",
-      "Чуйская область": "Chyi",
-      "Ошская область": "Osh",
-      "Жалал-Абадская область": "Djalal-Abad",
-      "Город Бишкек": "Bishkek",
+      "Таласский областной суд": "Talas",
+      "Иссык-кульский областной суд": "Issyk-Kyl",
+      "Нарынский областной суд": "Naryn",
+      "Баткенский областной суд": "Batken",
+      "Чуйский областной суд": "Chyi",
+      "Ошский областной суд": "Osh",
+      "Жалал-Абадский областной суд": "Djalal-Abad",
+      "Бишкекский городской суд": "Bishkek",
     };
-    
-    return regionMap[userRegion] || "";
+    return regionMap[court] || "";
   };
 
+  // Обновляет строку поиска
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
+  // Закрывает строку поиска при нажатии Escape
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Escape") {
       setIsSearchOpen(false);
     }
   };
 
-  const filteredCourts = Array.isArray(assessmentData) 
-    ? assessmentData.filter((court) => {
-        return searchQuery === "" || 
-          court.court.toLowerCase().includes(searchQuery.toLowerCase());
-      })
+  // Фильтрует суды по строке поиска
+  const filteredCourts = Array.isArray(assessmentData)
+    ? assessmentData.filter((court) =>
+        searchQuery === "" ||
+        court.court.toLowerCase().includes(searchQuery.toLowerCase())
+      )
     : [];
 
-  // Сортировка
+  // Сортирует суды по выбранному полю
   const sortedCourts = [...filteredCourts].sort((a, b) => {
     if (!sortField) return 0;
 
@@ -158,8 +154,8 @@ const FirstInstance = () => {
       valueA = a.overall_assessment;
       valueB = b.overall_assessment;
     } else {
-      const aspectA = a.assessment.find(assess => assess.aspect === sortField);
-      const aspectB = b.assessment.find(assess => assess.aspect === sortField);
+      const aspectA = a.assessment.find((assess) => assess.aspect === sortField);
+      const aspectB = b.assessment.find((assess) => assess.aspect === sortField);
       valueA = aspectA ? aspectA.court_avg : 0;
       valueB = aspectB ? aspectB.court_avg : 0;
     }
@@ -171,6 +167,7 @@ const FirstInstance = () => {
     }
   });
 
+  // Определяет цвет фона для рейтинга
   const getRatingColorClass = (rating: number) => {
     if (rating === 0) return "bg-gray-100";
     if (rating < 2) return "bg-red-100";
@@ -181,40 +178,37 @@ const FirstInstance = () => {
     return "bg-green-100";
   };
 
+  // Преобразует данные судов для карты
   const transformCourtData = (courts: CourtData[]): RegionData[] => {
     const transformedData: RegionData[] = [];
-    
     courts.forEach((court) => {
       if (court.court_id) {
         transformedData.push({
           id: court.court_id,
           name: court.court,
           ratings: [
-            court.assessment.find(a => a.aspect === "Судья")?.court_avg || 0,
-            court.assessment.find(a => a.aspect === "Сотрудники")?.court_avg || 0,
-            court.assessment.find(a => a.aspect === "Процесс")?.court_avg || 0,
-            court.assessment.find(a => a.aspect === "Канцелярия")?.court_avg || 0,
-            court.assessment.find(a => a.aspect === "Здание")?.court_avg || 0
+            court.assessment.find((a) => a.aspect === "Судья")?.court_avg || 0,
+            court.assessment.find((a) => a.aspect === "Сотрудники")?.court_avg || 0,
+            court.assessment.find((a) => a.aspect === "Процесс")?.court_avg || 0,
+            court.assessment.find((a) => a.aspect === "Канцелярия")?.court_avg || 0,
+            court.assessment.find((a) => a.aspect === "Здание")?.court_avg || 0,
           ],
           overall: court.overall_assessment,
-          totalAssessments: Number(court.assessment_count) || 0
+          totalAssessments: Number(court.assessment_count) || 0,
         });
       }
     });
-    
     return transformedData;
   };
 
-  const handleCourtClick = (court: any) => {
-    const courtId = court.court_id;
+  // Обрабатывает клик по суду в таблице или на карте
+  const handleCourtClick = (court: CourtData) => {
+    const courtId = court.court_id.toString();
     const courtName = court.court;
-    
-    // Сохраняем данные в localStorage
-    localStorage.setItem("selectedCourtId", courtId.toString());
-    localStorage.setItem("selectedCourtName", courtName);
-    
-    // Перенаправляем на страницу суда напрямую с ID
-    router.push(`/Home/first_instance/court/${courtId}`);
+    const regionSlug = getRegionSlug(courtName); // Получаем slug региона
+
+    setCourtName(courtName);
+    router.push(`/Home/first_instance/court/${regionSlug}/${courtId}`); // Перенаправляем с region и courtId
   };
 
   if (loading) {
@@ -232,31 +226,19 @@ const FirstInstance = () => {
           <div className="flex flex-col">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold leading-none py-2">{userRegion}</h2>
-              
-              {currentUser?.role === "Председатель 2 инстанции" && (
-                <button
-                  onClick={() => {
-                    const regionSlug = getRegionSlug(userRegion || "");
-                    router.push(`/Home/first_instance/feedbacks/${regionSlug}`);
-                  }}
-                  className="px-5 py-2.5 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 shadow-sm transition-all duration-200 leading-none"
-                >
-                  {getTranslation("RemarksLogic_Remarks", language)}
-                </button>
-              )}
             </div>
-            
-            <div className="bg-white rounded-xl shadow-sm mb-6  overflow-hidden border border-gray-300">
+
+            <div className="bg-white rounded-xl shadow-sm mb-6 overflow-hidden border border-gray-300">
               <RegionMap
                 regionName={userRegion || ""}
                 selectedRegion={transformCourtData(filteredCourts)}
-                onCourtClick={(courtId, courtName) => {
-                  const court = filteredCourts.find(c => c.court_id === courtId);
+                onCourtClick={(courtId) => {
+                  const court = filteredCourts.find((c) => c.court_id === courtId);
                   if (court) handleCourtClick(court);
                 }}
               />
             </div>
-            
+
             <div className="bg-white rounded-xl shadow-sm border border-gray-100">
               <div className="overflow-x-auto">
                 <table className="min-w-full border-collapse">
@@ -265,11 +247,11 @@ const FirstInstance = () => {
                       <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                         №
                       </th>
-                      <th
-                        className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 w-56 min-w-[14rem]"
-                      >
+                      <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 w-56 min-w-[14rem]">
                         <div className="flex items-center justify-between">
-                          <span className="truncate mr-2">{getTranslation("Regional_Courts_Table_NameRegion", language)}</span>
+                          <span className="truncate mr-2">
+                            {getTranslation("Regional_Courts_Table_NameRegion", language)}
+                          </span>
                           <div className="relative">
                             <div
                               className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${
@@ -317,70 +299,78 @@ const FirstInstance = () => {
                       <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                         Инстанция
                       </th>
-                      <th 
+                      <th
                         className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                         onClick={() => handleSort("overall")}
                       >
                         <div className="flex items-center justify-between px-2">
-                        {getTranslation("Regional_Courts_Table_Overall", language)}
-                        {getSortIcon("overall")}
+                          {getTranslation("Regional_Courts_Table_Overall", language)}
+                          {getSortIcon("overall")}
                         </div>
                       </th>
-                      <th 
+                      <th
                         className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                         onClick={() => handleSort("judge")}
                       >
                         <div className="flex items-center justify-between px-2">
-                        {getTranslation("Regional_Courts_Table_Judge", language)}
+                          {getTranslation("Regional_Courts_Table_Judge", language)}
                           {getSortIcon("judge")}
                         </div>
                       </th>
-                      <th 
+                      <th
                         className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                         onClick={() => handleSort("process")}
                       >
                         <div className="flex items-center justify-between px-2">
-                        {getTranslation("Regional_Courts_Table_Procces", language)}
+                          {getTranslation("Regional_Courts_Table_Procces", language)}
                           {getSortIcon("process")}
                         </div>
                       </th>
-                      <th 
+                      <th
                         className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                         onClick={() => handleSort("staff")}
                       >
                         <div className="flex items-center justify-between px-2">
-                        {getTranslation("Regional_Courts_Table_Staff", language)}
+                          {getTranslation("Regional_Courts_Table_Staff", language)}
                           {getSortIcon("staff")}
                         </div>
                       </th>
-                      <th 
+                      <th
                         className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                         onClick={() => handleSort("office")}
                       >
                         <div className="flex items-center justify-between px-2">
-                        {getTranslation("Regional_Courts_Table_Building", language)}
+                          {getTranslation("Regional_Courts_Table_Building", language)}
                           {getSortIcon("office")}
                         </div>
                       </th>
                       <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50">
-                      {getTranslation("Regional_Courts_Table_NumberResponses", language)}
+                        {getTranslation("Regional_Courts_Table_NumberResponses", language)}
                       </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {sortedCourts.map((court, index) => {
-                      const judgeRating = court.assessment.find(item => item.aspect === "Судья")?.court_avg || 0;
-                      const processRating = court.assessment.find(item => item.aspect === "Процесс")?.court_avg || 0;
-                      const staffRating = court.assessment.find(item => item.aspect === "Сотрудники")?.court_avg || 0;
-                      const officeRating = court.assessment.find(item => item.aspect === "Канцелярия")?.court_avg || 0;
-                      const buildingRating = court.assessment.find(item => item.aspect === "Здание")?.court_avg || 0;
-                      
+                      const judgeRating =
+                        court.assessment.find((item) => item.aspect === "Судья")?.court_avg || 0;
+                      const processRating =
+                        court.assessment.find((item) => item.aspect === "Процесс")?.court_avg || 0;
+                      const staffRating =
+                        court.assessment.find((item) => item.aspect === "Сотрудники")?.court_avg || 0;
+                      const officeRating =
+                        court.assessment.find((item) => item.aspect === "Канцелярия")?.court_avg || 0;
+                      const buildingRating =
+                        court.assessment.find((item) => item.aspect === "Здание")?.court_avg || 0;
+
                       return (
-                        <tr key={court.court_id} className="hover:bg-gray-50 transition-colors">
+                        <tr
+                          key={court.court_id}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
                           <td className="px-3 py-2 whitespace-nowrap text-sm text-center text-gray-500 border-r border-gray-200">
                             {index + 1}
                           </td>
-                          <td 
+                          <td
                             className="px-3 py-2.5 text-left text-xs text-gray-600 cursor-pointer hover:text-blue-500"
                             onClick={() => handleCourtClick(court)}
                           >
@@ -389,19 +379,39 @@ const FirstInstance = () => {
                           <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 border-r border-gray-200">
                             {court.instantiation}
                           </td>
-                          <td className={`px-3 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200 ${getRatingColorClass(court.overall_assessment)}`}>
+                          <td
+                            className={`px-3 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200 ${getRatingColorClass(
+                              court.overall_assessment
+                            )}`}
+                          >
                             {court.overall_assessment.toFixed(1)}
                           </td>
-                          <td className={`px-3 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200 ${getRatingColorClass(judgeRating)}`}>
+                          <td
+                            className={`px-3 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200 ${getRatingColorClass(
+                              judgeRating
+                            )}`}
+                          >
                             {judgeRating.toFixed(1)}
                           </td>
-                          <td className={`px-3 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200 ${getRatingColorClass(processRating)}`}>
+                          <td
+                            className={`px-3 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200 ${getRatingColorClass(
+                              processRating
+                            )}`}
+                          >
                             {processRating.toFixed(1)}
                           </td>
-                          <td className={`px-3 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200 ${getRatingColorClass(staffRating)}`}>
+                          <td
+                            className={`px-3 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200 ${getRatingColorClass(
+                              staffRating
+                            )}`}
+                          >
                             {staffRating.toFixed(1)}
                           </td>
-                          <td className={`px-3 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200 ${getRatingColorClass(buildingRating)}`}>
+                          <td
+                            className={`px-3 py-2 whitespace-nowrap text-sm text-center text-gray-900 border-r border-gray-200 ${getRatingColorClass(
+                              buildingRating
+                            )}`}
+                          >
                             {buildingRating.toFixed(1)}
                           </td>
                           <td className="px-3 py-2 whitespace-nowrap text-sm text-center text-gray-500">
@@ -421,4 +431,4 @@ const FirstInstance = () => {
   );
 };
 
-export default FirstInstance; 
+export default FirstInstance;

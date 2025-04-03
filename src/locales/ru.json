@@ -162,5 +162,9 @@
 
     "Loading": "Загрузка...",
     "No_Data": "Данные отсутствуют",
-    "RemarksLogic_ViewMessageTitle":"Сообщение от гражданина"
+    "RemarksLogic_ViewMessageTitle":"Сообщение от гражданина",
+
+    "LoginForm_EmptyFields": "Имя пользователя и пароль не могут быть пустыми",
+    "LoginForm_Error": "Имя пользователя и пароль не могут быть пустыми",
+    "LoginForm_NoToken": "Имя пользователя и пароль не могут быть пустыми"
 }

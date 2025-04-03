@@ -6,20 +6,21 @@ import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
 import { getCurrentUser } from "@/lib/api/login";
-import CourtApi from "@/lib/api/CourtAPI"; 
-import courtIdsData from "../../../../../../public/courtIds.json"; // Импортируем courtIds.json
+import CourtApi from "@/lib/api/CourtAPI";
+import courtIdsData from "../../../../../../public/courtIds.json";
 
 const RegionalCourtPage = () => {
   const params = useParams();
-  const region = params?.region as string; // Это slug, например, "Naryn"
+  const region = params?.region as string; // Это slug региона, например, "Djalal-Abad"
+  const courtId = params?.courtId as string; // Это ID суда, например, "19"
   const router = useRouter();
 
   const [courtName, setCourtName] = useState<string>("");
   const [userRegion, setUserRegion] = useState<string | null>(null);
-  const [userCourt, setUserCourt] = useState<string | null>(null); // Для хранения userCourt из getCurrentUser
-  const [selectedCourtId, setSelectedCourtId] = useState<string | null>(null); // Для хранения courtId из JSON
+  const [userCourt, setUserCourt] = useState<string | null>(null);
+  const [selectedCourtId, setSelectedCourtId] = useState<string | null>(null);
 
-  // Функция для получения названия суда по slug (обратное преобразование из Header)
+  // Функция для получения названия суда по slug региона
   const getCourtNameFromSlug = (slug: string): string => {
     const regionMap: { [key: string]: string } = {
       Talas: "Таласский областной суд",
@@ -34,6 +35,21 @@ const RegionalCourtPage = () => {
     return regionMap[slug] || "";
   };
 
+  // Функция для получения названия региона по названию суда
+  const getRegionFromCourt = (court: string): string => {
+    const regionMap: { [key: string]: string } = {
+      "Таласский областной суд": "Таласская область",
+      "Иссык-кульский областной суд": "Иссык-Кульская область",
+      "Нарынский областной суд": "Нарынская область",
+      "Баткенский областной суд": "Баткенская область",
+      "Чуйский областной суд": "Чуйская область",
+      "Ошский областной суд": "Ошская область",
+      "Жалал-Абадский областной суд": "Жалал-Абадская область",
+      "Бишкекский городской суд": "Город Бишкек",
+    };
+    return regionMap[court] || "Оценки по области";
+  };
+
   // Получаем данные пользователя и сравниваем суды
   useEffect(() => {
     const fetchUserData = async () => {
@@ -42,20 +58,31 @@ const RegionalCourtPage = () => {
         const userCourtFromApi = userData.court || null;
         setUserCourt(userCourtFromApi);
 
-        // Получаем название суда из slug (region из params)
+        // Получаем название суда из slug региона
         const courtFromSlug = getCourtNameFromSlug(region);
 
-        // Устанавливаем courtName для отображения
-        setCourtName(courtFromSlug);
+        // Находим суд по courtId в courtIds.json
+        const courtFromJson = courtIdsData.courts.find(
+          (c: { court_id: number }) => c.court_id.toString() === courtId
+        );
 
-        // Сравниваем userCourt из getCurrentUser с судом из slug
-        if (userCourtFromApi === courtFromSlug && userData.role === "Председатель 2 инстанции") {
-          const court = courtIdsData.courts.find(
-            (c: { court: string }) => c.court === courtFromSlug
-          );
-          if (court) {
-            setSelectedCourtId(court.court_id.toString()); // Устанавливаем courtId из JSON
+        if (courtFromJson) {
+          const courtFromId = courtFromJson.court; // Название суда из JSON
+
+          // Проверяем, совпадает ли суд из slug с судом из courtId
+          if (courtFromSlug === courtFromId) {
+            setCourtName(courtFromId); // Устанавливаем название суда
+            setUserRegion(getRegionFromCourt(courtFromId)); // Устанавливаем регион
+
+            // Сравниваем userCourt из getCurrentUser с судом
+            if (userCourtFromApi === courtFromId && userData.role === "Председатель 2 инстанции") {
+              setSelectedCourtId(courtId); // Устанавливаем courtId для CourtApi
+            }
+          } else {
+            console.error("Суд из region не совпадает с судом из courtId:", { region, courtId });
           }
+        } else {
+          console.error("Суд с courtId не найден в courtIds.json:", courtId);
         }
       } catch (error) {
         console.error("Ошибка при получении данных пользователя:", error);
@@ -63,7 +90,7 @@ const RegionalCourtPage = () => {
     };
 
     fetchUserData();
-  }, [region]);
+  }, [region, courtId]);
 
   const handleBackClick = () => {
     router.back();
@@ -80,7 +107,7 @@ const RegionalCourtPage = () => {
       <h2 className="text-3xl font-bold mb-4 mt-4">{courtName}</h2>
       <Dates />
       {selectedCourtId && <CourtApi courtId={selectedCourtId} />}
-      <Evaluations courtNameId={region} />
+      <Evaluations courtNameId={courtId} />
     </div>
   );
 };
