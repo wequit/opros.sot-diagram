@@ -1,7 +1,7 @@
 import React from "react";
 import { Bar } from "react-chartjs-2";
 import { ChartOptions, ChartData } from "chart.js";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface TrafficSourceChartProps {
   trafficSourceData: ChartData<"bar">;
@@ -12,7 +12,7 @@ export default function TrafficSourceChart({
   trafficSourceData,
   windowWidth,
 }: TrafficSourceChartProps) {
-  const { language } = useSurveyData();
+  const { getTranslation } = useLanguage();
 
   const getMaxValue = (data: (number | [number, number] | null)[]): number => {
     const numericData = data
@@ -64,7 +64,7 @@ export default function TrafficSourceChart({
     <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
       <div className="px-6 py-4 border-b">
         <h2 className="text-xl font-medium DiagrammFiveName">
-          {getTranslation("DiagrammFive", language)}
+          {getTranslation("DiagrammFive")}
         </h2>
       </div>
       <div className="p-6">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useSurveyData } from "@/context/SurveyContext";
 import {
   getCircleRegionData,
   getRadarRegionData,
@@ -9,10 +8,13 @@ import {
   getProgressRegionData,
   getColumnRegionData,
 } from "@/lib/api/charts/charts";
+import { useChartData } from "@/context/ChartDataContext";
+import { useDateParams } from "@/context/DateParamsContext";
 
 export default function SummaryAPI2() {
   const [error, setError] = useState<string | null>(null);
-  const { setSurveyData, setIsLoading, dateParams, setSurveyResponsesCount } = useSurveyData();
+  const { setSurveyData, setIsLoading, setSurveyResponsesCount } = useChartData();
+  const {  dateParams } = useDateParams();
 
   const fetchData = useCallback(async () => {
     try {

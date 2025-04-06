@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import rayonData from "../../../../public/gadm41_KGZ_2.json";
 import { FiMinus, FiPlus, FiRefreshCw, FiInfo, FiX } from "react-icons/fi";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 const rayonToCourtMapping: { [key: string]: string } = {
   Biskek: "Бишкекский межрайонный суд",
@@ -164,7 +164,7 @@ export default function Map_rayon({
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   const [showLegend, setShowLegend] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const { language } = useSurveyData();
+  const { language, getTranslation } = useLanguage();
 
   const getRayonRating = (rayonName: string): number => {
     if (!courts || !Array.isArray(courts)) {

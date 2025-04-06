@@ -2,7 +2,7 @@ import React from 'react';
 import { Radar } from 'react-chartjs-2';
 import "@/types/chartSetup";
 import { ChartOptions } from 'chart.js';
-import { getTranslation, useSurveyData } from '@/context/SurveyContext';
+import {  useLanguage } from '@/context/LanguageContext';
 
 interface RadarChartProps {
   radarData: any;
@@ -11,7 +11,7 @@ interface RadarChartProps {
 }
 
 export default function RadarChart({ radarData, windowWidth, totalResponses }: RadarChartProps) {
-  const { language } = useSurveyData();
+  const { language, getTranslation } = useLanguage();
 
   const radarOptions: ChartOptions<'radar'> = {
     plugins: {

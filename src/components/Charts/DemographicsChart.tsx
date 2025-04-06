@@ -2,7 +2,7 @@ import React from 'react';
 import { Pie, Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, ChartOptions, ChartData } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
-import { getTranslation, useSurveyData } from '@/context/SurveyContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface DemographicsChartProps {
   genderData: ChartData<'pie'>;
@@ -21,7 +21,7 @@ export default function DemographicsChart({
   setDemographicsView,
   windowWidth,
 }: DemographicsChartProps) {
-  const { language } = useSurveyData();
+  const { language, getTranslation } = useLanguage();
 
   const pieOptions: ChartOptions<'pie'> = {
     plugins: {

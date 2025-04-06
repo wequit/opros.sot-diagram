@@ -1,7 +1,7 @@
 import React from 'react';
 import { Bar } from 'react-chartjs-2';
 import { ChartOptions, ChartData } from 'chart.js';
-import { getTranslation, useSurveyData } from '@/context/SurveyContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface DisrespectChartProps {
   disrespectData: ChartData<'bar'>;
@@ -14,7 +14,7 @@ export default function DisrespectChart({
   disrespectData,
   windowWidth,
 }: DisrespectChartProps) {
-  const { language } = useSurveyData();
+  const { language, getTranslation } = useLanguage();
 
   const getMaxValue = (data: (number | [number, number] | null)[]): number => {
     const numericData = data

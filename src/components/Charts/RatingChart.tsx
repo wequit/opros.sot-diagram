@@ -1,6 +1,6 @@
+import { useLanguage } from '@/context/LanguageContext';
 import React from 'react';
 import { FaStar } from 'react-icons/fa';
-import { getTranslation, useSurveyData } from '@/context/SurveyContext';
 
 interface RatingChartProps {
   ratings: { [key: string]: number }; 
@@ -39,7 +39,7 @@ export default function RatingChart({
   translationKey,
   className = '',
 }: RatingChartProps) {
-  const { language } = useSurveyData();
+  const { language, getTranslation } = useLanguage();
 
   return (
     <div

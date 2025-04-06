@@ -1,10 +1,10 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { ChartOptions, ChartData } from 'chart.js';
-import { getTranslation, useSurveyData } from '@/context/SurveyContext';
 
 // Глобально отключаем datalabels для null значений
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface CategoryJudgeChartProps {
   caseTypesData: ChartData<'pie', (number | null)[]>;
@@ -15,7 +15,7 @@ export default function CategoryJudgeChart({
   caseTypesData,
   windowWidth,
 }: CategoryJudgeChartProps) {
-  const { language } = useSurveyData();
+  const { language, getTranslation} = useLanguage();
 
   const caseTypesOptions: ChartOptions<'pie'> = {
     plugins: {

@@ -5,7 +5,7 @@ import { getCookie } from "@/lib/api/login";
 import { ArrowLeft, FileSearch, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 
 export default function RemarksPage() {
@@ -24,7 +24,7 @@ export default function RemarksPage() {
   const itemsPerPage = 9;
   const router = useRouter();
   const pathname = usePathname();
-  const {language, } = useSurveyData();
+  const {language, getTranslation} = useLanguage();
 
   // Новая функция для начала изменения размера столбца
   const startResize = (e: React.MouseEvent<HTMLDivElement>) => {

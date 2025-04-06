@@ -7,7 +7,8 @@ import "@/styles/responsive/responsive.css";
 import Header from "@/components/layout/Header";
 import { Inter } from "next/font/google";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { SurveyProvider, useSurveyData } from "@/context/SurveyContext";
+import { SurveyProvider } from "@/context/SurveyProvider"; // Импортируем объединённый провайдер
+import { useLanguage } from "@/context/LanguageContext"; // Импортируем хук для языка
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import LoginPage from "./login/page";
@@ -18,7 +19,6 @@ const inter = Inter({
   display: "swap",
   variable: "--font-inter",
 });
-
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 function AuthContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
-  const { language } = isAuthenticated ? useSurveyData() : { language: "ru" };
+  const { language } = useLanguage(); 
   const pathname = usePathname();
   const router = useRouter();
 
@@ -52,7 +52,6 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     document.documentElement.lang = language;
   }, [language]);
-  
 
   // Страница логина только если не авторизован и путь явно /results/login
   if (!isAuthenticated && pathname === "/login") {

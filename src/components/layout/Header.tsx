@@ -8,20 +8,20 @@ import { CgProfile } from "react-icons/cg";
 import { HiMenu } from "react-icons/hi";
 import Sidebar from "./Sidebar";
 import { GrLanguage } from "react-icons/gr";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Link from "next/link";
 import { LogoutButton } from "@/components/Logout";
 import logo from "../../../public/logo.png";
 import { FaBuilding, FaCity, FaHome, FaMap, FaPrint } from "react-icons/fa";
 import { BiDownload } from "react-icons/bi";
 import { getCurrentUser } from "@/lib/api/login"; 
+import { useLanguage } from "@/context/LanguageContext";
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const pathname = usePathname();
   const [isSticky, setIsSticky] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { courtName, language, toggleLanguage } = useSurveyData();
+  const { language, toggleLanguage, getTranslation } = useLanguage();
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0
   );

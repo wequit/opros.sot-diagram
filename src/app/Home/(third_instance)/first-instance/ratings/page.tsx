@@ -1,6 +1,6 @@
 "use client";
 
-import Map from "../../../../lib/utils/Maps/Map_rayon";
+import Map from "../../../../../lib/utils/Maps/Map_rayon";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   FaSort,
@@ -10,10 +10,10 @@ import {
   FaArrowUp,
 } from "react-icons/fa";
 import { getRayonAssessmentData, getCookie } from "@/lib/api/login";
-import { useSurveyData } from "@/context/SurveyContext";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import debounce from "lodash/debounce";
+import { useCourt } from "@/context/CourtContext";
 
 interface Assessment {
   aspect: string;
@@ -127,7 +127,7 @@ export default function Courts() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<SortField>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const { setCourtName, setCourtNameId } = useSurveyData();
+  const { setCourtName, setCourtNameId } = useCourt();
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const router = useRouter();

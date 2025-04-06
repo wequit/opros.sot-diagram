@@ -2,11 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import { getAssessmentData, getCurrentUser } from "@/lib/api/login";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import SkeletonLoader from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 import RegionMap, { RegionData } from "@/components/Maps/RegionMap";
+import { useLanguage } from "@/context/LanguageContext";
+import { useCourt } from "@/context/CourtContext";
 
 interface Assessment {
   aspect: string;
@@ -26,13 +27,13 @@ interface CourtData {
 
 const FirstInstance = () => {
   const [assessmentData, setAssessmentData] = useState<CourtData[]>([]);
-  const { setCourtName } = useSurveyData();
+  const { setCourtName } = useCourt();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userRegion, setUserRegion] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const { language } = useSurveyData();
+  const { language, getTranslation } = useLanguage();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const router = useRouter();
   const [loading, setLoading] = useState(true);

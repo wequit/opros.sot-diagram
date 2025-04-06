@@ -1,7 +1,8 @@
 "use client";
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { useSurveyData, getTranslation } from "@/context/SurveyContext";
 import { usePathname } from "next/navigation";
+import { useDateParams } from "@/context/DateParamsContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface DateRange {
   startDate: string;
@@ -32,7 +33,8 @@ export default function Dates() {
   const yearDropdownRef = useRef<HTMLDivElement>(null);
   const monthDropdownRef = useRef<HTMLDivElement>(null);
 
-  const { setDateParams, language } = useSurveyData();
+  const { setDateParams } = useDateParams();
+  const { getTranslation } = useLanguage();
   const pathname = usePathname();
 
   const formatDateToDisplay = (isoDate: string): string => {

@@ -1,9 +1,11 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useSurveyData } from "@/context/SurveyContext";
 import { useRemarks } from "@/components/RemarksApi";
 import { ChartData } from "chart.js";
 import { usePathname } from "next/navigation";
+import { useChartData } from "@/context/ChartDataContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useCourt } from "@/context/CourtContext";
 
 export default function useEvaluationData(selectedCourtName?: string) {
   const {
@@ -12,12 +14,11 @@ export default function useEvaluationData(selectedCourtName?: string) {
     barData,
     progressData,
     columnData,
-    language,
     surveyResponsesCount,
     isLoading,
-    selectedCourtId,
-    dateParams,
-  } = useSurveyData();
+  } = useChartData();
+  const { selectedCourtId} = useCourt();
+  const { language } = useLanguage();
   const { remarks } = useRemarks();
   const courtName2 = localStorage.getItem("courtName2");
   const matchedCourt = localStorage.getItem("matchedCourt");

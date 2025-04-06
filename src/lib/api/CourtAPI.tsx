@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { getCookie } from "@/lib/api/login";
-import { useSurveyData } from "@/context/SurveyContext";
 import {
   getCircleCourtData,
   getRadarCourtData,
@@ -9,6 +8,8 @@ import {
   getProgressCourtData,
   getColumnCourtData,
 } from "@/lib/api/charts/charts";
+import { useChartData } from "@/context/ChartDataContext";
+import { useDateParams } from "@/context/DateParamsContext";
 
 interface CourtApi {
   courtId?: string;
@@ -16,7 +17,8 @@ interface CourtApi {
 
 export default function CourtApi({ courtId }: CourtApi) {
   const [error, setError] = useState<string | null>(null);
-  const { setSurveyData, setIsLoading, dateParams, setSurveyResponsesCount } = useSurveyData();
+  const { setSurveyData, setIsLoading, setSurveyResponsesCount } = useChartData();
+  const {dateParams } = useDateParams();
 
   const effectiveCourtId = courtId || "65";
 

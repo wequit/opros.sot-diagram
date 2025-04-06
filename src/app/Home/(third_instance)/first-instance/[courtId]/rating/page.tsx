@@ -1,31 +1,27 @@
 "use client";
 import { useParams } from "next/navigation";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useCourt } from "@/context/CourtContext";
+import { useChartData } from "@/context/ChartDataContext";
 import { useEffect, useState } from "react";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
-import CourtDataFetcher from "@/lib/api/CourtAPI"; // Импортируем новый компонент
+import CourtDataFetcher from "@/lib/api/CourtAPI";
 
 const CourtRatingPage = () => {
   const params = useParams();
-  const courtId = params?.courtId as string; // Используем courtId из маршрута
+  const courtId = params?.courtId as string;
 
-  const {
-    courtName,
-    setCourtName,
-    courtNameId,
-    setCourtNameId,
-    setIsLoading,
-    language,
-    surveyData,
-  } = useSurveyData();
+  const {  getTranslation } = useLanguage();
+  const { courtName, setCourtName, courtNameId, setCourtNameId } = useCourt();
+  const { setIsLoading, radarData: surveyData } = useChartData();
 
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const handleBackClick = () => {
-    window.history.back(); // Возвращаемся на предыдущую страницу
+    window.history.back();
   };
 
   useEffect(() => {
@@ -48,8 +44,7 @@ const CourtRatingPage = () => {
         setIsLoading(true);
         setIsDataLoading(true);
 
-        // Данные уже загружаются через CourtDataFetcher, но мы можем использовать surveyData для получения имени суда
-        const newCourtName = storedCourtName || surveyData?.radar?.court || "Неизвестный суд";
+        const newCourtName = storedCourtName || surveyData?.court || "Неизвестный суд";
 
         setCourtName(newCourtName);
         setCourtNameId(courtId);
@@ -74,15 +69,7 @@ const CourtRatingPage = () => {
     };
 
     loadCourtMetadata();
-  }, [
-    courtId,
-    courtName,
-    setCourtName,
-    courtNameId,
-    setCourtNameId,
-    setIsLoading,
-    surveyData,
-  ]);
+  }, [courtId, courtName, setCourtName, courtNameId, setCourtNameId, setIsLoading, surveyData]);
 
   if (isDataLoading) {
     return <div>Loading...</div>;
@@ -92,7 +79,7 @@ const CourtRatingPage = () => {
     return (
       <div className="p-3 mt-4">
         <Breadcrumb
-          regionName={getTranslation("HeaderNavFour", language)}
+          regionName={getTranslation("HeaderNavFour")}
           courtName={courtName}
           onCourtBackClick={handleBackClick}
           showHome={false}
@@ -106,14 +93,14 @@ const CourtRatingPage = () => {
   return (
     <div className="p-3 mt-4">
       <Breadcrumb
-        regionName={getTranslation("HeaderNavFour", language)}
+        regionName={getTranslation("HeaderNavFour")}
         courtName={courtName}
         onCourtBackClick={handleBackClick}
         showHome={false}
       />
       <h2 className="text-3xl font-bold mb-4 mt-4 DistrictEvaluationsCourtName">{courtName}</h2>
       <Dates />
-      <CourtDataFetcher courtId={courtId} /> {/* Передаем динамический courtId */}
+      <CourtDataFetcher courtId={courtId} />
       <Evaluations courtNameId={courtNameId} />
     </div>
   );

@@ -4,8 +4,8 @@ import React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface BreadcrumbProps {
   regionName?: string | null;
@@ -24,7 +24,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   showHome = true,
   headerKey = "BreadCrumb_RegionName",
 }) => {
-  const { language } = useSurveyData();
+  const { language, getTranslation } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
 
@@ -51,7 +51,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
               href="/Home/summary/ratings"
               className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
             >
-              {getTranslation("Regional_Courts_Breadcrumbs_Main", language)}
+              {getTranslation("Regional_Courts_Breadcrumbs_Main")}
             </Link>
             {(showHome || regionName || courtName) && (
               <ChevronRight className="w-4 h-4 mx-1 text-gray-400" />
@@ -67,7 +67,7 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
               className="text-blue-600 hover:text-blue-800 transition-colors duration-200 cursor-pointer disabled:text-gray-400 disabled:cursor-not-allowed"
               disabled={!onRegionBackClick && effectiveHeaderKey !== "BreadCrumb_CourtName"}
             >
-              {getTranslation(effectiveHeaderKey, language)}
+              {getTranslation(effectiveHeaderKey)}
             </button>
             {(regionName || courtName) && (
               <ChevronRight className="w-4 h-4 mx-1 text-gray-400" />

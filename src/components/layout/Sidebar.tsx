@@ -5,8 +5,8 @@ import { MdAssessment, MdFeedback, MdClose, MdMap } from "react-icons/md";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import logo from '../../../public/logo.png'
+import { useLanguage } from "@/context/LanguageContext";
 
 interface SidebarProps {
   onClose: () => void;
@@ -15,7 +15,7 @@ interface SidebarProps {
 export default function Sidebar({ onClose }: SidebarProps) {
   const { isAuthenticated, user } = useAuth();
   const pathname = usePathname();
-  const { language } = useSurveyData();
+  const { getTranslation } = useLanguage();
 
   if (!isAuthenticated || pathname === "/login") {
     return null;
@@ -59,7 +59,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           <MdAssessment className="w-6 h-6" />
           <span>
             {user?.role === "Председатель 3 инстанции"
-              ? getTranslation("HeaderNavOne", language)
+              ? getTranslation("HeaderNavOne")
               : "Оценки по судам"}
           </span>
         </Link>
@@ -80,7 +80,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           `}
             >
               <MdMap className="w-6 h-6" />
-              <span>{getTranslation("HeaderNavTwo", language)}</span>
+              <span>{getTranslation("HeaderNavTwo")}</span>
             </Link>
 
             <Link
@@ -96,7 +96,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           `}
             >
               <MdMap className="w-6 h-6 " />
-              <span>{getTranslation("HeaderNavThree", language)}</span>
+              <span>{getTranslation("HeaderNavThree")}</span>
             </Link>
 
 
@@ -113,7 +113,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
           `}
             >
               <MdMap className="w-6 h-6" />
-              <span>{getTranslation("HeaderNavFour", language)}</span>
+              <span>{getTranslation("HeaderNavFour")}</span>
             </Link>
             
           </>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
-import { getTranslation, useSurveyData } from '@/context/SurveyContext';
 import { ChartOptions } from 'chart.js';
+import { useLanguage } from '@/context/LanguageContext';
 
 type TranslationKey = "DiagrammEleven" | "DiagrammTwelve" ;
 
@@ -18,7 +18,7 @@ export default function ReusablePieChart({
   windowWidth,
   className = '',
 }: ReusablePieChartProps) {
-  const { language } = useSurveyData();
+  const { language, getTranslation } = useLanguage();
 
   const pieOptions: ChartOptions<"pie"> = {
     maintainAspectRatio: false,

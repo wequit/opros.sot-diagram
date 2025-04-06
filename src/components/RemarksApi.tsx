@@ -3,7 +3,7 @@
 import { getCookie, getCurrentUser } from "@/lib/api/login";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useSurveyData } from "@/context/SurveyContext";
+import { useCourt } from "@/context/CourtContext";
 
 export interface Remark {
   id: number;
@@ -26,8 +26,7 @@ export function useRemarks() {
   const [error, setError] = useState<string | null>(null);
   const pathname = usePathname();
   const router = useRouter();
-  const { selectedCourt, courtName, selectedCourtName, selectedCourtId } =
-    useSurveyData();
+  const { selectedCourt, courtName, selectedCourtName, selectedCourtId } = useCourt();
 
   const filterRemarks = (
     remarks: Remark[],

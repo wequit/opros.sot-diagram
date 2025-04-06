@@ -11,7 +11,7 @@ import * as d3 from "d3";
 import geoData from "../../../../public/gadm41_KGZ_1.json";
 
 import { FiMinus, FiPlus, FiRefreshCw, FiInfo, FiX } from "react-icons/fi";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface SVGFeature {
   type: string;
@@ -68,7 +68,7 @@ export default function Map_oblast({ oblastData }: MapProps) {
   const [dimensions, setDimensions] = useState({ width: 800, height: 480 });
   const [showLegend, setShowLegend] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
-  const { language } = useSurveyData();
+  const { language, getTranslation } = useLanguage();
   
   // Добавляем новый ref для хранения начального состояния карты
   const initialTransformRef = useRef(d3.zoomIdentity);

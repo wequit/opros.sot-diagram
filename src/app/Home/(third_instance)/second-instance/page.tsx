@@ -7,7 +7,8 @@ import Map from "../../../../lib/utils/Maps/Map_oblast";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import RegionDetails from "./regions/RegionDetails/page";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useCourt } from "@/context/CourtContext";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -39,8 +40,9 @@ interface OblastData {
 }
 
 export default function SecondInstanceUnifiedPage() {
-  const { selectedRegion, language, setSelectedRegion, regionName, setRegionName } = useSurveyData();
-
+  const {  getTranslation } = useLanguage();
+  const { selectedRegion, setSelectedRegion, regionName } = useCourt();
+  
   const [regionCourts, setRegionCourts] = useState<CourtData[]>([]);
   const [regions, setRegions] = useState<OblastData[]>([]);
   const [oblastData, setOblastData] = useState<OblastData[]>([]);
@@ -256,7 +258,7 @@ export default function SecondInstanceUnifiedPage() {
             }`}
             onClick={() => handleTabClick("courts")}
           >
-            {getTranslation("Regional_Courts_Button_Courts", language)}
+            {getTranslation("Regional_Courts_Button_Courts")}
           </button>
           <button
             className={`py-1 px-2 sm:py-2 sm:px-4 text-xs sm:text-base rounded-lg font-medium transition-all duration-200 ${
@@ -266,7 +268,7 @@ export default function SecondInstanceUnifiedPage() {
             }`}
             onClick={() => handleTabClick("regions")}
           >
-            {getTranslation("Regional_Courts_Button_Regions", language)}
+            {getTranslation("Regional_Courts_Button_Regions")}
           </button>
         </div>
       </div>
@@ -284,15 +286,15 @@ export default function SecondInstanceUnifiedPage() {
                 </th>
                 <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                   {activeTab === "courts"
-                    ? getTranslation("Regional_Courts_Table_NameCourt", language)
-                    : getTranslation("Regional_Courts_Table_NameRegion", language)}
+                    ? getTranslation("Regional_Courts_Table_NameCourt")
+                    : getTranslation("Regional_Courts_Table_NameRegion")}
                 </th>
                 <th
                   className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                   onClick={() => handleSort("overall")}
                 >
                   <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Overall", language)}</span>
+                    <span>{getTranslation("Regional_Courts_Table_Overall")}</span>
                     {getSortIcon("overall")}
                   </div>
                 </th>
@@ -301,7 +303,7 @@ export default function SecondInstanceUnifiedPage() {
                   onClick={() => handleSort("judge")}
                 >
                   <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Build", language)}</span>
+                    <span>{getTranslation("Regional_Courts_Table_Build")}</span>
                     {getSortIcon("judge")}
                   </div>
                 </th>
@@ -310,7 +312,7 @@ export default function SecondInstanceUnifiedPage() {
                   onClick={() => handleSort("process")}
                 >
                   <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
+                    <span>{getTranslation("Regional_Courts_Table_Chancellery")}</span>
                     {getSortIcon("process")}
                   </div>
                 </th>
@@ -319,7 +321,7 @@ export default function SecondInstanceUnifiedPage() {
                   onClick={() => handleSort("staff")}
                 >
                   <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
+                    <span>{getTranslation("Regional_Courts_Table_Procces")}</span>
                     {getSortIcon("staff")}
                   </div>
                 </th>
@@ -328,7 +330,7 @@ export default function SecondInstanceUnifiedPage() {
                   onClick={() => handleSort("office")}
                 >
                   <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
+                    <span>{getTranslation("Regional_Courts_Table_Staff")}</span>
                     {getSortIcon("office")}
                   </div>
                 </th>
@@ -337,7 +339,7 @@ export default function SecondInstanceUnifiedPage() {
                   onClick={() => handleSort("accessibility")}
                 >
                   <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
+                    <span>{getTranslation("Regional_Courts_Table_Judge")}</span>
                     {getSortIcon("accessibility")}
                   </div>
                 </th>
@@ -346,7 +348,7 @@ export default function SecondInstanceUnifiedPage() {
                   onClick={() => handleSort("count")}
                 >
                   <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Number of reviews", language)}</span>
+                    <span>{getTranslation("Regional_Courts_Table_Number of reviews")}</span>
                     {getSortIcon("count")}
                   </div>
                 </th>
@@ -356,13 +358,13 @@ export default function SecondInstanceUnifiedPage() {
               {isLoading ? (
                 <tr>
                   <td colSpan={9} className="text-center py-4">
-                    {getTranslation("Loading", language)}
+                    {getTranslation("Loading")}
                   </td>
                 </tr>
               ) : displayedData.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="text-center py-4">
-                    {getTranslation("No_Data", language)}
+                    {getTranslation("No_Data")}
                   </td>
                 </tr>
               ) : (

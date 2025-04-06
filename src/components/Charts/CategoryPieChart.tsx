@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { ChartOptions, ChartData, LegendItem } from 'chart.js';
-import { getTranslation, useSurveyData } from '@/context/SurveyContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface CategoryPieChartProps {
   categoryData: ChartData<'pie'>;
@@ -9,7 +9,7 @@ interface CategoryPieChartProps {
 }
 
 export default function CategoryPieChart({ categoryData, windowWidth }: CategoryPieChartProps) {
-  const { language } = useSurveyData();
+  const { language, getTranslation} = useLanguage();
 
   const getMaxLabelLength = (width: number): number => {
     if (width < 440) return 38; 

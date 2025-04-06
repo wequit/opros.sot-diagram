@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
-import { SurveyData, useSurveyData } from "@/context/SurveyContext";
 import CourtDataFetcher from "@/lib/api/CourtAPI"; // Импортируем новый компонент
+import { useCourt } from "@/context/CourtContext";
+import { useChartData } from "@/context/ChartDataContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 const CourtRatingPage = () => {
   const params = useParams();
@@ -16,11 +18,10 @@ const CourtRatingPage = () => {
     selectedCourtName,
     setSelectedCourtId,
     setSelectedCourtName,
-    setSurveyData,
     regionName,
     setRegionName,
-    isLoading,
-  } = useSurveyData();
+  } = useCourt();
+  const {setSurveyData, isLoading} = useChartData()
 
   const [isDataLoading, setIsDataLoading] = useState(true);
 

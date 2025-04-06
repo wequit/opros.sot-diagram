@@ -4,11 +4,13 @@ import React, { useEffect, useState } from "react";
 import { getAssessmentData, getCookie } from "@/lib/api/login";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import RegionMap, { RegionData } from "@/components/Maps/RegionMap";
 import { FaSort, FaSortUp, FaSortDown } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/context/LanguageContext";
+import { useCourt } from "@/context/CourtContext";
+import { useChartData } from "@/context/ChartDataContext";
 
 interface Assessment {
   aspect: string;
@@ -28,13 +30,14 @@ interface CourtData {
 
 const SecondInstance = () => {
   const [assessmentData, setAssessmentData] = useState<CourtData[]>([]);
-  const {courtName, setCourtName, setSurveyData, setIsLoading, selectedCourt, setSelectedCourt } = useSurveyData();
+  const { courtName, setCourtName, selectedCourt, setSelectedCourt } = useCourt();
+  const { setSurveyData, setIsLoading } = useChartData();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [userRegion, setUserRegion] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const {language, } = useSurveyData();
+  const {getTranslation, } = useLanguage();
   const router = useRouter();
 
   useEffect(() => {
@@ -263,7 +266,7 @@ const SecondInstance = () => {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder={getTranslation("Regional_Courts_Table_Search", language)}
+                      placeholder={getTranslation("Regional_Courts_Table_Search")}
 
                       className="w-full pl-10 pr-4 py-2.5 text-sm text-gray-900 bg-white rounded-lg focus:outline-none transition-all duration-200 ease-in-out placeholder-gray-500"
                     />
@@ -292,7 +295,7 @@ const SecondInstance = () => {
                           №
                         </th>
                         <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 w-56 min-w-[14rem]">
-                        {getTranslation("Regional_Courts_Table_NameRegion", language)}
+                        {getTranslation("Regional_Courts_Table_NameRegion")}
                         </th>
                         <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
                           Инстанция
@@ -302,7 +305,7 @@ const SecondInstance = () => {
                           onClick={() => handleSort("overall")}
                         >
                           <div className="flex items-center justify-between px-2">
-                          {getTranslation("Regional_Courts_Table_Overall", language)}
+                          {getTranslation("Regional_Courts_Table_Overall")}
                           {getSortIcon("overall")}
                           </div>
                         </th>
@@ -311,7 +314,7 @@ const SecondInstance = () => {
                           onClick={() => handleSort("judge")}
                         >
                           <div className="flex items-center justify-between px-2">
-                          {getTranslation("Regional_Courts_Table_Judge", language)}
+                          {getTranslation("Regional_Courts_Table_Judge")}
                             {getSortIcon("judge")}
                           </div>
                         </th>
@@ -320,7 +323,7 @@ const SecondInstance = () => {
                           onClick={() => handleSort("process")}
                         >
                           <div className="flex items-center justify-between px-2">
-                          {getTranslation("Regional_Courts_Table_Procces", language)}
+                          {getTranslation("Regional_Courts_Table_Procces")}
                             {getSortIcon("process")}
                           </div>
                         </th>
@@ -329,7 +332,7 @@ const SecondInstance = () => {
                           onClick={() => handleSort("staff")}
                         >
                           <div className="flex items-center justify-between px-2">
-                          {getTranslation("Regional_Courts_Table_Staff", language)}
+                          {getTranslation("Regional_Courts_Table_Staff")}
                             {getSortIcon("staff")}
                           </div>
                         </th>
@@ -338,7 +341,7 @@ const SecondInstance = () => {
                           onClick={() => handleSort("office")}
                         >
                           <div className="flex items-center justify-between px-2">
-                          {getTranslation("Regional_Courts_Table_Chancellery", language)}
+                          {getTranslation("Regional_Courts_Table_Chancellery")}
                             {getSortIcon("office")}
                           </div>
                         </th>
@@ -347,7 +350,7 @@ const SecondInstance = () => {
                           onClick={() => handleSort("building")}
                         >
                           <div className="flex items-center justify-between px-2">
-                          {getTranslation("Regional_Courts_Table_Build", language)}
+                          {getTranslation("Regional_Courts_Table_Build")}
                             {getSortIcon("building")}
                           </div>
                         </th>
@@ -356,7 +359,7 @@ const SecondInstance = () => {
                           onClick={() => handleSort("count")}
                         >
                           <div className="flex items-center justify-between px-2">
-                          {getTranslation("Regional_Courts_Table_Number of reviews", language)}
+                          {getTranslation("Regional_Courts_Table_Number of reviews")}
                           </div>
                         </th>
                       </tr>

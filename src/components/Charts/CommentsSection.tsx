@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Link from "next/link";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface CommentsSectionProps {
   comments: { text: string }[];
@@ -13,8 +13,7 @@ export default function CommentsSection({
   totalResponsesAnswer,
   remarksPath,
 }: CommentsSectionProps) {
-  const { language } = useSurveyData();
-
+  const { language, getTranslation } = useLanguage();
 
   return (
     <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex flex-col justify-between h-full">

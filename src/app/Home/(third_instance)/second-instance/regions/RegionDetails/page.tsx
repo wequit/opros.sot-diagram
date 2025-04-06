@@ -1,7 +1,9 @@
 "use client";
 
 import { getCookie } from "@/lib/api/login";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
+import { useLanguage } from "@/context/LanguageContext";
+import { useCourt } from "@/context/CourtContext";
+import { useChartData } from "@/context/ChartDataContext";
 import React, {
   useCallback,
   useState,
@@ -14,8 +16,8 @@ import Evaluations from "@/components/Evaluations/page";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import * as d3 from "d3";
 import { GeoPermissibleObjects } from "d3-geo";
-import geoData from "../../../../../../public/gadm41_KGZ_1.json";
-import districtsGeoData from "../../../../../../public/gadm41_KGZ_2.json";
+import geoData from "../../../../../../../public/gadm41_KGZ_1.json";
+import districtsGeoData from "../../../../../../../public/gadm41_KGZ_2.json";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import debounce from "lodash/debounce";
 import CourtApi from "@/lib/api/CourtAPI";
@@ -286,21 +288,20 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
   regionName,
   regions,
 }) => {
+  const { language, getTranslation } = useLanguage();
   const {
     selectedRegion,
     setSelectedRegion,
-    setSurveyData,
-    setIsLoading,
     selectedCourtName,
     setSelectedCourtName,
     selectedCourtId,
     setSelectedCourtId,
-  } = useSurveyData();
+  } = useCourt();
+  const { setSurveyData, setIsLoading } = useChartData();
 
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const {  language  } = useSurveyData();
 
   // Добавьте состояние для анимированного поиска
   const [isSearchOpen, setIsSearchOpen] = useState(false);

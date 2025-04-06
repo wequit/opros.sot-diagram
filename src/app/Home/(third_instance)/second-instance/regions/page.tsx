@@ -1,13 +1,14 @@
 "use client";
 
-import Map from "../../../../lib/utils/Maps/Map_oblast";
+import Map from "../../../../../lib/utils/Maps/Map_oblast";
 import { useState, useEffect } from "react";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { getAssessmentData, getCookie } from "@/lib/api/login";
-import { getTranslation, useSurveyData } from "@/context/SurveyContext";
-import RegionDetails from '@/app/Home/second-instance/regions/RegionDetails/page';
+import { useLanguage } from "@/context/LanguageContext";
+import { useCourt } from "@/context/CourtContext";
+import RegionDetails from "./RegionDetails/page";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 
 type SortDirection = "asc" | "desc" | null;
@@ -42,7 +43,8 @@ interface Region {
 export default function RegionalCourts() {
   const [regions, setRegions] = useState<OblastData[]>([]);
 
-  const { selectedRegion, language, setSelectedRegion, regionName, setRegionName } = useSurveyData();
+  const { selectedRegion, setSelectedRegion, regionName, setRegionName } = useCourt();
+  const { getTranslation } = useLanguage();
   const [sortField, setSortField] = useState<SortField>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const router = useRouter();
@@ -232,7 +234,7 @@ export default function RegionalCourts() {
                 }`}
                 onClick={() => handleTabClick("courts")}
               >
-                {getTranslation("Regional_Courts_Button_Courts", language)}
+                {getTranslation("Regional_Courts_Button_Courts")}
               </button>
               <button
                 className={`py-1 px-2 sm:py-2 sm:px-4 text-xs sm:text-base rounded-lg font-medium transition-all duration-200 ${
@@ -242,7 +244,7 @@ export default function RegionalCourts() {
                 }`}
                 onClick={() => handleTabClick("regions")}
               >
-                {getTranslation("Regional_Courts_Button_Regions", language)}
+                {getTranslation("Regional_Courts_Button_Regions")}
                 </button>
             </div>
           </div>
@@ -261,14 +263,14 @@ export default function RegionalCourts() {
                       №
                     </th>
                     <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                      {getTranslation("Regional_Courts_Table_NameRegion", language)}
+                      {getTranslation("Regional_Courts_Table_NameRegion")}
                     </th>
                     <th
                       className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                       onClick={() => handleSort("overall")}
                     >
                       <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Overall", language)}</span>
+                        <span>{getTranslation("Regional_Courts_Table_Overall")}</span>
                         {getSortIcon("overall")}
                       </div>
                     </th>
@@ -277,7 +279,7 @@ export default function RegionalCourts() {
                       onClick={() => handleSort("judge")}
                     >
                       <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Build", language)}</span>
+                        <span>{getTranslation("Regional_Courts_Table_Build")}</span>
                         {getSortIcon("judge")}
                       </div>
                     </th>
@@ -286,7 +288,7 @@ export default function RegionalCourts() {
                       onClick={() => handleSort("process")}
                     >
                       <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
+                        <span>{getTranslation("Regional_Courts_Table_Chancellery")}</span>
                         {getSortIcon("process")}
                       </div>
                     </th>
@@ -295,7 +297,7 @@ export default function RegionalCourts() {
                       onClick={() => handleSort("staff")}
                     >
                       <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
+                        <span>{getTranslation("Regional_Courts_Table_Procces")}</span>
                         {getSortIcon("staff")}
                       </div>
                     </th>
@@ -304,7 +306,7 @@ export default function RegionalCourts() {
                       onClick={() => handleSort("office")}
                     >
                       <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
+                        <span>{getTranslation("Regional_Courts_Table_Staff")}</span>
                         {getSortIcon("office")}
                       </div>
                     </th>
@@ -313,12 +315,12 @@ export default function RegionalCourts() {
                       onClick={() => handleSort("accessibility")}
                     >
                       <div className="flex items-center justify-between px-2">
-                        <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
+                        <span>{getTranslation("Regional_Courts_Table_Judge")}</span>
                         {getSortIcon("accessibility")}
                       </div>
                     </th>
                     <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                      {getTranslation("Regional_Courts_Table_Number of reviews", language)}
+                      {getTranslation("Regional_Courts_Table_Number of reviews")}
                     </th>
                   </tr>
                 </thead>
