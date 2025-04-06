@@ -156,7 +156,7 @@ export const getAssessmentData = async () => {
   return await fetchWithAuth("assessment/");
 };
 
-export const getCurrentUser = async () => {
+export const getCurrentUser = async (court?: any) => {
   return await fetchWithAuth("current_user/");
 };
 

@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import "@/styles/globals.css";
 import "@/styles/skeleton.css";
 import "@/styles/map.css";
-import "@/styles/spinner.css";
 import "@/styles/responsive/responsive.css";
 import Header from "@/components/layout/Header";
 import { Inter } from "next/font/google";
@@ -11,14 +10,14 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SurveyProvider, useSurveyData } from "@/context/SurveyContext";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
+import LoginPage from "./login/page";
 
 const inter = Inter({
-  subsets: ["latin", "cyrillic"],
+  subsets: ["cyrillic"],
+  weight: ["400", "700"],
   display: "swap",
   variable: "--font-inter",
 });
-
-const LoginPage = dynamic(() => import("@/app/login/page"));
 
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

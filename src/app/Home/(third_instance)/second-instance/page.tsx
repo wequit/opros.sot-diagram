@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getCookie, getAssessmentData } from "@/lib/api/login";
-import Map from "../../../lib/utils/Maps/Map_oblast";
+import Map from "../../../../lib/utils/Maps/Map_oblast";
 import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
-import RegionDetails from "@/app/Home/second-instance/regions/RegionDetails/page";
+import RegionDetails from "./regions/RegionDetails/page";
 import { getTranslation, useSurveyData } from "@/context/SurveyContext";
 
 type SortDirection = "asc" | "desc" | null;

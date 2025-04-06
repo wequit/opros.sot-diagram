@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
-import NoData from "@/components/NoData/NoData";
 import CommentsSection from "../Charts/CommentsSection";
 import CategoryPieChart from "../Charts/CategoryPieChart";
 import RadarChart from "../Charts/RadarChart";
@@ -18,12 +17,9 @@ interface RegionSummaryData {
   overall_rating: number;
   total_responses: number;
   courts_count: number;
-  ratings_by_category: {
-    [key: string]: number;
-  };
+  ratings_by_category: { [key: string]: number };
 }
 
-// Evaluations.tsx
 export default function Evaluations({
   selectedCourtId,
   courtNameId,
@@ -40,18 +36,21 @@ export default function Evaluations({
   const [demographicsView, setDemographicsView] = useState("пол");
 
   let remarksPath = "/Home/summary/feedbacks";
-
   if (pathname.includes("/Home/supreme-court/rating")) {
     remarksPath = "/Home/supreme-court/feedbacks";
   } else if (pathname.startsWith("/Home/second-instance/")) {
-    // Формируем путь с selectedCourtId перед /feedbacks
     remarksPath = `/Home/second-instance${selectedCourtId ? `/${selectedCourtId}` : ""}/feedbacks`;
+  } else if (pathname.startsWith("/Home/first_instance/court/")) {
+    remarksPath = "/Home/first_instance/feedbacks/";
   } else if (pathname.includes("/Home/first-instance")) {
     remarksPath = "/Home/first-instance/feedbacks";
+  } else if (pathname.startsWith("/Home/") && pathname.endsWith("/ratings2")) {
+    const parts = pathname.split("/");
+    const slug = parts[2];
+    remarksPath = `/Home/${slug}/feedbacks`;
+  } else if (courtNameId) {
+    remarksPath += `/${courtNameId}`;
   }
-  
-// Добавляем selectedCourtId и courtNameId, если они есть
-if (courtNameId) remarksPath += `/${courtNameId}`;
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -81,20 +80,22 @@ if (courtNameId) remarksPath += `/${courtNameId}`;
     isLoading,
   } = useEvaluationData();
 
-  if (isLoading) return <SkeletonDashboard />;
+  if (isLoading && !radarData && !categoryData && !genderData && !trafficSourceData && !caseTypesData && !audioVideoData && !judgeRatings && !staffRatings && !processRatings && !accessibilityRatings && !officeRatings && !startTimeData && !disrespectData && !ageData && !ageGenderData) {
+    return <SkeletonDashboard />;
+  }
 
   return (
     <div className="min-h-screen mb-4">
       <div className="max-w-[1250px] mx-auto">
         <div className="grid grid-cols-2 gap-4 EvalutionCols">
-          {radarData.datasets.length > 0 && (
-            <RadarChart radarData={radarData} windowWidth={windowWidth}  totalResponses={totalResponses}/>
+          {radarData && radarData.datasets.length > 0 && (
+            <RadarChart radarData={radarData} windowWidth={windowWidth} totalResponses={totalResponses} />
           )}
           <CommentsSection totalResponsesAnswer={totalResponsesAnswer} remarksPath={remarksPath} comments={comments} />
-          {categoryData.datasets[0].data.length > 0 && (
+          {categoryData && categoryData.datasets[0].data.length > 0 && (
             <CategoryPieChart categoryData={categoryData} windowWidth={windowWidth} />
           )}
-          {(genderData.datasets[0].data.length > 0 || ageData.datasets[0].data.length > 0) && (
+          {(genderData && genderData.datasets[0].data.length > 0) || (ageData && ageData.datasets[0].data.length > 0) && (
             <DemographicsChart
               genderData={genderData}
               ageGenderData={ageGenderData}
@@ -104,25 +105,25 @@ if (courtNameId) remarksPath += `/${courtNameId}`;
               windowWidth={windowWidth}
             />
           )}
-          {trafficSourceData.datasets[0].data.length > 0 && (
+          {trafficSourceData && trafficSourceData.datasets[0].data.length > 0 && (
             <TrafficSourceChart trafficSourceData={trafficSourceData} windowWidth={windowWidth} />
           )}
-          {caseTypesData.datasets[0].data.length > 0 && (
+          {caseTypesData && caseTypesData.datasets[0].data.length > 0 && (
             <CategoryJudgeChart caseTypesData={caseTypesData} windowWidth={windowWidth} />
           )}
-          {Object.keys(judgeRatings).length > 0 && (
+          {judgeRatings && Object.keys(judgeRatings).length > 0 && (
             <RatingChart ratings={judgeRatings} translationKey="DiagrammSeven" />
           )}
-          {disrespectData.datasets[0].data.length > 0 && (
+          {disrespectData && disrespectData.datasets[0].data.length > 0 && (
             <DisrespectChart disrespectData={disrespectData} windowWidth={windowWidth} />
           )}
-          {Object.keys(staffRatings).length > 0 && (
+          {staffRatings && Object.keys(staffRatings).length > 0 && (
             <RatingChart ratings={staffRatings} translationKey="DiagrammNine" />
           )}
-          {Object.keys(processRatings).length > 0 && (
+          {processRatings && Object.keys(processRatings).length > 0 && (
             <RatingChart ratings={processRatings} translationKey="DiagrammTen" />
           )}
-          {audioVideoData.datasets[0].data.length > 0 && (
+          {audioVideoData && audioVideoData.datasets[0].data.length > 0 && (
             <ReusablePieChart
               data={audioVideoData}
               translationKey="DiagrammEleven"
@@ -130,7 +131,7 @@ if (courtNameId) remarksPath += `/${courtNameId}`;
               className="EvaluationsAudio"
             />
           )}
-          {startTimeData.datasets[0].data.length > 0 && (
+          {startTimeData && startTimeData.datasets[0].data.length > 0 && (
             <ReusablePieChart
               data={startTimeData}
               translationKey="DiagrammTwelve"
@@ -138,10 +139,10 @@ if (courtNameId) remarksPath += `/${courtNameId}`;
               className="EvaluationsTime"
             />
           )}
-          {Object.keys(officeRatings).length > 0 && (
+          {officeRatings && Object.keys(officeRatings).length > 0 && (
             <RatingChart ratings={officeRatings} translationKey="DiagrammThirteen" />
           )}
-          {Object.keys(accessibilityRatings).length > 0 && (
+          {accessibilityRatings && Object.keys(accessibilityRatings).length > 0 && (
             <RatingChart ratings={accessibilityRatings} translationKey="DiagrammFourteen" />
           )}
         </div>

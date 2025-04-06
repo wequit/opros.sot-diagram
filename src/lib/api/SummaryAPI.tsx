@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useSurveyData } from "@/context/SurveyContext";
 import {
   getCircleRepublicData,
@@ -10,51 +10,51 @@ import {
 } from "@/lib/api/charts/charts";
 
 export default function SummaryAPI() {
-  const [error, setError] = useState<string | null>(null);
-  const { setSurveyData, setIsLoading, dateParams, setSurveyResponsesCount } = useSurveyData();
+  const {
+    setCircleData,
+    setRadarData,
+    setBarData,
+    setProgressData,
+    setColumnData,
+    setIsLoading,
+    dateParams,
+    setSurveyResponsesCount,
+  } = useSurveyData();
 
   const fetchData = useCallback(async () => {
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      console.time("Fetch Republic Data");
+      // Запускаем все запросы параллельно
+      const circlePromise = getCircleRepublicData(dateParams).then(data => {
+        setCircleData(data);
+      });
+      const radarPromise = getRadarRepublicData(dateParams).then(data => {
+        setRadarData(data);
+        setSurveyResponsesCount(data.survey_responses_count || 0);
+      });
+      const barPromise = getBarRepublicData(dateParams).then(data => {
+        setBarData(data);
+      });
+      const progressPromise = getProgressRepublicData(dateParams).then(data => {
+        setProgressData(data);
+      });
+      const columnPromise = getColumnRepublicData(dateParams).then(data => {
+        setColumnData(data);
+      });
 
-      const promises = [
-        getCircleRepublicData(dateParams),
-        getRadarRepublicData(dateParams),
-        getBarRepublicData(dateParams),
-        getProgressRepublicData(dateParams),
-        getColumnRepublicData(dateParams),
-      ];
-
-      const [circleData, radarData, barData, progressData, columnData] = await Promise.all(promises);
-
-      const surveyData = {
-        circle: circleData,
-        radar: radarData,
-        bar: barData,
-        progress: progressData,
-        column: columnData,
-      };
-
-      setSurveyData(surveyData);
-      setSurveyResponsesCount(radarData.survey_responses_count || 0);
-      setError(null);
-      console.timeEnd("Fetch Republic Data");
+      // Ждем завершения всех запросов только для сброса isLoading
+      await Promise.all([circlePromise, radarPromise, barPromise, progressPromise, columnPromise]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Произошла ошибка");
       console.error("Ошибка при получении данных:", err);
     } finally {
       setIsLoading(false);
     }
-  }, [setSurveyData, setIsLoading, dateParams, setSurveyResponsesCount]);
+  }, [dateParams, setCircleData, setRadarData, setBarData, setProgressData, setColumnData, setIsLoading, setSurveyResponsesCount]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  if (error) {
-    return null;
-  }
 
   return null;
 }

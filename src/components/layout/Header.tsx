@@ -14,7 +14,7 @@ import { LogoutButton } from "@/components/Logout";
 import logo from "../../../public/logo.png";
 import { FaBuilding, FaCity, FaHome, FaMap, FaPrint } from "react-icons/fa";
 import { BiDownload } from "react-icons/bi";
-import { getCurrentUser } from "@/lib/api/login"; // Импортируем getCurrentUser
+import { getCurrentUser } from "@/lib/api/login"; 
 
 const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
@@ -29,15 +29,14 @@ const Header: React.FC = () => {
   const [isPrintMenuOpen, setIsPrintMenuOpen] = useState(false);
   const printMenuRef = useRef<HTMLDivElement>(null);
 
-  // Получаем court из getCurrentUser
   useEffect(() => {
     const fetchUserCourt = async () => {
       try {
         const userData = await getCurrentUser();
-        setUserCourt(userData.court || ""); // Устанавливаем court из ответа
+        setUserCourt(userData.court || ""); 
       } catch (error) {
         console.error("Ошибка при получении данных пользователя:", error);
-        setUserCourt(""); // В случае ошибки устанавливаем пустую строку
+        setUserCourt(""); 
       }
     };
 
@@ -117,7 +116,7 @@ const Header: React.FC = () => {
           className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
           flex items-center gap-2
           ${
-            pathname === "/Home/first_instance/ratings"
+            pathname.startsWith("/Home/first_instance") 
               ? "text-blue-600 bg-blue-100 shadow-inner"
               : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
           }`}
@@ -126,11 +125,11 @@ const Header: React.FC = () => {
         </Link>
 
         <Link
-          href={`/Home/${slug}/ratings`}
+          href={`/Home/${slug}/ratings2`}
           className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
           flex items-center gap-2
           ${
-            pathname.includes(`/Home/${slug}/ratings`) ||
+            pathname.includes(`/Home/${slug}/ratings2`) ||
             pathname.includes(`/Home/${slug}/feedbacks`)
               ? "text-blue-600 bg-blue-100 shadow-inner"
               : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"

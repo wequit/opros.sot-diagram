@@ -66,6 +66,7 @@ const FirstInstance = () => {
         }
       } catch (error) {
         console.error("Ошибка при получении данных пользователя:", error);
+        router.push('/login')
       }
     };
 
@@ -107,21 +108,6 @@ const FirstInstance = () => {
       "Бишкекский городской суд": "Город Бишкек",
     };
     return regionMap[userCourt] || "";
-  };
-
-  // Преобразует название суда в slug региона
-  const getRegionSlug = (court: string): string => {
-    const regionMap: { [key: string]: string } = {
-      "Таласский областной суд": "Talas",
-      "Иссык-кульский областной суд": "Issyk-Kyl",
-      "Нарынский областной суд": "Naryn",
-      "Баткенский областной суд": "Batken",
-      "Чуйский областной суд": "Chyi",
-      "Ошский областной суд": "Osh",
-      "Жалал-Абадский областной суд": "Djalal-Abad",
-      "Бишкекский городской суд": "Bishkek",
-    };
-    return regionMap[court] || "";
   };
 
   // Обновляет строку поиска
@@ -205,10 +191,10 @@ const FirstInstance = () => {
   const handleCourtClick = (court: CourtData) => {
     const courtId = court.court_id.toString();
     const courtName = court.court;
-    const regionSlug = getRegionSlug(courtName); // Получаем slug региона
 
+    localStorage.setItem("courtName2", court.court);
     setCourtName(courtName);
-    router.push(`/Home/first_instance/court/${regionSlug}/${courtId}`); // Перенаправляем с region и courtId
+    router.push(`/Home/first_instance/court/${courtId}`);
   };
 
   if (loading) {
@@ -221,7 +207,6 @@ const FirstInstance = () => {
 
   return (
     <div className="w-full min-h-screen bg-transparent">
-      {currentUser?.role === "Председатель 2 инстанции" && (
         <div className="max-w-[1250px] mx-auto px-4 py-5">
           <div className="flex flex-col">
             <div className="flex justify-between items-center mb-4">
@@ -426,7 +411,6 @@ const FirstInstance = () => {
             </div>
           </div>
         </div>
-      )}
     </div>
   );
 };

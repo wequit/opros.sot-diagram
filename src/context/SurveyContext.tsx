@@ -1,3 +1,4 @@
+"use client";
 import React, {
   createContext,
   useContext,
@@ -6,11 +7,12 @@ import React, {
   ReactNode,
   Dispatch,
   SetStateAction,
+  useMemo,
+  useRef,
 } from "react";
 import ru from "@/locales/ru.json";
 import ky from "@/locales/ky.json";
 
-// Тип для опций вопросов
 export interface SelectedOption {
   id: number;
   text_ru: string;
@@ -18,7 +20,6 @@ export interface SelectedOption {
   value?: number;
 }
 
-// Тип для ответа на вопрос
 export interface QuestionResponse {
   id: number;
   selected_option: SelectedOption | null;
@@ -30,7 +31,6 @@ export interface QuestionResponse {
   gender: string;
 }
 
-// Тип для вопроса
 export interface Question {
   id: number;
   text: string;
@@ -40,27 +40,22 @@ export interface Question {
   options?: string[];
 }
 
-// Тип для данных опроса
-export interface SurveyData {
-  questions?: Question[];
-  period_start?: string;
-  period_end?: string;
-  total_responses?: number;
-  circle?: any;
-  radar?: any;
-  bar?: any;
-  progress?: any;
-  column?: any;
+export type Language = "ky" | "ru";
+
+export interface RegionData {
+  id: number;
+  name: string;
+  overall: number;
+  ratings: number[];
+  totalAssessments: number;
 }
 
-// Тип для оценки аспекта суда
 export interface Assessment {
   aspect: string;
   court_avg: number;
   assessment_count: string;
 }
 
-// Тип для данных суда
 export interface CourtData {
   court_id: number;
   court: string;
@@ -71,22 +66,17 @@ export interface CourtData {
   total_survey_responses: number;
 }
 
-// Тип для языка
-export type Language = "ky" | "ru";
-
-// Тип для данных региона
-export interface RegionData {
-  id: number;
-  name: string;
-  overall: number;
-  ratings: number[];
-  totalAssessments: number;
-}
-
-// Интерфейс контекста с полной типизацией
 interface SurveyContextType {
-  surveyData: SurveyData | null;
-  setSurveyData: Dispatch<SetStateAction<SurveyData | null>>;
+  circleData: any | null;
+  setCircleData: Dispatch<SetStateAction<any | null>>;
+  radarData: any | null;
+  setRadarData: Dispatch<SetStateAction<any | null>>;
+  barData: any | null;
+  setBarData: Dispatch<SetStateAction<any | null>>;
+  progressData: any | null;
+  setProgressData: Dispatch<SetStateAction<any | null>>;
+  columnData: any | null;
+  setColumnData: Dispatch<SetStateAction<any | null>>;
   totalResponses: number;
   isLoading: boolean;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
@@ -107,20 +97,22 @@ interface SurveyContextType {
   setSelectedCourtName: Dispatch<SetStateAction<string | null>>;
   selectedCourtId: number | null;
   setSelectedCourtId: Dispatch<SetStateAction<number | null>>;
-  regionName: string | null; 
-  setRegionName: Dispatch<SetStateAction<string | null>>; 
+  regionName: string | null;
+  setRegionName: Dispatch<SetStateAction<string | null>>;
   dateParams: { year?: string; quarter?: number; month?: number };
   setDateParams: (params: { year?: string; quarter?: number; month?: number }) => void;
-  surveyResponsesCount: number; 
+  surveyResponsesCount: number;
   setSurveyResponsesCount: (count: number) => void;
 }
 
-// Создание контекста с типом
 const SurveyContext = createContext<SurveyContextType | undefined>(undefined);
 
-// Провайдер контекста
 export function SurveyProvider({ children }: { children: ReactNode }) {
-  const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
+  const [circleData, setCircleData] = useState<any | null>(null);
+  const [radarData, setRadarData] = useState<any | null>(null);
+  const [barData, setBarData] = useState<any | null>(null);
+  const [progressData, setProgressData] = useState<any | null>(null);
+  const [columnData, setColumnData] = useState<any | null>(null);
   const [totalResponses, setTotalResponses] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userCourt, setUserCourt] = useState<string | null>(null);
@@ -128,24 +120,22 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
   const [courtNameId, setCourtNameId] = useState<string | null>(null);
   const [language, setLanguage] = useState<Language>("ru");
   const [selectedCourt, setSelectedCourt] = useState<CourtData | null>(null);
-  const [selectedCourtName, setSelectedCourtName] = useState<string | null>(
-    null
-  );
+  const [selectedCourtName, setSelectedCourtName] = useState<string | null>(null);
   const [surveyResponsesCount, setSurveyResponsesCount] = useState(0);
   const [selectedCourtId, setSelectedCourtId] = useState<number | null>(null);
-  const [selectedRegion, setSelectedRegion] = useState<RegionData[] | null>(
-    null
-  );
+  const [selectedRegion, setSelectedRegion] = useState<RegionData[] | null>(null);
   const [regionName, setRegionName] = useState<string | null>(null);
   const [dateParams, setDateParams] = useState<{ year?: string; quarter?: number; month?: number }>({ year: "2025" });
+
+  const prevCourtName = useRef<string | null>(null);
+
   useEffect(() => {
-    if (
-      typeof surveyData?.total_responses === "number" &&
-      surveyData?.total_responses >= 0
-    ) {
-      setTotalResponses(surveyData.total_responses);
+    if (courtName !== null) {
+      prevCourtName.current = courtName;
+    } else if (prevCourtName.current !== null) {
+      setCourtName(prevCourtName.current);
     }
-  }, [surveyData]);
+  }, [courtName]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -162,55 +152,75 @@ export function SurveyProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("language", newLanguage);
   };
 
-  const value: SurveyContextType = {
-    surveyData,
-    setSurveyData,
-    totalResponses,
-    isLoading,
-    setIsLoading,
-    userCourt,
-    setUserCourt,
-    courtName,
-    setCourtName,
-    courtNameId,
-    setCourtNameId,
-    language,
-    setLanguage,
-    toggleLanguage,
-    selectedRegion,
-    setSelectedRegion,
-    selectedCourt,
-    setSelectedCourt,
-    selectedCourtName,
-    setSelectedCourtName,
-    selectedCourtId,
-    setSelectedCourtId,
-    regionName,
-    setRegionName,
-    dateParams,
-    setDateParams,
-    surveyResponsesCount,
-    setSurveyResponsesCount,
-  };
-
-  return (
-    <SurveyContext.Provider value={value}>{children}</SurveyContext.Provider>
+  const value = useMemo(
+    () => ({
+      circleData,
+      setCircleData,
+      radarData,
+      setRadarData,
+      barData,
+      setBarData,
+      progressData,
+      setProgressData,
+      columnData,
+      setColumnData,
+      totalResponses,
+      isLoading,
+      setIsLoading,
+      userCourt,
+      setUserCourt,
+      courtName,
+      setCourtName,
+      courtNameId,
+      setCourtNameId,
+      language,
+      setLanguage,
+      toggleLanguage,
+      selectedRegion,
+      setSelectedRegion,
+      selectedCourt,
+      setSelectedCourt,
+      selectedCourtName,
+      setSelectedCourtName,
+      selectedCourtId,
+      setSelectedCourtId,
+      regionName,
+      setRegionName,
+      dateParams,
+      setDateParams,
+      surveyResponsesCount,
+      setSurveyResponsesCount,
+    }),
+    [
+      circleData,
+      radarData,
+      barData,
+      progressData,
+      columnData,
+      totalResponses,
+      isLoading,
+      userCourt,
+      courtName,
+      courtNameId,
+      language,
+      selectedRegion,
+      selectedCourt,
+      selectedCourtName,
+      selectedCourtId,
+      regionName,
+      dateParams,
+      surveyResponsesCount,
+    ]
   );
+
+  return <SurveyContext.Provider value={value}>{children}</SurveyContext.Provider>;
 }
 
-// Функция для получения перевода
-export function getTranslation(
-  key: keyof typeof ru,
-  language: Language
-): string {
-  const translations: Record<Language, typeof ru> = {
-    ru,
-    ky,
-  };
+export function getTranslation(key: keyof typeof ru, language: Language): string {
+  const translations: Record<Language, typeof ru> = { ru, ky };
   return translations[language][key] || key;
 }
 
-// Хук для использования контекста
 export function useSurveyData(): SurveyContextType {
   const context = useContext(SurveyContext);
   if (context === undefined) {
