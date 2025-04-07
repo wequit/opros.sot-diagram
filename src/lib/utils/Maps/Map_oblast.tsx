@@ -272,18 +272,20 @@ export default function Map_oblast({ oblastData }: MapProps) {
     }
 
     // Добавляем CSS для анимации областей
-    const style = document.createElement('style');
-    style.textContent = `
-      .region-path {
-        transition: all 0.2s ease-in-out;
-      }
-      .region-path:hover {
-        filter: brightness(0.9);
-        transform: scale(1.01);
-        cursor: pointer;
-      }
-    `;
-    document.head.appendChild(style);
+    if (typeof document !== 'undefined') {
+      const style = document.createElement('style');
+      style.textContent = `
+        .region-path {
+          transition: all 0.2s ease-in-out;
+        }
+        .region-path:hover {
+          filter: brightness(0.9);
+          transform: scale(1.01);
+          cursor: pointer;
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
     // Рисуем области
     regionsGroup
@@ -409,7 +411,9 @@ export default function Map_oblast({ oblastData }: MapProps) {
 
     return () => {
       svg.call(zoom.transform, d3.zoomIdentity);
-      style.remove(); // Удаляем стили при размонтировании
+      if (typeof document !== 'undefined') {
+        document.head.removeChild(document.querySelector('style') as HTMLStyleElement);
+      }
       window.removeEventListener("resize", handleResize);
     };
   }, [oblastData, getOblastRating, getColor, zoom, language]);

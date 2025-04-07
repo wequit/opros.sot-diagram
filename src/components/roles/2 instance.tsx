@@ -191,11 +191,11 @@ const SecondInstance = () => {
   const handleCourtClick = (court: any) => {
     const courtId = court.court_id;
     
-    // Сохраняем нужные данные
-    localStorage.setItem("selectedCourtId", courtId.toString());
-    localStorage.setItem("selectedCourtName", court.court);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("selectedCourtId", courtId.toString());
+      localStorage.setItem("selectedCourtName", court.court);
+    }
     
-    // Перенаправляем на страницу суда
     router.push(`/Home/second-instance/court/${courtId}`);
   };
 

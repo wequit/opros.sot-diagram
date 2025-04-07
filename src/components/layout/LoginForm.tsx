@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { loginApi } from "@/lib/api/login";
 import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
-import logo from "../../../public/logo.png";
+import logo from "../../../public/logo.webp";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext"; 
 import dynamic from "next/dynamic";
@@ -119,24 +119,20 @@ const LoginForm: React.FC = () => {
       data-testid="login-form-container"
     >
       {/* Фоновые элементы */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none ">
         <div className="absolute top-0 right-0 w-full h-full bg-[url('/pattern-grid.svg')] opacity-[0.03]"></div>
         <div className="absolute -top-64 -right-64 w-[40rem] h-[40rem] bg-blue-800 opacity-[0.03] rounded-full mix-blend-multiply blur-3xl"></div>
         <div className="absolute -bottom-32 -left-32 w-[30rem] h-[30rem] bg-indigo-700 opacity-[0.05] rounded-full mix-blend-multiply blur-3xl"></div>
       </div>
-
-      {/* Шапка */}
-      <header className="bg-gradient-to-r from-blue-700 to-blue-900 text-white shadow-xl relative overflow-hidden z-10 py-6 md:py-6 sm:py-4 h-auto">
-        <div className="absolute inset-0 bg-[url('/pattern-grid.svg')] opacity-10"></div>
-
+     
         {/* Переключатель языка */}
-        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex z-20 animate-fadeIn">
+        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex  animate-fadeIn">
           <div className="bg-blue-100/30 backdrop-blur-sm rounded-md overflow-hidden border border-blue-200/50 shadow-sm">
             <button
-              onClick={toggleLanguage} // Используем toggleLanguage из useLanguage
+              onClick={toggleLanguage} 
               aria-label={language === "ru" ? "Переключить на кыргызский" : "Переключить на русский"}
-              className={`px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-semibold transition-all duration-300 ${
-                language === "ru" ? "bg-blue-800 text-white" : "text-white hover:bg-blue-400/50"
+              className={`px-2 py-1 sm:px-3 sm:py-1.5 text-sm font-semibold transition-all duration-300 ${
+                language === "ru" ? "bg-blue-800 text-sky-50" : "text-sky-700 hover:bg-blue-400/50"
               }`}
             >
               RU
@@ -144,39 +140,17 @@ const LoginForm: React.FC = () => {
             <button
               onClick={toggleLanguage}
               aria-label={language === "ky" ? "Переключить на русский" : "Переключить на кыргызский"}
-              className={`px-2 py-1 sm:px-3 sm:py-1.5 text-xs font-semibold transition-all duration-300 ${
-                language === "ky" ? "bg-blue-800 text-white" : "text-white hover:bg-blue-400/50"
+              className={`px-2 py-1 sm:px-3 sm:py-1.5 text-sm font-semibold transition-all duration-300 ${
+                language === "ky" ? "bg-blue-800 text-sky-50" : "text-sky-700 hover:bg-blue-400/50"
               }`}
             >
               KY
             </button>
           </div>
         </div>
-
-        <div className="container mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-2 sm:gap-4">
-          <div className="p-2 sm:p-3 rounded-xl transform transition-transform duration-300 hover:scale-105 flex-shrink-0">
-            <Image
-              src={logo}
-              alt="Логотип"
-              width={40}
-              height={40}
-              className="rounded-lg animate-pulse-subtle sm:w-[60px] sm:h-[60px] w-[40px] h-[40px]"
-              priority
-            />
-          </div>
-          <div className="text-center sm:text-left">
-            <h1 className="text-lg sm:text-xl md:text-2xl font-bold animate-slideUp">
-              {getTranslation("LoginForm_Welcome")}
-            </h1>
-            <p className="text-blue-100 text-xs sm:text-sm max-w-xl animate-slideUp animation-delay-300">
-              {getTranslation("LoginForm_Subtitle")}
-            </p>
-          </div>
-        </div>
-      </header>
-
+       
       {/* Основной контент - форма входа */}
-      <main className="flex-grow flex items-center justify-center py-8 px-4">
+      <div className="flex-grow flex items-center justify-center py-8 px-4">
         <div className="w-full max-w-md transform transition-all duration-700 ease-out animate-float">
           <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-7 sm:p-8 border border-gray-200/50 hover:shadow-blue-500/10 transition-all duration-500 ease-in-out group">
             {/* Эффект свечения */}
@@ -184,7 +158,14 @@ const LoginForm: React.FC = () => {
 
             <div className="text-center mb-6 mt-2 animate-slideUp animation-delay-300">
               <div className="flex justify-center mb-4">
-                <RiScales3Line className="w-12 h-12 text-blue-700" />
+              <Image
+              src={logo}
+              alt="Логотип"
+              width={100}
+              height={100}
+              className=" rounded-lg animate-pulse-subtle] "
+              priority
+            />
               </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 {getTranslation("LoginForm_LoginTitle")}
@@ -292,7 +273,7 @@ const LoginForm: React.FC = () => {
             </form>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* CSS для анимаций */}
       <style jsx global>{`

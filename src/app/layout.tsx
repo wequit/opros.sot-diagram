@@ -16,9 +16,10 @@ import LoginPage from "./login/page";
 const inter = Inter({
   subsets: ["cyrillic"],
   weight: ["400", "700"],
-  display: "swap",
+  display: "swap",  
   variable: "--font-inter",
 });
+
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -50,7 +51,9 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, pathname, router]);
 
   useEffect(() => {
-    document.documentElement.lang = language;
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = language;
+    }
   }, [language]);
 
   // Страница логина только если не авторизован и путь явно /results/login

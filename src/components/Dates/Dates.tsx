@@ -55,8 +55,8 @@ export default function Dates() {
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-
+  
+    // Функция для обработки кликов снаружи
     const handleClickOutside = (event: MouseEvent) => {
       if (yearDropdownRef.current && !yearDropdownRef.current.contains(event.target as Node)) {
         setShowYearDropdown(false);
@@ -65,14 +65,16 @@ export default function Dates() {
         setShowMonthDropdown(false);
       }
     };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
+  
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("mousedown", handleClickOutside);
+  
     return () => {
       window.removeEventListener("resize", handleResize);
-      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, []);  
+  
 
   const years = Array.from({ length: 11 }, (_, i) => (2025 + i).toString());
 

@@ -10,7 +10,7 @@ import Sidebar from "./Sidebar";
 import { GrLanguage } from "react-icons/gr";
 import Link from "next/link";
 import { LogoutButton } from "@/components/Logout";
-import logo from "../../../public/logo.png";
+import logo from "../../../public/logo.webp";
 import { FaBuilding, FaCity, FaHome, FaMap, FaPrint } from "react-icons/fa";
 import { BiDownload } from "react-icons/bi";
 import { getCurrentUser } from "@/lib/api/login"; 
@@ -44,9 +44,11 @@ const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    if (typeof window !== 'undefined') {
+      const handleResize = () => setWindowWidth(window.innerWidth);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
   }, []);
 
   useEffect(() => {
@@ -59,17 +61,22 @@ const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Функция, которая будет срабатывать при клике
     const handleClickOutside = (event: MouseEvent) => {
       if (printMenuRef.current && !printMenuRef.current.contains(event.target as Node)) {
         setIsPrintMenuOpen(false);
       }
     };
-
-    document.addEventListener("mousedown", handleClickOutside);
+  
+    // Добавляем обработчик события
+    window.addEventListener("mousedown", handleClickOutside);
+  
+    // Очищаем обработчик при размонтировании компонента
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, []);  // Пустой массив зависимостей означает, что эффект сработает только при монтировании и размонтировании компонента.
+  
 
   if (!isAuthenticated || pathname === "/login") {
     return null;
@@ -158,15 +165,16 @@ const Header: React.FC = () => {
       pathname.includes("/ratings");
 
     if (isDiagramsPage) {
-      document.body.classList.add("printing-charts");
+      if (typeof window !== "undefined") {
+        document.body.classList.add("printing-charts");
+      }
     }
 
     setTimeout(() => {
-      window.print();
-
-      setTimeout(() => {
+      if (typeof window !== "undefined") {
+        window.print();
         document.body.classList.remove("printing-charts");
-      }, 500);
+      }
     }, 100);
   };
 

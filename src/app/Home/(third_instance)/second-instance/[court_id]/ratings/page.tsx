@@ -1,5 +1,5 @@
 "use client";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import Dates from "@/components/Dates/Dates";
@@ -11,6 +11,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 const CourtRatingPage = () => {
   const params = useParams();
+  const router = useRouter();
   const courtId = params?.court_id as string;
 
   const {
@@ -27,7 +28,7 @@ const CourtRatingPage = () => {
 
   useEffect(() => {
     const loadCourtData = async () => {
-      const storedRegionName = localStorage.getItem("regionName");
+      const storedRegionName = typeof window !== 'undefined' ? localStorage.getItem("regionName") : null;
       if (storedRegionName && !regionName) {
         setRegionName(storedRegionName);
       }
@@ -37,19 +38,21 @@ const CourtRatingPage = () => {
         return;
       }
 
-      const storedCourtId = localStorage.getItem("selectedCourtId");
-      const storedCourtName = localStorage.getItem("selectedCourtName");
+      const storedCourtId = typeof window !== 'undefined' ? localStorage.getItem("selectedCourtId") : null;
+      const storedCourtName = typeof window !== 'undefined' ? localStorage.getItem("selectedCourtName") : null;
 
       if (courtId === storedCourtId && storedCourtName && selectedCourtId) {
         setIsDataLoading(false);
         return;
       }
 
-      // Устанавливаем courtId и courtName после загрузки данных в CourtDataFetcher
       setSelectedCourtId(Number(courtId));
       setSelectedCourtName(storedCourtName || "Неизвестный суд");
-      localStorage.setItem("selectedCourtId", courtId);
-      localStorage.setItem("selectedCourtName", storedCourtName || "Неизвестный суд");
+      
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("selectedCourtId", courtId);
+        localStorage.setItem("selectedCourtName", storedCourtName || "Неизвестный суд");
+      }
 
       setIsDataLoading(false);
     };
@@ -61,7 +64,7 @@ const CourtRatingPage = () => {
     return <div>Loading...</div>;
   }
 
-  const breadcrumbSource = localStorage.getItem("breadcrumbSource");
+  const breadcrumbSource = typeof window !== 'undefined' ? localStorage.getItem("breadcrumbSource") : null;
   const headerKey = breadcrumbSource === "courts" ? "BreadCrumb_CourtName" : "BreadCrumb_RegionName";
 
   return (
@@ -73,13 +76,13 @@ const CourtRatingPage = () => {
           setSelectedCourtId(null);
           setSelectedCourtName(null);
           setSurveyData(null);
-          window.location.href = `/results/Home/second-instance/regions`;
+          router.push(`/results/Home/second-instance/regions`);
         }}
         onRegionBackClick={() => {
           setSelectedCourtId(null);
           setSelectedCourtName(null);
           setSurveyData(null);
-          window.location.href = "/results/Home/second-instance/regions";
+          router.push("/results/Home/second-instance/regions");
         }}
         headerKey={headerKey}
       />

@@ -5,7 +5,7 @@ import { MdAssessment, MdFeedback, MdClose, MdMap } from "react-icons/md";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import logo from '../../../public/logo.png'
+import logo from '../../../public/logo.webp'
 import { useLanguage } from "@/context/LanguageContext";
 
 interface SidebarProps {

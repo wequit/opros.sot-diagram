@@ -7,7 +7,7 @@ import { useChartData } from "@/context/ChartDataContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCourt } from "@/context/CourtContext";
 
-export default function useEvaluationData(selectedCourtName?: string) {
+export default function useEvaluationData() {
   const {
     circleData,
     radarData,
@@ -16,13 +16,14 @@ export default function useEvaluationData(selectedCourtName?: string) {
     columnData,
     surveyResponsesCount,
     isLoading,
+    genderAgeData, // Добавляем новый параметр
   } = useChartData();
-  const { selectedCourtId} = useCourt();
+  const { selectedCourtId } = useCourt();
   const { language } = useLanguage();
   const { remarks } = useRemarks();
-  const courtName2 = localStorage.getItem("courtName2");
-  const matchedCourt = localStorage.getItem("matchedCourt");
-  const storedCourtName = localStorage.getItem("selectedCourtName");
+  const courtName2 = typeof window !== 'undefined' ? localStorage.getItem("courtName2") : null;
+  const matchedCourt = typeof window !== 'undefined' ? localStorage.getItem("matchedCourt") : null;
+  const storedCourtName = typeof window !== 'undefined' ? localStorage.getItem("selectedCourtName") : null;
   const pathname = usePathname();
 
   const [categoryData, setCategoryData] = useState<ChartData<"pie">>({
@@ -70,7 +71,7 @@ export default function useEvaluationData(selectedCourtName?: string) {
     ],
   });
   const [totalResponsesAnswer, setTotalResponsesAnswer] = useState<number>(0);
-  const [disrespectData, setDisrespectData] = useState<any>({
+  const [disrespectData, setDisrespectData] = useState<ChartData<"bar">>({
     labels: [],
     datasets: [{ data: [], backgroundColor: "rgb(139, 69, 19)", barThickness: 20 }],
   });
@@ -79,7 +80,7 @@ export default function useEvaluationData(selectedCourtName?: string) {
     datasets: [{ data: [], backgroundColor: [] }],
   });
   const [ageGenderData, setAgeGenderData] = useState<ChartData<"bar">>({
-    labels: ["18-29", "30-44", "45-59", "60 +"],
+    labels: ["18–29", "30–44", "45–59", "60 +"], // Обновлены метки для соответствия API
     datasets: [
       { label: "Мужской", data: [0, 0, 0, 0], backgroundColor: "rgb(51, 153, 255)" },
       { label: "Женский", data: [0, 0, 0, 0], backgroundColor: "rgb(255, 99, 132)" },
@@ -90,6 +91,7 @@ export default function useEvaluationData(selectedCourtName?: string) {
     if (isLoading) return;
 
     try {
+      // Обработка circleData
       if (circleData) {
         circleData.forEach((question: any) => {
           const labels = question.options?.map((option: any) => (language === "ru" ? option.text_ru : option.text_kg)) || [];
@@ -166,60 +168,76 @@ export default function useEvaluationData(selectedCourtName?: string) {
         });
       }
 
-      if (barData) {
-        barData.forEach((question: any) => {
-          const labels = question.options?.map((option: any) => (language === "ru" ? option.text_ru : option.text_kg)) || [];
-          const rawData = question.options?.map((option: any) => option.count || 0) || [];
-          const filteredData = rawData.map((value: number) => (value === 0 ? null : value));
+     // Обработка "Пол и возраст" из genderAgeData
+if (genderAgeData) {
+  const femaleObj = genderAgeData.find(obj => obj["Женский"]);
+  const maleObj = genderAgeData.find(obj => obj["Мужской"]);
 
-          switch (question.question_id) {
-            case 1:
-              setTrafficSourceData({
-                labels,
-                datasets: [
-                  {
-                    data: filteredData,
-                    backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF", "#FF9F40", "#4CAF50", "#9C27B0"],
-                  },
-                ],
-              });
-              break;
-            case 4:
-              setAgeData({
-                labels,
-                datasets: [
-                  { label: language === "ru" ? "Возраст" : "Жаш", data: filteredData, backgroundColor: ["#5B9BD5", "#C000C0", "#FFC000", "#3CB371"] },
-                ],
-              });
-              break;
-          }
-        });
+  if (femaleObj && maleObj) {
+    const ageGroups: Array<"18–29" | "30–44" | "45–59" | "60 +"> = ["18–29", "30–44", "45–59", "60 +"];
+    const femaleData = ageGroups.map(age => femaleObj["Женский"]?.[age] ? parseFloat(femaleObj["Женский"][age].replace("%", "")) : 0);
+    const maleData = ageGroups.map(age => maleObj["Мужской"]?.[age] ? -parseFloat(maleObj["Мужской"][age].replace("%", "")) : 0);
+    const femaleLabel = language === "ru" ? femaleObj["Женский"]?.text_ru : femaleObj["Женский"]?.text_kg;
+    const maleLabel = language === "ru" ? maleObj["Мужской"]?.text_ru : maleObj["Мужской"]?.text_kg;
 
-        const ageQuestion = barData.find((q: any) => q.question_id === 4);
-        const genderQuestion = circleData?.find((q: any) => q.question_id === 3);
+    setAgeGenderData({
+      labels: ageGroups,
+      datasets: [
+        { label: maleLabel, data: maleData, backgroundColor: "rgb(51, 153, 255)" },
+        { label: femaleLabel, data: femaleData, backgroundColor: "rgb(255, 99, 132)" },
+      ],
+    });
+  }
+}
 
-        if (ageQuestion && genderQuestion) {
-          const ageLabels = ageQuestion.options.map((opt: any) => opt.text_ru);
-          const ageCounts = ageQuestion.options.map((opt: any) => opt.count);
-          const totalResponses = ageCounts.reduce((sum: number, count: number) => sum + count, 0);
-          const agePercentages = ageCounts.map((count: number) => (count / totalResponses) * 100);
+// Обработка "Пол и возраст" из barData и circleData, только если нет genderAgeData
+if (!genderAgeData && barData && circleData) {
+  const ageQuestion = barData.find((q: any) => q.question_id === 4);
+  const genderQuestion = circleData?.find((q: any) => q.question_id === 3);
 
-          const femalePercentage = parseFloat(genderQuestion.options.find((opt: any) => opt.text_ru === "Женский")?.percentage?.replace("%", "") || "0");
-          const malePercentage = parseFloat(genderQuestion.options.find((opt: any) => opt.text_ru === "Мужской")?.percentage?.replace("%", "") || "0");
+  if (ageQuestion && genderQuestion) {
+    const ageLabels = ageQuestion.options.map((opt: any) => opt.text_ru);
+    const ageCounts = ageQuestion.options.map((opt: any) => opt.count);
+    const totalResponses = ageCounts.reduce((sum: number, count: number) => sum + count, 0);
+    const agePercentages = ageCounts.map((count: number) => (count / totalResponses) * 100);
 
-          const maleData = agePercentages.map((percent: number) => -(percent * malePercentage) / 100);
-          const femaleData = agePercentages.map((percent: number) => (percent * femalePercentage) / 100);
+    const femalePercentage = parseFloat(genderQuestion.options.find((opt: any) => opt.text_ru === "Женский")?.percentage?.replace("%", "") || "0");
+    const malePercentage = parseFloat(genderQuestion.options.find((opt: any) => opt.text_ru === "Мужской")?.percentage?.replace("%", "") || "0");
 
-          setAgeGenderData({
-            labels: ageLabels,
-            datasets: [
-              { label: language === "ru" ? "Мужской" : "Эркек", data: maleData, backgroundColor: "#36A2EB" },
-              { label: language === "ru" ? "Женский" : "Аял", data: femaleData, backgroundColor: "#FF6384" },
-            ],
-          });
-        }
-      }
+    const maleData = agePercentages.map((percent: number) => -(percent * malePercentage) / 100);
+    const femaleData = agePercentages.map((percent: number) => (percent * femalePercentage) / 100);
 
+    setAgeGenderData({
+      labels: ageLabels,
+      datasets: [
+        { label: language === "ru" ? "Мужской" : "Эркек", data: maleData, backgroundColor: "rgb(51, 153, 255)" },
+        { label: language === "ru" ? "Женский" : "Аял", data: femaleData, backgroundColor: "rgb(255, 99, 132)" },
+      ],
+    });
+  }
+}
+
+// Обработка "Возраст" независимо от genderAgeData
+if (barData) {
+  const ageQuestion = barData.find((q: any) => q.question_id === 4);
+  if (ageQuestion) {
+    const ageLabels = ageQuestion.options.map((opt: any) => opt.text_ru);
+    const ageCounts = ageQuestion.options.map((opt: any) => opt.count);
+
+    setAgeData({
+      labels: ageLabels,
+      datasets: [
+        {
+          label: language === "ru" ? "Возраст" : "Жаш",
+          data: ageCounts,
+          backgroundColor: ["#5B9BD5", "#C000C0", "#FFC000", "#3CB371"],
+        },
+      ],
+    });
+  }
+}
+
+      // Обработка progressData
       if (progressData) {
         const judgeQuestions = [11, 12, 14, 17];
         const staffQuestions = [7, 9];
@@ -257,6 +275,7 @@ export default function useEvaluationData(selectedCourtName?: string) {
         setProcessRatings(processRatingsData);
       }
 
+      // Обработка columnData
       if (columnData) {
         const disrespectQuestion = columnData.find((q: any) => q.question_id === 15);
         if (disrespectQuestion) {
@@ -279,7 +298,13 @@ export default function useEvaluationData(selectedCourtName?: string) {
       setAudioVideoData({ labels: [], datasets: [{ data: [], backgroundColor: [] }] });
       setRadarData({ labels: [], datasets: [] });
       setAgeData({ labels: [], datasets: [{ data: [], backgroundColor: [] }] });
-      setAgeGenderData({ labels: [], datasets: [{ data: [], backgroundColor: [] }] });
+      setAgeGenderData({
+        labels: ["18–29", "30–44", "45–59", "60 +"],
+        datasets: [
+          { label: "Мужской", data: [0, 0, 0, 0], backgroundColor: "rgb(51, 153, 255)" },
+          { label: "Женский", data: [0, 0, 0, 0], backgroundColor: "rgb(255, 99, 132)" },
+        ],
+      });
       setJudgeRatings({});
       setStaffRatings({});
       setProcessRatings({});
@@ -287,7 +312,21 @@ export default function useEvaluationData(selectedCourtName?: string) {
       setAccessibilityRatings({});
       setDisrespectData({ labels: [], datasets: [{ data: [], backgroundColor: [], barThickness: 20 }] });
     }
-  }, [circleData, radarData, barData, progressData, columnData, language, selectedCourtId, courtName2, matchedCourt, storedCourtName, pathname, isLoading]);
+  }, [
+    circleData,
+    radarData,
+    barData,
+    progressData,
+    columnData,
+    genderAgeData, // Добавляем в зависимости
+    language,
+    selectedCourtId,
+    courtName2,
+    matchedCourt,
+    storedCourtName,
+    pathname,
+    isLoading,
+  ]);
 
   useEffect(() => {
     if (remarks) {
@@ -320,4 +359,4 @@ export default function useEvaluationData(selectedCourtName?: string) {
     comments,
     isLoading,
   };
-} 
+}

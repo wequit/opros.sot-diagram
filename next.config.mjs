@@ -14,7 +14,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  webpack: (config) => {
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.devtool = 'source-map';  // Включаем source-map для клиентской сборки
+    }
     return config;
   },
   experimental: {
@@ -23,4 +26,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig; 
+export default nextConfig;

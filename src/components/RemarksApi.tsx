@@ -36,11 +36,11 @@ export function useRemarks() {
     courtId: number | null,
     selectedCourtId: number | null
   ): Remark[] => {
-    const courtName2 = localStorage.getItem("courtName2");
-    const matchedCourt = localStorage.getItem("matchedCourt");
-    const storedCourtName = localStorage.getItem("selectedCourtName");
-    const courtNameId = localStorage.getItem("courtNameId");
-    const courtNAME = localStorage.getItem("courtName");
+    const courtName2 = typeof window !== 'undefined' ? localStorage.getItem("courtName2") : null;
+    const matchedCourt = typeof window !== 'undefined' ? localStorage.getItem("matchedCourt") : null;
+    const storedCourtName = typeof window !== 'undefined' ? localStorage.getItem("selectedCourtName") : null;
+    const courtNameId = typeof window !== 'undefined' ? localStorage.getItem("courtNameId") : null;
+    const courtNAME = typeof window !== 'undefined' ? localStorage.getItem("courtName") : null;
 
     return remarks.filter((item: Remark) => {
       if (

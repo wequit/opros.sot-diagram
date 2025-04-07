@@ -31,8 +31,10 @@ export default function RemarksPage() {
     setIsResizing(true);
     startXRef.current = e.clientX;
     startWidthRef.current = courtColumnWidth;
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', stopResize);
+    if (typeof document !== 'undefined') {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', stopResize);
+    }
   };
 
   // Обработчик перемещения мыши
@@ -46,8 +48,10 @@ export default function RemarksPage() {
   // Завершение изменения размера
   const stopResize = () => {
     setIsResizing(false);
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', stopResize);
+    if (typeof document !== 'undefined') {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', stopResize);
+    }
   };
 
   const CommentModal = ({

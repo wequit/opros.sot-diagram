@@ -10,7 +10,7 @@ const CourtDetailsPage = () => {
   const params = useParams();
   const courtId = params?.courtId as string; 
   const router = useRouter();
-  const courtName2 = localStorage.getItem("courtName2") 
+  const courtName2 = typeof window !== 'undefined' ? localStorage.getItem("courtName2") : null;
   const handleBackClick = () => {
     router.back();
   };

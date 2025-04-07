@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchWithAuth } from "../login"; 
+import { fetchWithAuth } from "../login";
 
 const cache: { [key: string]: Promise<any> } = {};
 
@@ -14,6 +14,7 @@ const buildQueryAndCacheKey = (baseKey: string, params: { year?: string; quarter
   return { queryString: queryString.toString(), cacheKey };
 };
 
+// Existing functions (unchanged)
 export const getRadarRepublicData = async (params: { year?: string; quarter?: number; month?: number }) => {
   const { queryString, cacheKey } = buildQueryAndCacheKey("radar_republic", params);
   if (!cache[cacheKey]) {
@@ -79,7 +80,7 @@ export const getColumnCourtData = async (courtId: string, params: { year?: strin
 };
 
 export const getProgressRepublicData = async (params: { year?: string; quarter?: number; month?: number }) => {
-   const { queryString, cacheKey } = buildQueryAndCacheKey("progress_republic", params);
+  const { queryString, cacheKey } = buildQueryAndCacheKey("progress_republic", params);
   if (!cache[cacheKey]) {
     cache[cacheKey] = fetchWithAuth(`chart/progress/republic/?${queryString}`);
   }
@@ -87,14 +88,13 @@ export const getProgressRepublicData = async (params: { year?: string; quarter?:
 };
 
 export const getProgressCourtData = async (courtId: string, params: { year?: string; quarter?: number; month?: number }) => {
-   const { queryString, cacheKey } = buildQueryAndCacheKey(`progress_court_${courtId}`, params);
+  const { queryString, cacheKey } = buildQueryAndCacheKey(`progress_court_${courtId}`, params);
   if (!cache[cacheKey]) {
     cache[cacheKey] = fetchWithAuth(`chart/progress/${courtId}/?${queryString}`);
   }
   return await cache[cacheKey];
 };
 
-// Запросы для region
 export const getRadarRegionData = async (params: { year?: string; quarter?: number; month?: number }) => {
   const { queryString, cacheKey } = buildQueryAndCacheKey("radar_region", params);
   if (!cache[cacheKey]) {
@@ -131,6 +131,31 @@ export const getProgressRegionData = async (params: { year?: string; quarter?: n
   const { queryString, cacheKey } = buildQueryAndCacheKey("progress_region", params);
   if (!cache[cacheKey]) {
     cache[cacheKey] = fetchWithAuth(`chart/progress/region/?${queryString}`);
+  }
+  return await cache[cacheKey];
+};
+
+// New functions for gender and age data
+export const getGenderAgeRepublicData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("genderage_republic", params);
+  if (!cache[cacheKey]) {
+    cache[cacheKey] = fetchWithAuth(`chart/genderage/republic/?${queryString}`);
+  }
+  return await cache[cacheKey];
+};
+
+export const getGenderAgeRegionData = async (params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey("genderage_region", params);
+  if (!cache[cacheKey]) {
+    cache[cacheKey] = fetchWithAuth(`chart/genderage/region/?${queryString}`);
+  }
+  return await cache[cacheKey];
+};
+
+export const getGenderAgeCourtData = async (courtId: string, params: { year?: string; quarter?: number; month?: number }) => {
+  const { queryString, cacheKey } = buildQueryAndCacheKey(`genderage_court_${courtId}`, params);
+  if (!cache[cacheKey]) {
+    cache[cacheKey] = fetchWithAuth(`chart/genderage/${courtId}/?${queryString}`);
   }
   return await cache[cacheKey];
 };

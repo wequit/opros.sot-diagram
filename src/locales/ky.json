@@ -48,17 +48,15 @@
   "Regional_Courts_Table_Search": "Сот издөө",
   "Regional_Courts_Button_Courts": "Соттар",
   "Regional_Courts_Button_Regions": "Аймактар",
+  "Regional_Courts_Table_List": "Соттордун тизмеси",
   "Regional_Courts_Table_NumberResponses": "Сын-пикирлердин саны",
   "Regional_Courts_Table_Building": "Имарат",
-  
-
   "District_Courts_MainName": "Райондук соттор",
-
+  "First_Instance_Table_Instantiation": "Инстанция",
   "LogoutModal_TextOne": "Чыгууну ырастоо",
   "LogoutModal_TextTwo": "Чыгып кетүүнү каалайсызбы?",
   "LogoutModal_Cancel": "Айынуу",
   "LogoutModal_Exit": "Чыгуу",
-  
   "RemarksLogic_Remarks": "Эскертүүлөр жана сунуштар",
   "RemarksLogic_Chairman": "Төрага",
   "RemarksLogic_Message": "Жарандан билдирүү",
@@ -78,14 +76,10 @@
   "RemarksLogic_Loading": "Маалымат Жүктөө...",
   "RemarksLogic_Error_Adding": "Эскертүү жазылышында үлгүлөр",
   "RemarksLogic_ModalPlaceholder": "Сиздин эскертүүңүздү жазыңыз...",
-
   "BreadCrumb_RegionName": "Аймактар",
   "BreadCrumb_CourtName": "Облустук соттор",
-
   "HeaderNavRegionalRatings": "Аймактар ​​боюнча баалоо",
-  
   "Print": "Чыгаруу",
-
   "Month_Label": "Ай боюнча",
   "Month_January": "Учтун айы",
   "Month_February": "Бирдин айы",
@@ -99,7 +93,6 @@
   "Month_October": "Тогуздун айы",
   "Month_November": "Жетинин айы",
   "Month_December": "Бештин айы",
-  
   "Month_Jan": "Учтун айы",
   "Month_Feb": "Бирдин айы",
   "Month_Mar": "Жалган куран",
@@ -109,12 +102,10 @@
   "Month_Jul": "Теке",
   "Month_Aug": "Баш оона",
   "Month_Sep": "Аяк оона",
-  "Month_Oct": "Тогуздун айы", 
+  "Month_Oct": "Тогуздун айы",
   "Month_Nov": "Жетинин айы",
   "Month_Dec": "Бештин айы",
-  
   "Reset_Button": "Баштапкы абалга келтирүү",
-
   "LoginForm_Welcome": "Соттордун жана облустардын баалоо мониторингине кош келиңиз",
   "LoginForm_Subtitle": "Сот системасынын иштөө сапатын мониторинг, талдоо жана көзөмөлдөө үчүн бирдиктүү система",
   "LoginForm_LoginTitle": "Системага кирүү",
@@ -128,7 +119,6 @@
   "LoginForm_MonitoringDesc": "Реалдуу убакыт режиминде көрсөткүчтөрдү көзөмөлдөө",
   "LoginForm_Evaluation": "Баалоо",
   "LoginForm_EvaluationDesc": "Иштин натыйжалуулугун комплекстүү талдоо",
-
   "MapOblast_Title": "Облустар картасы жөнүндө",
   "MapOblast_Description": "Бул картада Кыргызстандын облустары жана алардын орточо баалары көрсөтүлгөн, ар бир облустагы соттордун рейтингдерине негизделген.",
   "MapOblast_ColorDescription": "Түстөр орточо баасын чагылдырат: жашыл - жогорку баа, кызыл - төмөн баа.",
@@ -138,7 +128,6 @@
   "MapOblast_Information": "Маалымат",
   "MapOblast_ScaleTitle": "Түстөрдүн белгилениши",
   "MapOblast_OverallRating": "Жалпы баа",
-
   "MapRayon_Title": "Райондук карта жөнүндө",
   "MapRayon_Description": "Бул картада Кыргызстандын райондору жана соттордун рейтингдерине негизделген орточо баалары көрсөтүлгөн.",
   "MapRayon_HoverDescription": "Районго учкаштырылганда, райондук соттун аталышы жана анын орточо баасы менен всплывающий кеңеш пайда болот.",
@@ -148,11 +137,9 @@
   "MapRayon_Information": "Маалымат",
   "MapRayon_ScaleTitle": "Түстөрдүн белгилениши",
   "MapRayon_OverallRating": "Жалпы баа",
-
   "Loading": "Жүктөө...",
   "No_Data": "Маалымат жок",
-  "RemarksLogic_ViewMessageTitle": "Жарандан билдирүү", 
-
+  "RemarksLogic_ViewMessageTitle": "Жарандан билдирүү",
   "LoginForm_EmptyFields": "Колдонуучу аты жана сырсөздү киргизиңиз",
   "LoginForm_Error": "Колдонуучу аты жана сырсөздү киргизиңиз",
   "LoginForm_NoToken": "Колдонуучу аты жана сырсөздү киргизиңиз"

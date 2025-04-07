@@ -95,7 +95,6 @@ export default function Evaluations({
           {categoryData && categoryData.datasets[0].data.length > 0 && (
             <CategoryPieChart categoryData={categoryData} windowWidth={windowWidth} />
           )}
-          {(genderData && genderData.datasets[0].data.length > 0) || (ageData && ageData.datasets[0].data.length > 0) && (
             <DemographicsChart
               genderData={genderData}
               ageGenderData={ageGenderData}
@@ -104,7 +103,6 @@ export default function Evaluations({
               setDemographicsView={setDemographicsView}
               windowWidth={windowWidth}
             />
-          )}
           {trafficSourceData && trafficSourceData.datasets[0].data.length > 0 && (
             <TrafficSourceChart trafficSourceData={trafficSourceData} windowWidth={windowWidth} />
           )}

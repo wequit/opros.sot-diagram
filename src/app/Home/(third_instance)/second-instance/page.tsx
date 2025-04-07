@@ -213,18 +213,18 @@ export default function SecondInstanceUnifiedPage() {
     const courtId = isCourt ? item.court_id : item.courtId;
     const name = isCourt ? item.court : item.name;
 
-    // Сохраняем контекст для хлебных крошек
-    localStorage.setItem("selectedCourtId", courtId.toString());
-    localStorage.setItem("selectedCourtName", name);
-    localStorage.setItem("breadcrumbSource", activeTab); // "courts" или "regions"
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("selectedCourtId", courtId.toString());
+      localStorage.setItem("selectedCourtName", name);
+      localStorage.setItem("breadcrumbSource", activeTab);
 
-    if (!isCourt) {
-      localStorage.setItem("regionName", name); // Для "По областям" сохраняем название региона
-    } else {
-      localStorage.removeItem("regionName"); // Для "По судам" убираем регион
+      if (!isCourt) {
+        localStorage.setItem("regionName", name);
+      } else {
+        localStorage.removeItem("regionName");
+      }
     }
 
-    // Перенаправляем на страницу рейтинга суда без параметра source в URL
     router.push(`/Home/second-instance/${courtId}/ratings`);
   };
 

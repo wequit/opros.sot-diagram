@@ -27,7 +27,9 @@ const RegionalCourtPage = () => {
     if (matchedCourt) {
       setCourtName(matchedCourt.court);
       setSelectedCourtId(matchedCourt.court_id.toString());
-      localStorage.setItem("matchedCourt", matchedCourt.court);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("matchedCourt", matchedCourt.court);
+      }
     } else {
       setCourtName("Неизвестный суд");
       setSelectedCourtId(null);

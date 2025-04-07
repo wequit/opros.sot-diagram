@@ -193,7 +193,9 @@ const FirstInstance = () => {
     const courtId = court.court_id.toString();
     const courtName = court.court;
 
-    localStorage.setItem("courtName2", court.court);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("courtName2", court.court);
+    }
     setCourtName(courtName);
     router.push(`/Home/first_instance/court/${courtId}`);
   };

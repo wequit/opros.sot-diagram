@@ -12,19 +12,23 @@ interface LogoutModalProps {
 const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onConfirm }) => {
     const {  getTranslation  } = useLanguage();
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    } else {
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
+    if (typeof document !== 'undefined') {
+      if (isOpen) {
+        document.body.style.overflow = 'hidden';
+        
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      } else {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
     }
 
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      }
     };
   }, [isOpen]);
 

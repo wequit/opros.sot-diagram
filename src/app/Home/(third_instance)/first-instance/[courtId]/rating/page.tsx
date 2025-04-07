@@ -15,7 +15,7 @@ const CourtRatingPage = () => {
 
   const {  getTranslation } = useLanguage();
   const { courtName, setCourtName, courtNameId, setCourtNameId } = useCourt();
-  const { setIsLoading, radarData: surveyData } = useChartData();
+  const { setIsLoading, radarData } = useChartData();
 
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +32,8 @@ const CourtRatingPage = () => {
         return;
       }
 
-      const storedCourtName = localStorage.getItem("courtName") || courtName;
-      const storedCourtId = localStorage.getItem("courtNameId") || courtId;
+      const storedCourtName = typeof window !== 'undefined' ? localStorage.getItem("courtName") : null;
+      const storedCourtId = typeof window !== 'undefined' ? localStorage.getItem("courtNameId") : null;
 
       if (storedCourtId === courtId && storedCourtName && courtNameId) {
         setIsDataLoading(false);
@@ -44,13 +44,15 @@ const CourtRatingPage = () => {
         setIsLoading(true);
         setIsDataLoading(true);
 
-        const newCourtName = storedCourtName || surveyData?.court || "Неизвестный суд";
+        const newCourtName = storedCourtName || radarData?.data?.[0]?.court || "Неизвестный суд";
 
         setCourtName(newCourtName);
         setCourtNameId(courtId);
-        localStorage.setItem("courtNameId", courtId);
-        localStorage.setItem("courtName", newCourtName);
-        localStorage.setItem("selectedCourtName", newCourtName);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("courtNameId", courtId);
+          localStorage.setItem("courtName", newCourtName);
+          localStorage.setItem("selectedCourtName", newCourtName);
+        }
 
         setError(null);
       } catch (error) {
@@ -59,8 +61,10 @@ const CourtRatingPage = () => {
         if (courtId) {
           setCourtNameId(courtId);
           setCourtName(storedCourtName || "Неизвестный суд (данные недоступны)");
-          localStorage.setItem("courtNameId", courtId);
-          localStorage.setItem("courtName", storedCourtName || "Неизвестный суд (данные недоступны)");
+          if (typeof window !== 'undefined') {
+            localStorage.setItem("courtNameId", courtId);
+            localStorage.setItem("courtName", storedCourtName || "Неизвестный суд (данные недоступны)");
+          }
         }
       } finally {
         setIsLoading(false);
@@ -69,7 +73,7 @@ const CourtRatingPage = () => {
     };
 
     loadCourtMetadata();
-  }, [courtId, courtName, setCourtName, courtNameId, setCourtNameId, setIsLoading, surveyData]);
+  }, [courtId, courtName, setCourtName, courtNameId, setCourtNameId, setIsLoading, radarData]);
 
   if (isDataLoading) {
     return <div>Loading...</div>;

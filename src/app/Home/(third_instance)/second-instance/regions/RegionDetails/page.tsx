@@ -406,11 +406,11 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
   };
 
   const handleCourtClick = (courtId: number, courtName: string) => {
-    // Сохраняем данные в localStorage, если это нужно
-    localStorage.setItem("selectedCourtId", courtId.toString());
-    localStorage.setItem("selectedCourtName", courtName);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem("selectedCourtId", courtId.toString());
+      localStorage.setItem("selectedCourtName", courtName);
+    }
   
-    // Выполняем редирект на страницу с рейтингами суда
     router.push(`/Home/second-instance/${courtId}/ratings`);
   };
 

@@ -86,7 +86,7 @@ export default function DemographicsChart({
         font: {
           weight: 'bold',
         },
-        formatter: (value: number) => `${Math.abs(Math.round(value))}`, // Используем Math.abs для убирания минуса
+        formatter: (value: number) => `${Math.abs(Math.round(value))}%`,
       },
       tooltip: {
         callbacks: {
