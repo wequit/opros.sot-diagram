@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import Dates from "@/components/Dates/Dates";
 import Evaluations from "@/components/Evaluations/page";
-import CourtDataFetcher from "@/lib/api/CourtAPI"; // Импортируем новый компонент
+import CourtDataFetcher from "@/lib/api/CourtAPI";
 import { useCourt } from "@/context/CourtContext";
 import { useChartData } from "@/context/ChartDataContext";
 import { useLanguage } from "@/context/LanguageContext";

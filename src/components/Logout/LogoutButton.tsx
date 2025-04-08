@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import LogoutModal from './LogoutModal';
-import { FiLogOut } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '@/context/LanguageContext';
+import { LogOut } from 'lucide-react';
 
 const LogoutButton: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,7 +16,6 @@ const LogoutButton: React.FC = () => {
     logout();
     setIsModalOpen(false);
     
-    // Используем полный путь, чтобы обойти любые префиксы маршрутов
     window.location.href = "/results/login";
   };
 
@@ -26,7 +25,7 @@ const LogoutButton: React.FC = () => {
         onClick={() => setIsModalOpen(true)}
         className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors"
       >
-        <FiLogOut className="w-5 h-5" />
+        <LogOut className="w-5 h-5" />
         <span className='HeaderNavExitText'>{getTranslation("HeaderNavExit")}</span>
       </button>
 

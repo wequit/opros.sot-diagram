@@ -8,15 +8,13 @@ import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext"; 
 import dynamic from "next/dynamic";
 
-const FiUser = dynamic(() => import("react-icons/fi").then(mod => mod.FiUser), { ssr: false });
-const FiLock = dynamic(() => import("react-icons/fi").then(mod => mod.FiLock), { ssr: false });
-const FiAlertCircle = dynamic(() => import("react-icons/fi").then(mod => mod.FiAlertCircle), { ssr: false });
-const FiEye = dynamic(() => import("react-icons/fi").then(mod => mod.FiEye), { ssr: false });
-const FiEyeOff = dynamic(() => import("react-icons/fi").then(mod => mod.FiEyeOff), { ssr: false });
-const RiScales3Line = dynamic(() => import("react-icons/ri").then(mod => mod.RiScales3Line), { ssr: false });
+const User = dynamic(() => import("lucide-react").then(mod => mod.User), { ssr: false });
+const KeyRound = dynamic(() => import("lucide-react").then(mod => mod.KeyRound), { ssr: false });
+const TriangleAlert = dynamic(() => import("lucide-react").then(mod => mod.TriangleAlert), { ssr: false });
+const Eye = dynamic(() => import("lucide-react").then(mod => mod.Eye), { ssr: false });
+const EyeOff = dynamic(() => import("lucide-react").then(mod => mod.EyeOff), { ssr: false });
 
 const LoginForm: React.FC = () => {
-  // Состояния формы
   const [credentials, setCredentials] = useState({
     username: "",
     password: "",
@@ -26,14 +24,12 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  // Ссылки и хуки
-  const { language, toggleLanguage, getTranslation } = useLanguage(); // Получаем getTranslation через useLanguage
+  const { language, toggleLanguage, getTranslation } = useLanguage(); 
   const { login } = useAuth();
   const router = useRouter();
   const usernameInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
-  // Эффект автоматического фокуса и анимации страницы при загрузке
   useEffect(() => {
     setIsPageLoaded(true);
     const timer = setTimeout(() => {
@@ -43,7 +39,6 @@ const LoginForm: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Обработчик изменения полей ввода
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setCredentials(prev => ({
@@ -54,12 +49,11 @@ const LoginForm: React.FC = () => {
     if (error) setError(null);
   }, [error]);
 
-  // Обработчик отправки формы
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!credentials.username || !credentials.password) {
-      setError(getTranslation("LoginForm_EmptyFields")); // Убираем language, так как getTranslation использует текущий язык по умолчанию
+      setError(getTranslation("LoginForm_EmptyFields"));
       return;
     }
 
@@ -86,12 +80,10 @@ const LoginForm: React.FC = () => {
     }
   };
 
-  // Переключение видимости пароля
   const togglePasswordVisibility = useCallback(() => {
     setShowPassword(prev => !prev);
   }, []);
 
-  // Обработчик нажатия клавиши Enter
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter" && !isLoading) {
@@ -101,7 +93,6 @@ const LoginForm: React.FC = () => {
     [isLoading]
   );
 
-  // Стиль для скролла и центрирования
   const scrollStyle: React.CSSProperties = {
     overflowY: "auto",
     height: "100vh",
@@ -163,7 +154,7 @@ const LoginForm: React.FC = () => {
               alt="Логотип"
               width={100}
               height={100}
-              className=" rounded-lg animate-pulse-subtle] "
+              className=" rounded-lg "
               priority
             />
               </div>
@@ -182,7 +173,7 @@ const LoginForm: React.FC = () => {
                 </label>
                 <div className="relative transition-all duration-300 group">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none transition-all duration-300 group-focus-within:text-blue-600">
-                    <FiUser className="w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+                    <User className="w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                   </div>
                   <input
                     id="username"
@@ -208,7 +199,7 @@ const LoginForm: React.FC = () => {
                 </label>
                 <div className="relative transition-all duration-300 group">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none transition-all duration-300 group-focus-within:text-blue-600">
-                    <FiLock className="w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+                    <KeyRound className="w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                   </div>
                   <input
                     id="password"
@@ -230,7 +221,7 @@ const LoginForm: React.FC = () => {
                     aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-all duration-200"
                   >
-                    {showPassword ? <FiEye className="h-5 w-5" aria-hidden="true" /> : <FiEyeOff className="h-5 w-5" aria-hidden="true" />}
+                    {showPassword ? <Eye className="h-5 w-5" aria-hidden="true" /> : <EyeOff className="h-5 w-5" aria-hidden="true" />}
                   </button>
                 </div>
               </div>
@@ -238,7 +229,7 @@ const LoginForm: React.FC = () => {
               {error && (
                 <div role="alert" aria-live="assertive" className="p-4 rounded-lg text-sm bg-red-50 border-l-4 border-red-500 text-red-600 animate-shake shadow-sm">
                   <div className="flex items-center">
-                    <FiAlertCircle className="w-5 h-5 mr-2 flex-shrink-0" aria-hidden="true" />
+                    <TriangleAlert className="w-5 h-5 mr-2 flex-shrink-0" aria-hidden="true" />
                     <span>{error}</span>
                   </div>
                 </div>

@@ -1,10 +1,9 @@
 import { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from "react";
 
-// Определяем тип для данных genderAgeData на основе структуры API
 interface GenderAgeOption {
   text_ru: string;
   text_kg: string;
-  "18–29": string; // Процент в формате "XX%"
+  "18–29": string; 
   "30–44": string;
   "45–59": string;
   "60 +": string;
@@ -15,20 +14,17 @@ interface GenderAgeData {
   Мужской?: GenderAgeOption;
 }
 
-// Тип для surveyData (на основе вашего описания)
 interface SurveyData {
   radar?: { court?: string };
-  // Можно добавить другие поля, если они используются
 }
 
-// Тип для данных диаграмм (можно уточнить дальше, если есть точные структуры API)
 interface ChartDataType {
-  circleData: any[] | null; // Замените на точный тип, если известен
-  radarData: { survey_responses_count?: number; data?: any[] } | null; // Уточните тип data, если есть структура
+  circleData: any[] | null;
+  radarData: { survey_responses_count?: number; data?: any[] } | null; 
   barData: any[] | null;
   progressData: any[] | null;
   columnData: any[] | null;
-  genderAgeData: GenderAgeData[] | null; // Тип для нового API
+  genderAgeData: GenderAgeData[] | null; 
 }
 
 interface ChartDataContextType {

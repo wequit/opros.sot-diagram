@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
+import { createContext, useContext, useState, useCallback, useMemo, ReactNode } from "react";
 import { Language } from "../types/surveyTypes";
 import { LanguageContextType } from "../types/contextTypes";
 import ru from "@/locales/ru.json";

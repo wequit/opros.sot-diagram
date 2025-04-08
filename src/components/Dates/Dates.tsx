@@ -56,7 +56,6 @@ export default function Dates() {
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
   
-    // Функция для обработки кликов снаружи
     const handleClickOutside = (event: MouseEvent) => {
       if (yearDropdownRef.current && !yearDropdownRef.current.contains(event.target as Node)) {
         setShowYearDropdown(false);
@@ -89,7 +88,6 @@ export default function Dates() {
     setActivePeriod(null);
     setSelectedMonth(null);
 
-    // Обновляем dateParams в контексте
     setDateParams({ year: selectedYear });
   }, [setDateParams]);
 
@@ -176,10 +174,9 @@ export default function Dates() {
       if (period.type === "quarter") {
         params.quarter = Math.floor(period.id) + 1;
       } else if (period.type === "month") {
-        params.month = period.id - 3; // Например, февраль = 2
+        params.month = period.id - 3; 
       }
 
-      // Обновляем dateParams в контексте
       setDateParams(params);
     },
     [dateRange.year, setDateParams]
@@ -196,7 +193,6 @@ export default function Dates() {
         endDate: field === "endDate" ? isoValue : dateRange.endDate,
       };
 
-      // Обновляем dateParams в контексте
       setDateParams(params);
     },
     [dateRange.startDate, dateRange.endDate, dateRange.year, setDateParams]
@@ -252,7 +248,6 @@ export default function Dates() {
       year: currentYear,
     });
 
-    // Обновляем dateParams в контексте
     setDateParams({ year: currentYear });
   }, [setDateParams]);
 

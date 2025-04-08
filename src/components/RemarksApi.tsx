@@ -153,11 +153,10 @@ export function useRemarks() {
       });
 
       if (!response.ok) {
-        // Проверяем, истёк ли токен (401 Unauthorized)
         if (response.status === 401) {
           console.warn("Токен устарел, перенаправляем на /login");
-          router.push("/login"); // Перенаправляем на страницу логина
-          return; // Прерываем выполнение функции
+          router.push("/login");
+          return;
         }
 
         const errorData = await response.json();

@@ -13,7 +13,7 @@ export default function GeneralPageContent() {
   return (
     <div className="mt-4">
       <Dates />
-      <CourtDataFetcher /> {/* По умолчанию используется courtId = "65" */}
+      <CourtDataFetcher /> 
       {isLoading ? <SkeletonDashboard /> : <Evaluations />}
     </div>
   );

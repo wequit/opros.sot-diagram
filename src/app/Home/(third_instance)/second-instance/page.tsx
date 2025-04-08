@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getCookie, getAssessmentData } from "@/lib/api/login";
 import Map from "../../../../lib/utils/Maps/Map_oblast";
-import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import RegionDetails from "./regions/RegionDetails/page";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCourt } from "@/context/CourtContext";
+import { ArrowDown, ArrowDownUp, ArrowUp } from "lucide-react";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -40,9 +40,9 @@ interface OblastData {
 }
 
 export default function SecondInstanceUnifiedPage() {
-  const {  getTranslation } = useLanguage();
+  const { getTranslation } = useLanguage();
   const { selectedRegion, setSelectedRegion, regionName } = useCourt();
-  
+
   const [regionCourts, setRegionCourts] = useState<CourtData[]>([]);
   const [regions, setRegions] = useState<OblastData[]>([]);
   const [oblastData, setOblastData] = useState<OblastData[]>([]);
@@ -118,9 +118,10 @@ export default function SecondInstanceUnifiedPage() {
   };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <FaSort className="ml-1 inline-block" />;
-    if (sortDirection === "asc") return <FaSortUp className="ml-1 inline-block text-blue-600" />;
-    return <FaSortDown className="ml-1 inline-block text-blue-600" />;
+    if (sortField !== field) return <ArrowDownUp className="ml-1 inline-block w-4 h-4" />;
+    if (sortDirection === "asc")
+      return <ArrowDown className="ml-1 inline-block text-blue-600 w-4 h-4" />;
+    return <ArrowUp className="ml-1 inline-block text-blue-600 w-4 h-4" />;
   };
 
   const sortedRegions = [...regions].sort((a, b) => {
@@ -251,21 +252,19 @@ export default function SecondInstanceUnifiedPage() {
         </div>
         <div className="flex gap-2 sm:gap-4 mt-2">
           <button
-            className={`py-1 px-2 sm:py-2 sm:px-4 text-xs sm:text-base rounded-lg font-medium transition-all duration-200 ${
-              activeTab === "courts"
+            className={`py-1 px-2 sm:py-2 sm:px-4 text-xs sm:text-base rounded-lg font-medium transition-all duration-200 ${activeTab === "courts"
                 ? "bg-blue-600 text-white shadow-md"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
+              }`}
             onClick={() => handleTabClick("courts")}
           >
             {getTranslation("Regional_Courts_Button_Courts")}
           </button>
           <button
-            className={`py-1 px-2 sm:py-2 sm:px-4 text-xs sm:text-base rounded-lg font-medium transition-all duration-200 ${
-              activeTab === "regions"
+            className={`py-1 px-2 sm:py-2 sm:px-4 text-xs sm:text-base rounded-lg font-medium transition-all duration-200 ${activeTab === "regions"
                 ? "bg-blue-600 text-white shadow-md"
                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
+              }`}
             onClick={() => handleTabClick("regions")}
           >
             {getTranslation("Regional_Courts_Button_Regions")}
@@ -294,10 +293,13 @@ export default function SecondInstanceUnifiedPage() {
                   onClick={() => handleSort("overall")}
                 >
                   <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Overall")}</span>
-                    {getSortIcon("overall")}
+                    <span className="whitespace-nowrap">{getTranslation("Regional_Courts_Table_Overall")}</span>
+                    <div className="flex items-center justify-center">
+                      {getSortIcon("overall")}
+                    </div>
                   </div>
                 </th>
+
                 <th
                   className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                   onClick={() => handleSort("judge")}
@@ -348,8 +350,10 @@ export default function SecondInstanceUnifiedPage() {
                   onClick={() => handleSort("count")}
                 >
                   <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Number of reviews")}</span>
+                  <span className="whitespace-nowrap">{getTranslation("Regional_Courts_Table_Number of reviews")}</span>
+                    <div className="flex items-center justify-center">
                     {getSortIcon("count")}
+                    </div>
                   </div>
                 </th>
               </tr>
@@ -373,12 +377,12 @@ export default function SecondInstanceUnifiedPage() {
                   const ratings = isCourt
                     ? Object.fromEntries(item.assessment.map((a) => [a.aspect, a.court_avg]))
                     : {
-                        Судья: item.ratings[0],
-                        Сотрудники: item.ratings[1],
-                        Процесс: item.ratings[2],
-                        Канцелярия: item.ratings[3],
-                        Здание: item.ratings[4],
-                      };
+                      Судья: item.ratings[0],
+                      Сотрудники: item.ratings[1],
+                      Процесс: item.ratings[2],
+                      Канцелярия: item.ratings[3],
+                      Здание: item.ratings[4],
+                    };
                   return (
                     <tr
                       key={isCourt ? item.court_id : item.id}
@@ -457,12 +461,12 @@ export default function SecondInstanceUnifiedPage() {
               const ratings = isCourt
                 ? Object.fromEntries(item.assessment.map((a) => [a.aspect, a.court_avg]))
                 : {
-                    Судья: item.ratings[0],
-                    Сотрудники: item.ratings[1],
-                    Процесс: item.ratings[2],
-                    Канцелярия: item.ratings[3],
-                    Здание: item.ratings[4],
-                  };
+                  Судья: item.ratings[0],
+                  Сотрудники: item.ratings[1],
+                  Процесс: item.ratings[2],
+                  Канцелярия: item.ratings[3],
+                  Здание: item.ratings[4],
+                };
               return (
                 <div
                   key={isCourt ? item.court_id : item.id}
@@ -474,7 +478,9 @@ export default function SecondInstanceUnifiedPage() {
                       {(isCourt ? item.court_id : item.id)}. {isCourt ? item.court : item.name}
                     </div>
                     <div className="flex items-center gap-1">
-                      <FaStar className="text-yellow-400 text-sm" />
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="ml-1 inline-block w-6 h-6 text-yellow-500" viewBox="0 0 24 24" stroke="none">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" stroke-linejoin="round" stroke-linecap="round" />
+                      </svg>
                       <span className="text-sm font-medium text-gray-700">
                         {(isCourt ? item.overall_assessment : item.overall).toFixed(1)}
                       </span>

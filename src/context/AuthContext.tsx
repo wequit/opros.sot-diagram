@@ -5,7 +5,7 @@ import { setCookie, getCookie, deleteCookie, getCurrentUser } from "@/lib/api/lo
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  isLoading: boolean; // Добавляем состояние загрузки
+  isLoading: boolean; 
   login: (token: string) => void;
   logout: () => void;
   user: { first_name: string; last_name: string; court: string; role: string } | null;
@@ -54,23 +54,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(currentUser);
       setIsAuthenticated(true);
       
-      // Определяем URL перенаправления в зависимости от инстанции пользователя
       let redirectUrl;
       
-      // Проверяем роль пользователя
       if (currentUser.role === "Председатель 1 инстанции") {
         redirectUrl = "/results/Home/summary/ratings";
       } else if (currentUser.role === "Председатель 2 инстанции") {
-        // Возвращаем первоначальный маршрут
         redirectUrl = "/results/Home/first_instance/ratings";
       } else if (currentUser.role === "Председатель 3 инстанции") {
         redirectUrl = "/results/Home/summary/ratings";
       } else {
-        // Если роль не соответствует ни одной из инстанций
         redirectUrl = "/results/Home/summary/ratings";
       }
       
-      // Полная перезагрузка страницы с целевым URL
       window.location.href = redirectUrl;
     } catch (error) {
       console.error("Ошибка при логине:", error);

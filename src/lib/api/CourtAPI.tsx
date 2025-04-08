@@ -8,7 +8,7 @@ import {
   getBarCourtData,
   getProgressCourtData,
   getColumnCourtData,
-  getGenderAgeCourtData, // Добавляем импорт
+  getGenderAgeCourtData,
 } from "@/lib/api/charts/charts";
 import { useChartData } from "@/context/ChartDataContext";
 import { useDateParams } from "@/context/DateParamsContext";
@@ -27,7 +27,7 @@ export default function CourtApi({ courtId }: CourtApiProps) {
     setColumnData,
     setIsLoading,
     setSurveyResponsesCount,
-    setGenderAgeData, // Добавляем setAgeGenderData
+    setGenderAgeData,
   } = useChartData();
 
   const { dateParams } = useDateParams();
@@ -46,16 +46,15 @@ export default function CourtApi({ courtId }: CourtApiProps) {
         getBarCourtData(effectiveCourtId, dateParams),
         getProgressCourtData(effectiveCourtId, dateParams),
         getColumnCourtData(effectiveCourtId, dateParams),
-        getGenderAgeCourtData(effectiveCourtId, dateParams), // Добавляем запрос
+        getGenderAgeCourtData(effectiveCourtId, dateParams), 
       ]);
 
-      // Установка данных по частям
       setCircleData(circleData || null);
       setRadarData(radarData || null);
       setBarData(barData || null);
       setProgressData(progressData || null);
       setColumnData(columnData || null);
-      setGenderAgeData(genderAgeData || null); // Передаем данные в контекст
+      setGenderAgeData(genderAgeData || null); 
       setSurveyResponsesCount(radarData?.survey_responses_count || 0);
 
       setError(null);
@@ -75,7 +74,7 @@ export default function CourtApi({ courtId }: CourtApiProps) {
     setColumnData,
     setIsLoading,
     setSurveyResponsesCount,
-    setGenderAgeData, // Добавляем в зависимости
+    setGenderAgeData,
   ]);
 
   useEffect(() => {

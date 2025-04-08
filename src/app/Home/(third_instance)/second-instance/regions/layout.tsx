@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "@/components/layout/Header";
+import Header from "@/components/layout/Header/Header";
 import { SurveyProvider } from "@/context/SurveyProvider";
 import  '@/styles/responsive/responsiveRegion.css'
 

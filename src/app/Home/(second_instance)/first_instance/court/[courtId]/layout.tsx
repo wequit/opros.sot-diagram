@@ -1,6 +1,6 @@
 "use client";
 
-import Header from "@/components/layout/Header";
+import Header from "@/components/layout/Header/Header";
 import { SurveyProvider } from "@/context/SurveyProvider";
 
 export default function CourtLayout({ children }: { children: React.ReactNode }) {

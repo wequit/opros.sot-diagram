@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 interface LoginResponse {
   access: string;
@@ -90,7 +91,11 @@ const handleUnauthorized = () => {
   deleteCookie("refresh_token");
 };
 
-export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+export const fetchWithAuth = async (
+  url: string,
+  options: RequestInit = {},
+  router?: ReturnType<typeof useRouter>
+) => {
   const cacheKey = `${url}-${JSON.stringify(options)}`;
   const cached = cache[cacheKey];
   const now = Date.now();
@@ -109,10 +114,20 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
         accessToken = newAccessToken;
       } else {
         handleUnauthorized();
+        if (router) {
+          router.push("/login");  
+        } else {
+          window.location.href = "/login";  
+        }
         return null;
       }
     } else {
       handleUnauthorized();
+      if (router) {
+        router.push("/login");  
+      } else {
+        window.location.href = "/login";  
+      }
       return null;
     }
   }
@@ -130,6 +145,11 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
   if (response.status === 401) {
     handleUnauthorized();
+    if (router) {
+      router.push("/login");  
+    } else {
+      window.location.href = "/login";  
+    }
     return null;
   }
 
@@ -150,7 +170,9 @@ export const getCurrentUser = async (court?: any) => {
   return await fetchWithAuth("current_user/");
 };
 
-export const getRayonAssessmentData = async () => {
+export const getRayonAssessmentData = async (
+  router?: ReturnType<typeof useRouter>
+) => {
   const cacheKey = "getRayonAssessmentData";
   const cached = cache[cacheKey];
   const now = Date.now();
@@ -182,6 +204,11 @@ export const getRayonAssessmentData = async () => {
     return data;
   } catch (error) {
     console.error("Ошибка при получении данных rayon assessment:", error);
+    if (router) {
+      router.push("/login");  
+    } else {
+      window.location.href = "/login"; 
+    }
     throw error;
   }
 };
@@ -222,6 +249,7 @@ export const useFetchAssessmentData = () => {
   const [data, setData] = useState<any>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -230,7 +258,7 @@ export const useFetchAssessmentData = () => {
         if (dataRef.current) {
           setData(dataRef.current);
         } else {
-          const response = await fetchWithAuth("assessment/");
+          const response = await fetchWithAuth("assessment/", {}, router);
           dataRef.current = response;
           setData(response);
         }
@@ -242,7 +270,7 @@ export const useFetchAssessmentData = () => {
     };
 
     fetchData();
-  }, []);
+  }, [router]);
 
   return { data, isLoading, error };
 };

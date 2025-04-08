@@ -15,11 +15,10 @@ ChartJS.register(
   ChartDataLabels
 );
 
-// Глобально настраиваем datalabels
 ChartJS.defaults.plugins.datalabels = {
   display: (context: any) => {
     const value = context.dataset.data[context.dataIndex];
-    return value !== null && value > 0; // Отображаем только для значений больше 0
+    return value !== null && value > 0; 
   },
   formatter: (value: number | null) => {
     if (value === null || value <= 0) return '';

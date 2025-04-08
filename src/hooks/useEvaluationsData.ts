@@ -16,7 +16,7 @@ export default function useEvaluationData() {
     columnData,
     surveyResponsesCount,
     isLoading,
-    genderAgeData, // Добавляем новый параметр
+    genderAgeData, 
   } = useChartData();
   const { selectedCourtId } = useCourt();
   const { language } = useLanguage();
@@ -80,7 +80,7 @@ export default function useEvaluationData() {
     datasets: [{ data: [], backgroundColor: [] }],
   });
   const [ageGenderData, setAgeGenderData] = useState<ChartData<"bar">>({
-    labels: ["18–29", "30–44", "45–59", "60 +"], // Обновлены метки для соответствия API
+    labels: ["18–29", "30–44", "45–59", "60 +"],
     datasets: [
       { label: "Мужской", data: [0, 0, 0, 0], backgroundColor: "rgb(51, 153, 255)" },
       { label: "Женский", data: [0, 0, 0, 0], backgroundColor: "rgb(255, 99, 132)" },
@@ -91,7 +91,6 @@ export default function useEvaluationData() {
     if (isLoading) return;
 
     try {
-      // Обработка circleData
       if (circleData) {
         circleData.forEach((question: any) => {
           const labels = question.options?.map((option: any) => (language === "ru" ? option.text_ru : option.text_kg)) || [];
@@ -168,7 +167,6 @@ export default function useEvaluationData() {
         });
       }
 
-     // Обработка "Пол и возраст" из genderAgeData
 if (genderAgeData) {
   const femaleObj = genderAgeData.find(obj => obj["Женский"]);
   const maleObj = genderAgeData.find(obj => obj["Мужской"]);
@@ -190,7 +188,6 @@ if (genderAgeData) {
   }
 }
 
-// Обработка "Пол и возраст" из barData и circleData, только если нет genderAgeData
 if (!genderAgeData && barData && circleData) {
   const ageQuestion = barData.find((q: any) => q.question_id === 4);
   const genderQuestion = circleData?.find((q: any) => q.question_id === 3);
@@ -217,8 +214,31 @@ if (!genderAgeData && barData && circleData) {
   }
 }
 
-// Обработка "Возраст" независимо от genderAgeData
 if (barData) {
+  const trafficQuestion = barData.find((q: any) => q.question_id === 1);
+  if (trafficQuestion) {
+    const labels = trafficQuestion.options.map((opt: any) => opt.text_ru);
+    const counts = trafficQuestion.options.map((opt: any) => opt.count);
+    setTrafficSourceData({
+      labels,
+      datasets: [
+        {
+          data: counts,
+          backgroundColor: [
+            "#FF6384",
+            "#36A2EB",
+            "#FFCE56",
+            "#4BC0C0",
+            "#9966FF",
+            "#FF9F40",
+            "#8B0000",
+            "#008000",
+          ],
+        },
+      ],
+    });
+  }
+
   const ageQuestion = barData.find((q: any) => q.question_id === 4);
   if (ageQuestion) {
     const ageLabels = ageQuestion.options.map((opt: any) => opt.text_ru);
@@ -237,7 +257,7 @@ if (barData) {
   }
 }
 
-      // Обработка progressData
+
       if (progressData) {
         const judgeQuestions = [11, 12, 14, 17];
         const staffQuestions = [7, 9];
@@ -275,7 +295,6 @@ if (barData) {
         setProcessRatings(processRatingsData);
       }
 
-      // Обработка columnData
       if (columnData) {
         const disrespectQuestion = columnData.find((q: any) => q.question_id === 15);
         if (disrespectQuestion) {
@@ -318,7 +337,7 @@ if (barData) {
     barData,
     progressData,
     columnData,
-    genderAgeData, // Добавляем в зависимости
+    genderAgeData, 
     language,
     selectedCourtId,
     courtName2,

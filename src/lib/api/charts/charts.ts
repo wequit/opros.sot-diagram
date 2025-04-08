@@ -14,7 +14,6 @@ const buildQueryAndCacheKey = (baseKey: string, params: { year?: string; quarter
   return { queryString: queryString.toString(), cacheKey };
 };
 
-// Existing functions (unchanged)
 export const getRadarRepublicData = async (params: { year?: string; quarter?: number; month?: number }) => {
   const { queryString, cacheKey } = buildQueryAndCacheKey("radar_republic", params);
   if (!cache[cacheKey]) {
@@ -135,7 +134,6 @@ export const getProgressRegionData = async (params: { year?: string; quarter?: n
   return await cache[cacheKey];
 };
 
-// New functions for gender and age data
 export const getGenderAgeRepublicData = async (params: { year?: string; quarter?: number; month?: number }) => {
   const { queryString, cacheKey } = buildQueryAndCacheKey("genderage_republic", params);
   if (!cache[cacheKey]) {

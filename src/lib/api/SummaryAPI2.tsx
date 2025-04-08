@@ -22,7 +22,7 @@ export default function SummaryAPI2() {
     setColumnData,
     setIsLoading,
     setSurveyResponsesCount,
-    setGenderAgeData, // Добавляем setGenderAgeData
+    setGenderAgeData, 
   } = useChartData();
   const { dateParams } = useDateParams();
 
@@ -47,7 +47,7 @@ export default function SummaryAPI2() {
         setColumnData(data);
       });
       const genderAgePromise = getGenderAgeRegionData(dateParams).then((data) => {
-        setGenderAgeData(data); // Устанавливаем напрямую
+        setGenderAgeData(data);
       });
 
       await Promise.all([
@@ -75,7 +75,7 @@ export default function SummaryAPI2() {
     setColumnData,
     setIsLoading,
     setSurveyResponsesCount,
-    setGenderAgeData, // Добавляем в зависимости
+    setGenderAgeData,
   ]);
 
   useEffect(() => {

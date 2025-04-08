@@ -15,7 +15,7 @@ export default function RemarksPage() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [localRemarks, setLocalRemarks] = useState<any[]>([]);
-  const [courtColumnWidth, setCourtColumnWidth] = useState<number>(250); // Начальная ширина столбца СУД
+  const [courtColumnWidth, setCourtColumnWidth] = useState<number>(250); 
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const resizingRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef<number>(0);
@@ -26,7 +26,6 @@ export default function RemarksPage() {
   const pathname = usePathname();
   const {language, getTranslation} = useLanguage();
 
-  // Новая функция для начала изменения размера столбца
   const startResize = (e: React.MouseEvent<HTMLDivElement>) => {
     setIsResizing(true);
     startXRef.current = e.clientX;
@@ -37,15 +36,13 @@ export default function RemarksPage() {
     }
   };
 
-  // Обработчик перемещения мыши
   const handleMouseMove = (e: MouseEvent) => {
     if (!isResizing) return;
     const diff = e.clientX - startXRef.current;
-    const newWidth = Math.max(150, startWidthRef.current + diff); // Минимальная ширина 150px
+    const newWidth = Math.max(150, startWidthRef.current + diff); 
     setCourtColumnWidth(newWidth);
   };
 
-  // Завершение изменения размера
   const stopResize = () => {
     setIsResizing(false);
     if (typeof document !== 'undefined') {
@@ -108,7 +105,6 @@ export default function RemarksPage() {
     );
   };
 
-  // Добавляем модальное окно для просмотра сообщения
   const ViewMessageModal = ({
     isOpen,
     onClose,
@@ -147,7 +143,7 @@ export default function RemarksPage() {
       }
     } catch (error) {
       console.error("Ошибка при обработке данных замечаний:", error);
-      setLocalRemarks([]); // Устанавливаем пустой массив при ошибке
+      setLocalRemarks([]); 
     }
   }, [remarks]);
 
@@ -191,14 +187,12 @@ export default function RemarksPage() {
     }
   };
 
-  // Мемоизируем вычисление пагинации
   const getCurrentPageData = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
     return localRemarks.slice().reverse().slice(startIndex, endIndex);
   }, [localRemarks, currentPage, itemsPerPage]);
 
-  // Мемоизируем вычисление общего числа страниц
   const totalPages = useMemo(() => {
     return Math.ceil(localRemarks.length / itemsPerPage);
   }, [localRemarks.length, itemsPerPage]);
@@ -221,34 +215,28 @@ export default function RemarksPage() {
     }
   };
 
-  // Функция для создания массива номеров страниц
   const getPaginationNumbers = () => {
     let pages = [];
-    const maxButtons = 5; // Максимальное количество кнопок пагинации
+    const maxButtons = 5;
     
     if (totalPages <= maxButtons) {
-      // Если страниц меньше или равно максимальному количеству кнопок, показываем все
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Иначе показываем только часть
       if (currentPage <= 3) {
-        // Если текущая страница - одна из первых
         for (let i = 1; i <= 4; i++) {
           pages.push(i);
         }
-        pages.push(null); // null означает ...
+        pages.push(null);
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
-        // Если текущая страница - одна из последних
         pages.push(1);
         pages.push(null);
         for (let i = totalPages - 3; i <= totalPages; i++) {
           pages.push(i);
         }
       } else {
-        // Где-то в середине
         pages.push(1);
         pages.push(null);
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
@@ -262,7 +250,6 @@ export default function RemarksPage() {
     return pages;
   };
 
-  // Мемоизируем вычисление номеров страниц для пагинации
   const paginationNumbers = useMemo(() => {
     return getPaginationNumbers();
   }, [currentPage, totalPages]);

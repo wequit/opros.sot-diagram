@@ -1,6 +1,5 @@
 import { useLanguage } from '@/context/LanguageContext';
 import React from 'react';
-import { FaStar } from 'react-icons/fa';
 
 interface RatingChartProps {
   ratings: { [key: string]: number }; 
@@ -54,7 +53,9 @@ export default function RatingChart({
             <div className="flex justify-between items-center">
               <span className="text-md">{title}</span>
               <div className="flex items-center">
-                <FaStar className="text-yellow-400 w-4 h-4 mr-1" />
+              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="ml-1 inline-block w-6 h-6 text-yellow-500" viewBox="0 0 24 24" stroke="none">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" strokeLinejoin="round" strokeLinecap="round" />
+                      </svg>
                 <span className="font-bold">{rating}</span>
                 <span className="font-bold text-gray-900 ml-1">/</span>
                 <span className="font-bold text-gray-900 ml-1">5</span>

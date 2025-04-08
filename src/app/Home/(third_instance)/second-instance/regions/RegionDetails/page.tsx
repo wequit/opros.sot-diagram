@@ -1,6 +1,5 @@
 "use client";
 
-import { getCookie } from "@/lib/api/login";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCourt } from "@/context/CourtContext";
 import { useChartData } from "@/context/ChartDataContext";
@@ -11,16 +10,13 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import Dates from "@/components/Dates/Dates";
-import Evaluations from "@/components/Evaluations/page";
+import { ArrowDown, ArrowDownUp, ArrowUp } from "lucide-react";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import * as d3 from "d3";
 import { GeoPermissibleObjects } from "d3-geo";
 import geoData from "../../../../../../../public/gadm41_KGZ_1.json";
 import districtsGeoData from "../../../../../../../public/gadm41_KGZ_2.json";
-import { FaSort, FaSortUp, FaSortDown, FaStar } from "react-icons/fa";
 import debounce from "lodash/debounce";
-import CourtApi from "@/lib/api/CourtAPI";
 import { useRouter } from "next/navigation";
 
 const getRatingColor = (rating: number) => {
@@ -303,7 +299,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
   const [sortDirection, setSortDirection] = useState<SortDirection>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Добавьте состояние для анимированного поиска
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const router = useRouter();
 
@@ -313,8 +308,8 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
         sortDirection === "asc"
           ? "desc"
           : sortDirection === "desc"
-          ? null
-          : "asc"
+            ? null
+            : "asc"
       );
       if (sortDirection === "desc") setSortField(null);
     } else {
@@ -324,10 +319,10 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
   };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <FaSort className="ml-1 inline-block" />;
+    if (sortField !== field) return <ArrowDownUp className="ml-1 inline-block w-4 h-4" />;
     if (sortDirection === "asc")
-      return <FaSortUp className="ml-1 inline-block text-blue-600" />;
-    return <FaSortDown className="ml-1 inline-block text-blue-600" />;
+      return <ArrowDown className="ml-1 inline-block text-blue-600 w-4 h-4" />;
+    return <ArrowUp className="ml-1 inline-block text-blue-600 w-4 h-4" />;
   };
 
   const sortedCourts = useMemo(() => {
@@ -380,11 +375,9 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     );
   }, [searchQuery, sortedCourts]);
 
-  // Обновленная логика поиска с дебаунсингом
   const debouncedSearch = useCallback(
     debounce((query: string) => {
       setSearchQuery(query);
-      // Фильтрация происходит в useMemo filteredCourts, который уже существует
     }, 300),
     [sortedCourts]
   );
@@ -410,7 +403,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
       localStorage.setItem("selectedCourtId", courtId.toString());
       localStorage.setItem("selectedCourtName", courtName);
     }
-  
+
     router.push(`/Home/second-instance/${courtId}/ratings`);
   };
 
@@ -427,16 +420,13 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
     setSurveyData(null);
   };
 
-  // Перехватываем событие "назад" для очистки состояния
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
       if (selectedCourtId) {
-        // Если мы в деталях суда, очищаем только детали суда
         setSelectedCourtId(null);
         setSelectedCourtName(null);
         setSurveyData(null);
       } else if (selectedRegion) {
-        // Если мы в списке судов региона, очищаем регион
         setSelectedRegion(null);
         setSelectedCourtId(null);
         setSelectedCourtName(null);
@@ -602,7 +592,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                     d3.select("#tooltip").style("display", "none");
                   });
 
-                // Добавляем текст с оценками
                 const textGroup = g.append("g").attr("class", "rating-labels");
 
                 textGroup
@@ -658,8 +647,8 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
                               <span class="text-gray-700 text-sm">Общая оценка</span>
                               <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                                court.overall
-                              )}">
+                            court.overall
+                          )}">
                                 <span class="inline-flex items-center">
                                   <span class="text-yellow-400 mr-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="12" height="12" fill="currentColor">
@@ -673,40 +662,40 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
                               <span class="text-gray-700 text-sm">Здание</span>
                               <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                                court.ratings[4]
-                              )}">
+                            court.ratings[4]
+                          )}">
                                 ${court.ratings[4].toFixed(1)}
                               </span>
                             </div>
                             <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
                               <span class="text-gray-700 text-sm">Канцелярия</span>
                               <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                                court.ratings[3]
-                              )}">
+                            court.ratings[3]
+                          )}">
                                 ${court.ratings[3].toFixed(1)}
                               </span>
                             </div>
                             <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
                               <span class="text-gray-700 text-sm">Процесс</span>
                               <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                                court.ratings[2]
-                              )}">
+                            court.ratings[2]
+                          )}">
                                 ${court.ratings[2].toFixed(1)}
                               </span>
                             </div>
                             <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
                               <span class="text-gray-700 text-sm">Сотрудники</span>
                               <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                                court.ratings[1]
-                              )}">
+                            court.ratings[1]
+                          )}">
                                 ${court.ratings[1].toFixed(1)}
                               </span>
                             </div>
                             <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
                               <span class="text-gray-700 text-sm">Судья</span>
                               <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                                court.ratings[0]
-                              )}">
+                            court.ratings[0]
+                          )}">
                                 ${court.ratings[0].toFixed(1)}
                               </span>
                             </div>
@@ -824,14 +813,12 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             <span className="truncate mr-2">НАИМЕНОВАНИЕ СУДОВ</span>
                             <div className="relative">
                               <div
-                                className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${
-                                  isSearchOpen ? "w-36" : "w-8"
-                                }`}
+                                className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${isSearchOpen ? "w-36" : "w-8"
+                                  }`}
                               >
                                 <div
-                                  className={`flex-grow transition-all duration-500 ease-in-out ${
-                                    isSearchOpen ? "opacity-100 w-full" : "opacity-0 w-0"
-                                  }`}
+                                  className={`flex-grow transition-all duration-500 ease-in-out ${isSearchOpen ? "opacity-100 w-full" : "opacity-0 w-0"
+                                    }`}
                                 >
                                   <input
                                     type="text"
@@ -870,8 +857,10 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                           onClick={() => handleSort("overall")}
                         >
                           <div className="flex items-center justify-between px-2">
-                            <span>{getTranslation("Regional_Courts_Table_Overall", language)}</span>
-                            {getSortIcon("overall")}
+                            <span className="whitespace-nowrap">{getTranslation("Regional_Courts_Table_Overall", language)}</span>
+                            <div className="flex-shrink-0">
+                              {getSortIcon("overall")}
+                            </div>
                           </div>
                         </th>
                         <th
@@ -1003,7 +992,9 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                             {index + 1}. {court.name}
                           </div>
                           <div className="flex items-center gap-1">
-                            <FaStar className="text-yellow-400 text-sm" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="ml-1 inline-block w-6 h-6 text-yellow-500" viewBox="0 0 24 24" stroke="none">
+                              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" strokeLinejoin="round" strokeLinecap="round" />
+                            </svg>
                             <span className="text-sm font-medium text-gray-700">
                               {court.overall.toFixed(1)}
                             </span>

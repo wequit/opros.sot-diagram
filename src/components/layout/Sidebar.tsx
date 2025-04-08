@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { MdAssessment, MdFeedback, MdClose, MdMap } from "react-icons/md";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
@@ -21,7 +20,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
     return null;
   }
 
-  const isActivePath = (path: string) => pathname === path;
+  const isActivePath = (path: string) => pathname.startsWith(path) 
 
   return (
     <div className="h-full flex flex-col ">
@@ -30,33 +29,32 @@ export default function Sidebar({ onClose }: SidebarProps) {
         <Image
           src={logo}
           alt="Логотип"
-          width={45}
-          height={45}
-          className="rounded-full shadow-sm"
+          width={40}
+          height={40}
+          style={{ width: 'auto', height: 'auto' }}
+          className="rounded-full shadow-sm Logo_1024"
         />
         <button
           onClick={onClose}
           className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
         >
-          <MdClose className="w-5 h-5 text-gray-600" />
         </button>
       </div>
 
       {/* Навигация */}
       <nav className="flex flex-col p-4 space-y-2">
         <Link
-          href="/"
+          href="/Home/summary/ratings"
           onClick={onClose}
           className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/")
+              isActivePath("/Home/summary/")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
           `}
         >
-          <MdAssessment className="w-6 h-6" />
           <span>
             {user?.role === "Председатель 3 инстанции"
               ? getTranslation("HeaderNavOne")
@@ -68,34 +66,32 @@ export default function Sidebar({ onClose }: SidebarProps) {
         user?.role !== "Председатель 1 инстанции" ? (
           <>
             <Link
-              href="/maps/General"
+              href="/Home/supreme-court/ratings"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/maps/General")
+              isActivePath("/Home/supreme-court")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
           `}
             >
-              <MdMap className="w-6 h-6" />
               <span>{getTranslation("HeaderNavTwo")}</span>
             </Link>
 
             <Link
-              href="/Home/second-instance/regions"
+              href="/Home/second-instance/"
               onClick={onClose}
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/Home/second-instance/regions")
+              isActivePath("/Home/second-instance")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
           `}
             >
-              <MdMap className="w-6 h-6 " />
               <span>{getTranslation("HeaderNavThree")}</span>
             </Link>
 
@@ -106,13 +102,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
               className={`
             flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
             ${
-              isActivePath("/Home/first-instance/ratings")
+              isActivePath("/Home/first-instance/")
                 ? "bg-green-50 text-green-700 font-medium shadow-sm"
                 : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
             }
           `}
             >
-              <MdMap className="w-6 h-6" />
               <span>{getTranslation("HeaderNavFour")}</span>
             </Link>
             

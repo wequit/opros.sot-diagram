@@ -2,18 +2,12 @@
 
 import Map from "../../../../../lib/utils/Maps/Map_rayon";
 import { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  FaSort,
-  FaSortUp,
-  FaSortDown,
-  FaStar,
-  FaArrowUp,
-} from "react-icons/fa";
 import { getRayonAssessmentData, getCookie } from "@/lib/api/login";
 import { useRouter } from "next/navigation";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import debounce from "lodash/debounce";
 import { useCourt } from "@/context/CourtContext";
+import { ArrowDown, ArrowDownUp, ArrowUp, MoveVertical, Star } from "lucide-react";
 
 interface Assessment {
   aspect: string;
@@ -75,14 +69,14 @@ const transformApiData = (apiData: any): Court[] => {
               curr.aspect.toLowerCase() === "здание"
                 ? "building"
                 : curr.aspect.toLowerCase() === "канцелярия"
-                ? "office"
-                : curr.aspect.toLowerCase() === "процесс"
-                ? "process"
-                : curr.aspect.toLowerCase() === "сотрудники"
-                ? "staff"
-                : curr.aspect.toLowerCase() === "судья"
-                ? "judge"
-                : "";
+                  ? "office"
+                  : curr.aspect.toLowerCase() === "процесс"
+                    ? "process"
+                    : curr.aspect.toLowerCase() === "сотрудники"
+                      ? "staff"
+                      : curr.aspect.toLowerCase() === "судья"
+                        ? "judge"
+                        : "";
 
             if (key) acc[key] = curr.court_avg;
             return acc;
@@ -204,10 +198,10 @@ export default function Courts() {
   };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <FaSort className="ml-1 inline-block" />;
+    if (sortField !== field) return <ArrowDownUp className="ml-1 inline-block w-4 h-4" />;
     if (sortDirection === "asc")
-      return <FaSortUp className="ml-1 inline-block text-blue-600" />;
-    return <FaSortDown className="ml-1 inline-block text-blue-600" />;
+      return <ArrowDown className="ml-1 inline-block text-blue-600 w-4 h-4" />;
+    return <ArrowUp className="ml-1 inline-block text-blue-600 w-4 h-4" />;
   };
 
   const sortedCourts = useMemo(() => {
@@ -294,14 +288,14 @@ export default function Courts() {
         <Breadcrumb
           regionName={null}
           courtName={null}
-          onRegionBackClick={() => {}}
+          onRegionBackClick={() => { }}
           showHome={true}
           headerKey="HeaderNavFour"
         />
         <h2 className="text-2xl font-bold mt-2 DistrictName">Районные суды</h2>
       </div>
       <div className="border border-gray-300 rounded-2xl bg-white">
-        <Map selectedRayon={null} onSelectRayon={() => {}} courts={courts} />
+        <Map selectedRayon={null} onSelectRayon={() => { }} courts={courts} />
       </div>
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-8">
         <div className="overflow-x-auto">
@@ -320,14 +314,12 @@ export default function Courts() {
                       <span className="truncate mr-2">НАИМЕНОВАНИЕ СУДА</span>
                       <div className="relative">
                         <div
-                          className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${
-                            isSearchOpen ? "w-36" : "w-8"
-                          }`}
+                          className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${isSearchOpen ? "w-36" : "w-8"
+                            }`}
                         >
                           <div
-                            className={`flex-grow transition-all duration-500 ease-in-out ${
-                              isSearchOpen ? "opacity-100 w-full" : "opacity-0 w-0"
-                            }`}
+                            className={`flex-grow transition-all duration-500 ease-in-out ${isSearchOpen ? "opacity-100 w-full" : "opacity-0 w-0"
+                              }`}
                           >
                             <input
                               type="text"
@@ -365,11 +357,14 @@ export default function Courts() {
                     className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                     onClick={() => handleSort("overall")}
                   >
-                    <div className="flex items-center justify-between px-2">
-                      <span>Общая оценка</span>
-                      {getSortIcon("overall")}
+                   <div className="flex items-center justify-between px-2 space-x-1">
+                      <span className="truncate">Общая оценка</span>
+                      <div className="w-4 h-4">
+                        {getSortIcon("overall")}
+                      </div>
                     </div>
                   </th>
+
                   <th
                     className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
                     onClick={() => handleSort("judge")}
@@ -513,7 +508,9 @@ export default function Courts() {
                       {index + 1}. {court.name}
                     </div>
                     <div className="flex items-center gap-1">
-                      <FaStar className="text-yellow-400 text-sm" />
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="ml-1 inline-block w-6 h-6 text-yellow-500" viewBox="0 0 24 24" stroke="none">
+                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" strokeLinejoin="round" strokeLinecap="round" />
+                      </svg>
                       <span className="text-sm font-medium text-gray-700">
                         {renderTableCell(court.overall_assessment)}
                       </span>
@@ -557,7 +554,7 @@ export default function Courts() {
           className="fixed bottom-4 right-2 sm:bottom-10 sm:right-6 p-2 sm:p-3 bg-sky-500 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 ease-in-out z-50"
           aria-label="Наверх"
         >
-          <FaArrowUp className="w-4 h-4 sm:w-5 sm:h-5" />
+          <ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" /> 
         </button>
       )}
     </div>

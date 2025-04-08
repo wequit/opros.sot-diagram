@@ -2,15 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
-import CommentsSection from "../Charts/CommentsSection";
-import CategoryPieChart from "../Charts/CategoryPieChart";
-import RadarChart from "../Charts/RadarChart";
-import DemographicsChart from "../Charts/DemographicsChart";
-import CategoryJudgeChart from "../Charts/CategoryJudgeChart";
-import TrafficSourceChart from "../Charts/TrafficSourceChart";
-import RatingChart from "../Charts/RatingChart";
-import ReusablePieChart from "../Charts/ReusablePieChart";
-import DisrespectChart from "../Charts/DisrespectChart";
 import useEvaluationData from "@/hooks/useEvaluationsData";
 
 interface RegionSummaryData {
@@ -19,6 +10,16 @@ interface RegionSummaryData {
   courts_count: number;
   ratings_by_category: { [key: string]: number };
 }
+
+const RadarChart = React.lazy(() => import("../Charts/RadarChart"));
+const CommentsSection = React.lazy(() => import("../Charts/CommentsSection"));
+const CategoryPieChart = React.lazy(() => import("../Charts/CategoryPieChart"));
+const DemographicsChart = React.lazy(() => import("../Charts/DemographicsChart"));
+const CategoryJudgeChart = React.lazy(() => import("../Charts/CategoryJudgeChart"));
+const TrafficSourceChart = React.lazy(() => import("../Charts/TrafficSourceChart"));
+const RatingChart = React.lazy(() => import("../Charts/RatingChart"));
+const ReusablePieChart = React.lazy(() => import("../Charts/ReusablePieChart"));
+const DisrespectChart = React.lazy(() => import("../Charts/DisrespectChart"));
 
 export default function Evaluations({
   selectedCourtId,
@@ -103,9 +104,7 @@ export default function Evaluations({
               setDemographicsView={setDemographicsView}
               windowWidth={windowWidth}
             />
-          {trafficSourceData && trafficSourceData.datasets[0].data.length > 0 && (
             <TrafficSourceChart trafficSourceData={trafficSourceData} windowWidth={windowWidth} />
-          )}
           {caseTypesData && caseTypesData.datasets[0].data.length > 0 && (
             <CategoryJudgeChart caseTypesData={caseTypesData} windowWidth={windowWidth} />
           )}

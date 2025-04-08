@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import rayonData from "../../../../public/gadm41_KGZ_2.json";
-import { FiMinus, FiPlus, FiRefreshCw, FiInfo, FiX } from "react-icons/fi";
+import {  Minus, Plus, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const rayonToCourtMapping: { [key: string]: string } = {
@@ -419,7 +419,6 @@ export default function Map_rayon({
         .style("top", `${coordinates.y + 10}px`);
     });
 
-    // Добавляем легенду как в Map_oblast.tsx
     svg.append("defs")
       .append("filter")
       .attr("id", "shadow")
@@ -500,7 +499,6 @@ export default function Map_rayon({
           .text((d) => d.label);
       });
 
-    // Показываем или скрываем легенду внутри существующего useEffect
     if (showLegend) {
       legend
         .style("display", "block")
@@ -522,69 +520,6 @@ export default function Map_rayon({
     <div ref={containerRef} className="relative w-full h-full">
       <svg ref={svgRef} className="w-full h-auto"></svg>
       
-      {/* Кнопка информации (точно как в Map_oblast.tsx) */}
-      <button
-        onClick={() => {
-          if (showLegend) {
-            setShowLegend(false);
-          } else {
-            setShowInfo(!showInfo);
-          }
-        }}
-        className="absolute top-4 left-4 z-40 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 flex items-center gap-2 border border-gray-300"
-      >
-        {showLegend ? (
-          <>
-            <FiX className="w-5 h-5" />
-            <span className="text-sm">{getTranslation("MapRayon_HideScale", language)}</span>
-          </>
-        ) : (
-          <>
-            <FiInfo className="w-5 h-5" />
-            <span className="text-sm">{getTranslation("MapRayon_Information", language)}</span>
-          </>
-        )}
-      </button>
-      
-      {/* Информационное окно с правильными размерами шрифта */}
-      {showInfo && !showLegend && (
-        <div className="absolute top-16 left-4 z-50 bg-white p-4 rounded-lg shadow-lg border border-gray-200" 
-             style={{maxWidth: "320px"}}>
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-medium text-gray-900">{getTranslation("MapRayon_Title", language)}</h3>
-            <button 
-              onClick={() => setShowInfo(false)}
-              className="text-gray-400 hover:text-gray-500"
-            >
-              <FiX className="w-5 h-5" />
-            </button>
-          </div>
-          
-          <p className="text-sm text-gray-600 mb-3">
-            {getTranslation("MapRayon_Description", language)}
-          </p>
-          
-          <p className="text-sm text-gray-600 mb-3">
-            {getTranslation("MapRayon_HoverDescription", language)}
-          </p>
-          
-          <p className="text-sm text-gray-600 mb-4">
-            {getTranslation("MapRayon_ZoomDescription", language)}
-          </p>
-          
-          <button
-            onClick={() => {
-              setShowLegend(true);
-              setShowInfo(false);
-            }}
-            className="w-full py-2 px-3 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 flex items-center justify-center gap-2 border border-blue-200"
-          >
-            <FiInfo className="w-4 h-4" />
-            <span className="text-sm">{getTranslation("MapRayon_ShowScale", language)}</span>
-          </button>
-        </div>
-      )}
-      
       {/* Кнопки зума */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-30 ContainerZoomButtons">
         <button
@@ -594,7 +529,7 @@ export default function Map_rayon({
           }}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 border border-gray-300"
         >
-          <FiPlus className="w-7 h-7 ZoomButtons" />
+          <Plus className="w-7 h-7 ZoomButtons" />
         </button>
         <button
           onClick={() => {
@@ -603,7 +538,7 @@ export default function Map_rayon({
           }}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 border border-gray-300"
         >
-          <FiMinus className="w-7 h-7 ZoomButtons" />
+          <Minus className="w-7 h-7 ZoomButtons" />
         </button>
         <button
           onClick={() => {
@@ -614,7 +549,7 @@ export default function Map_rayon({
           }}
           className="bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 border border-gray-300"
         >
-          <FiRefreshCw className="w-7 h-7 ZoomButtons" />
+          <RefreshCw className="w-7 h-7 ZoomButtons" />
         </button>
       </div>
       

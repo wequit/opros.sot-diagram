@@ -4,11 +4,11 @@ import "@/styles/globals.css";
 import "@/styles/skeleton.css";
 import "@/styles/map.css";
 import "@/styles/responsive/responsive.css";
-import Header from "@/components/layout/Header";
+import Header from "@/components/layout/Header/Header";
 import { Inter } from "next/font/google";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
-import { SurveyProvider } from "@/context/SurveyProvider"; // Импортируем объединённый провайдер
-import { useLanguage } from "@/context/LanguageContext"; // Импортируем хук для языка
+import { SurveyProvider } from "@/context/SurveyProvider";
+import { useLanguage } from "@/context/LanguageContext"; 
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import LoginPage from "./login/page";
@@ -43,7 +43,6 @@ function AuthContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Редирект после входа только с /results/login
   useEffect(() => {
     if (isAuthenticated && pathname === "/results/login") {
       router.push("/Home/summary/ratings");
@@ -56,7 +55,6 @@ function AuthContent({ children }: { children: React.ReactNode }) {
     }
   }, [language]);
 
-  // Страница логина только если не авторизован и путь явно /results/login
   if (!isAuthenticated && pathname === "/login") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -77,7 +75,6 @@ function AuthContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Основная разметка для всех остальных случаев
   return (
     <div className="max-w-[1250px] mx-auto layout">
       <Header />
