@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
 import useEvaluationData from "@/hooks/useEvaluationsData";
+import NoData from "../NoData/NoData";
 
 interface RegionSummaryData {
   overall_rating: number;
@@ -81,8 +82,14 @@ export default function Evaluations({
     isLoading,
   } = useEvaluationData();
 
-  if (isLoading && !radarData && !categoryData && !genderData && !trafficSourceData && !caseTypesData && !audioVideoData && !judgeRatings && !staffRatings && !processRatings && !accessibilityRatings && !officeRatings && !startTimeData && !disrespectData && !ageData && !ageGenderData) {
+  const hasAnyData = [radarData, categoryData, genderData, trafficSourceData, caseTypesData, audioVideoData, startTimeData, disrespectData, ageData, ageGenderData].some(d => d?.datasets?.[0]?.data?.length > 0) || [judgeRatings, staffRatings, processRatings, officeRatings, accessibilityRatings].some(obj => obj && Object.keys(obj).length > 0);
+
+  if (isLoading) {
     return <SkeletonDashboard />;
+  }
+  
+  if (!isLoading && totalResponses === 0) {
+    return <NoData />;
   }
 
   return (

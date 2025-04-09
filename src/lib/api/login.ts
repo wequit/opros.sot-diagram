@@ -28,6 +28,7 @@ interface RegionAssessmentData {
 
 const cache: { [key: string]: { data: any; timestamp: number } } = {};
 const CACHE_TTL = 1000 * 60 * 60;
+const LOGIN_PATH = "/results/login"; 
 
 export const setCookie = (name: string, value: string, days = 7) => {
   Cookies.set(name, value, { expires: days });
@@ -115,18 +116,18 @@ export const fetchWithAuth = async (
       } else {
         handleUnauthorized();
         if (router) {
-          router.push("/login");  
+          router.push(LOGIN_PATH);
         } else {
-          window.location.href = "/login";  
+          window.location.href = LOGIN_PATH;
         }
         return null;
       }
     } else {
       handleUnauthorized();
       if (router) {
-        router.push("/login");  
+        router.push(LOGIN_PATH);
       } else {
-        window.location.href = "/login";  
+        window.location.href = LOGIN_PATH;
       }
       return null;
     }
@@ -138,17 +139,17 @@ export const fetchWithAuth = async (
     ...options.headers,
   };
 
-  const response = await fetch(
-    `https://opros.sot.kg:443/api/v1/${url}`,
-    { ...options, headers }
-  );
+  const response = await fetch(`https://opros.sot.kg:443/api/v1/${url}`, {
+    ...options,
+    headers,
+  });
 
   if (response.status === 401) {
     handleUnauthorized();
     if (router) {
-      router.push("/login");  
+      router.push(LOGIN_PATH);
     } else {
-      window.location.href = "/login";  
+      window.location.href = LOGIN_PATH;
     }
     return null;
   }
@@ -196,6 +197,12 @@ export const getRayonAssessmentData = async (
     );
 
     if (!response.ok) {
+      handleUnauthorized();
+      if (router) {
+        router.push(LOGIN_PATH);
+      } else {
+        window.location.href = LOGIN_PATH;
+      }
       throw new Error("Network response was not ok");
     }
 
@@ -205,9 +212,9 @@ export const getRayonAssessmentData = async (
   } catch (error) {
     console.error("Ошибка при получении данных rayon assessment:", error);
     if (router) {
-      router.push("/login");  
+      router.push(LOGIN_PATH);
     } else {
-      window.location.href = "/login"; 
+      window.location.href = LOGIN_PATH;
     }
     throw error;
   }
@@ -264,6 +271,7 @@ export const useFetchAssessmentData = () => {
         }
       } catch (err) {
         setError(err instanceof Error ? err : new Error("Неизвестная ошибка"));
+        router.push(LOGIN_PATH); 
       } finally {
         setIsLoading(false);
       }

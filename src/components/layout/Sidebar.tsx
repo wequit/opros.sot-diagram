@@ -12,13 +12,9 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ onClose }: SidebarProps) {
-  const { isAuthenticated, user } = useAuth();
+  const { user } = useAuth();
   const pathname = usePathname();
   const { getTranslation } = useLanguage();
-
-  if (!isAuthenticated || pathname === "/login") {
-    return null;
-  }
 
   const isActivePath = (path: string) => pathname.startsWith(path) 
 
@@ -31,7 +27,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
           alt="Логотип"
           width={40}
           height={40}
-          style={{ width: 'auto', height: 'auto' }}
           className="rounded-full shadow-sm Logo_1024"
         />
         <button

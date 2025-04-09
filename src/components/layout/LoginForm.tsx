@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import Image from "next/image";
 import logo from "../../../public/logo.webp";
 import { useRouter } from "next/navigation";
-import { useLanguage } from "@/context/LanguageContext"; 
+import { useLanguage } from "@/context/LanguageContext";
 import dynamic from "next/dynamic";
 
 const User = dynamic(() => import("lucide-react").then(mod => mod.User), { ssr: false });
@@ -24,7 +24,7 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isPageLoaded, setIsPageLoaded] = useState(false);
 
-  const { language, toggleLanguage, getTranslation } = useLanguage(); 
+  const { language, toggleLanguage, getTranslation } = useLanguage();
   const { login } = useAuth();
   const router = useRouter();
   const usernameInputRef = useRef<HTMLInputElement>(null);
@@ -104,9 +104,8 @@ const LoginForm: React.FC = () => {
   return (
     <div
       style={scrollStyle}
-      className={`bg-gradient-to-br from-slate-100 to-slate-200 transition-opacity duration-1000 ease-in-out ${
-        isPageLoaded ? "opacity-100" : "opacity-0"
-      }`}
+      className={`bg-gradient-to-br from-slate-100 to-slate-200 transition-opacity duration-1000 ease-in-out ${isPageLoaded ? "opacity-100" : "opacity-0"
+        }`}
       data-testid="login-form-container"
     >
       {/* Фоновые элементы */}
@@ -115,31 +114,29 @@ const LoginForm: React.FC = () => {
         <div className="absolute -top-64 -right-64 w-[40rem] h-[40rem] bg-blue-800 opacity-[0.03] rounded-full mix-blend-multiply blur-3xl"></div>
         <div className="absolute -bottom-32 -left-32 w-[30rem] h-[30rem] bg-indigo-700 opacity-[0.05] rounded-full mix-blend-multiply blur-3xl"></div>
       </div>
-     
-        {/* Переключатель языка */}
-        <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex  animate-fadeIn">
-          <div className="bg-blue-100/30 backdrop-blur-sm rounded-md overflow-hidden border border-blue-200/50 shadow-sm">
-            <button
-              onClick={toggleLanguage} 
-              aria-label={language === "ru" ? "Переключить на кыргызский" : "Переключить на русский"}
-              className={`px-2 py-1 sm:px-3 sm:py-1.5 text-sm font-semibold transition-all duration-300 ${
-                language === "ru" ? "bg-blue-800 text-sky-50" : "text-sky-700 hover:bg-blue-400/50"
+
+      {/* Переключатель языка */}
+      <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex  animate-fadeIn">
+        <div className="bg-blue-100/30 backdrop-blur-sm rounded-md overflow-hidden border border-blue-200/50 shadow-sm">
+          <button
+            onClick={toggleLanguage}
+            aria-label={language === "ru" ? "Переключить на кыргызский" : "Переключить на русский"}
+            className={`px-2 py-1 sm:px-3 sm:py-1.5 text-sm font-semibold transition-all duration-300 ${language === "ru" ? "bg-blue-800 text-sky-50" : "text-sky-700 hover:bg-blue-400/50"
               }`}
-            >
-              RU
-            </button>
-            <button
-              onClick={toggleLanguage}
-              aria-label={language === "ky" ? "Переключить на русский" : "Переключить на кыргызский"}
-              className={`px-2 py-1 sm:px-3 sm:py-1.5 text-sm font-semibold transition-all duration-300 ${
-                language === "ky" ? "bg-blue-800 text-sky-50" : "text-sky-700 hover:bg-blue-400/50"
+          >
+            RU
+          </button>
+          <button
+            onClick={toggleLanguage}
+            aria-label={language === "ky" ? "Переключить на русский" : "Переключить на кыргызский"}
+            className={`px-2 py-1 sm:px-3 sm:py-1.5 text-sm font-semibold transition-all duration-300 ${language === "ky" ? "bg-blue-800 text-sky-50" : "text-sky-700 hover:bg-blue-400/50"
               }`}
-            >
-              KY
-            </button>
-          </div>
+          >
+            KY
+          </button>
         </div>
-       
+      </div>
+
       {/* Основной контент - форма входа */}
       <div className="flex-grow flex items-center justify-center py-8 px-4">
         <div className="w-full max-w-md transform transition-all duration-700 ease-out animate-float">
@@ -149,14 +146,14 @@ const LoginForm: React.FC = () => {
 
             <div className="text-center mb-6 mt-2 animate-slideUp animation-delay-300">
               <div className="flex justify-center mb-4">
-              <Image
-              src={logo}
-              alt="Логотип"
-              width={100}
-              height={100}
-              className=" rounded-lg "
-              priority
-            />
+                <Image
+                  src={logo}
+                  alt="Логотип"
+                  width={100}
+                  height={100}
+                  className=" rounded-lg "
+                  priority
+                />
               </div>
               <h2 className="text-2xl font-bold text-gray-800 mb-2">
                 {getTranslation("LoginForm_LoginTitle")}
@@ -186,7 +183,7 @@ const LoginForm: React.FC = () => {
                     onFocus={(e) => e.target.setAttribute("placeholder", "")}
                     onBlur={(e) => e.target.setAttribute("placeholder", getTranslation("LoginForm_Username"))}
                     placeholder={getTranslation("LoginForm_Username")}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full pl-10 p-3 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 shadow-sm hover:shadow-md"
+                    className="text-base text-gray-900 placeholder:text-base placeholder:text-gray-900 bg-gray-50 border border-gray-300 rounded-lg block w-full pl-10 p-3 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 shadow-sm hover:shadow-md"
                     required
                     aria-required="true"
                   />

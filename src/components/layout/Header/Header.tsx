@@ -1,19 +1,15 @@
 "use client";
 
 import { useRef } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { usePathname } from "next/navigation";
-import HeaderLogo from "./parts/HeaderLogo";
-import HeaderActions from "./parts/HeaderActions";
 import SidebarOverlay from "./parts/SidebarOverlay";
 import { useHeaderLogic } from "@/hooks/useHeaderLogic";
 import dynamic from "next/dynamic";
 
 const HeaderNav = dynamic(() => import("./parts/HeaderNav"), { ssr: false });
+const HeaderLogo = dynamic(() => import("./parts/HeaderLogo"), { ssr: false });
+const HeaderActions = dynamic(() => import("./parts/HeaderActions"), { ssr: false });
 
 const Header: React.FC = () => {
-  const { isAuthenticated } = useAuth();
-  const pathname = usePathname();
   const printMenuRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -24,9 +20,6 @@ const Header: React.FC = () => {
     toggleSidebar,
   } = useHeaderLogic();
 
-  if (!isAuthenticated || pathname === "/login") {
-    return null;
-  }
 
   return (
     <>

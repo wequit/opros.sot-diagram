@@ -61,7 +61,7 @@ const CourtRatingPage = () => {
   }, [courtId, regionName, setRegionName, setSelectedCourtId, setSelectedCourtName]);
 
   if (isDataLoading) {
-    return <div>Loading...</div>;
+    return <div>Loadi..</div>;
   }
 
   const breadcrumbSource = typeof window !== 'undefined' ? localStorage.getItem("breadcrumbSource") : null;
