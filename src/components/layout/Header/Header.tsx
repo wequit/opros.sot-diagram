@@ -7,19 +7,15 @@ import dynamic from "next/dynamic";
 
 const HeaderNav = dynamic(() => import("./parts/HeaderNav"), { ssr: false });
 const HeaderLogo = dynamic(() => import("./parts/HeaderLogo"), { ssr: false });
-const HeaderActions = dynamic(() => import("./parts/HeaderActions"), { ssr: false });
+const HeaderActions = dynamic(() => import("./parts/HeaderActions"), {
+  ssr: false,
+});
 
 const Header: React.FC = () => {
   const printMenuRef = useRef<HTMLDivElement>(null);
 
-  const {
-    isSticky,
-    isSidebarOpen,
-    windowWidth,
-    userCourt,
-    toggleSidebar,
-  } = useHeaderLogic();
-
+  const { isSticky, isSidebarOpen, windowWidth, userCourt, toggleSidebar } =
+    useHeaderLogic();
 
   return (
     <>
@@ -28,14 +24,17 @@ const Header: React.FC = () => {
           isSticky
             ? "fixed top-0 left-0 right-0 z-40 backdrop-blur-lg bg-white/40 border-b border-gray-200 shadow-md"
             : "fixed top-0 left-0 right-0 bg-white w-full"
-        } HeaderHeight h-[4.5rem] flex items-center justify-between px-6 transition-all duration-500 ${
+        } h-[4.5rem] flex items-center justify-center transition-all duration-500 ${
           isSidebarOpen ? "backdrop-blur-lg" : ""
         }`}
       >
-        <HeaderLogo windowWidth={windowWidth} toggleSidebar={toggleSidebar} />
-        <HeaderNav windowWidth={windowWidth} userCourt={userCourt} />
-        <HeaderActions printMenuRef={printMenuRef} />
+        <div className="max-w-[1250px] w-full  flex items-center justify-between px-6">
+          <HeaderLogo windowWidth={windowWidth} toggleSidebar={toggleSidebar} />
+          <HeaderNav windowWidth={windowWidth} userCourt={userCourt} />
+          <HeaderActions printMenuRef={printMenuRef} />
+        </div>
       </header>
+
       <SidebarOverlay
         isSidebarOpen={isSidebarOpen}
         toggleSidebar={toggleSidebar}

@@ -43,13 +43,13 @@ export default function Evaluations({
   } else if (pathname.startsWith("/Home/second-instance/")) {
     remarksPath = `/Home/second-instance${selectedCourtId ? `/${selectedCourtId}` : ""}/feedbacks`;
   } else if (pathname.startsWith("/Home/first_instance/court/")) {
-    remarksPath = "/Home/first_instance/feedbacks/";
+    remarksPath = `/Home/first_instance/feedbacks/${courtNameId}`;
   } else if (pathname.includes("/Home/first-instance")) {
-    remarksPath = "/Home/first-instance/feedbacks";
+    remarksPath = `/Home/first-instance/feedbacks/`;
   } else if (pathname.startsWith("/Home/") && pathname.endsWith("/ratings2")) {
     const parts = pathname.split("/");
     const slug = parts[2];
-    remarksPath = `/Home/${slug}/feedbacks`;
+    remarksPath = `/Home/${slug}/feedbacks2`;
   } else if (courtNameId) {
     remarksPath += `/${courtNameId}`;
   }
@@ -80,9 +80,8 @@ export default function Evaluations({
     ageGenderData,
     comments,
     isLoading,
+    disrespectPercentages
   } = useEvaluationData();
-
-  const hasAnyData = [radarData, categoryData, genderData, trafficSourceData, caseTypesData, audioVideoData, startTimeData, disrespectData, ageData, ageGenderData].some(d => d?.datasets?.[0]?.data?.length > 0) || [judgeRatings, staffRatings, processRatings, officeRatings, accessibilityRatings].some(obj => obj && Object.keys(obj).length > 0);
 
   if (isLoading) {
     return <SkeletonDashboard />;
@@ -119,7 +118,11 @@ export default function Evaluations({
             <RatingChart ratings={judgeRatings} translationKey="DiagrammSeven" />
           )}
           {disrespectData && disrespectData.datasets[0].data.length > 0 && (
-            <DisrespectChart disrespectData={disrespectData} windowWidth={windowWidth} />
+          <DisrespectChart
+          disrespectData={disrespectData}
+          windowWidth={windowWidth}
+          percentages={disrespectPercentages}
+        />
           )}
           {staffRatings && Object.keys(staffRatings).length > 0 && (
             <RatingChart ratings={staffRatings} translationKey="DiagrammNine" />

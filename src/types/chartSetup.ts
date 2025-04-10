@@ -22,7 +22,7 @@ ChartJS.defaults.plugins.datalabels = {
   },
   formatter: (value: number | null) => {
     if (value === null || value <= 0) return '';
-    return `${value}%`;
+    return `${value}`;
   },
 };
 

@@ -43,95 +43,71 @@ export function useRemarks() {
     const courtNAME = typeof window !== 'undefined' ? localStorage.getItem("courtName") : null;
 
     return remarks.filter((item: Remark) => {
-      if (
-        user.role === "Председатель 3 инстанции" &&
-        (pathname === "/Home/summary/ratings" ||
-          pathname === "/Home/summary/feedbacks")
-      ) {
-        return (
-          item.custom_answer !== null &&
-          item.custom_answer !== "Необязательный вопрос"
-        );
-      }
-
+      const isValid = 
+        item.custom_answer !== null &&
+        item.custom_answer !== "Необязательный вопрос";
+    
       if (user.role === "Председатель 3 инстанции") {
+        if (
+          pathname === "/Home/summary/ratings" ||
+          pathname === "/Home/summary/feedbacks"
+        ) {
+          return isValid;
+        }
+    
         if (
           pathname === "/Home/supreme-court/ratings" ||
           pathname === "/Home/supreme-court/feedbacks"
         ) {
-          return (
-            item.court === "Верховный суд" &&
-            item.custom_answer !== null &&
-            item.custom_answer !== "Необязательный вопрос"
-          );
-        } else if (
+          return isValid && item.court === "Верховный суд";
+        }
+    
+        if (
           pathname.startsWith(`/Home/second-instance/`) ||
-          pathname === "`/results/Home/second-instance/"
+          pathname === "/results/Home/second-instance/"
         ) {
-          return (
-            item.custom_answer !== null &&
-            item.custom_answer !== "Необязательный вопрос" &&
-            item.court === storedCourtName
-          );
-          return false;
-        } else if (pathname === `/Home/second-instance/feedbacks/${courtId}`) {
-          return (
-            item.custom_answer !== null &&
-            item.custom_answer !== "Необязательный вопрос" &&
-            item.court === storedCourtName
-          );
-        } else if (pathname.startsWith(`/Home/first-instance/`)) {
-          return (
-            item.custom_answer !== null &&
-            item.custom_answer !== "Необязательный вопрос" &&
-            item.court === storedCourtName
-          );
-        } else if (
-          pathname === `/Home/first-instance/feedbacks/${courtNameId}`
-        ) {
-          return (
-            item.custom_answer !== null &&
-            item.custom_answer !== "Необязательный вопрос" &&
-            item.court === courtNAME
-          );
+          return isValid && item.court === storedCourtName;
+        }
+    
+        if (pathname === `/Home/second-instance/feedbacks/${courtId}`) {
+          return isValid && item.court === storedCourtName;
+        }
+    
+        if (pathname.startsWith(`/Home/first-instance/`)) {
+          return isValid && item.court === storedCourtName;
+        }
+    
+        if (pathname === `/Home/first-instance/feedbacks/${courtNameId}`) {
+          return isValid && item.court === courtNAME;
         }
       }
-
+    
       if (user.role === "Председатель 2 инстанции") {
         if (pathname.startsWith("/Home/first_instance/court/")) {
-          return (
-            item.custom_answer !== null &&
-            item.custom_answer !== "Необязательный вопрос" &&
-            item.court === courtName2
-          );
+          return isValid && item.court === courtName2;
         }
+    
         if (pathname.startsWith("/Home/first_instance/feedbacks/")) {
-          return (
-            item.custom_answer !== null &&
-            item.custom_answer !== "Необязательный вопрос" &&
-            item.court === courtName2
-          );
+          return isValid && item.court === courtName2;
         }
+    
         if (pathname.startsWith("/Home/") && pathname.endsWith("/ratings2")) {
-          return (
-            item.custom_answer !== null &&
-            item.custom_answer !== "Необязательный вопрос" &&
-            item.court === matchedCourt
-          );
+          return isValid && item.court === matchedCourt;
         }
-        if (pathname.startsWith("/Home/") && pathname.endsWith("/feedbacks")) {
-          return (
-            item.custom_answer !== null &&
-            item.custom_answer !== "Необязательный вопрос" &&
-            item.court === matchedCourt
-          );
+    
+        if (pathname.startsWith("/Home/") && pathname.endsWith("/feedbacks2")) {
+          return isValid && item.court === matchedCourt;
         }
+    
+        // if (
+        //   pathname === "/Home/summary2/ratings" ||
+        //   pathname === "/Home/summary2/feedbacks"
+        // ) {
+        //   return isValid;
+        // }
       }
-
-      return (
-        item.custom_answer !== null &&
-        item.custom_answer !== "Необязательный вопрос"
-      );
+    
+      return isValid;
     });
   };
 

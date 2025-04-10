@@ -147,6 +147,14 @@ body::after {
 
 }
 
+.HeaderCenter{
+  @apply justify-center
+}
+
+.HeaderPx{
+  @apply px-0
+}
+
 .region-path {
   transition: fill 0.2s ease;
 }

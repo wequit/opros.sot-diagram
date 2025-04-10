@@ -2,7 +2,7 @@ import React from 'react';
 import { Radar } from 'react-chartjs-2';
 import "@/types/chartSetup";
 import { ChartOptions } from 'chart.js';
-import {  useLanguage } from '@/context/LanguageContext';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface RadarChartProps {
   radarData: any;
@@ -25,6 +25,18 @@ export default function RadarChart({ radarData, windowWidth, totalResponses }: R
             size: windowWidth < 530 ? 10 : 12,
           },
         },
+      },
+      datalabels: {
+        color: '#000000', // Цвет текста меток
+        font: {
+          size: windowWidth < 385 ? 8 : windowWidth < 470 ? 10 : 12, // Размер шрифта адаптируется
+        },
+        formatter: (value: number) => {
+          return value.toFixed(1); // Форматируем значение до 1 знака после запятой (например, 3.3)
+        },
+        anchor: 'center', // Размещаем метку в центре точки
+        align: 'top', // Смещаем метку чуть выше точки
+        offset: 5, // Отступ от точки
       },
       tooltip: {
         callbacks: {

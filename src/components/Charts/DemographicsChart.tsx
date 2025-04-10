@@ -38,7 +38,10 @@ export default function DemographicsChart({
       datalabels: {
         color: '#FFFFFF',
         font: { size: 16, weight: 'bold' },
-        formatter: (value) => value + '%',
+        formatter: (value: number) => {
+          if (value === 0) return ''; // Скрываем 0%
+          return value + '%';
+        },
       },
     },
     layout: {
@@ -82,16 +85,19 @@ export default function DemographicsChart({
       },
       datalabels: {
         display: true,
-        color: '#FFFFFF', 
+        color: '#FFFFFF',
         font: {
           weight: 'bold',
         },
-        formatter: (value: number) => `${Math.abs(Math.round(value))}%`,
+        formatter: (value: number) => {
+          if (value === 0) return ''; // Скрываем 0%
+          return `${Math.abs(Math.round(value))}%`;
+        },
       },
       tooltip: {
         callbacks: {
           label: function (tooltipItem: any) {
-            const value = Math.abs(Math.round(tooltipItem.raw)); 
+            const value = Math.abs(Math.round(tooltipItem.raw));
             return `${tooltipItem.dataset.label}: ${value}`;
           },
         },
@@ -118,9 +124,13 @@ export default function DemographicsChart({
       legend: { display: false },
       datalabels: {
         display: true,
-        color: '#FFFFFF', // Белый текст
+        color: '#FFFFFF',
         font: {
           weight: 'bold',
+        },
+        formatter: (value: number) => {
+          if (value === 0) return ''; // Скрываем 0%
+          return value;
         },
       },
     },

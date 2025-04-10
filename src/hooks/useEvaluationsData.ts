@@ -25,6 +25,7 @@ export default function useEvaluationData() {
   const matchedCourt = typeof window !== 'undefined' ? localStorage.getItem("matchedCourt") : null;
   const storedCourtName = typeof window !== 'undefined' ? localStorage.getItem("selectedCourtName") : null;
   const pathname = usePathname();
+  const [disrespectPercentages, setDisrespectPercentages] = useState<(string | null)[]>([]);
 
   const [categoryData, setCategoryData] = useState<ChartData<"pie">>({
     labels: [],
@@ -298,14 +299,33 @@ if (barData) {
       if (columnData) {
         const disrespectQuestion = columnData.find((q: any) => q.question_id === 15);
         if (disrespectQuestion) {
-          const labels = disrespectQuestion.options?.map((option: any) => (language === "ru" ? option.text_ru : option.text_kg)) || [];
-          const rawData = disrespectQuestion.options?.map((option: any) => option.count || 0) || [];
-          const filteredData = rawData.map((value: number) => (value === 0 ? null : value));
-
+          const labels =
+            disrespectQuestion.options?.map((option: any) =>
+              language === "ru" ? option.text_ru : option.text_kg
+            ) || [];
+      
+          const rawData =
+            disrespectQuestion.options?.map((option: any) =>
+              option.count === 0 ? null : option.count
+            ) || [];
+      
+          const percentages =
+            disrespectQuestion.options?.map((option: any) =>
+              `${option.percentage}`
+            ) || [];
+      
           setDisrespectData({
             labels,
-            datasets: [{ data: filteredData, backgroundColor: ["#4682B4", "#8B008B", "#DAA520", "#2E8B57"], barThickness: 20 }],
+            datasets: [
+              {
+                data: rawData,
+                backgroundColor: ["#4682B4", "#8B008B", "#DAA520", "#2E8B57"],
+                barThickness: 20,
+              },
+            ],
           });
+      
+          setDisrespectPercentages(percentages);
         }
       }
     } catch (error) {
@@ -377,5 +397,6 @@ if (barData) {
     ageGenderData,
     comments,
     isLoading,
+    disrespectPercentages
   };
 }
