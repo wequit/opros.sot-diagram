@@ -93,8 +93,53 @@ const HeaderNav: React.FC<HeaderNavProps> = ({ windowWidth, userCourt }) => {
             {getTranslation("HeaderNavFour", language)}
           </Link>
         </div>
+      ) : user?.role === "Председатель 2 инстанции" ? (
+        // Проверка для второй инстанции
+        <div className="flex space-x-3 p-2 rounded-xl">
+          <Link
+            href="/Home/summary2/ratings"
+            className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
+            flex items-center gap-2 ${
+              pathname === "/Home/summary2/ratings"
+                ? "text-blue-600 bg-blue-100 shadow-inner"
+                : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+            }`}
+          >
+            {getTranslation("HeaderNavOne", language)}
+          </Link>
+          <Link
+            href="/Home/second-instance/ratings"
+            className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
+            flex items-center gap-2 ${
+              pathname.startsWith("/Home/second-instance")
+                ? "text-blue-600 bg-blue-100 shadow-inner"
+                : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+            }`}
+          >
+            {getTranslation("HeaderNavThree", language)}
+          </Link>
+          <Link
+            href="/Home/first-instance/ratings"
+            className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
+            flex items-center gap-2 ${
+              pathname.startsWith("/Home/first-instance")
+                ? "text-blue-600 bg-blue-100 shadow-inner"
+                : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
+            }`}
+          >
+            {getTranslation("HeaderNavFour", language)}
+          </Link>
+        </div>
+      ) : user?.role === "Председатель 1 инстанции" ? (
+        // Проверка для первой инстанции — просто текст
+        <div className="p-2 rounded-xl">
+          <span className="text-gray-700">
+            Вы находитесь в первой инстанции
+          </span>
+        </div>
       ) : (
-        userCourt && (
+        // Существующая ветка для остальных случаев
+        user?.court && (
           <div className="flex space-x-3 p-2 rounded-xl">
             <Link
               href="/Home/summary2/ratings"
@@ -119,16 +164,16 @@ const HeaderNav: React.FC<HeaderNavProps> = ({ windowWidth, userCourt }) => {
               {getTranslation("HeaderNavRegionalRatings", language)}
             </Link>
             <Link
-              href={`/Home/${getCourtSlug(userCourt)}/ratings2`}
+              href={`/Home/${getCourtSlug(user.court)}/ratings2`}
               className={`HeaderNav relative px-4 py-2 rounded-md font-semibold transition-all duration-300 
               flex items-center gap-2 ${
-                pathname.includes(`/Home/${getCourtSlug(userCourt)}/ratings2`) ||
-                pathname.includes(`/Home/${getCourtSlug(userCourt)}/feedbacks`)
+                pathname.includes(`/Home/${getCourtSlug(user.court)}/ratings2`) ||
+                pathname.includes(`/Home/${getCourtSlug(user.court)}/feedbacks`)
                   ? "text-blue-600 bg-blue-100 shadow-inner"
                   : "text-gray-700 hover:text-blue-900 hover:bg-blue-50"
               }`}
             >
-              {userCourt}
+              {user.court}
             </Link>
           </div>
         )

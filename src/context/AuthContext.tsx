@@ -5,10 +5,10 @@ import { setCookie, getCookie, deleteCookie, getCurrentUser } from "@/lib/api/lo
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  isLoading: boolean; 
+  isLoading: boolean;
   login: (token: string) => void;
   logout: () => void;
-  user: { first_name: string; last_name: string; court: string; role: string } | null;
+  user: { first_name: string; last_name: string; court: string; role: string; court_id: string } | null; // Добавляем court_id
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<AuthContextType['user']>(null); // Указываем тип для user
   const router = useRouter();
 
   useEffect(() => {
@@ -53,11 +53,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const currentUser = await getCurrentUser();
       setUser(currentUser);
       setIsAuthenticated(true);
-      
+
       let redirectUrl;
-      
+
       if (currentUser.role === "Председатель 1 инстанции") {
-        redirectUrl = "/results/Home/summary/ratings";
+        redirectUrl = "/results/Home/summary1/ratings";
       } else if (currentUser.role === "Председатель 2 инстанции") {
         redirectUrl = "/results/Home/first_instance/ratings";
       } else if (currentUser.role === "Председатель 3 инстанции") {
@@ -65,7 +65,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         redirectUrl = "/results/Home/summary/ratings";
       }
-      
+
       window.location.href = redirectUrl;
     } catch (error) {
       console.error("Ошибка при логине:", error);
@@ -100,6 +100,6 @@ function getRegionSlug(courtName: string): string {
     "Жалал-Абадский областной суд": "Djalal-Abad",
     "Бишкекский городской суд": "Bishkek",
   };
-  
+
   return regionMap[courtName] || "unknown";
 }
