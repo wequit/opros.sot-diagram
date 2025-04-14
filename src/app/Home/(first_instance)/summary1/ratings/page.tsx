@@ -20,11 +20,10 @@ export default function SecondInstanceSummaryPage() {
   }
 
   const courtId = user.court_id; // Теперь court_id типизирован
-  const court = user.court;
 
   return (
     <div className="max-w-[1250px] mx-auto px-4 py-4">
-      <h2 className="font-bold text-3xl font-sans mb-4">{court}</h2>
+    
       <Dates />
       <CourtApi courtId={courtId} />
       <Evaluations />

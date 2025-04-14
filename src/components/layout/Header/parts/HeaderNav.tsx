@@ -19,6 +19,8 @@ const HeaderNav: React.FC<HeaderNavProps> = ({ windowWidth, userCourt }) => {
   const pathname = usePathname();
   const { language, getTranslation } = useLanguage();
 
+  const courtName = user?.court;
+
   const getCourtSlug = (courtName: string): string => {
     const court = courtData.courts.find((item) => item.court === courtName);
     return court ? court.slug : "court-id"; 
@@ -34,13 +36,7 @@ const HeaderNav: React.FC<HeaderNavProps> = ({ windowWidth, userCourt }) => {
   return (
     <div className="flex items-center gap-3">
       <Link href={logoLink()} className="flex items-center">
-        <Image
-          src={logo}
-          alt="Логотип"
-          width={45}
-          height={45}
-          className="rounded-full shadow-sm"
-        />
+       
       </Link>
       {user?.role === "Председатель 3 инстанции" ? (
         <div className="flex space-x-3 p-2 rounded-xl">
@@ -131,12 +127,7 @@ const HeaderNav: React.FC<HeaderNavProps> = ({ windowWidth, userCourt }) => {
           </Link>
         </div>
       ) : user?.role === "Председатель 1 инстанции" ? (
-        // Проверка для первой инстанции — просто текст
-        <div className="p-2 rounded-xl">
-          <span className="text-gray-700">
-            Вы находитесь в первой инстанции
-          </span>
-        </div>
+          null
       ) : (
         // Существующая ветка для остальных случаев
         user?.court && (
