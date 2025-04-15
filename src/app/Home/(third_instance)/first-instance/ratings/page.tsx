@@ -8,6 +8,8 @@ import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import debounce from "lodash/debounce";
 import { useCourt } from "@/context/CourtContext";
 import { ArrowDown, ArrowDownUp, ArrowUp, MoveVertical, Star } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
+import TableSkeleton, { MobileCardsSkeleton } from "@/lib/utils/SkeletonLoader/TableSkeleton";
 
 interface Assessment {
   aspect: string;
@@ -125,6 +127,8 @@ export default function Courts() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const router = useRouter();
+  const { language, getTranslation } = useLanguage();
+  const [loading, setLoading] = useState(true);
 
   const token = getCookie("access_token");
 
@@ -166,21 +170,22 @@ export default function Courts() {
   }, [handleScroll]);
 
   useEffect(() => {
-    const fetchCourts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getRayonAssessmentData();
-        const transformedCourts = transformApiData(data);
-        const sortedCourts = [...transformedCourts].sort((a, b) =>
-          a.name.localeCompare(b.name, "ru", { sensitivity: "base" })
-        );
-        setCourts(sortedCourts);
-        setFilteredCourts(sortedCourts);
+        const response = await getRayonAssessmentData();
+        if (response) {
+          const transformedData = transformApiData(response);
+          setCourts(transformedData);
+          setFilteredCourts(transformedData);
+        }
       } catch (error) {
-        console.error("Error fetching courts:", error);
+        console.error("Ошибка при получении данных:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchCourts();
+    fetchData();
   }, []);
 
   const handleSort = (field: SortField) => {
@@ -292,260 +297,276 @@ export default function Courts() {
           showHome={true}
           headerKey="HeaderNavFour"
         />
-        <h2 className="text-2xl font-bold mt-2 DistrictName">Районные суды</h2>
+        <h2 className="text-2xl font-bold mt-2 DistrictName">
+          {getTranslation("District_Courts_MainName", language)}
+        </h2>
       </div>
       <div className="border border-gray-300 rounded-2xl bg-white">
         <Map selectedRayon={null} onSelectRayon={() => { }} courts={courts} />
       </div>
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-8">
-        <div className="overflow-x-auto">
-          <div className="hidden sm:block overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                    №
-                  </th>
-                  <th
-                    className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200"
-                    style={{ width: "20%", minWidth: "250px" }}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="truncate mr-2">НАИМЕНОВАНИЕ СУДА</span>
-                      <div className="relative">
-                        <div
-                          className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${isSearchOpen ? "w-36" : "w-8"
-                            }`}
-                        >
-                          <div
-                            className={`flex-grow transition-all duration-500 ease-in-out ${isSearchOpen ? "opacity-100 w-full" : "opacity-0 w-0"
-                              }`}
-                          >
-                            <input
-                              type="text"
-                              onChange={handleSearchChange}
-                              onKeyDown={handleKeyDown}
-                              placeholder="Поиск суда"
-                              className="w-full px-2 py-1.5 text-xs text-gray-900 bg-white border border-gray-300 rounded-lg outline-none"
-                              autoFocus={isSearchOpen}
-                            />
-                          </div>
-                          <div
-                            className="cursor-pointer p-1.5 hover:bg-gray-100 rounded-full flex-shrink-0"
-                            onClick={() => setIsSearchOpen(!isSearchOpen)}
-                          >
-                            <svg
-                              className="w-4 h-4 text-gray-500"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
+        <div className="relative">
+          {loading ? (
+            <>
+              <div className="hidden sm:block">
+                <TableSkeleton rowCount={10} columnCount={9} hasHeader={true} />
+              </div>
+              <MobileCardsSkeleton cardCount={8} />
+            </>
+          ) : (
+            <>
+              <div className="hidden sm:block overflow-auto max-h-[70vh]">
+                <table className="w-full border-collapse">
+                  <thead className="sticky top-0 z-20">
+                    <tr className="border-b border-gray-200">
+                      <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                        №
+                      </th>
+                      <th
+                        className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200"
+                        style={{ width: "20%", minWidth: "250px" }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="truncate mr-2">{getTranslation("Regional_Courts_Table_NameCourt", language)}</span>
+                          <div className="relative">
+                            <div
+                              className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${isSearchOpen ? "w-36" : "w-8"
+                                }`}
                             >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                              />
-                            </svg>
+                              <div
+                                className={`flex-grow transition-all duration-500 ease-in-out ${isSearchOpen ? "opacity-100 w-full" : "opacity-0 w-0"
+                                  }`}
+                              >
+                                <input
+                                  type="text"
+                                  onChange={handleSearchChange}
+                                  onKeyDown={handleKeyDown}
+                                  placeholder="Поиск суда"
+                                  className="w-full px-2 py-1.5 text-xs text-gray-900 bg-white border border-gray-300 rounded-lg outline-none"
+                                  autoFocus={isSearchOpen}
+                                />
+                              </div>
+                              <div
+                                className="cursor-pointer p-1.5 hover:bg-gray-100 rounded-full flex-shrink-0"
+                                onClick={() => setIsSearchOpen(!isSearchOpen)}
+                              >
+                                <svg
+                                  className="w-4 h-4 text-gray-500"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  viewBox="0 0 24 24"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                  />
+                                </svg>
+                              </div>
+                            </div>
                           </div>
+                        </div>
+                      </th>
+                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort("overall")}
+                      >
+                        <div className="flex items-center justify-between px-2">
+                          <span>{getTranslation("Regional_Courts_Table_Overall", language)}</span>
+                          {getSortIcon("overall")}
+                        </div>
+                      </th>
+                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort("judge")}
+                      >
+                        <div className="flex items-center justify-between px-2">
+                          <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
+                          {getSortIcon("judge")}
+                        </div>
+                      </th>
+                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort("process")}
+                      >
+                        <div className="flex items-center justify-between px-2">
+                          <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
+                          {getSortIcon("process")}
+                        </div>
+                      </th>
+                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort("staff")}
+                      >
+                        <div className="flex items-center justify-between px-2">
+                          <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
+                          {getSortIcon("staff")}
+                        </div>
+                      </th>
+                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort("office")}
+                      >
+                        <div className="flex items-center justify-between px-2">
+                          <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
+                          {getSortIcon("office")}
+                        </div>
+                      </th>
+                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                        onClick={() => handleSort("building")}
+                      >
+                        <div className="flex items-center justify-between px-2">
+                          <span>{getTranslation("Regional_Courts_Table_Building", language)}</span>
+                          {getSortIcon("building")}
+                        </div>
+                      </th>
+                      <th
+                        className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 cursor-pointer"
+                        onClick={() => handleSort("count")}
+                      >
+                        <div className="flex items-center justify-between px-2">
+                          <span>{getTranslation("Regional_Courts_Table_Number of reviews", language)}</span>
+                          {getSortIcon("count")}
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {sortedCourts.map((court, index) => (
+                      <tr
+                        key={court.id}
+                        className="hover:bg-gray-50/50 border-b border-gray-200"
+                      >
+                        <td className="px-3 py-2.5 text-sm text-gray-900 text-center border-r border-gray-200">
+                          {index + 1}
+                        </td>
+                        <td
+                          className="px-3 py-2.5 text-sm text-gray-900 border-r border-gray-200 cursor-pointer hover:text-blue-600"
+                          onClick={() => handleCourtClick(court)}
+                        >
+                          {court.name}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            court.overall_assessment
+                          )}`}
+                        >
+                          {renderTableCell(court.overall_assessment)}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            court.assessment.judge
+                          )}`}
+                        >
+                          {renderTableCell(court.assessment.judge)}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            court.assessment.process
+                          )}`}
+                        >
+                          {renderTableCell(court.assessment.process)}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            court.assessment.staff
+                          )}`}
+                        >
+                          {renderTableCell(court.assessment.staff)}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            court.assessment.office
+                          )}`}
+                        >
+                          {renderTableCell(court.assessment.office)}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            court.assessment.building
+                          )}`}
+                        >
+                          {renderTableCell(court.assessment.building)}
+                        </td>
+                        <td className="px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200">
+                          {court.total_survey_responses}
+                        </td>
+                      </tr>
+                    ))}
+                    {sortedCourts.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={9}
+                          className="px-6 py-4 text-center text-gray-500 h-[300px]"
+                        >
+                          {searchQuery ? "Ничего не найдено" : "Нет данных"}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="block sm:hidden p-3">
+                {sortedCourts.length === 0 ? (
+                  <div className="text-center text-gray-500 py-8">
+                    {searchQuery ? "Ничего не найдено" : "Нет данных"}
+                  </div>
+                ) : (
+                  sortedCourts.map((court, index) => (
+                    <div
+                      key={court.id}
+                      className="mb-3 p-3 border border-gray-100 rounded-lg bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
+                      onClick={() => handleCourtClick(court)}
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="text-sm font-semibold text-gray-800 hover:text-blue-600 truncate">
+                          {index + 1}. {court.name}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="ml-1 inline-block w-6 h-6 text-yellow-500" viewBox="0 0 24 24" stroke="none">
+                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" strokeLinejoin="round" strokeLinecap="round" />
+                          </svg>
+                          <span className="text-sm font-medium text-gray-700">
+                            {renderTableCell(court.overall_assessment)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">Судья:</span>
+                          <span>{renderTableCell(court.assessment.judge)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">Процесс:</span>
+                          <span>{renderTableCell(court.assessment.process)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">Сотрудники:</span>
+                          <span>{renderTableCell(court.assessment.staff)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">Канцелярия:</span>
+                          <span>{renderTableCell(court.assessment.office)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">Здание:</span>
+                          <span>{renderTableCell(court.assessment.building)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium">Отзывы:</span>
+                          <span>{court.total_survey_responses}</span>
                         </div>
                       </div>
                     </div>
-                  </th>
-                  <th
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort("overall")}
-                  >
-                   <div className="flex items-center justify-between px-2 space-x-1">
-                      <span className="truncate">Общая оценка</span>
-                      <div className="w-4 h-4">
-                        {getSortIcon("overall")}
-                      </div>
-                    </div>
-                  </th>
-
-                  <th
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort("judge")}
-                  >
-                    <div className="flex items-center justify-between px-2">
-                      <span>Судья</span>
-                      {getSortIcon("judge")}
-                    </div>
-                  </th>
-                  <th
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort("process")}
-                  >
-                    <div className="flex items-center justify-between px-2">
-                      <span>Процесс</span>
-                      {getSortIcon("process")}
-                    </div>
-                  </th>
-                  <th
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort("staff")}
-                  >
-                    <div className="flex items-center justify-between px-2">
-                      <span>Сотрудники</span>
-                      {getSortIcon("staff")}
-                    </div>
-                  </th>
-                  <th
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort("office")}
-                  >
-                    <div className="flex items-center justify-between px-2">
-                      <span>Канцелярия</span>
-                      {getSortIcon("office")}
-                    </div>
-                  </th>
-                  <th
-                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                    onClick={() => handleSort("building")}
-                  >
-                    <div className="flex items-center justify-between px-2">
-                      <span>Здание</span>
-                      {getSortIcon("building")}
-                    </div>
-                  </th>
-                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                    Кол-во оценок
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedCourts.map((court, index) => (
-                  <tr
-                    key={court.id}
-                    className="hover:bg-gray-50/50 border-b border-gray-200"
-                  >
-                    <td className="px-3 py-2.5 text-sm text-gray-900 text-center border-r border-gray-200">
-                      {index + 1}
-                    </td>
-                    <td
-                      className="px-3 py-2.5 text-sm text-gray-900 border-r border-gray-200 cursor-pointer hover:text-blue-600"
-                      onClick={() => handleCourtClick(court)}
-                    >
-                      {court.name}
-                    </td>
-                    <td
-                      className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        court.overall_assessment
-                      )}`}
-                    >
-                      {renderTableCell(court.overall_assessment)}
-                    </td>
-                    <td
-                      className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        court.assessment.judge
-                      )}`}
-                    >
-                      {renderTableCell(court.assessment.judge)}
-                    </td>
-                    <td
-                      className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        court.assessment.process
-                      )}`}
-                    >
-                      {renderTableCell(court.assessment.process)}
-                    </td>
-                    <td
-                      className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        court.assessment.staff
-                      )}`}
-                    >
-                      {renderTableCell(court.assessment.staff)}
-                    </td>
-                    <td
-                      className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        court.assessment.office
-                      )}`}
-                    >
-                      {renderTableCell(court.assessment.office)}
-                    </td>
-                    <td
-                      className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                        court.assessment.building
-                      )}`}
-                    >
-                      {renderTableCell(court.assessment.building)}
-                    </td>
-                    <td className="px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200">
-                      {court.total_survey_responses}
-                    </td>
-                  </tr>
-                ))}
-                {sortedCourts.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={9}
-                      className="px-6 py-4 text-center text-gray-500 h-[300px]"
-                    >
-                      {searchQuery ? "Ничего не найдено" : "Нет данных"}
-                    </td>
-                  </tr>
+                  ))
                 )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="block sm:hidden p-3">
-            {sortedCourts.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                {searchQuery ? "Ничего не найдено" : "Нет данных"}
               </div>
-            ) : (
-              sortedCourts.map((court, index) => (
-                <div
-                  key={court.id}
-                  className="mb-3 p-3 border border-gray-100 rounded-lg bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
-                  onClick={() => handleCourtClick(court)}
-                >
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="text-sm font-semibold text-gray-800 hover:text-blue-600 truncate">
-                      {index + 1}. {court.name}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="ml-1 inline-block w-6 h-6 text-yellow-500" viewBox="0 0 24 24" stroke="none">
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" strokeLinejoin="round" strokeLinecap="round" />
-                      </svg>
-                      <span className="text-sm font-medium text-gray-700">
-                        {renderTableCell(court.overall_assessment)}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium">Судья:</span>
-                      <span>{renderTableCell(court.assessment.judge)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium">Процесс:</span>
-                      <span>{renderTableCell(court.assessment.process)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium">Сотрудники:</span>
-                      <span>{renderTableCell(court.assessment.staff)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium">Канцелярия:</span>
-                      <span>{renderTableCell(court.assessment.office)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium">Здание:</span>
-                      <span>{renderTableCell(court.assessment.building)}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="font-medium">Отзывы:</span>
-                      <span>{court.total_survey_responses}</span>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+            </>
+          )}
         </div>
       </div>
       {showScrollTop && (

@@ -21,7 +21,7 @@ const TrafficSourceChart = React.lazy(() => import("../Charts/TrafficSourceChart
 const RatingChart = React.lazy(() => import("../Charts/RatingChart"));
 const ReusablePieChart = React.lazy(() => import("../Charts/ReusablePieChart"));
 const DisrespectChart = React.lazy(() => import("../Charts/DisrespectChart"));
-
+//courtNameId
 export default function Evaluations({
   selectedCourtId,
   courtNameId,
@@ -44,8 +44,8 @@ export default function Evaluations({
     remarksPath = `/Home/second-instance${selectedCourtId ? `/${selectedCourtId}` : ""}/feedbacks`;
   } else if (pathname.startsWith("/Home/first_instance/court/")) {
     remarksPath = `/Home/first_instance/feedbacks/${courtNameId}`;
-  } else if (pathname.includes("/Home/first-instance")) {
-    remarksPath = `/Home/first-instance/feedbacks/`;
+  } else if (pathname.startsWith("/Home/first-instance/") && pathname.endsWith("/rating")) {
+    remarksPath = `/Home/first-instance/feedbacks/${courtNameId}`;
   } else if (pathname.startsWith("/Home/") && pathname.endsWith("/ratings2")) {
     const parts = pathname.split("/");
     const slug = parts[2];

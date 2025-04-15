@@ -253,17 +253,23 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
   }, []);
 
   useEffect(() => {
+    // Полностью удаляем все тултипы при монтировании и размонтировании
     d3.selectAll(".tooltip").remove();
     d3.selectAll("#tooltip").remove();
     
+    // Создаем единый тултип с белым фоном
     d3.select("body")
       .append("div")
       .attr("id", "tooltip")
-      .attr("class", "absolute hidden bg-white px-3 py-2 rounded shadow-lg border border-gray-200 z-50")
+      .attr("class", "absolute hidden bg-white px-3 py-2 rounded-lg shadow-lg border border-gray-200")
       .style("pointer-events", "none")
-      .style("transition", "all 0.1s ease")
-      .style("z-index", "1000")
-      .style("position", "fixed");
+      .style("transition", "opacity 0.2s ease, transform 0.1s ease")
+      .style("z-index", "9999")
+      .style("position", "fixed")
+      .style("background-color", "white")
+      .style("box-shadow", "0 4px 15px -3px rgba(0, 0, 0, 0.12), 0 2px 8px -2px rgba(0, 0, 0, 0.1)")
+      .style("opacity", "0")
+      .style("transform", "translateY(5px)");
 
     return () => {
       d3.selectAll(".tooltip").remove();
@@ -354,6 +360,7 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
         .attr("pointer-events", "all")
         .on("mouseover", function (event: any, d: any) {
           if (isLake(d.properties)) return;
+          
           d3.select(this).attr("stroke-width", "1.5");
           const tooltip = d3.select("#tooltip");
           const coordinates = getEventCoordinates(event);
@@ -364,16 +371,27 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
             (c: any) => c.name === russianName
           );
           const rating = court?.overall || 0;
+          const ratingBgColor = getRatingBgColor(rating);
 
           tooltip
             .style("display", "block")
-            .style("left", `${coordinates.x + 10}px`)
-            .style("top", `${coordinates.y + 10}px`).html(`
-              <div class="font-medium">${displayName}</div>
-              <div class="text-sm text-gray-600">Общая оценка: ${
-                rating ? formatRating(rating) : "Нет данных"
-              }</div>
-            `);
+            .style("left", `${coordinates.x + 15}px`)
+            .style("top", `${coordinates.y + 15}px`)
+            .style("opacity", "0")
+            .style("transform", "translateY(5px)")
+            .html(`
+              <div class="font-medium text-base mb-1">${displayName}</div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600">Общая оценка:</span>
+                <span class="ml-2 px-2 py-0.5 rounded ${ratingBgColor}">
+                  ${rating ? formatRating(rating) : "Нет данных"}
+                </span>
+              </div>
+            `)
+            .transition()
+            .duration(150)
+            .style("opacity", "1")
+            .style("transform", "translateY(0)");
         })
         .on("mousemove", function (event: any) {
           const coordinates = getEventCoordinates(event);
@@ -383,7 +401,14 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
         })
         .on("mouseout", function () {
           d3.select(this).attr("stroke-width", "1");
-          d3.select("#tooltip").style("display", "none");
+          d3.select("#tooltip")
+            .transition()
+            .duration(100)
+            .style("opacity", "0")
+            .style("transform", "translateY(5px)")
+            .on("end", function() {
+              d3.select(this).style("display", "none");
+            });
         });
 
       const textGroup = g.append("g").attr("class", "rating-labels");
@@ -425,66 +450,62 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
           .on("mouseover", (event: any) => {
             const coordinates = getEventCoordinates(event);
             const tooltip = d3.select("#tooltip");
+            
             tooltip
               .style("display", "block")
-              .style("left", `${coordinates.x}px`)
-              .style("top", `${coordinates.y}px`).html(`
-            <div class="bg-white rounded-lg shadow-lg border border-gray-100 p-3 max-w-[240px]">
-              <div class="font-semibold text-base mb-2 text-gray-800 border-b pb-1.5" style="border-color: #4B5563">
-                ${court.name}
-              </div>
-              <div class="space-y-1.5">
-                <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
-                  <span class="text-gray-700 text-sm">Общая оценка</span>
-                  <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                    court.overall
-                  )}">
-                    ${court.overall.toFixed(1)}
-                  </span>
+              .style("left", `${coordinates.x + 15}px`)
+              .style("top", `${coordinates.y + 15}px`)
+              .style("opacity", "0")
+              .style("transform", "translateY(5px)")
+              .html(`
+                <div class="bg-white rounded-lg p-3 max-w-[280px]">
+                  <div class="font-semibold text-base mb-3 text-gray-800 border-b pb-2" style="border-color: #4B5563">
+                    ${court.name}
+                  </div>
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between border-l-2 pl-2.5" style="border-color: #4B5563">
+                      <span class="text-gray-700">Общая оценка</span>
+                      <span class="font-medium text-gray-900 px-2 py-0.5 rounded ${getRatingBgColor(court.overall)}">
+                        ${court.overall.toFixed(1)}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between border-l-2 pl-2.5" style="border-color: #4B5563">
+                      <span class="text-gray-700">Здание</span>
+                      <span class="font-medium text-gray-900 px-2 py-0.5 rounded ${getRatingBgColor(court.ratings[4])}">
+                        ${court.ratings[4].toFixed(1)}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between border-l-2 pl-2.5" style="border-color: #4B5563">
+                      <span class="text-gray-700">Канцелярия</span>
+                      <span class="font-medium text-gray-900 px-2 py-0.5 rounded ${getRatingBgColor(court.ratings[3])}">
+                        ${court.ratings[3].toFixed(1)}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between border-l-2 pl-2.5" style="border-color: #4B5563">
+                      <span class="text-gray-700">Процесс</span>
+                      <span class="font-medium text-gray-900 px-2 py-0.5 rounded ${getRatingBgColor(court.ratings[2])}">
+                        ${court.ratings[2].toFixed(1)}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between border-l-2 pl-2.5" style="border-color: #4B5563">
+                      <span class="text-gray-700">Сотрудники</span>
+                      <span class="font-medium text-gray-900 px-2 py-0.5 rounded ${getRatingBgColor(court.ratings[1])}">
+                        ${court.ratings[1].toFixed(1)}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between border-l-2 pl-2.5" style="border-color: #4B5563">
+                      <span class="text-gray-700">Судья</span>
+                      <span class="font-medium text-gray-900 px-2 py-0.5 rounded ${getRatingBgColor(court.ratings[0])}">
+                        ${court.ratings[0].toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
-                  <span class="text-gray-700 text-sm">Здание</span>
-                  <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                    court.ratings[4]
-                  )}">
-                    ${court.ratings[4].toFixed(1)}
-                  </span>
-                </div>
-                <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
-                  <span class="text-gray-700 text-sm">Канцелярия</span>
-                  <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                    court.ratings[3]
-                  )}">
-                    ${court.ratings[3].toFixed(1)}
-                  </span>
-                </div>
-                <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
-                  <span class="text-gray-700 text-sm">Процесс</span>
-                  <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                    court.ratings[2]
-                  )}">
-                    ${court.ratings[2].toFixed(1)}
-                  </span>
-                </div>
-                <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
-                  <span class="text-gray-700 text-sm">Сотрудники</span>
-                  <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                    court.ratings[1]
-                  )}">
-                    ${court.ratings[1].toFixed(1)}
-                  </span>
-                </div>
-                <div class="flex items-center justify-between border-l-2 pl-2" style="border-color: #4B5563">
-                  <span class="text-gray-700 text-sm">Судья</span>
-                  <span class="font-medium text-gray-900 px-1.5 py-0.5 rounded ${getRatingBgColor(
-                    court.ratings[0]
-                  )}">
-                    ${court.ratings[0].toFixed(1)}
-                  </span>
-                </div>
-              </div>
-            </div>
-          `);
+              `)
+              .transition()
+              .duration(150)
+              .style("opacity", "1")
+              .style("transform", "translateY(0)");
           })
           .on("mousemove", (event: any) => {
             const coordinates = getEventCoordinates(event);
@@ -493,7 +514,14 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
               .style("top", `${coordinates.y}px`);
           })
           .on("mouseout", () => {
-            d3.select("#tooltip").style("display", "none");
+            d3.select("#tooltip")
+              .transition()
+              .duration(100)
+              .style("opacity", "0")
+              .style("transform", "translateY(5px)")
+              .on("end", function() {
+                d3.select(this).style("display", "none");
+              });
           })
           .on("click", () => {
             if (onCourtClick) {
@@ -516,9 +544,13 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
       <style jsx>{`
         #tooltip {
           pointer-events: none;
-          transition: all 0.1s ease;
-          z-index: 1000;
+          transition: opacity 0.2s ease, transform 0.1s ease;
+          z-index: 9999;
           position: fixed;
+          background-color: white;
+          box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.12), 0 2px 8px -2px rgba(0, 0, 0, 0.1);
+          opacity: 0;
+          transform: translateY(5px);
         }
         .district-border {
           transition: stroke-width 0.2s ease;

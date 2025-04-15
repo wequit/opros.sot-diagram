@@ -9,6 +9,7 @@ import RegionDetails from "./regions/RegionDetails/page";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCourt } from "@/context/CourtContext";
 import { ArrowDown, ArrowDownUp, ArrowUp } from "lucide-react";
+import TableSkeleton, { MobileCardsSkeleton } from "@/lib/utils/SkeletonLoader/TableSkeleton";
 
 type SortDirection = "asc" | "desc" | null;
 type SortField =
@@ -277,177 +278,188 @@ export default function SecondInstanceUnifiedPage() {
       </div>
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 mt-8">
         <div className="hidden sm:block overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b border-gray-200">
-                <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                  №
-                </th>
-                <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
-                  {activeTab === "courts"
-                    ? getTranslation("Regional_Courts_Table_NameCourt")
-                    : getTranslation("Regional_Courts_Table_NameRegion")}
-                </th>
-                <th
-                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("overall")}
-                >
-                  <div className="flex items-center justify-between px-2">
-                    <span className="whitespace-nowrap">{getTranslation("Regional_Courts_Table_Overall")}</span>
-                    <div className="flex items-center justify-center">
-                      {getSortIcon("overall")}
+          {isLoading ? (
+            <>
+              <div className="hidden sm:block">
+                <TableSkeleton rowCount={10} columnCount={9} hasHeader={true} hasFilter={true} />
+              </div>
+              <div className="sm:hidden">
+                <MobileCardsSkeleton cardCount={5} />
+              </div>
+            </>
+          ) : (
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-gray-200">
+                  <th className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                    №
+                  </th>
+                  <th className="px-3 py-2.5 text-left text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200">
+                    {activeTab === "courts"
+                      ? getTranslation("Regional_Courts_Table_NameCourt")
+                      : getTranslation("Regional_Courts_Table_NameRegion")}
+                  </th>
+                  <th
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("overall")}
+                  >
+                    <div className="flex items-center justify-between px-2">
+                      <span className="whitespace-nowrap">{getTranslation("Regional_Courts_Table_Overall")}</span>
+                      <div className="flex items-center justify-center">
+                        {getSortIcon("overall")}
+                      </div>
                     </div>
-                  </div>
-                </th>
+                  </th>
 
-                <th
-                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("judge")}
-                >
-                  <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Build")}</span>
-                    {getSortIcon("judge")}
-                  </div>
-                </th>
-                <th
-                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("process")}
-                >
-                  <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Chancellery")}</span>
-                    {getSortIcon("process")}
-                  </div>
-                </th>
-                <th
-                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("staff")}
-                >
-                  <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Procces")}</span>
-                    {getSortIcon("staff")}
-                  </div>
-                </th>
-                <th
-                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("office")}
-                >
-                  <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Staff")}</span>
-                    {getSortIcon("office")}
-                  </div>
-                </th>
-                <th
-                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("accessibility")}
-                >
-                  <div className="flex items-center justify-between px-2">
-                    <span>{getTranslation("Regional_Courts_Table_Judge")}</span>
-                    {getSortIcon("accessibility")}
-                  </div>
-                </th>
-                <th
-                  className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
-                  onClick={() => handleSort("count")}
-                >
-                  <div className="flex items-center justify-between px-2">
-                  <span className="whitespace-nowrap">{getTranslation("Regional_Courts_Table_Number of reviews")}</span>
-                    <div className="flex items-center justify-center">
-                    {getSortIcon("count")}
+                  <th
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("judge")}
+                  >
+                    <div className="flex items-center justify-between px-2">
+                      <span>{getTranslation("Regional_Courts_Table_Build")}</span>
+                      {getSortIcon("judge")}
                     </div>
-                  </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr>
-                  <td colSpan={9} className="text-center py-4">
-                    {getTranslation("Loading")}
-                  </td>
+                  </th>
+                  <th
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("process")}
+                  >
+                    <div className="flex items-center justify-between px-2">
+                      <span>{getTranslation("Regional_Courts_Table_Chancellery")}</span>
+                      {getSortIcon("process")}
+                    </div>
+                  </th>
+                  <th
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("staff")}
+                  >
+                    <div className="flex items-center justify-between px-2">
+                      <span>{getTranslation("Regional_Courts_Table_Procces")}</span>
+                      {getSortIcon("staff")}
+                    </div>
+                  </th>
+                  <th
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("office")}
+                  >
+                    <div className="flex items-center justify-between px-2">
+                      <span>{getTranslation("Regional_Courts_Table_Staff")}</span>
+                      {getSortIcon("office")}
+                    </div>
+                  </th>
+                  <th
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("accessibility")}
+                  >
+                    <div className="flex items-center justify-between px-2">
+                      <span>{getTranslation("Regional_Courts_Table_Judge")}</span>
+                      {getSortIcon("accessibility")}
+                    </div>
+                  </th>
+                  <th
+                    className="px-3 py-2.5 text-center text-xs font-medium text-gray-500 uppercase bg-gray-50 border-r border-gray-200 cursor-pointer"
+                    onClick={() => handleSort("count")}
+                  >
+                    <div className="flex items-center justify-between px-2">
+                    <span className="whitespace-nowrap">{getTranslation("Regional_Courts_Table_Number of reviews")}</span>
+                      <div className="flex items-center justify-center">
+                    {getSortIcon("count")}
+                      </div>
+                    </div>
+                  </th>
                 </tr>
-              ) : displayedData.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="text-center py-4">
-                    {getTranslation("No_Data")}
-                  </td>
-                </tr>
-              ) : (
-                displayedData.map((item, index) => {
-                  const isCourt = "court" in item;
-                  const ratings = isCourt
-                    ? Object.fromEntries(item.assessment.map((a) => [a.aspect, a.court_avg]))
-                    : {
-                      Судья: item.ratings[0],
-                      Сотрудники: item.ratings[1],
-                      Процесс: item.ratings[2],
-                      Канцелярия: item.ratings[3],
-                      Здание: item.ratings[4],
-                    };
-                  return (
-                    <tr
-                      key={isCourt ? item.court_id : item.id}
-                      className="hover:bg-gray-50/50 border-b border-gray-200"
-                    >
-                      <td className="px-3 py-2.5 text-sm text-gray-900 text-center border-r border-gray-200">
-                        {index + 1}
-                      </td>
-                      <td
-                        className="px-3 py-2.5 text-sm text-gray-900 border-r border-gray-200 cursor-pointer hover:text-blue-600"
-                        onClick={() => handleCourtClick(item)}
+              </thead>
+              <tbody>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={9} className="text-center py-4">
+                      {getTranslation("Loading")}
+                    </td>
+                  </tr>
+                ) : displayedData.length === 0 ? (
+                  <tr>
+                    <td colSpan={9} className="text-center py-4">
+                      {getTranslation("No_Data")}
+                    </td>
+                  </tr>
+                ) : (
+                  displayedData.map((item, index) => {
+                    const isCourt = "court" in item;
+                    const ratings = isCourt
+                      ? Object.fromEntries(item.assessment.map((a) => [a.aspect, a.court_avg]))
+                      : {
+                        Судья: item.ratings[0],
+                        Сотрудники: item.ratings[1],
+                        Процесс: item.ratings[2],
+                        Канцелярия: item.ratings[3],
+                        Здание: item.ratings[4],
+                      };
+                    return (
+                      <tr
+                        key={isCourt ? item.court_id : item.id}
+                        className="hover:bg-gray-50/50 border-b border-gray-200"
                       >
-                        {isCourt ? item.court : item.name}
-                      </td>
-                      <td
-                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                          isCourt ? item.overall_assessment : item.overall
-                        )}`}
-                      >
-                        {(isCourt ? item.overall_assessment : item.overall).toFixed(1)}
-                      </td>
-                      <td
-                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                          ratings["Здание"] || 0
-                        )}`}
-                      >
-                        {(ratings["Здание"] || 0).toFixed(1)}
-                      </td>
-                      <td
-                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                          ratings["Канцелярия"] || 0
-                        )}`}
-                      >
-                        {(ratings["Канцелярия"] || 0).toFixed(1)}
-                      </td>
-                      <td
-                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                          ratings["Процесс"] || 0
-                        )}`}
-                      >
-                        {(ratings["Процесс"] || 0).toFixed(1)}
-                      </td>
-                      <td
-                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                          ratings["Сотрудники"] || 0
-                        )}`}
-                      >
-                        {(ratings["Сотрудники"] || 0).toFixed(1)}
-                      </td>
-                      <td
-                        className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
-                          ratings["Судья"] || 0
-                        )}`}
-                      >
-                        {(ratings["Судья"] || 0).toFixed(1)}
-                      </td>
-                      <td className="px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200">
-                        {isCourt ? item.total_survey_responses : item.totalAssessments}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
+                        <td className="px-3 py-2.5 text-sm text-gray-900 text-center border-r border-gray-200">
+                          {index + 1}
+                        </td>
+                        <td
+                          className="px-3 py-2.5 text-sm text-gray-900 border-r border-gray-200 cursor-pointer hover:text-blue-600"
+                          onClick={() => handleCourtClick(item)}
+                        >
+                          {isCourt ? item.court : item.name}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            isCourt ? item.overall_assessment : item.overall
+                          )}`}
+                        >
+                          {(isCourt ? item.overall_assessment : item.overall).toFixed(1)}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            ratings["Здание"] || 0
+                          )}`}
+                        >
+                          {(ratings["Здание"] || 0).toFixed(1)}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            ratings["Канцелярия"] || 0
+                          )}`}
+                        >
+                          {(ratings["Канцелярия"] || 0).toFixed(1)}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            ratings["Процесс"] || 0
+                          )}`}
+                        >
+                          {(ratings["Процесс"] || 0).toFixed(1)}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            ratings["Сотрудники"] || 0
+                          )}`}
+                        >
+                          {(ratings["Сотрудники"] || 0).toFixed(1)}
+                        </td>
+                        <td
+                          className={`px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200 ${getRatingColor(
+                            ratings["Судья"] || 0
+                          )}`}
+                        >
+                          {(ratings["Судья"] || 0).toFixed(1)}
+                        </td>
+                        <td className="px-3 py-2.5 text-sm text-gray-600 text-center border-r border-gray-200">
+                          {isCourt ? item.total_survey_responses : item.totalAssessments}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <div className="block sm:hidden p-3">

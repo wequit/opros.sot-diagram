@@ -2,7 +2,8 @@
 
 import React, { useRef, useEffect, useMemo, useState, useCallback } from "react";
 import * as d3 from "d3";
-import { Minus, Plus, RefreshCw } from "lucide-react";
+import { Minus, Plus, RefreshCw, Info, X } from "lucide-react";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface OblastData {
   id: number;
@@ -39,7 +40,7 @@ interface GeoData {
 
 type OblastMapping = { [key: string]: string };
 
-const BASE_PATH = "/results"; 
+const BASE_PATH = "/results";
 
 export default function Map_oblast({ oblastData }: { oblastData: OblastData[] }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -47,7 +48,10 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [geoData, setGeoData] = useState<GeoData | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 480 });
+  const [showInfo, setShowInfo] = useState(false);
+  const [showLegend, setShowLegend] = useState(false);
   const initialTransformRef = useRef(d3.zoomIdentity);
+  const { getTranslation, language } = useLanguage();
 
   const zoom = useMemo(
     () =>
@@ -109,6 +113,21 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
     return "#cccccc";
   }, []);
 
+  const colorScale = useMemo(
+    () => [
+      { range: "4.5 - 5.0", color: "#66C266" },
+      { range: "4.0 - 4.4", color: "#B4D330" },
+      { range: "3.5 - 3.9", color: "#FFC04D" },
+      { range: "3.0 - 3.4", color: "#F4A460" },
+      { range: "2.0 - 2.9", color: "#ff8300" },
+      { range: "1.5 - 1.9", color: "#ff620d" },
+      { range: "1.0 - 1.4", color: "#fa5d5d" },
+      { range: "0.5 - 0.9", color: "#640202" },
+      { range: "Нет данных", color: "#cccccc" },
+    ],
+    []
+  );
+
   useEffect(() => {
     fetch(`${BASE_PATH}/gadm41_KGZ_1.json`)
       .then((response) => {
@@ -150,15 +169,15 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
     if (typeof document !== "undefined") {
       const style = document.createElement("style");
       style.textContent = `
-      .region-path {
-        transition: all 0.2s ease-in-out;
-      }
-      .region-path:hover {
-        transform: scale(1.02); /* Лёгкое увеличение масштаба */
-        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2)); /* Только тень, без изменения яркости */
-        cursor: pointer;
-      }
-    `;
+        .region-path {
+          transition: all 0.2s ease-in-out;
+        }
+        .region-path:hover {
+          transform: scale(1.02);
+          filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+          cursor: pointer;
+        }
+      `;
       document.head.appendChild(style);
     }
 
@@ -185,20 +204,26 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
 
         const coordinates = getEventCoordinates(event);
         const tooltip = d3.select(tooltipRef.current);
+        const mappedName = oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
+        const rating = getOblastRating(d.properties.NAME_1);
+        const ratingColor = getColor(rating);
+
         tooltip
           .style("display", "block")
           .style("position", "fixed")
           .style("left", `${coordinates.x + 10}px`)
-          .style("top", `${coordinates.y + 10}px`);
-
-        const mappedName = oblastMapping[d.properties.NAME_1] || d.properties.NAME_1;
-        const rating = getOblastRating(d.properties.NAME_1);
-        tooltip.html(`
-          <div class="font-medium">${mappedName}</div>
-          <div class="text-sm text-gray-600">
-            Общая оценка: ${formatRating(rating)}
-          </div>
-        `);
+          .style("top", `${coordinates.y + 10}px`)
+          .html(`
+            <div class="p-2">
+              <div class="font-medium mb-1">${mappedName}</div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">Общая оценка:</span>
+                <span class="ml-2 px-2 py-0.5 rounded text-gray-900 font-medium" style="background-color: ${rating > 0 ? ratingColor + '40' : '#E5E7EB'}">
+                  ${rating > 0 ? `<span class="text-yellow-600 mr-1">★</span>${rating.toFixed(1)} / 5` : "Нет данных"}
+                </span>
+              </div>
+            </div>
+          `);
       })
       .on("mousemove", function (event: any) {
         if (!hasData) return;
@@ -232,6 +257,40 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
         });
     }
 
+    // Создаем легенду (шкалу цветов)
+    const legend = svg.append("g").attr("class", "legend").style("display", "none");
+
+    const legendX = 20;
+    const legendY = 60;
+    const boxWidth = 15; // Уменьшаем ширину прямоугольника
+    const boxHeight = 15; // Уменьшаем высоту прямоугольника
+    const textOffset = 25; // Уменьшаем отступ текста
+
+    legend
+      .selectAll("rect")
+      .data(colorScale)
+      .enter()
+      .append("rect")
+      .attr("x", legendX)
+      .attr("y", (d, i) => legendY + i * (boxHeight + 3)) // Уменьшаем вертикальный отступ
+      .attr("width", boxWidth)
+      .attr("height", boxHeight)
+      .attr("fill", (d) => d.color)
+      .attr("stroke", "#000")
+      .attr("stroke-width", "0.5");
+
+    legend
+      .selectAll("text")
+      .data(colorScale)
+      .enter()
+      .append("text")
+      .attr("x", legendX + textOffset)
+      .attr("y", (d, i) => legendY + i * (boxHeight + 3) + boxHeight / 2)
+      .attr("dy", "0.35em")
+      .attr("font-size", "10px") // Уменьшаем размер шрифта
+      .attr("fill", "#000")
+      .text((d) => d.range);
+
     svg.call(zoom);
     zoom.translateExtent([[0, 0], [width, height]]);
 
@@ -245,12 +304,99 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
     };
   }, [geoData, oblastData, getOblastRating, getColor, zoom]);
 
+  // Управление отображением легенды с анимацией
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    const legend = d3.select(svgRef.current).select(".legend");
+
+    if (showLegend) {
+      legend
+        .style("display", "block")
+        .transition()
+        .duration(300)
+        .style("opacity", 1);
+    } else {
+      legend
+        .transition()
+        .duration(300)
+        .style("opacity", 0)
+        .on("end", () => {
+          legend.style("display", "none");
+        });
+    }
+  }, [showLegend]);
+
   return (
     <div ref={containerRef} className="relative w-full">
       <svg ref={svgRef} className="w-full h-auto"></svg>
 
+      {/* Кнопка информации */}
+      <button
+        onClick={() => {
+          if (showLegend) {
+            setShowLegend(false);
+          } else {
+            setShowInfo(!showInfo);
+          }
+        }}
+        className="absolute top-4 left-4 z-[70] bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 flex items-center gap-2 border border-gray-300"
+      >
+        {showLegend ? (
+          <>
+            <X className="w-5 h-5" />
+            <span className="text-sm">{getTranslation("MapOblast_HideScale", language)}</span>
+          </>
+        ) : (
+          <>
+            <Info className="w-5 h-5" />
+            <span className="text-sm">{getTranslation("MapOblast_Information", language)}</span>
+          </>
+        )}
+      </button>
+
+      {/* Информационное окно */}
+      {showInfo && !showLegend && (
+        <div
+          className="absolute top-16 left-4 z-[40] bg-white p-4 rounded-lg shadow-lg border border-gray-200"
+          style={{ maxWidth: "320px" }}
+        >
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-medium text-gray-800">{getTranslation("MapOblast_Title", language)}</h3>
+            <button
+              onClick={() => setShowInfo(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <X className="w-5 táj h-5" />
+            </button>
+          </div>
+          <div className="border-t border-gray-200 pt-2 mb-4">
+            <p className="text-sm text-gray-600 mb-2">
+              {getTranslation("MapOblast_Description", language)}
+            </p>
+            <p className="text-sm text-gray-600 mb-2">
+              {getTranslation("MapOblast_ColorDescription", language)}
+            </p>
+            <p className="text-sm text-gray-600">
+              {getTranslation("MapOblast_ZoomDescription", language)}
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              setShowLegend(true);
+              setShowInfo(false);
+            }}
+            className="w-full py-2 px-3 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 flex items-center justify-center gap-2"
+          >
+            <Info className="w-4 h-4" />
+            <span className="text-sm">{getTranslation("MapOblast_ShowScale", language)}</span>
+          </button>
+        </div>
+      )}
+
       {/* Кнопки управления зумом */}
-      <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-30">
+      <div className="absolute bottom-4 right-4 z-[60] flex flex-col gap-2">
         <button
           onClick={() => {
             svgRef.current && d3.select(svgRef.current).call(zoom.scaleBy, 1.2);
@@ -285,7 +431,7 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
       {/* Тултип */}
       <div
         ref={tooltipRef}
-        className="hidden absolute bg-white shadow-lg rounded-md p-2 z-50 pointer-events-none"
+        className="hidden absolute bg-white shadow-lg rounded-md p-2 z-[50] pointer-events-none"
         style={{ minWidth: "150px" }}
       ></div>
     </div>

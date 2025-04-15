@@ -147,6 +147,17 @@ export default function RemarksPage() {
     }
   }, [remarks]);
 
+  // Стили для предотвращения скролла при отображении пустой страницы
+  useEffect(() => {
+    if (localRemarks.length === 0 && !isLoading) {
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [localRemarks, isLoading]);
+
   const handleCommentSubmit = async (comment: string) => {
     try {
       const token = getCookie("access_token");
@@ -273,25 +284,34 @@ export default function RemarksPage() {
   }
 
   return (
-    <div className="min-h-screen bg-transparent">
+    <>
       {localRemarks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 bg-gray-50 border border-gray-200 rounded-lg shadow-sm p-6">
-          <div className="animate-bounce mb-4">
-            <FileSearch size={64} className="text-gray-400" />
+        <div className="fixed inset-0 flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center max-w-3xl w-full mx-auto">
+            {/* Анимированная иконка */}
+            <div className="animate-bounce mb-8">
+              <FileSearch size={72} className="text-blue-500" />
+            </div>
+            
+            {/* Заголовок */}
+            <p className="text-gray-800 text-3xl font-bold mb-4 text-center">
+              {getTranslation("RemarksLogic_NoRemarks", language)}
+            </p>
+            
+            {/* Текст */}
+            <p className="text-gray-600 text-lg mb-10 text-center max-w-lg">
+              {getTranslation("RemarksLogic_NoRemarksMessage", language)}
+            </p>
+            
+            {/* Кнопка */}
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-3 px-8 py-3 bg-blue-500 text-white text-base font-medium rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              <ArrowLeft size={20} />
+              <span>{getTranslation("RemarksLogic_Back", language)}</span>
+            </button>
           </div>
-          <p className="text-gray-700 text-xl font-semibold mb-2">
-          {getTranslation("RemarksLogic_NoRemarks", language)}
-          </p>
-          <p className="text-gray-500 text-sm mb-4">
-          {getTranslation("RemarksLogic_NoRemarksMessage", language)}
-          </p>
-          <Link
-            href="/Home/summary/ratings"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg shadow hover:bg-blue-600 transition"
-          >
-            <ArrowLeft size={18} />
-            {getTranslation("RemarksLogic_Back", language)}
-          </Link>
         </div>
       ) : (
         <div className="w-full px-4 sm:px-6 lg:px-8 py-6 mx-auto">
@@ -424,6 +444,6 @@ export default function RemarksPage() {
           />
         </div>
       )}
-    </div>
+    </>
   );
 }

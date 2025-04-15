@@ -21,6 +21,8 @@ export default function Dates() {
   const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
+  const [showStartDateCalendar, setShowStartDateCalendar] = useState(false);
+  const [showEndDateCalendar, setShowEndDateCalendar] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: "2025-01-01",
     endDate: "2025-12-31",
@@ -30,6 +32,8 @@ export default function Dates() {
     typeof window !== "undefined" ? window.innerWidth : 0
   );
 
+  const startDateCalendarRef = useRef<HTMLDivElement>(null);
+  const endDateCalendarRef = useRef<HTMLDivElement>(null);
   const yearDropdownRef = useRef<HTMLDivElement>(null);
   const monthDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -62,6 +66,12 @@ export default function Dates() {
       }
       if (monthDropdownRef.current && !monthDropdownRef.current.contains(event.target as Node)) {
         setShowMonthDropdown(false);
+      }
+      if (startDateCalendarRef.current && !startDateCalendarRef.current.contains(event.target as Node)) {
+        setShowStartDateCalendar(false);
+      }
+      if (endDateCalendarRef.current && !endDateCalendarRef.current.contains(event.target as Node)) {
+        setShowEndDateCalendar(false);
       }
     };
   
@@ -185,15 +195,20 @@ export default function Dates() {
   const handleDateChange = useCallback(
     (field: keyof DateRange, value: string) => {
       const isoValue = formatDateToISO(value);
-      setDateRange((prev) => ({ ...prev, [field]: isoValue }));
-
-      const params = {
-        year: dateRange.year,
-        startDate: field === "startDate" ? isoValue : dateRange.startDate,
-        endDate: field === "endDate" ? isoValue : dateRange.endDate,
-      };
-
-      setDateParams(params);
+      
+      // Проверка правильности диапазона дат
+      if (field === 'startDate' && isoValue > dateRange.endDate) {
+        // Если начальная дата позже конечной, установить конечную равной начальной
+        setDateRange((prev) => ({ ...prev, startDate: isoValue, endDate: isoValue }));
+        setDateParams({ year: dateRange.year });
+      } else if (field === 'endDate' && isoValue < dateRange.startDate) {
+        // Не позволять устанавливать конечную дату раньше начальной
+        return;
+      } else {
+        // Нормальное обновление даты
+        setDateRange((prev) => ({ ...prev, [field]: isoValue }));
+        setDateParams({ year: dateRange.year });
+      }
     },
     [dateRange.startDate, dateRange.endDate, dateRange.year, setDateParams]
   );
@@ -251,29 +266,185 @@ export default function Dates() {
     setDateParams({ year: currentYear });
   }, [setDateParams]);
 
+  const generateCalendarDays = (date: string, isStartDateCalendar: boolean) => {
+    const [year, month] = date.split('-').map(Number);
+    const daysInMonth = new Date(year, month, 0).getDate();
+    const firstDayOfMonth = new Date(year, month - 1, 1).getDay() || 7; // 1-7, где 1 - понедельник
+    
+    const days = [];
+    
+    // Пустые ячейки для выравнивания
+    for (let i = 1; i < firstDayOfMonth; i++) {
+      days.push(<div key={`empty-${i}`} className="h-8 w-8"></div>);
+    }
+    
+    // Дни месяца
+    for (let i = 1; i <= daysInMonth; i++) {
+      const currentDate = `${year}-${month.toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
+      const isSelected = 
+        (showStartDateCalendar && currentDate === dateRange.startDate) || 
+        (showEndDateCalendar && currentDate === dateRange.endDate);
+      
+      // Проверяем, недоступна ли дата (для календаря конечной даты)
+      const isDisabled = !isStartDateCalendar && currentDate < dateRange.startDate;
+      
+      days.push(
+        <button
+          key={i}
+          onClick={() => {
+            if (isDisabled) return; // Игнорируем клик на недоступных датах
+            
+            if (showStartDateCalendar) {
+              handleDateChange('startDate', formatDateToDisplay(currentDate));
+              setShowStartDateCalendar(false);
+              
+              // Если конечная дата стала раньше начальной, корректируем её
+              if (currentDate > dateRange.endDate) {
+                handleDateChange('endDate', formatDateToDisplay(currentDate));
+              }
+            } else if (showEndDateCalendar) {
+              handleDateChange('endDate', formatDateToDisplay(currentDate));
+              setShowEndDateCalendar(false);
+            }
+          }}
+          disabled={isDisabled}
+          className={`h-8 w-8 rounded flex items-center justify-center text-sm transition-all duration-200 
+            ${isSelected 
+              ? 'bg-blue-700 text-white font-medium' 
+              : isDisabled
+                ? 'text-gray-300 cursor-not-allowed'
+                : 'hover:bg-blue-50 text-gray-700'}`}
+        >
+          {i}
+        </button>
+      );
+    }
+    
+    return days;
+  };
+
+  const renderCalendar = (isStartDate = true) => {
+    const date = isStartDate ? dateRange.startDate : dateRange.endDate;
+    const [year, month] = date.split('-').map(Number);
+    
+    const handleMonthChange = (increment: number) => {
+      let newMonth = month + increment;
+      let newYear = year;
+      
+      if (newMonth > 12) {
+        newMonth = 1;
+        newYear += 1;
+      } else if (newMonth < 1) {
+        newMonth = 12;
+        newYear -= 1;
+      }
+      
+      const newDate = `${newYear}-${newMonth.toString().padStart(2, '0')}-01`;
+      if (isStartDate) {
+        setDateRange(prev => ({ ...prev, startDate: newDate }));
+      } else {
+        setDateRange(prev => ({ ...prev, endDate: newDate }));
+      }
+    };
+    
+    return (
+      <div className="p-3 bg-white rounded-md shadow-lg border border-gray-200 w-64">
+        <div className="flex items-center justify-between mb-3">
+          <button 
+            onClick={() => handleMonthChange(-1)}
+            className="p-1 rounded hover:bg-blue-50 transition-colors"
+          >
+            <svg className="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div className="font-medium text-blue-800">
+            {monthNames[month - 1]} {year}
+          </div>
+          <button 
+            onClick={() => handleMonthChange(1)}
+            className="p-1 rounded hover:bg-blue-50 transition-colors"
+          >
+            <svg className="w-5 h-5 text-blue-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-7 gap-1 mb-2">
+          {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
+            <div key={day} className="h-8 w-8 flex items-center justify-center text-xs text-blue-500 font-medium">
+              {day}
+            </div>
+          ))}
+        </div>
+        
+        <div className="grid grid-cols-7 gap-1">
+          {generateCalendarDays(date, isStartDate)}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="w-full bg-gradient-to-r from-blue-700 to-indigo-400 p-4 rounded-2xl mb-4 shadow-lg">
       <div className="flex flex-wrap items-center gap-3">
         {/* Ввод диапазона дат */}
         <div className="flex items-center bg-white rounded-xl shadow-sm p-2 border-b-2 border-indigo-100">
-          <div className="flex items-center gap-2 ml-3">
-            <span className="font-medium text-gray-700">С</span>
-            <input
-              type="text"
-              value={formatDateToDisplay(dateRange.startDate)}
-              onChange={(e) => handleDateChange("startDate", e.target.value)}
-              className="border-0 focus:ring-0 text-gray-600 font-medium w-20 text-center"
-            />
+          <div className="flex items-center gap-2 ml-3 relative" ref={startDateCalendarRef}>
+            <span 
+              className="font-medium text-gray-700 cursor-pointer hover:text-indigo-600 transition-colors select-none"
+              onClick={() => {
+                setShowStartDateCalendar(!showStartDateCalendar);
+                setShowEndDateCalendar(false);
+              }}
+            >
+              С
+            </span>
+            <span
+              onClick={() => {
+                setShowStartDateCalendar(!showStartDateCalendar);
+                setShowEndDateCalendar(false);
+              }}
+              className="border-0 focus:ring-0 text-gray-600 font-medium w-20 text-center cursor-pointer hover:text-indigo-600 transition-colors select-none"
+            >
+              {formatDateToDisplay(dateRange.startDate)}
+            </span>
+            
+            {showStartDateCalendar && (
+              <div className="absolute top-full left-0 mt-2 z-40 animate-fade-in-down">
+                {renderCalendar(true)}
+              </div>
+            )}
           </div>
+          
           <div className="w-px h-6 bg-gray-200 mx-1"></div>
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-700">По</span>
-            <input
-              type="text"
-              value={formatDateToDisplay(dateRange.endDate)}
-              onChange={(e) => handleDateChange("endDate", e.target.value)}
-              className="border-0 focus:ring-0 text-gray-600 font-medium w-20 text-center"
-            />
+          
+          <div className="flex items-center gap-2 relative" ref={endDateCalendarRef}>
+            <span 
+              className="font-medium text-gray-700 cursor-pointer hover:text-indigo-600 transition-colors select-none"
+              onClick={() => {
+                setShowEndDateCalendar(!showEndDateCalendar);
+                setShowStartDateCalendar(false);
+              }}
+            >
+              По
+            </span>
+            <span
+              onClick={() => {
+                setShowEndDateCalendar(!showEndDateCalendar);
+                setShowStartDateCalendar(false);
+              }}
+              className="border-0 focus:ring-0 text-gray-600 font-medium w-20 text-center cursor-pointer hover:text-indigo-600 transition-colors select-none"
+            >
+              {formatDateToDisplay(dateRange.endDate)}
+            </span>
+            
+            {showEndDateCalendar && (
+              <div className="absolute top-full left-0 mt-2 z-40 animate-fade-in-down">
+                {renderCalendar(false)}
+              </div>
+            )}
           </div>
         </div>
 

@@ -283,6 +283,8 @@ export default function Map_rayon({
         const districtName = d.properties.NAME_2;
         const russianName = districtNamesRu[districtName] || districtName;
         const rating = getRayonRating(districtName);
+        const ratingColor = getColorByRating(rating);
+        
         tooltip
           .style("display", "block")
           .style("position", "fixed")
@@ -290,8 +292,13 @@ export default function Map_rayon({
           .style("top", `${coordinates.y - 28}px`)
           .html(`
             <div class="p-2">
-              <div>${russianName}</div>
-              <div>${getTranslation("MapRayon_OverallRating", language)}: ${rating > 0 ? formatRating(rating) : "Нет данных"}</div>
+              <div class="font-medium mb-1">${russianName}</div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">${getTranslation("MapRayon_OverallRating", language)}:</span>
+                <span class="ml-2 px-2 py-0.5 rounded text-gray-900 font-medium" style="background-color: ${rating > 0 ? ratingColor + '40' : '#E5E7EB'}">
+                  ${rating > 0 ? `<span class="text-yellow-600 mr-1">★</span>${rating.toFixed(1)} / 5` : "Нет данных"}
+                </span>
+              </div>
             </div>
           `);
       })
@@ -312,15 +319,23 @@ export default function Map_rayon({
         const districtName = d.properties.NAME_2;
         const russianName = districtNamesRu[districtName] || districtName;
         const rating = getRayonRating(districtName);
+        const ratingColor = getColorByRating(rating);
+        
         tooltip
           .style("display", "block")
           .style("position", "fixed")
           .style("left", `${coordinates.x + 10}px`)
-          .style("top", `${coordinates.y + 10}px`).html(`
-            <div class="font-medium">${russianName}</div>
-            <div class="text-sm text-gray-600">${getTranslation("MapRayon_OverallRating", language)}: ${
-              rating ? rating.toFixed(1) : "Нет данных"
-            }</div>
+          .style("top", `${coordinates.y + 10}px`)
+          .html(`
+            <div class="p-2">
+              <div class="font-medium mb-1">${russianName}</div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">${getTranslation("MapRayon_OverallRating", language)}:</span>
+                <span class="ml-2 px-2 py-0.5 rounded text-gray-900 font-medium" style="background-color: ${rating > 0 ? ratingColor + '40' : '#E5E7EB'}">
+                  ${rating > 0 ? `<span class="text-yellow-500 mr-1">★</span>${rating.toFixed(1)} / 5` : "Нет данных"}
+                </span>
+              </div>
+            </div>
           `);
       })
       .on("touchend", function () {
@@ -367,14 +382,23 @@ export default function Map_rayon({
       .on("mouseover", function (event, d) {
         d3.select(this).attr("opacity", 1).attr("r", 8);
         const court = courts.find((c) => c.name === d[0]);
+        const rating = court ? court.overall_assessment : 0;
+        const ratingColor = getColorByRating(rating);
+        
         tooltip
           .style("display", "block")
           .style("left", `${event.pageX + 10}px`)
-          .style("top", `${event.pageY + 10}px`).html(`
-            <div class="font-medium">${d[0]}</div>
-            <div class="text-sm text-gray-600">${getTranslation("MapRayon_OverallRating", language)}: ${
-              court ? court.overall_assessment.toFixed(1) : "Нет данных"
-            }</div>
+          .style("top", `${event.pageY + 10}px`)
+          .html(`
+            <div class="p-2">
+              <div class="font-medium mb-1">${d[0]}</div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">${getTranslation("MapRayon_OverallRating", language)}:</span>
+                <span class="ml-2 px-2 py-0.5 rounded text-gray-900 font-medium" style="background-color: ${rating > 0 ? ratingColor + '40' : '#E5E7EB'}">
+                  ${rating > 0 ? `<span class="text-yellow-500 mr-1">★</span>${rating.toFixed(1)} / 5` : "Нет данных"}
+                </span>
+              </div>
+            </div>
           `);
       })
       .on("mouseout", function () {
@@ -384,16 +408,25 @@ export default function Map_rayon({
       .on("touchstart", function (event: any, d) {
         event.preventDefault();
         const court = courts.find((c) => c.name === d[0]);
+        const rating = court ? court.overall_assessment : 0;
+        const ratingColor = getColorByRating(rating);
         const coordinates = getEventCoordinates(event);
+        
         tooltip
           .style("display", "block")
           .style("position", "fixed")
           .style("left", `${coordinates.x + 10}px`)
-          .style("top", `${coordinates.y + 10}px`).html(`
-            <div class="font-medium">${d[0]}</div>
-            <div class="text-sm text-gray-600">${getTranslation("MapRayon_OverallRating", language)}: ${
-              court ? court.overall_assessment.toFixed(1) : "Нет данных"
-            }</div>
+          .style("top", `${coordinates.y + 10}px`)
+          .html(`
+            <div class="p-2">
+              <div class="font-medium mb-1">${d[0]}</div>
+              <div class="flex items-center justify-between">
+                <span class="text-gray-700">${getTranslation("MapRayon_OverallRating", language)}:</span>
+                <span class="ml-2 px-2 py-0.5 rounded text-gray-900 font-medium" style="background-color: ${rating > 0 ? ratingColor + '40' : '#E5E7EB'}">
+                  ${rating > 0 ? `<span class="text-yellow-500 mr-1">★</span>${rating.toFixed(1)} / 5` : "Нет данных"}
+                </span>
+              </div>
+            </div>
           `);
       })
       .on("touchend", function () {
