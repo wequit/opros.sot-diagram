@@ -8,7 +8,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (token: string) => void;
   logout: () => void;
-  user: { first_name: string; last_name: string; court: string; role: string; court_id: string } | null; // Добавляем court_id
+  user: { first_name: string; last_name: string; court: string; role: string; court_id: string } | null; 
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -22,7 +22,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<AuthContextType['user']>(null); // Указываем тип для user
+  const [user, setUser] = useState<AuthContextType['user']>(null); 
   const router = useRouter();
 
   useEffect(() => {

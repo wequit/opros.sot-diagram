@@ -74,7 +74,6 @@ const HeaderNav: React.FC<HeaderNavProps> = ({ windowWidth, userCourt }) => {
           </Link>
         </div>
       ) : user?.role === "Председатель 2 инстанции" ? (
-        // === Председатель 2 инстанции ===
         <div className="flex space-x-3 p-2 rounded-xl">
           <Link
             href="/Home/summary2/ratings"

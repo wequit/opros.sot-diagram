@@ -68,7 +68,6 @@ const TableSkeleton: React.FC<TableSkeletonProps> = ({
   );
 };
 
-// Мобильный вариант скелетона для карточек
 export const MobileCardsSkeleton: React.FC<{ cardCount?: number }> = ({ 
   cardCount = 5 
 }) => {

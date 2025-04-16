@@ -39,7 +39,7 @@ export default function DemographicsChart({
         color: '#FFFFFF',
         font: { size: 16, weight: 'bold' },
         formatter: (value: number) => {
-          if (value === 0) return ''; // Скрываем 0%
+          if (value === 0) return ''; 
           return value + '%';
         },
       },
@@ -90,7 +90,7 @@ export default function DemographicsChart({
           weight: 'bold',
         },
         formatter: (value: number) => {
-          if (value === 0) return ''; // Скрываем 0%
+          if (value === 0) return ''; 
           return `${Math.abs(Math.round(value))}%`;
         },
       },
@@ -129,7 +129,7 @@ export default function DemographicsChart({
           weight: 'bold',
         },
         formatter: (value: number) => {
-          if (value === 0) return ''; // Скрываем 0%
+          if (value === 0) return ''; 
           return value;
         },
       },

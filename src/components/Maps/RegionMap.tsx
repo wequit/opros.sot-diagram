@@ -253,11 +253,9 @@ const RegionMap: React.FC<RegionMapProps> = ({ regionName, selectedRegion, onCou
   }, []);
 
   useEffect(() => {
-    // Полностью удаляем все тултипы при монтировании и размонтировании
     d3.selectAll(".tooltip").remove();
     d3.selectAll("#tooltip").remove();
     
-    // Создаем единый тултип с белым фоном
     d3.select("body")
       .append("div")
       .attr("id", "tooltip")

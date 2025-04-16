@@ -62,7 +62,7 @@ export default function DisrespectChart({
         },
       },
       tooltip: {
-        enabled: true, // Оставляем тултип включенным, но он будет показывать то же самое
+        enabled: true, 
         callbacks: {
           label: (context: any) => {
             const value = context.raw;
@@ -77,7 +77,7 @@ export default function DisrespectChart({
       },
     },
     maintainAspectRatio: false,
-    layout: { padding: { left: 1, right: 50 } }, // Отступ справа для меток
+    layout: { padding: { left: 1, right: 50 } }, 
   };
 
   return (

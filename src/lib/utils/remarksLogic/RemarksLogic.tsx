@@ -147,7 +147,6 @@ export default function RemarksPage() {
     }
   }, [remarks]);
 
-  // Стили для предотвращения скролла при отображении пустой страницы
   useEffect(() => {
     if (localRemarks.length === 0 && !isLoading) {
       document.body.style.overflow = 'hidden';

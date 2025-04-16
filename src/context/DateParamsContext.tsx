@@ -1,11 +1,20 @@
 "use client";
 import React, { createContext, useContext, useState, useMemo, ReactNode } from "react";
-import { DateParamsContextType } from "../types/contextTypes";
+
+interface DateParams {
+  startDate?: string;
+  endDate?: string;
+}
+
+interface DateParamsContextType {
+  dateParams: DateParams;
+  setDateParams: (params: DateParams) => void;
+}
 
 const DateParamsContext = createContext<DateParamsContextType | undefined>(undefined);
 
 export function DateParamsProvider({ children }: { children: ReactNode }) {
-  const [dateParams, setDateParams] = useState<{ year?: string; quarter?: number; month?: number }>({ year: "2025" });
+  const [dateParams, setDateParams] = useState<DateParams>({ startDate: "2025-01-01", endDate: "2025-12-31" });
 
   const value = useMemo(() => ({ dateParams, setDateParams }), [dateParams]);
 

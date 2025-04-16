@@ -27,16 +27,16 @@ export default function RadarChart({ radarData, windowWidth, totalResponses }: R
         },
       },
       datalabels: {
-        color: '#000000', // Цвет текста меток
+        color: '#000000', 
         font: {
-          size: windowWidth < 385 ? 8 : windowWidth < 470 ? 10 : 12, // Размер шрифта адаптируется
+          size: windowWidth < 385 ? 8 : windowWidth < 470 ? 10 : 12, 
         },
         formatter: (value: number) => {
-          return value.toFixed(1); // Форматируем значение до 1 знака после запятой (например, 3.3)
+          return value.toFixed(1);
         },
-        anchor: 'center', // Размещаем метку в центре точки
-        align: 'top', // Смещаем метку чуть выше точки
-        offset: 5, // Отступ от точки
+        anchor: 'center', 
+        align: 'top', 
+        offset: 5, 
       },
       tooltip: {
         callbacks: {

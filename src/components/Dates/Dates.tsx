@@ -1,8 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useState, useRef } from "react";
-import { usePathname } from "next/navigation";
 import { useDateParams } from "@/context/DateParamsContext";
-import { useLanguage } from "@/context/LanguageContext";
 
 interface DateRange {
   startDate: string;
@@ -21,25 +19,24 @@ export default function Dates() {
   const [showYearDropdown, setShowYearDropdown] = useState(false);
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
-  const [showStartDateCalendar, setShowStartDateCalendar] = useState(false);
-  const [showEndDateCalendar, setShowEndDateCalendar] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>({
     startDate: "2025-01-01",
     endDate: "2025-12-31",
     year: "2025",
   });
+  const [isSelectingStartDate, setIsSelectingStartDate] = useState(true);
+  const [isDateSelectionComplete, setIsDateSelectionComplete] = useState(false);
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0
   );
 
-  const startDateCalendarRef = useRef<HTMLDivElement>(null);
-  const endDateCalendarRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
   const yearDropdownRef = useRef<HTMLDivElement>(null);
   const monthDropdownRef = useRef<HTMLDivElement>(null);
+  const dateInputRef = useRef<HTMLDivElement>(null);
 
   const { setDateParams } = useDateParams();
-  const { getTranslation } = useLanguage();
-  const pathname = usePathname();
 
   const formatDateToDisplay = (isoDate: string): string => {
     const parts = isoDate.split("-");
@@ -59,7 +56,7 @@ export default function Dates() {
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
-  
+
     const handleClickOutside = (event: MouseEvent) => {
       if (yearDropdownRef.current && !yearDropdownRef.current.contains(event.target as Node)) {
         setShowYearDropdown(false);
@@ -67,39 +64,41 @@ export default function Dates() {
       if (monthDropdownRef.current && !monthDropdownRef.current.contains(event.target as Node)) {
         setShowMonthDropdown(false);
       }
-      if (startDateCalendarRef.current && !startDateCalendarRef.current.contains(event.target as Node)) {
-        setShowStartDateCalendar(false);
-      }
-      if (endDateCalendarRef.current && !endDateCalendarRef.current.contains(event.target as Node)) {
-        setShowEndDateCalendar(false);
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node) && !dateInputRef.current?.contains(event.target as Node)) {
+        setShowCalendar(false);
       }
     };
-  
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("mousedown", handleClickOutside);
-  
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);  
-  
+  }, []);
 
   const years = Array.from({ length: 11 }, (_, i) => (2025 + i).toString());
 
-  const handleYearSelect = useCallback((selectedYear: string) => {
-    setDateRange((prev) => ({
-      ...prev,
-      startDate: `${selectedYear}-01-01`,
-      endDate: `${selectedYear}-12-31`,
-      year: selectedYear,
-    }));
-    setShowYearDropdown(false);
-    setActivePeriod(null);
-    setSelectedMonth(null);
+  const handleYearSelect = useCallback(
+    (selectedYear: string) => {
+      const newStartDate = `${selectedYear}-01-01`;
+      const newEndDate = `${selectedYear}-12-31`;
+      setDateRange((prev) => ({
+        ...prev,
+        startDate: newStartDate,
+        endDate: newEndDate,
+        year: selectedYear,
+      }));
+      setShowYearDropdown(false);
+      setActivePeriod(null);
+      setSelectedMonth(null);
+      setIsDateSelectionComplete(false);
 
-    setDateParams({ year: selectedYear });
-  }, [setDateParams]);
+      setDateParams({ startDate: newStartDate, endDate: newEndDate });
+    },
+    [setDateParams]
+  );
 
   const periods: Period[] = [
     { id: 0, type: "quarter", label: "I" },
@@ -124,6 +123,7 @@ export default function Dates() {
     (period: Period) => {
       setActivePeriod(period.id);
       setSelectedMonth(period.type === "month" ? period.label : null);
+      setIsDateSelectionComplete(false);
 
       let newStartDate = dateRange.startDate;
       let newEndDate = dateRange.endDate;
@@ -178,39 +178,53 @@ export default function Dates() {
         endDate: newEndDate,
       }));
 
-      const params: { year?: string; quarter?: number; month?: number } = {
-        year: dateRange.year,
-      };
-      if (period.type === "quarter") {
-        params.quarter = Math.floor(period.id) + 1;
-      } else if (period.type === "month") {
-        params.month = period.id - 3; 
-      }
-
-      setDateParams(params);
+      setDateParams({ startDate: newStartDate, endDate: newEndDate });
     },
     [dateRange.year, setDateParams]
   );
 
-  const handleDateChange = useCallback(
-    (field: keyof DateRange, value: string) => {
-      const isoValue = formatDateToISO(value);
-      
-      // Проверка правильности диапазона дат
-      if (field === 'startDate' && isoValue > dateRange.endDate) {
-        // Если начальная дата позже конечной, установить конечную равной начальной
-        setDateRange((prev) => ({ ...prev, startDate: isoValue, endDate: isoValue }));
-        setDateParams({ year: dateRange.year });
-      } else if (field === 'endDate' && isoValue < dateRange.startDate) {
-        // Не позволять устанавливать конечную дату раньше начальной
-        return;
+  const handleDateSelect = useCallback(
+    (selectedDate: string) => {
+      const [selectedYear, selectedMonth] = selectedDate.split("-").map(Number);
+      const [startYear, startMonth] = dateRange.startDate.split("-").map(Number);
+
+      if (isSelectingStartDate) {
+        setDateRange((prev) => ({
+          ...prev,
+          startDate: selectedDate,
+          endDate: selectedDate,
+          year: selectedYear.toString(),
+        }));
+        setIsSelectingStartDate(false);
+        setIsDateSelectionComplete(false);
       } else {
-        // Нормальное обновление даты
-        setDateRange((prev) => ({ ...prev, [field]: isoValue }));
-        setDateParams({ year: dateRange.year });
+        // Проверяем, что выбранная дата в том же месяце
+        if (selectedYear === startYear && selectedMonth === startMonth) {
+          if (selectedDate < dateRange.startDate) {
+            setDateRange((prev) => ({
+              ...prev,
+              startDate: selectedDate,
+              endDate: prev.startDate,
+              year: selectedYear.toString(),
+            }));
+          } else {
+            setDateRange((prev) => ({
+              ...prev,
+              endDate: selectedDate,
+              year: selectedYear.toString(),
+            }));
+          }
+          setIsSelectingStartDate(true);
+          setIsDateSelectionComplete(true);
+          setDateParams({ startDate: dateRange.startDate, endDate: selectedDate });
+          setShowCalendar(false);
+        }
       }
+
+      setActivePeriod(null);
+      setSelectedMonth(null);
     },
-    [dateRange.startDate, dateRange.endDate, dateRange.year, setDateParams]
+    [isSelectingStartDate, dateRange.startDate, setDateParams]
   );
 
   const monthNames = [
@@ -254,103 +268,100 @@ export default function Dates() {
 
   const handleReset = useCallback(() => {
     const currentYear = new Date().getFullYear().toString();
+    const newStartDate = `${currentYear}-01-01`;
+    const newEndDate = `${currentYear}-12-31`;
 
     setActivePeriod(null);
     setSelectedMonth(null);
     setDateRange({
-      startDate: `${currentYear}-01-01`,
-      endDate: `${currentYear}-12-31`,
+      startDate: newStartDate,
+      endDate: newEndDate,
       year: currentYear,
     });
+    setIsDateSelectionComplete(false);
+    setIsSelectingStartDate(true);
 
-    setDateParams({ year: currentYear });
+    setDateParams({ startDate: newStartDate, endDate: newEndDate });
   }, [setDateParams]);
 
-  const generateCalendarDays = (date: string, isStartDateCalendar: boolean) => {
-    const [year, month] = date.split('-').map(Number);
-    const daysInMonth = new Date(year, month, 0).getDate();
-    const firstDayOfMonth = new Date(year, month - 1, 1).getDay() || 7; // 1-7, где 1 - понедельник
-    
+  const generateCalendarDays = (year: number, month: number) => {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfMonth = new Date(year, month, 1).getDay() || 7;
+
     const days = [];
-    
-    // Пустые ячейки для выравнивания
+
     for (let i = 1; i < firstDayOfMonth; i++) {
       days.push(<div key={`empty-${i}`} className="h-8 w-8"></div>);
     }
-    
-    // Дни месяца
+
+    const start = new Date(dateRange.startDate).getTime();
+    const end = new Date(dateRange.endDate).getTime();
+    const currentMonthStr = `${year}-${(month + 1).toString().padStart(2, "0")}`;
+
     for (let i = 1; i <= daysInMonth; i++) {
-      const currentDate = `${year}-${month.toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
-      const isSelected = 
-        (showStartDateCalendar && currentDate === dateRange.startDate) || 
-        (showEndDateCalendar && currentDate === dateRange.endDate);
-      
-      // Проверяем, недоступна ли дата (для календаря конечной даты)
-      const isDisabled = !isStartDateCalendar && currentDate < dateRange.startDate;
-      
+      const currentDate = `${year}-${(month + 1).toString().padStart(2, "0")}-${i.toString().padStart(2, "0")}`;
+      const isSameMonth = currentDate.startsWith(currentMonthStr);
+      const currentTime = new Date(currentDate).getTime();
+      const isStart = currentDate === dateRange.startDate;
+      const isEnd = currentDate === dateRange.endDate;
+      const isInRange = currentTime >= start && currentTime <= end && !isStart && !isEnd;
+
       days.push(
         <button
           key={i}
-          onClick={() => {
-            if (isDisabled) return; // Игнорируем клик на недоступных датах
-            
-            if (showStartDateCalendar) {
-              handleDateChange('startDate', formatDateToDisplay(currentDate));
-              setShowStartDateCalendar(false);
-              
-              // Если конечная дата стала раньше начальной, корректируем её
-              if (currentDate > dateRange.endDate) {
-                handleDateChange('endDate', formatDateToDisplay(currentDate));
-              }
-            } else if (showEndDateCalendar) {
-              handleDateChange('endDate', formatDateToDisplay(currentDate));
-              setShowEndDateCalendar(false);
-            }
-          }}
-          disabled={isDisabled}
-          className={`h-8 w-8 rounded flex items-center justify-center text-sm transition-all duration-200 
-            ${isSelected 
-              ? 'bg-blue-700 text-white font-medium' 
-              : isDisabled
-                ? 'text-gray-300 cursor-not-allowed'
-                : 'hover:bg-blue-50 text-gray-700'}`}
+          onClick={() => isSameMonth && handleDateSelect(currentDate)}
+          className={`h-8 w-8 rounded flex items-center justify-center text-sm transition-all duration-200 relative
+            ${isStart || isEnd
+              ? "bg-blue-700 text-white font-medium"
+              : isInRange && isSameMonth
+                ? "bg-blue-200 text-gray-700"
+                : isSameMonth
+                  ? "hover:bg-blue-50 text-gray-700"
+                  : "text-gray-300 cursor-not-allowed"
+            }`}
         >
           {i}
+          {(isStart || isEnd || (isInRange && isSameMonth)) && (
+            <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-6 h-1 bg-red-500 opacity-50"></span>
+          )}
         </button>
       );
     }
-    
+
     return days;
   };
 
-  const renderCalendar = (isStartDate = true) => {
-    const date = isStartDate ? dateRange.startDate : dateRange.endDate;
-    const [year, month] = date.split('-').map(Number);
-    
+  const renderCalendar = () => {
+    const [year, month] = dateRange.startDate.split("-").map(Number);
+    const displayMonth = month - 1; // JavaScript месяцы: январь = 0, декабрь = 11
+
     const handleMonthChange = (increment: number) => {
-      let newMonth = month + increment;
+      let newMonth = displayMonth + increment;
       let newYear = year;
-      
-      if (newMonth > 12) {
-        newMonth = 1;
-        newYear += 1;
-      } else if (newMonth < 1) {
-        newMonth = 12;
-        newYear -= 1;
+
+      if (newMonth > 11) {
+        newMonth = 0;
+        newYear++;
+      } else if (newMonth < 0) {
+        newMonth = 11;
+        newYear--;
       }
-      
-      const newDate = `${newYear}-${newMonth.toString().padStart(2, '0')}-01`;
-      if (isStartDate) {
-        setDateRange(prev => ({ ...prev, startDate: newDate }));
-      } else {
-        setDateRange(prev => ({ ...prev, endDate: newDate }));
-      }
+
+      const newDate = `${newYear}-${(newMonth + 1).toString().padStart(2, "0")}-01`;
+      setDateRange((prev) => ({
+        ...prev,
+        startDate: newDate,
+        endDate: newDate, // Сбрасываем endDate при смене месяца
+        year: newYear.toString(),
+      }));
+      setIsSelectingStartDate(true);
+      setIsDateSelectionComplete(false);
     };
-    
+
     return (
-      <div className="p-3 bg-white rounded-md shadow-lg border border-gray-200 w-64">
+      <div ref={calendarRef} className="p-3 bg-white rounded-md shadow-lg border border-gray-200 w-64">
         <div className="flex items-center justify-between mb-3">
-          <button 
+          <button
             onClick={() => handleMonthChange(-1)}
             className="p-1 rounded hover:bg-blue-50 transition-colors"
           >
@@ -359,9 +370,9 @@ export default function Dates() {
             </svg>
           </button>
           <div className="font-medium text-blue-800">
-            {monthNames[month - 1]} {year}
+            {monthNames[displayMonth]} {year}
           </div>
-          <button 
+          <button
             onClick={() => handleMonthChange(1)}
             className="p-1 rounded hover:bg-blue-50 transition-colors"
           >
@@ -370,18 +381,19 @@ export default function Dates() {
             </svg>
           </button>
         </div>
-        
+
         <div className="grid grid-cols-7 gap-1 mb-2">
-          {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
-            <div key={day} className="h-8 w-8 flex items-center justify-center text-xs text-blue-500 font-medium">
+          {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((day) => (
+            <div
+              key={day}
+              className="h-8 w-8 flex items-center justify-center text-xs text-blue-500 font-medium"
+            >
               {day}
             </div>
           ))}
         </div>
-        
-        <div className="grid grid-cols-7 gap-1">
-          {generateCalendarDays(date, isStartDate)}
-        </div>
+
+        <div className="grid grid-cols-7 gap-1">{generateCalendarDays(year, displayMonth)}</div>
       </div>
     );
   };
@@ -390,62 +402,55 @@ export default function Dates() {
     <div className="w-full bg-gradient-to-r from-blue-700 to-indigo-400 p-4 rounded-2xl mb-4 shadow-lg">
       <div className="flex flex-wrap items-center gap-3">
         {/* Ввод диапазона дат */}
-        <div className="flex items-center bg-white rounded-xl shadow-sm p-2 border-b-2 border-indigo-100">
-          <div className="flex items-center gap-2 ml-3 relative" ref={startDateCalendarRef}>
-            <span 
-              className="font-medium text-gray-700 cursor-pointer hover:text-indigo-600 transition-colors select-none"
-              onClick={() => {
-                setShowStartDateCalendar(!showStartDateCalendar);
-                setShowEndDateCalendar(false);
-              }}
-            >
-              С
-            </span>
-            <span
-              onClick={() => {
-                setShowStartDateCalendar(!showStartDateCalendar);
-                setShowEndDateCalendar(false);
-              }}
-              className="border-0 focus:ring-0 text-gray-600 font-medium w-20 text-center cursor-pointer hover:text-indigo-600 transition-colors select-none"
-            >
-              {formatDateToDisplay(dateRange.startDate)}
-            </span>
-            
-            {showStartDateCalendar && (
-              <div className="absolute top-full left-0 mt-2 z-40 animate-fade-in-down">
-                {renderCalendar(true)}
-              </div>
-            )}
-          </div>
-          
+        <div ref={dateInputRef} className="relative flex items-center bg-white rounded-xl shadow-sm p-2 border-b-2 border-indigo-100">          <div className="flex items-center gap-2 ml-3">
+          <span
+            className="font-medium text-gray-700 cursor-pointer hover:text-indigo-600 transition-colors select-none"
+            onClick={() => {
+              setShowCalendar(!showCalendar);
+              setIsSelectingStartDate(true);
+            }}
+          >
+            С
+          </span>
+          <span
+            onClick={() => {
+              setShowCalendar(!showCalendar);
+              setIsSelectingStartDate(true);
+            }}
+            className="border-0 focus:ring-0 text-gray-600 font-medium w-20 text-center cursor-pointer hover:text-indigo-600 transition-colors select-none"
+          >
+            {formatDateToDisplay(dateRange.startDate)}
+          </span>
+        </div>
+
           <div className="w-px h-6 bg-gray-200 mx-1"></div>
-          
-          <div className="flex items-center gap-2 relative" ref={endDateCalendarRef}>
-            <span 
+
+          <div className="flex items-center gap-2">
+            <span
               className="font-medium text-gray-700 cursor-pointer hover:text-indigo-600 transition-colors select-none"
               onClick={() => {
-                setShowEndDateCalendar(!showEndDateCalendar);
-                setShowStartDateCalendar(false);
+                setShowCalendar(!showCalendar);
+                setIsSelectingStartDate(false);
               }}
             >
               По
             </span>
             <span
               onClick={() => {
-                setShowEndDateCalendar(!showEndDateCalendar);
-                setShowStartDateCalendar(false);
+                setShowCalendar(!showCalendar);
+                setIsSelectingStartDate(false);
               }}
               className="border-0 focus:ring-0 text-gray-600 font-medium w-20 text-center cursor-pointer hover:text-indigo-600 transition-colors select-none"
             >
               {formatDateToDisplay(dateRange.endDate)}
             </span>
-            
-            {showEndDateCalendar && (
-              <div className="absolute top-full left-0 mt-2 z-40 animate-fade-in-down">
-                {renderCalendar(false)}
-              </div>
-            )}
           </div>
+
+          {showCalendar && (
+            <div className="absolute top-full left-0 mt-2 z-40 animate-fade-in-down">
+              {renderCalendar()}
+            </div>
+          )}
         </div>
 
         {/* Выбор года */}
@@ -471,9 +476,8 @@ export default function Dates() {
                   <button
                     key={year}
                     onClick={() => handleYearSelect(year)}
-                    className={`w-full px-4 py-2 text-center hover:bg-blue-50 transition-colors ${
-                      dateRange.year === year ? "bg-blue-100 font-medium" : ""
-                    }`}
+                    className={`w-full px-4 py-2 text-center hover:bg-blue-50 transition-colors ${dateRange.year === year ? "bg-blue-100 font-medium" : ""
+                      }`}
                   >
                     {year}
                   </button>
@@ -531,9 +535,8 @@ export default function Dates() {
                   <button
                     key={index}
                     onClick={() => handleMonthSelect(index)}
-                    className={`w-full px-4 py-2 text-center hover:bg-blue-50 transition-colors ${
-                      selectedMonth === monthLabels[index] ? "bg-blue-100 font-medium" : ""
-                    }`}
+                    className={`w-full px-4 py-2 text-center hover:bg-blue-50 transition-colors ${selectedMonth === monthLabels[index] ? "bg-blue-100 font-medium" : ""
+                      }`}
                   >
                     {month}
                   </button>

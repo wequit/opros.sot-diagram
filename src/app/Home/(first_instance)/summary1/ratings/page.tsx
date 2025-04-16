@@ -19,7 +19,7 @@ export default function SecondInstanceSummaryPage() {
     );
   }
 
-  const courtId = user.court_id; // Теперь court_id типизирован
+  const courtId = user.court_id;
 
   return (
     <div className="max-w-[1250px] mx-auto px-4 py-4">

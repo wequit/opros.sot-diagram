@@ -257,14 +257,13 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
         });
     }
 
-    // Создаем легенду (шкалу цветов)
     const legend = svg.append("g").attr("class", "legend").style("display", "none");
 
     const legendX = 20;
     const legendY = 60;
-    const boxWidth = 15; // Уменьшаем ширину прямоугольника
-    const boxHeight = 15; // Уменьшаем высоту прямоугольника
-    const textOffset = 25; // Уменьшаем отступ текста
+    const boxWidth = 15;
+    const boxHeight = 15;
+    const textOffset = 25; 
 
     legend
       .selectAll("rect")
@@ -272,7 +271,7 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
       .enter()
       .append("rect")
       .attr("x", legendX)
-      .attr("y", (d, i) => legendY + i * (boxHeight + 3)) // Уменьшаем вертикальный отступ
+      .attr("y", (d, i) => legendY + i * (boxHeight + 3))
       .attr("width", boxWidth)
       .attr("height", boxHeight)
       .attr("fill", (d) => d.color)
@@ -287,7 +286,7 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
       .attr("x", legendX + textOffset)
       .attr("y", (d, i) => legendY + i * (boxHeight + 3) + boxHeight / 2)
       .attr("dy", "0.35em")
-      .attr("font-size", "10px") // Уменьшаем размер шрифта
+      .attr("font-size", "10px")
       .attr("fill", "#000")
       .text((d) => d.range);
 
@@ -304,7 +303,6 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
     };
   }, [geoData, oblastData, getOblastRating, getColor, zoom]);
 
-  // Управление отображением легенды с анимацией
   useEffect(() => {
     if (!svgRef.current) return;
 
