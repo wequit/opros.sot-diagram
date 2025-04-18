@@ -13,13 +13,13 @@ const CourtRatingPage = () => {
   const params = useParams();
   const courtId = params?.courtId as string;
 
-  const {  getTranslation } = useLanguage();
+  const { getTranslation } = useLanguage();
   const { courtName, setCourtName, courtNameId, setCourtNameId } = useCourt();
   const { setIsLoading, radarData } = useChartData();
 
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [localCourtName, setLocalCourtName] = useState<string | null>(null);
   const handleBackClick = () => {
     window.history.back();
   };
@@ -34,6 +34,8 @@ const CourtRatingPage = () => {
 
       const storedCourtName = typeof window !== 'undefined' ? localStorage.getItem("courtName") : null;
       const storedCourtId = typeof window !== 'undefined' ? localStorage.getItem("courtNameId") : null;
+
+      setLocalCourtName(storedCourtName || "Неизвестный суд");
 
       if (storedCourtId === courtId && storedCourtName && courtNameId) {
         setIsDataLoading(false);
@@ -54,18 +56,18 @@ const CourtRatingPage = () => {
           localStorage.setItem("selectedCourtName", newCourtName);
         }
 
+        setLocalCourtName(newCourtName);
         setError(null);
       } catch (error) {
         console.error("Ошибка при установке метаданных суда:", error);
-        setError(error instanceof Error ? error.message : "Неизвестная ошибка");
-        if (courtId) {
-          setCourtNameId(courtId);
-          setCourtName(storedCourtName || "Неизвестный суд (данные недоступны)");
-          if (typeof window !== 'undefined') {
-            localStorage.setItem("courtNameId", courtId);
-            localStorage.setItem("courtName", storedCourtName || "Неизвестный суд (данные недоступны)");
-          }
+        const fallbackName = storedCourtName || "Неизвестный суд (данные недоступны)";
+        setCourtName(fallbackName);
+        setLocalCourtName(fallbackName);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem("courtNameId", courtId);
+          localStorage.setItem("courtName", fallbackName);
         }
+        setError(error instanceof Error ? error.message : "Неизвестная ошибка");
       } finally {
         setIsLoading(false);
         setIsDataLoading(false);
@@ -88,7 +90,9 @@ const CourtRatingPage = () => {
           onCourtBackClick={handleBackClick}
           showHome={false}
         />
-        <h2 className="text-3xl font-bold mb-4 mt-4 DistrictEvaluationsCourtName">{courtName || "Ошибка"}</h2>
+        <h2 className="text-3xl font-bold mb-4 mt-4 DistrictEvaluationsCourtName">
+          {localCourtName || "Ошибка"}
+        </h2>
         <div className="text-red-500">Ошибка: {error}</div>
       </div>
     );
@@ -102,7 +106,9 @@ const CourtRatingPage = () => {
         onCourtBackClick={handleBackClick}
         showHome={false}
       />
-      <h2 className="text-3xl font-bold mb-4 mt-4 DistrictEvaluationsCourtName">{courtName}</h2>
+    <h2 className="text-3xl font-bold mb-4 mt-4 DistrictEvaluationsCourtName">
+          {localCourtName || "Ошибка"}
+        </h2>
       <Dates />
       <CourtDataFetcher courtId={courtId} />
       <Evaluations courtNameId={courtNameId} />

@@ -50,14 +50,54 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({ printMenuRef }) => {
       const html2pdfModule = await import("html2pdf.js");
       const html2pdf = html2pdfModule.default;
       const element = document.querySelector("main") || document.body;
+
+      // Временные стили для разбиения страниц
+      const style = document.createElement("style");
+      style.innerHTML = `
+        @media print {
+          .chart-container { 
+            page-break-after: always; 
+            page-break-inside: avoid; 
+            width: 100%; 
+            height: auto; 
+            margin-bottom: 20mm; 
+          }
+          canvas { 
+            max-width: 100%; 
+            height: auto !important; 
+          }
+        }
+      `;
+      document.head.appendChild(style);
+
       const opt = {
-        margin: [10, 10],
+        margin: [10, 10, 10, 10],
         filename: `${document.title || "document"}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" as "portrait" },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          logging: true, 
+          windowWidth: element.scrollWidth 
+        },
+        jsPDF: { 
+          unit: "mm", 
+          format: "a4", 
+          orientation: "portrait" 
+        },
+        pagebreak: { 
+          mode: ["css", "legacy"], 
+          avoid: ["canvas", ".chart-container"], 
+          after: ".chart-container" 
+        }
       };
+
       html2pdf().set(opt).from(element).save();
+
+      // Удаление временных стилей
+      setTimeout(() => {
+        document.head.removeChild(style);
+      }, 1000);
     } catch (error) {
       console.error("Ошибка при создании PDF:", error);
     }
@@ -121,9 +161,6 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({ printMenuRef }) => {
       <div className="flex items-center gap-3 px-4 py-2 rounded-lg HeaderUser_Exit">
         <div className="flex items-center gap-2 HeaderUser">
           <User className="w-5 h-5 text-gray-600 CgProfile" />
-          {/* <span className="text-xs sm:text-sm font-medium text-gray-700 HeaderUserName">
-            {user ? `${user.first_name} ${user.last_name}` : "Загрузка..."}
-          </span> */}
         </div>
         <div className="h-4 w-px bg-gray-300"></div>
         <LogoutButton />

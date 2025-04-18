@@ -45,7 +45,6 @@ body::before {
   z-index: 0;
 }
 
-/* Декоративные элементы фона */
 body::after {
   content: "";
   position: fixed;
@@ -117,44 +116,144 @@ body::after {
 
 /* Стили для печати */
 @media print {
-  /* Стили печати ТОЛЬКО для страниц с диаграммами */
-  header.printing-charts * {
-    visibility: hidden;
+  header img,
+  .app-header img, 
+  img[alt*="logo"],
+  .logo,
+  [class*="logo"],
+  header *[class*="logo"],
+
+  /* Кнопка выйти - прижимаем вплотную */
+  header [class*="exit"],
+  .app-header [class*="exit"],
+  header button:last-child,
+  .app-header button:last-child,
+  header a:last-child,
+  .app-header a:last-child {
+    margin-left: 0 !important;
+    padding-left: 5px !important;
   }
 
-  /* Скрываем хедер ТОЛЬКО на страницах с диаграммами */
-  body.printing-charts header {
+  .app-header *[class*="logo"] {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 9999 !important;
+    max-height: none !important;
+    max-width: none !important;
+    height: auto !important;
+    width: auto !important;
+  }
+
+  /* размер хедера */
+  header, .app-header {
+    transform: scale(1) !important;
+    transform-origin: left top !important;
+    width: 100% !important;
+  }
+
+  header *, .app-header * {
+    font-size: 14px !important;
+  }
+
+  header img, .app-header img, .logo {
+    max-width: 50px !important;
+    height: auto !important;
+  }
+
+  /* Делаем хедер flex для лучшего контроля */
+  header, .app-header {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 5px !important; /* Минимальный отступ между элементами */
+  }
+
+
+  @page {
+    margin: 5mm; 
+    background: white !important;
+    size: A4;}
+
+  /* меняю цвет на белый фон для печати */
+  body {
+    background: white !important;
+    background-color: white !important;
+    background-image: none !important;
+  }
+
+  body {box-shadow: none !important;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;}
+  
+  
+  .container,
+  .main-content,
+  .print-container 
+  {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  }
+
+  .no-print {
     display: none !important;
   }
-  
-  /* Показываем ТОЛЬКО диаграммы */
-  body.printing-charts .chart-container,
-  body.printing-charts .chart-container *,
-  body.printing-charts svg,
-  body.printing-charts canvas,
-  body.printing-charts .bg-white.rounded-lg.shadow-sm,
-  body.printing-charts .bg-white.rounded-lg.shadow-sm * {
-    visibility: visible !important;
-
+  /* Оптимизация таблицы для печати */
+  table {
+    width: 100% !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+    border-collapse: collapse !important;
   }
   
-  /* Общие настройки страницы */
-  @page {
-    size: A4;
-    margin: 1cm;
+  table th {
+    font-size: 8px !important; 
+    padding: 1px 2px !important;
+    line-height: 1 !important;
+    height: auto !important;
+    vertical-align: middle !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+    hyphens: auto !important; 
+    border: 0.5px solid #ddd !important;
+    max-height: none !important;
+    min-height: 0 !important;
   }
   
-
-}
-
-.HeaderCenter{
-  @apply justify-center
-}
-
-.HeaderPx{
-  @apply px-0
-}
-
-.region-path {
-  transition: fill 0.2s ease;
+  table td {
+    font-size: 12px !important; 
+    padding: 2px !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    border: 0.5px solid #ddd !important;
+    max-height: none !important;
+    min-height: 0 !important;
+  }
+  
+  table th:first-child, 
+  table td:first-child {
+    width: 5% !important;
+  }
+  
+  table th:nth-child(2), 
+  table td:nth-child(2) {
+    width: 25% !important;
+  }
+  
+  table th:not(:first-child):not(:nth-child(2)),
+  table td:not(:first-child):not(:nth-child(2)) {
+    width: 10% !important;
+  }
+  
+  .pagination, 
+  [class*="pagination"],
+  [class*="page-nav"] {
+    display: none !important;
+  }
 }

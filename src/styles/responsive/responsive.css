@@ -16,7 +16,7 @@
     @apply px-2;
   }
   .HeaderUser {
-    @apply w-[9rem];
+    @apply w-[3rem];
   }
 }
 
@@ -215,9 +215,6 @@
 
   .DiagrammSixName {
     @apply text-lg;
-  }
-
-  .DiagrammSevenName {
   }
 
   .DiagrammEightName {

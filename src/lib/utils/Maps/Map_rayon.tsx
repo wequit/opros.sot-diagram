@@ -163,7 +163,6 @@ export default function Map_rayon({
   const [dimensions, setDimensions] = useState({ width: 1200, height: 600 });
   const zoomRef = useRef<d3.ZoomBehavior<SVGSVGElement, unknown> | null>(null);
   const [showLegend, setShowLegend] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
   const { language, getTranslation } = useLanguage();
 
   const getRayonRating = (rayonName: string): number => {
@@ -172,7 +171,6 @@ export default function Map_rayon({
     }
     const courtName = rayonToCourtMapping[rayonName];
     if (!courtName) {
-      console.warn(`Нет маппинга для района: ${rayonName}`);
       return 0;
     }
     const court = courts.find((c: Court) => c.name === courtName);
