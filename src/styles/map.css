@@ -15,7 +15,6 @@
   pointer-events: none;
 }
 
-/* Стили для тултипа */
 .tooltip {
   background: white;
   border: 1px solid #e5e7eb;
@@ -27,13 +26,11 @@
   z-index: 50;
 }
 
-/* Стили для легенды */
 .legend-item text {
   font-size: 12px;
   font-weight: 500;
 }
 
-/* Добавьте эти новые стили для улучшения поведения тултипа */
 .tooltip-wrapper {
   transition-delay: 100ms;
   transition: opacity 0.15s ease;
@@ -45,14 +42,12 @@
   opacity: 1;
 }
 
-/* Стиль для контейнера тултипа */
 #tooltip-container {
   position: absolute;
   z-index: 50;
   pointer-events: none;
 }
 
-/* Предотвращение мерцания при наведении */
 .region-wrapper {
   position: relative;
 }

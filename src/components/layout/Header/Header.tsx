@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import SidebarOverlay from "./parts/SidebarOverlay";
 import { useHeaderLogic } from "@/hooks/useHeaderLogic";
 import dynamic from "next/dynamic";
@@ -12,7 +11,6 @@ const HeaderActions = dynamic(() => import("./parts/HeaderActions"), {
 });
 
 const Header: React.FC = () => {
-  const printMenuRef = useRef<HTMLDivElement>(null);
 
   const { isSticky, isSidebarOpen, windowWidth, userCourt, toggleSidebar } =
     useHeaderLogic();
@@ -34,7 +32,7 @@ const Header: React.FC = () => {
           </div>
 
           {/* Правая часть: действия */}
-          <HeaderActions printMenuRef={printMenuRef} />
+          <HeaderActions />
         </div>
       </header>
 
