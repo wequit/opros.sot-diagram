@@ -1,6 +1,7 @@
 "use client";
 import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useDateParams } from "@/context/DateParamsContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 interface DateRange {
   startDate: string;
@@ -41,6 +42,7 @@ export default function Dates() {
   const dateInputRef = useRef<HTMLDivElement>(null);
 
   const { setDateParams } = useDateParams();
+  const { language, getTranslation } = useLanguage();
 
   const formatDateToDisplay = (isoDate: string): string => {
     const parts = isoDate.split("-");
@@ -413,7 +415,7 @@ export default function Dates() {
         <div className="flex items-center gap-3">
           <div ref={dateInputRef} className="w-[210px] relative bg-white rounded-xl hover:rounded-xl shadow-sm border-b-2 border-indigo-100">
             <div
-              className="flex items-center justify-center gap-2 p-2 cursor-pointer transition-colors"
+              className="flex items-center justify-center gap-2 p-2 cursor-pointer transition-colors Calendar"
               onClick={() => {
                 setShowCalendar(true);
                 setIsSelectingStartDate(true);
@@ -423,7 +425,7 @@ export default function Dates() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <p className="text-gray-700 font-medium">
-                {isDateSelectionComplete ? `${formatDateToDisplay(dateRange.startDate)} - ${formatDateToDisplay(dateRange.endDate)}` : "Выбрать даты"}
+                {isDateSelectionComplete ? `${formatDateToDisplay(dateRange.startDate)} - ${formatDateToDisplay(dateRange.endDate)}` :   getTranslation("ChooseDate", language)}
               </p>
             </div>
 
@@ -546,7 +548,7 @@ export default function Dates() {
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
             />
           </svg>
-          Сбросить
+          <span className="hidden xs530:inline">{getTranslation("Reset_Button", language)}</span>
         </button>
       </div>
     </div>

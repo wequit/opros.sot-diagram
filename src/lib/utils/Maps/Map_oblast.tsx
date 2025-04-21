@@ -331,27 +331,28 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
 
       {/* Кнопка информации */}
       <button
-        onClick={() => {
-          if (showLegend) {
-            setShowLegend(false);
-          } else {
-            setShowInfo(!showInfo);
-          }
-        }}
-        className="absolute top-4 left-4 z-[70] bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 flex items-center gap-2 border border-gray-300"
-      >
-        {showLegend ? (
-          <>
-            <X className="w-5 h-5" />
-            <span className="text-sm">{getTranslation("MapOblast_HideScale", language)}</span>
-          </>
-        ) : (
-          <>
-            <Info className="w-5 h-5" />
-            <span className="text-sm">{getTranslation("MapOblast_Information", language)}</span>
-          </>
-        )}
-      </button>
+  onClick={() => {
+    if (showLegend) {
+      setShowLegend(false);
+    } else {
+      setShowInfo(!showInfo);
+    }
+  }}
+  className="hidden sm:flex absolute top-4 left-4 z-[70] bg-white p-2 rounded-full shadow-md hover:bg-gray-100 text-gray-600 items-center gap-2 border border-gray-300"
+>
+  {showLegend ? (
+    <>
+      <X className="w-5 h-5" />
+      <span className="text-sm">{getTranslation("MapOblast_HideScale", language)}</span>
+    </>
+  ) : (
+    <>
+      <Info className="w-5 h-5" />
+      <span className="text-sm">{getTranslation("MapOblast_Information", language)}</span>
+    </>
+  )}
+</button>
+
 
       {/* Информационное окно */}
       {showInfo && !showLegend && (

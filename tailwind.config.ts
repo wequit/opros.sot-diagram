@@ -7,7 +7,11 @@ const config: Config = {
   ],
   darkMode: 'class',
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+        'xs530': '531px',
+      },
+    },
   },
   plugins: [],
 };

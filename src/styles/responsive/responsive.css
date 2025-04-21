@@ -112,6 +112,10 @@
   .SideBarWindow{
     @apply w-72
   }
+
+  .Calendar{
+    @apply gap-1
+  }
 }
 
 @media (max-width: 470px) {

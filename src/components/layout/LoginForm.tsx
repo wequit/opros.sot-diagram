@@ -96,7 +96,6 @@ const LoginForm: React.FC = () => {
   const scrollStyle: React.CSSProperties = {
     overflowY: "auto",
     height: "100vh",
-    maxHeight: "100vh",
     display: "flex",
     flexDirection: "column",
   };
@@ -104,33 +103,30 @@ const LoginForm: React.FC = () => {
   return (
     <div
       style={scrollStyle}
-      className={`bg-gradient-to-br from-slate-100 to-slate-200 transition-opacity duration-1000 ease-in-out ${isPageLoaded ? "opacity-100" : "opacity-0"
-        }`}
+      className={`bg-gradient-to-br from-slate-100 to-slate-200 transition-opacity duration-500 ease-in-out ${
+        isPageLoaded ? "opacity-100" : "opacity-0"
+      }`}
       data-testid="login-form-container"
     >
-      {/* Фоновые элементы */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none ">
-        <div className="absolute top-0 right-0 w-full h-full bg-[url('/pattern-grid.svg')] opacity-[0.03]"></div>
-        <div className="absolute -top-64 -right-64 w-[40rem] h-[40rem] bg-blue-800 opacity-[0.03] rounded-full mix-blend-multiply blur-3xl"></div>
-        <div className="absolute -bottom-32 -left-32 w-[30rem] h-[30rem] bg-indigo-700 opacity-[0.05] rounded-full mix-blend-multiply blur-3xl"></div>
-      </div>
 
       {/* Переключатель языка */}
-      <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex  animate-fadeIn">
-        <div className="bg-blue-100/30 backdrop-blur-sm rounded-md overflow-hidden border border-blue-200/50 shadow-sm">
+      <div className="absolute top-2 right-2 flex animate-fadeIn">
+        <div className="bg-blue-100/50 backdrop-blur-sm rounded-md border border-blue-200/50 shadow-sm flex">
           <button
             onClick={toggleLanguage}
             aria-label={language === "ru" ? "Переключить на кыргызский" : "Переключить на русский"}
-            className={`px-2 py-1 sm:px-3 sm:py-1.5 text-sm font-semibold transition-all duration-300 ${language === "ru" ? "bg-blue-800 text-sky-50" : "text-sky-700 hover:bg-blue-400/50"
-              }`}
+            className={`px-2 py-1 text-xs font-semibold transition-all duration-200 ${
+              language === "ru" ? "bg-blue-800 text-sky-50" : "text-sky-700 hover:bg-blue-400/50"
+            }`}
           >
             RU
           </button>
           <button
             onClick={toggleLanguage}
             aria-label={language === "ky" ? "Переключить на русский" : "Переключить на кыргызский"}
-            className={`px-2 py-1 sm:px-3 sm:py-1.5 text-sm font-semibold transition-all duration-300 ${language === "ky" ? "bg-blue-800 text-sky-50" : "text-sky-700 hover:bg-blue-400/50"
-              }`}
+            className={`px-2 py-1 text-xs font-semibold transition-all duration-200 ${
+              language === "ky" ? "bg-blue-800 text-sky-50" : "text-sky-700 hover:bg-blue-400/50"
+            }`}
           >
             KY
           </button>
@@ -138,39 +134,39 @@ const LoginForm: React.FC = () => {
       </div>
 
       {/* Основной контент - форма входа */}
-      <div className="flex-grow flex items-center justify-center py-8 px-4">
-        <div className="w-full max-w-md transform transition-all duration-700 ease-out animate-float">
-          <div className="relative bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl p-7 sm:p-8 border border-gray-200/50 hover:shadow-blue-500/10 transition-all duration-500 ease-in-out group">
-            {/* Эффект свечения */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-400 to-blue-600 rounded-2xl blur-xl opacity-5 group-hover:opacity-15 transition duration-1000 animate-glow"></div>
-
-            <div className="text-center mb-6 mt-2 animate-slideUp animation-delay-300">
-              <div className="flex justify-center mb-4">
+      <div className="flex-grow flex items-center justify-center py-4 px-4">
+        <div className="w-full max-w-sm">
+          <div className="relative bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-200/50">
+            <div className="text-center mb-4">
+              <div className="flex justify-center mb-3">
                 <Image
                   src={logo}
                   alt="Логотип"
-                  width={100}
-                  height={100}
-                  className=" rounded-lg "
+                  width={80}
+                  height={80}
+                  className="rounded-lg"
                   priority
                 />
               </div>
-              <h2 className="text-2xl font-bold text-gray-800 mb-2">
+              <h2 className="text-xl font-bold text-gray-800 mb-1">
                 {getTranslation("LoginForm_LoginTitle")}
               </h2>
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-500 text-xs">
                 {getTranslation("LoginForm_LoginSubtitle")}
               </p>
             </div>
 
-            <form ref={formRef} onSubmit={handleSubmit} className="space-y-5 animate-slideUp animation-delay-500" onKeyDown={handleKeyDown}>
+            <form ref={formRef} onSubmit={handleSubmit} className="space-y-4" onKeyDown={handleKeyDown}>
               <div>
-                <label htmlFor="username" className="text-sm font-medium text-gray-700 block mb-1.5 transition-all duration-300 hover:text-blue-600">
+                <label
+                  htmlFor="username"
+                  className="text-xs font-medium text-gray-700 block mb-1 transition-all duration-200 hover:text-blue-600"
+                >
                   {getTranslation("LoginForm_Username")}
                 </label>
-                <div className="relative transition-all duration-300 group">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none transition-all duration-300 group-focus-within:text-blue-600">
-                    <User className="w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <User className="w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                   </div>
                   <input
                     id="username"
@@ -183,7 +179,7 @@ const LoginForm: React.FC = () => {
                     onFocus={(e) => e.target.setAttribute("placeholder", "")}
                     onBlur={(e) => e.target.setAttribute("placeholder", getTranslation("LoginForm_Username"))}
                     placeholder={getTranslation("LoginForm_Username")}
-                    className="text-base text-gray-900 placeholder:text-base placeholder:text-gray-900 bg-gray-50 border border-gray-300 rounded-lg block w-full pl-10 p-3 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 shadow-sm hover:shadow-md"
+                    className="text-sm bg-gray-50 border border-gray-300 rounded-lg w-full pl-9 p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 shadow-sm hover:shadow-md transition-all duration-200"
                     required
                     aria-required="true"
                   />
@@ -191,12 +187,15 @@ const LoginForm: React.FC = () => {
               </div>
 
               <div>
-                <label htmlFor="password" className="text-sm font-medium text-gray-700 block mb-1.5 transition-all duration-300 hover:text-blue-600">
+                <label
+                  htmlFor="password"
+                  className="text-xs font-medium text-gray-700 block mb-1 transition-all duration-200 hover:text-blue-600"
+                >
                   {getTranslation("LoginForm_Password")}
                 </label>
-                <div className="relative transition-all duration-300 group">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none transition-all duration-300 group-focus-within:text-blue-600">
-                    <KeyRound className="w-5 h-5 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <KeyRound className="w-4 h-4 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
                   </div>
                   <input
                     id="password"
@@ -208,7 +207,7 @@ const LoginForm: React.FC = () => {
                     onFocus={(e) => e.target.setAttribute("placeholder", "")}
                     onBlur={(e) => e.target.setAttribute("placeholder", getTranslation("LoginForm_Password"))}
                     placeholder={getTranslation("LoginForm_Password")}
-                    className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full pl-10 pr-10 p-3 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 shadow-sm hover:shadow-md"
+                    className="text-sm bg-gray-50 border border-gray-300 rounded-lg w-full pl-9 pr-9 p-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-300 shadow-sm hover:shadow-md transition-all duration-200"
                     required
                     aria-required="true"
                   />
@@ -218,17 +217,19 @@ const LoginForm: React.FC = () => {
                     aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-all duration-200"
                   >
-                    {showPassword ? <Eye className="h-5 w-5" aria-hidden="true" /> : <EyeOff className="h-5 w-5" aria-hidden="true" />}
+                    {showPassword ? <Eye className="h-4 w-4" aria-hidden="true" /> : <EyeOff className="h-4 w-4" aria-hidden="true" />}
                   </button>
                 </div>
               </div>
 
               {error && (
-                <div role="alert" aria-live="assertive" className="p-4 rounded-lg text-sm bg-red-50 border-l-4 border-red-500 text-red-600 animate-shake shadow-sm">
-                  <div className="flex items-center">
-                    <TriangleAlert className="w-5 h-5 mr-2 flex-shrink-0" aria-hidden="true" />
-                    <span>{error}</span>
-                  </div>
+                <div
+                  role="alert"
+                  aria-live="assertive"
+                  className="p-3 rounded-lg text-xs bg-red-50 border-l-4 border-red-500 text-red-600 flex items-center"
+                >
+                  <TriangleAlert className="w-4 h-4 mr-2 flex-shrink-0" aria-hidden="true" />
+                  <span>{error}</span>
                 </div>
               )}
 
@@ -236,11 +237,11 @@ const LoginForm: React.FC = () => {
                 type="submit"
                 disabled={isLoading}
                 aria-label={isLoading ? getTranslation("LoginForm_Loading") : getTranslation("LoginForm_LoginButton")}
-                className="w-full py-3 px-4 rounded-lg text-white font-medium bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-blue-300/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 ease-in-out transform hover:-translate-y-0.5 active:translate-y-0.5"
+                className="w-full py-2.5 px-4 rounded-lg text-sm text-white font-medium bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-300/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
               >
                 {isLoading ? (
                   <div className="flex items-center justify-center gap-2">
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path
                         className="opacity-75"
@@ -255,7 +256,7 @@ const LoginForm: React.FC = () => {
                 )}
               </button>
 
-              <div className="text-center text-xs text-gray-500 mt-4 animate-fadeIn animation-delay-700">
+              <div className="text-center text-xs text-gray-500">
                 {getTranslation("LoginForm_HelpText")}
               </div>
             </form>
@@ -263,23 +264,8 @@ const LoginForm: React.FC = () => {
         </div>
       </div>
 
-      {/* CSS для анимаций */}
+      {/* CSS для анимаций (упрощены для мобильных) */}
       <style jsx global>{`
-        @keyframes blob {
-          0% {
-            transform: scale(1) translate(0px, 0px);
-          }
-          33% {
-            transform: scale(1.1) translate(30px, -50px);
-          }
-          66% {
-            transform: scale(0.9) translate(-20px, 20px);
-          }
-          100% {
-            transform: scale(1) translate(0px, 0px);
-          }
-        }
-
         @keyframes fadeIn {
           0% {
             opacity: 0;
@@ -291,7 +277,7 @@ const LoginForm: React.FC = () => {
 
         @keyframes slideUp {
           0% {
-            transform: translateY(20px);
+            transform: translateY(10px);
             opacity: 0;
           }
           100% {
@@ -300,100 +286,111 @@ const LoginForm: React.FC = () => {
           }
         }
 
-        @keyframes float {
-          0% {
-            transform: translateY(0px);
-          }
-          50% {
-            transform: translateY(-10px);
-          }
-          100% {
-            transform: translateY(0px);
-          }
-        }
-
-        @keyframes pulse-subtle {
-          0% {
-            transform: scale(1);
-          }
-          50% {
-            transform: scale(1.03);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
-        @keyframes glow {
-          0% {
-            opacity: 0.05;
-          }
-          50% {
-            opacity: 0.15;
-          }
-          100% {
-            opacity: 0.05;
-          }
-        }
-
-        @keyframes shake {
-          0%,
-          100% {
-            transform: translateX(0);
-          }
-          10%,
-          30%,
-          50%,
-          70%,
-          90% {
-            transform: translateX(-5px);
-          }
-          20%,
-          40%,
-          60%,
-          80% {
-            transform: translateX(5px);
-          }
-        }
-
-        .animate-blob {
-          animation: blob 7s infinite alternate;
-        }
-
         .animate-fadeIn {
-          animation: fadeIn 1s forwards;
+          animation: fadeIn 0.5s forwards;
         }
 
         .animate-slideUp {
-          animation: slideUp 0.8s forwards;
+          animation: slideUp 0.4s forwards;
         }
 
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
+        /* Медиа-запросы для адаптивности */
+        @media (max-width: 640px) {
+          .max-w-sm {
+            max-width: 100%;
+            padding-left: 1rem;
+            padding-right: 1rem;
+          }
+
+          .rounded-xl {
+            border-radius: 0.75rem;
+          }
+
+          .p-6 {
+            padding: 1.25rem;
+          }
+
+          .text-xl {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+          }
+
+          .text-sm {
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+          }
+
+          .text-xs {
+            font-size: 0.75rem;
+            line-height: 1rem;
+          }
+
+          .mb-4 {
+            margin-bottom: 0.75rem;
+          }
+
+          .mb-3 {
+            margin-bottom: 0.5rem;
+          }
+
+          .mb-1 {
+            margin-bottom: 0.25rem;
+          }
+
+          .py-2\.5 {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+          }
+
+          .p-2\.5 {
+            padding: 0.5rem;
+          }
+
+          .w-4 {
+            width: 0.875rem;
+            height: 0.875rem;
+          }
+
+          .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+            margin-top: 0.75rem;
+          }
+
+          .top-2 {
+            top: 0.5rem;
+          }
+
+          .right-2 {
+            right: 0.5rem;
+          }
+
+          .px-2 {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+          }
+
+          .py-1 {
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+          }
         }
 
-        .animate-pulse-subtle {
-          animation: pulse-subtle 3s infinite;
-        }
+        @media (max-width: 400px) {
+          .max-w-sm {
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+          }
 
-        .animate-glow {
-          animation: glow 3s infinite;
-        }
+          .text-xl {
+            font-size: 1rem;
+          }
 
-        .animate-shake {
-          animation: shake 0.5s linear;
-        }
+          .text-sm {
+            font-size: 0.75rem;
+          }
 
-        .animation-delay-300 {
-          animation-delay: 300ms;
-        }
-
-        .animation-delay-500 {
-          animation-delay: 500ms;
-        }
-
-        .animation-delay-700 {
-          animation-delay: 700ms;
+          .text-xs {
+            font-size: 0.625rem;
+          }
         }
       `}</style>
     </div>

@@ -13,7 +13,7 @@ export default function SecondInstanceSummaryPage() {
     return (
       <div className="max-w-[1250px] mx-auto px-4 py-4">
         <Dates />
-        <Evaluations />
+        <Evaluations />30з
         <div className="text-gray-500">Загрузка данных суда...</div>
       </div>
     );

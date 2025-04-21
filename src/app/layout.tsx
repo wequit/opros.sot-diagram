@@ -9,7 +9,6 @@ import { Inter } from "next/font/google";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { SurveyProvider } from "@/context/SurveyProvider";
 import { useLanguage } from "@/context/LanguageContext"; 
-import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import LoginPage from "./login/page";
 
