@@ -15,11 +15,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   webpack: (config, { isServer, dev }) => {
-    if (!isServer && dev) {
+    if (!isServer && !dev) {
       config.devtool = 'source-map';
-    }
-
-    if (!isServer) {
       config.optimization = {
         ...config.optimization,
         minimize: true,

@@ -17,21 +17,22 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header
-        className={`${isSticky
-          ? "fixed top-0 left-0 right-0 z-40 backdrop-blur-lg bg-white/40 border-b border-gray-200 shadow-md"
-          : "fixed top-0 left-0 right-0 bg-white w-full"
-          } h-[4.5rem] flex items-center transition-all duration-500 ${isSidebarOpen ? "backdrop-blur-lg" : ""
-          }`}
-      >
+    <header
+  className={`
+    fixed top-0 left-0 right-0 z-[100] 
+    ${isSticky
+      ? "backdrop-blur-lg bg-white/60 border-b border-gray-200 shadow-md"
+      : "bg-white shadow-sm"}
+    h-[4.5rem] flex items-center transition-all duration-500 
+    ${isSidebarOpen ? "backdrop-blur-lg" : ""}
+  `}
+>
         <div className="w-full max-w-[1250px] mx-auto flex items-center justify-between px-6">
-          {/* Левая часть: логотип + навигация */}
           <div className="flex items-center gap-4">
             <HeaderLogo windowWidth={windowWidth} toggleSidebar={toggleSidebar} />
             <HeaderNav windowWidth={windowWidth} userCourt={userCourt} />
           </div>
 
-          {/* Правая часть: действия */}
           <HeaderActions />
         </div>
       </header>
