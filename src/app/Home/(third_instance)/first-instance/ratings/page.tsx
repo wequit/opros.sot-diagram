@@ -7,9 +7,17 @@ import { useRouter } from "next/navigation";
 import Breadcrumb from "@/lib/utils/breadcrumb/BreadCrumb";
 import debounce from "lodash/debounce";
 import { useCourt } from "@/context/CourtContext";
-import { ArrowDown, ArrowDownUp, ArrowUp, MoveVertical, Star } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowDownUp,
+  ArrowUp,
+  MoveVertical,
+  Star,
+} from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import TableSkeleton, { MobileCardsSkeleton } from "@/lib/utils/SkeletonLoader/TableSkeleton";
+import TableSkeleton, {
+  MobileCardsSkeleton,
+} from "@/lib/utils/SkeletonLoader/TableSkeleton";
 
 interface Assessment {
   aspect: string;
@@ -71,14 +79,14 @@ const transformApiData = (apiData: any): Court[] => {
               curr.aspect.toLowerCase() === "здание"
                 ? "building"
                 : curr.aspect.toLowerCase() === "канцелярия"
-                  ? "office"
-                  : curr.aspect.toLowerCase() === "процесс"
-                    ? "process"
-                    : curr.aspect.toLowerCase() === "сотрудники"
-                      ? "staff"
-                      : curr.aspect.toLowerCase() === "судья"
-                        ? "judge"
-                        : "";
+                ? "office"
+                : curr.aspect.toLowerCase() === "процесс"
+                ? "process"
+                : curr.aspect.toLowerCase() === "сотрудники"
+                ? "staff"
+                : curr.aspect.toLowerCase() === "судья"
+                ? "judge"
+                : "";
 
             if (key) acc[key] = curr.court_avg;
             return acc;
@@ -203,7 +211,8 @@ export default function Courts() {
   };
 
   const getSortIcon = (field: SortField) => {
-    if (sortField !== field) return <ArrowDownUp className="ml-1 inline-block w-4 h-4" />;
+    if (sortField !== field)
+      return <ArrowDownUp className="ml-1 inline-block w-4 h-4" />;
     if (sortDirection === "asc")
       return <ArrowDown className="ml-1 inline-block text-blue-600 w-4 h-4" />;
     return <ArrowUp className="ml-1 inline-block text-blue-600 w-4 h-4" />;
@@ -293,7 +302,7 @@ export default function Courts() {
         <Breadcrumb
           regionName={null}
           courtName={null}
-          onRegionBackClick={() => { }}
+          onRegionBackClick={() => {}}
           showHome={true}
           headerKey="HeaderNavFour"
         />
@@ -302,7 +311,11 @@ export default function Courts() {
         </h2>
       </div>
       <div className="border border-gray-300 rounded-2xl bg-white">
-        <Map selectedRayon={null} onSelectRayon={() => { }} courts={courts} />
+        <Map
+          selectedRayon={null}
+          onSelectRayon={handleCourtClick}
+          courts={courts}
+        />
       </div>
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 mt-8">
         <div className="relative">
@@ -327,15 +340,24 @@ export default function Courts() {
                         style={{ width: "20%", minWidth: "250px" }}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="truncate mr-2">{getTranslation("Regional_Courts_Table_NameCourt", language)}</span>
+                          <span className="truncate mr-2">
+                            {getTranslation(
+                              "Regional_Courts_Table_NameCourt",
+                              language
+                            )}
+                          </span>
                           <div className="relative">
                             <div
-                              className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${isSearchOpen ? "w-36" : "w-8"
-                                }`}
+                              className={`flex items-center overflow-hidden transition-all duration-500 ease-in-out ${
+                                isSearchOpen ? "w-36" : "w-8"
+                              }`}
                             >
                               <div
-                                className={`flex-grow transition-all duration-500 ease-in-out ${isSearchOpen ? "opacity-100 w-full" : "opacity-0 w-0"
-                                  }`}
+                                className={`flex-grow transition-all duration-500 ease-in-out ${
+                                  isSearchOpen
+                                    ? "opacity-100 w-full"
+                                    : "opacity-0 w-0"
+                                }`}
                               >
                                 <input
                                   type="text"
@@ -374,7 +396,12 @@ export default function Courts() {
                         onClick={() => handleSort("overall")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>{getTranslation("Regional_Courts_Table_Overall", language)}</span>
+                          <span>
+                            {getTranslation(
+                              "Regional_Courts_Table_Overall",
+                              language
+                            )}
+                          </span>
                           {getSortIcon("overall")}
                         </div>
                       </th>
@@ -383,7 +410,12 @@ export default function Courts() {
                         onClick={() => handleSort("judge")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>{getTranslation("Regional_Courts_Table_Judge", language)}</span>
+                          <span>
+                            {getTranslation(
+                              "Regional_Courts_Table_Judge",
+                              language
+                            )}
+                          </span>
                           {getSortIcon("judge")}
                         </div>
                       </th>
@@ -392,7 +424,12 @@ export default function Courts() {
                         onClick={() => handleSort("process")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>{getTranslation("Regional_Courts_Table_Procces", language)}</span>
+                          <span>
+                            {getTranslation(
+                              "Regional_Courts_Table_Procces",
+                              language
+                            )}
+                          </span>
                           {getSortIcon("process")}
                         </div>
                       </th>
@@ -401,7 +438,12 @@ export default function Courts() {
                         onClick={() => handleSort("staff")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>{getTranslation("Regional_Courts_Table_Staff", language)}</span>
+                          <span>
+                            {getTranslation(
+                              "Regional_Courts_Table_Staff",
+                              language
+                            )}
+                          </span>
                           {getSortIcon("staff")}
                         </div>
                       </th>
@@ -410,7 +452,12 @@ export default function Courts() {
                         onClick={() => handleSort("office")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>{getTranslation("Regional_Courts_Table_Chancellery", language)}</span>
+                          <span>
+                            {getTranslation(
+                              "Regional_Courts_Table_Chancellery",
+                              language
+                            )}
+                          </span>
                           {getSortIcon("office")}
                         </div>
                       </th>
@@ -419,7 +466,12 @@ export default function Courts() {
                         onClick={() => handleSort("building")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>{getTranslation("Regional_Courts_Table_Building", language)}</span>
+                          <span>
+                            {getTranslation(
+                              "Regional_Courts_Table_Building",
+                              language
+                            )}
+                          </span>
                           {getSortIcon("building")}
                         </div>
                       </th>
@@ -428,7 +480,12 @@ export default function Courts() {
                         onClick={() => handleSort("count")}
                       >
                         <div className="flex items-center justify-between px-2">
-                          <span>{getTranslation("Regional_Courts_Table_Number of reviews", language)}</span>
+                          <span>
+                            {getTranslation(
+                              "Regional_Courts_Table_Number of reviews",
+                              language
+                            )}
+                          </span>
                           {getSortIcon("count")}
                         </div>
                       </th>
@@ -527,8 +584,18 @@ export default function Courts() {
                           {index + 1}. {court.name}
                         </div>
                         <div className="flex items-center gap-1">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="ml-1 inline-block w-6 h-6 text-yellow-500" viewBox="0 0 24 24" stroke="none">
-                            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" strokeLinejoin="round" strokeLinecap="round" />
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="currentColor"
+                            className="ml-1 inline-block w-6 h-6 text-yellow-500"
+                            viewBox="0 0 24 24"
+                            stroke="none"
+                          >
+                            <path
+                              d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
+                              strokeLinejoin="round"
+                              strokeLinecap="round"
+                            />
                           </svg>
                           <span className="text-sm font-medium text-gray-700">
                             {renderTableCell(court.overall_assessment)}
@@ -542,7 +609,9 @@ export default function Courts() {
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="font-medium">Процесс:</span>
-                          <span>{renderTableCell(court.assessment.process)}</span>
+                          <span>
+                            {renderTableCell(court.assessment.process)}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="font-medium">Сотрудники:</span>
@@ -550,11 +619,15 @@ export default function Courts() {
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="font-medium">Канцелярия:</span>
-                          <span>{renderTableCell(court.assessment.office)}</span>
+                          <span>
+                            {renderTableCell(court.assessment.office)}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="font-medium">Здание:</span>
-                          <span>{renderTableCell(court.assessment.building)}</span>
+                          <span>
+                            {renderTableCell(court.assessment.building)}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <span className="font-medium">Отзывы:</span>
@@ -575,7 +648,7 @@ export default function Courts() {
           className="fixed bottom-4 right-2 sm:bottom-10 sm:right-6 p-2 sm:p-3 bg-sky-500 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all duration-300 ease-in-out z-50"
           aria-label="Наверх"
         >
-          <ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" /> 
+          <ArrowUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
         </button>
       )}
     </div>

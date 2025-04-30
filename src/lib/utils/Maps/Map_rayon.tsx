@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+
+import React, { useRef, useEffect, useState } from "react";
 import * as d3 from "d3";
 import rayonData from "../../../../public/gadm41_KGZ_2.json";
-import {  Minus, Plus, RefreshCw } from "lucide-react";
+import { Minus, Plus, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
 const rayonToCourtMapping: { [key: string]: string } = {
@@ -108,7 +109,7 @@ interface Court {
 
 interface MapProps {
   selectedRayon: string | null;
-  onSelectRayon?: (courtName: string) => void;
+  onSelectRayon?: (court: Court) => void;
   courts: Court[];
 }
 
@@ -282,7 +283,7 @@ export default function Map_rayon({
         const russianName = districtNamesRu[districtName] || districtName;
         const rating = getRayonRating(districtName);
         const ratingColor = getColorByRating(rating);
-        
+
         tooltip
           .style("display", "block")
           .style("position", "fixed")
@@ -292,7 +293,7 @@ export default function Map_rayon({
             <div class="p-2">
               <div class="font-medium mb-1">${russianName}</div>
               <div class="flex items-center justify-between">
-                <span class="text-gray-700">${getTranslation("MapRayon_OverallRating", language)}:</span>
+                <breaks><span class="text-gray-700">${getTranslation("MapRayon_OverallRating", language)}:</span>
                 <span class="ml-2 px-2 py-0.5 rounded text-gray-900 font-medium" style="background-color: ${rating > 0 ? ratingColor + '40' : '#E5E7EB'}">
                   ${rating > 0 ? `<span class="text-yellow-600 mr-1">★</span>${rating.toFixed(1)} / 5` : "Нет данных"}
                 </span>
@@ -318,7 +319,7 @@ export default function Map_rayon({
         const russianName = districtNamesRu[districtName] || districtName;
         const rating = getRayonRating(districtName);
         const ratingColor = getColorByRating(rating);
-        
+
         tooltip
           .style("display", "block")
           .style("position", "fixed")
@@ -344,6 +345,17 @@ export default function Map_rayon({
         tooltip
           .style("left", `${coordinates.x + 10}px`)
           .style("top", `${coordinates.y + 10}px`);
+      })
+      .on("click", function (event: any, d: any) {
+        if (isLake(d.properties) || !onSelectRayon) return;
+        const districtName = d.properties.NAME_2;
+        const courtName = rayonToCourtMapping[districtName];
+        if (courtName) {
+          const court = courts.find((c) => c.name === courtName);
+          if (court) {
+            onSelectRayon(court);
+          }
+        }
       });
 
     const textGroup = g.append("g").attr("class", "rating-labels");
@@ -377,12 +389,13 @@ export default function Map_rayon({
       .attr("stroke", "white")
       .attr("stroke-width", 1)
       .attr("opacity", 0.8)
+      .style("cursor", "pointer")
       .on("mouseover", function (event, d) {
         d3.select(this).attr("opacity", 1).attr("r", 8);
         const court = courts.find((c) => c.name === d[0]);
         const rating = court ? court.overall_assessment : 0;
         const ratingColor = getColorByRating(rating);
-        
+
         tooltip
           .style("display", "block")
           .style("left", `${event.pageX + 10}px`)
@@ -409,7 +422,7 @@ export default function Map_rayon({
         const rating = court ? court.overall_assessment : 0;
         const ratingColor = getColorByRating(rating);
         const coordinates = getEventCoordinates(event);
-        
+
         tooltip
           .style("display", "block")
           .style("position", "fixed")
@@ -435,6 +448,13 @@ export default function Map_rayon({
         tooltip
           .style("left", `${coordinates.x + 10}px`)
           .style("top", `${coordinates.y + 10}px`);
+      })
+      .on("click", function (event: any, d) {
+        if (!onSelectRayon) return;
+        const court = courts.find((c) => c.name === d[0]);
+        if (court) {
+          onSelectRayon(court);
+        }
       });
 
     svg.on("click", function (event: any) {
@@ -458,7 +478,7 @@ export default function Map_rayon({
       .attr("dy", "2")
       .attr("stdDeviation", "3")
       .attr("flood-opacity", "0.3");
-    
+
     const legend = svg
       .append("g")
       .attr("class", "legend")
@@ -486,7 +506,7 @@ export default function Map_rayon({
       .attr("font-weight", "700")
       .attr("fill", "#1f2937")
       .text(getTranslation("MapRayon_ScaleTitle", language));
-      
+
     legend
       .append("line")
       .attr("x1", 15)
@@ -521,7 +541,7 @@ export default function Map_rayon({
           .attr("fill", (d) => d.color)
           .attr("stroke", "#e5e7eb")
           .attr("stroke-width", 0.5);
-        
+
         g.append("text")
           .attr("x", 28)
           .attr("y", 13)
@@ -550,7 +570,7 @@ export default function Map_rayon({
   return (
     <div ref={containerRef} className="relative w-full h-full">
       <svg ref={svgRef} className="w-full h-auto"></svg>
-      
+
       {/* Кнопки зума */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-30 ContainerZoomButtons">
         <button
@@ -583,7 +603,7 @@ export default function Map_rayon({
           <RefreshCw className="w-7 h-7 ZoomButtons" />
         </button>
       </div>
-      
+
       <div
         ref={tooltipRef}
         className="absolute hidden bg-white p-2 rounded shadow-lg border border-gray-200"
@@ -615,19 +635,4 @@ function getEventCoordinates(event: any) {
     };
   }
   return { x: event.clientX, y: event.clientY };
-}
-
-function formatRating(rating: number) {
-  return `
-    <span class="inline-flex items-center">
-      <span class="text-yellow-400 mr-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" width="14" height="14" fill="currentColor">
-          <path d="M316.9 18C311.6 7 300.4 0 288.1 0s-23.4 7-28.8 18L195 150.3 51.4 171.5c-12 1.8-22 10.2-25.7 21.7s-.7 24.2 7.9 32.7L137.8 329 113.2 474.7c-2 12 3 24.2 12.9 31.3s23 8 33.8 2.3l128.3-68.5 128.3 68.5c10.8 5.7 23.9 4.9 33.8-2.3s14.9-19.3 12.9-31.3L438.5 329 542.7 225.9c8.6-8.5 11.7-21.2 7.9-32.7s-13.7-19.9-25.7-21.7L381.2 150.3 316.9 18z"/>
-        </svg>
-      </span>
-      <span class="font-bold">${rating.toFixed(1)}</span>
-      <span class="font-bold text-gray-900 ml-1">/</span>
-      <span class="font-bold text-gray-900 ml-1">5</span>
-    </span>
-  `;
 }

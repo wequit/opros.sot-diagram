@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Calendar from './parts/Calendar';
 import YearSelector from './parts/YearSelector';
 import PeriodSelector from './parts/PeriodSelector';
@@ -13,8 +13,8 @@ const DateRangePicker: React.FC = () => {
   const [dateRange, setDateRange] = useState({ startDate: '', endDate: '', year: '2025' });
   const [calMonth, setCalMonth] = useState(0);
   const [calYear, setCalYear] = useState('2025');
-  const [activePeriod, setActivePeriod] = useState<number|null>(null);
-  const [selMonth, setSelMonth] = useState<string|null>(null);
+  const [activePeriod, setActivePeriod] = useState<number | null>(null);
+  const [selMonth, setSelMonth] = useState<string | null>(null);
   const [showCal, setShowCal] = useState(false);
   const [selStart, setSelStart] = useState(true);
   const [selRangeDone, setSelRangeDone] = useState(false);
@@ -22,6 +22,7 @@ const DateRangePicker: React.FC = () => {
   const [showMonth, setShowMonth] = useState(false);
   const { setDateParams } = useDateParams();
   const { language, getTranslation } = useLanguage();
+  const calendarRef = useRef<HTMLDivElement>(null);
 
   const years = Array.from({ length: 11 }, (_, i) => (2025 + i).toString());
 
@@ -37,29 +38,52 @@ const DateRangePicker: React.FC = () => {
   useEffect(() => {
     if (selRangeDone) setDateParams({ startDate: dateRange.startDate, endDate: dateRange.endDate });
     else setDateParams({ startDate: `${dateRange.year}-01-01`, endDate: `${dateRange.year}-12-31` });
-  }, [dateRange, selRangeDone]);
+  }, [dateRange, selRangeDone, setDateParams]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+        setShowCal(false);
+      }
+    };
+
+    if (showCal) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showCal]);
 
   const handleYear = (y: string) => {
     setDateRange({ startDate: '', endDate: '', year: y });
-    setCalYear(y); setCalMonth(0);
-    setActivePeriod(null); setSelMonth(null);
-    setSelStart(true); setSelRangeDone(false);
+    setCalYear(y);
+    setCalMonth(0);
+    setActivePeriod(null);
+    setSelMonth(null);
+    setSelStart(true);
+    setSelRangeDone(false);
     setShowYear(false);
   };
 
   const handlePeriod = (p: any) => {
     const [s, e] = getQuarterDates(dateRange.year, p.id);
     setDateRange({ startDate: s, endDate: e, year: dateRange.year });
-    setActivePeriod(p.id); setSelMonth(null);
-    setSelStart(true); setSelRangeDone(true);
+    setActivePeriod(p.id);
+    setSelMonth(null);
+    setSelStart(true);
+    setSelRangeDone(true);
     setShowCal(false);
   };
 
   const handleMonth = (idx: number) => {
     const [s, e] = getMonthDates(dateRange.year, idx);
     setDateRange({ startDate: s, endDate: e, year: dateRange.year });
-    setActivePeriod(null); setSelMonth(months[idx]);
-    setSelStart(true); setSelRangeDone(true);
+    setActivePeriod(null);
+    setSelMonth(months[idx]);
+    setSelStart(true);
+    setSelRangeDone(true);
     setShowMonth(false);
   };
 
@@ -69,23 +93,36 @@ const DateRangePicker: React.FC = () => {
       setSelStart(false);
     } else {
       setDateRange(r => ({ ...r, endDate: iso }));
-      setSelStart(true); setSelRangeDone(true); setShowCal(false);
+      setSelStart(true);
+      setSelRangeDone(true);
+      setShowCal(false);
     }
   };
 
   const changeMonth = (delta: number) => {
-    let m = calMonth + delta, y = Number(calYear);
-    if (m < 0) { m = 11; y--; }
-    if (m > 11) { m = 0; y++; }
-    setCalMonth(m); setCalYear(y.toString());
+    let m = calMonth + delta,
+      y = Number(calYear);
+    if (m < 0) {
+      m = 11;
+      y--;
+    }
+    if (m > 11) {
+      m = 0;
+      y++;
+    }
+    setCalMonth(m);
+    setCalYear(y.toString());
   };
 
   const reset = () => {
     const cy = new Date().getFullYear().toString();
     setDateRange({ startDate: '', endDate: '', year: cy });
-    setCalYear(cy); setCalMonth(0);
-    setActivePeriod(null); setSelMonth(null);
-    setSelStart(true); setSelRangeDone(false);
+    setCalYear(cy);
+    setCalMonth(0);
+    setActivePeriod(null);
+    setSelMonth(null);
+    setSelStart(true);
+    setSelRangeDone(false);
   };
 
   return (
@@ -93,18 +130,50 @@ const DateRangePicker: React.FC = () => {
       <div className="flex flex-wrap items-center gap-3">
         {/* Date input */}
         <div className="relative">
-          <div onClick={() => { setShowCal(true); setSelStart(true); }} className="w-[210px] bg-white rounded-xl shadow-sm border-b-2 border-indigo-100 flex items-center gap-2 p-2 cursor-pointer justify-center">
-           <CalendarDays />
-            <p>{ selRangeDone ? `${formatDisplayDate(dateRange.startDate)} - ${formatDisplayDate(dateRange.endDate)}` : getTranslation('ChooseDate', language) }</p>
+          <div
+            onClick={() => {
+              setShowCal(true);
+              setSelStart(true);
+            }}
+            className="w-[210px] bg-white rounded-xl shadow-sm border-b-2 border-indigo-100 flex items-center gap-2 p-2 cursor-pointer justify-center"
+          >
+            <CalendarDays />
+            <p>
+              {selRangeDone
+                ? `${formatDisplayDate(dateRange.startDate)} - ${formatDisplayDate(dateRange.endDate)}`
+                : getTranslation('ChooseDate', language)}
+            </p>
           </div>
-          {showCal && (<div className="absolute top-full left-0 mt-2 z-40"><Calendar year={Number(calYear)} month={calMonth} dateRange={dateRange} onDateSelect={handleDateSelect} onMonthChange={changeMonth} /></div>)}
+          {showCal && (
+            <div ref={calendarRef} className="absolute top-full left-0 mt-2 z-40">
+              <Calendar
+                year={Number(calYear)}
+                month={calMonth}
+                dateRange={dateRange}
+                onDateSelect={handleDateSelect}
+                onMonthChange={changeMonth}
+              />
+            </div>
+          )}
         </div>
         {/* Year selector */}
-        <YearSelector years={years} selected={dateRange.year} show={showYear} toggle={() => setShowYear(v => !v)} onSelect={handleYear} />
+        <YearSelector
+          years={years}
+          selected={dateRange.year}
+          show={showYear}
+          toggle={() => setShowYear(v => !v)}
+          onSelect={handleYear}
+        />
         {/* Quarters */}
         <PeriodSelector periods={periods} active={activePeriod} onClick={handlePeriod} />
         {/* Month selector */}
-        <MonthSelector months={months} selected={selMonth} show={showMonth} onToggle={() => setShowMonth(v => !v)} onSelect={handleMonth} />
+        <MonthSelector
+          months={months}
+          selected={selMonth}
+          show={showMonth}
+          onToggle={() => setShowMonth(v => !v)}
+          onSelect={handleMonth}
+        />
         {/* Reset */}
         <ResetButton onReset={reset} label={getTranslation('Reset_Button', language)} />
       </div>

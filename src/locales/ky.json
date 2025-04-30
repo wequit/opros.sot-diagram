@@ -141,5 +141,9 @@
   "LoginForm_EmptyFields": "Колдонуучу аты жана сырсөздү киргизиңиз",
   "LoginForm_Error": "Колдонуучу аты жана сырсөздү киргизиңиз",
   "LoginForm_NoToken": "Колдонуучу аты жана сырсөздү киргизиңиз",
-  "ChooseDate": "Даталарды тандоо"
+  "ChooseDate": "Даталарды тандоо",
+  "RemarksLogic_FilterByCourt": "Сот боюнча чыпка",
+  "RemarksLogic_AllCourts": "Бардык соттор",
+  "RemarksLogic_SearchCourt": "Сот боюнча издөө",
+  "RemarksLogic_ClearFilters": "Чыпкаларды тазалоо"
 }

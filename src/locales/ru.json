@@ -141,5 +141,9 @@
     "LoginForm_EmptyFields": "Имя пользователя и пароль не могут быть пустыми",
     "LoginForm_Error": "Имя пользователя и пароль не могут быть пустыми",
     "LoginForm_NoToken": "Имя пользователя и пароль не могут быть пустыми",
-     "ChooseDate": "Выбрать даты"
+    "ChooseDate": "Выбрать даты",
+    "RemarksLogic_FilterByCourt": "Фильтр по суду",
+    "RemarksLogic_AllCourts": "Все суды",
+    "RemarksLogic_SearchCourt": "Поиск по суду",
+    "RemarksLogic_ClearFilters": "Очистить фильтры"
 }
