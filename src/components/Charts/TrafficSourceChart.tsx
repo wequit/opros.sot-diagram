@@ -21,7 +21,6 @@ export default function TrafficSourceChart({
     return numericData.length > 0 ? Math.max(...numericData) + 1 : 1;
   };
 
-  
   if (!trafficSourceData?.datasets?.length || !trafficSourceData.datasets[0]?.data) {
     return null;
   }

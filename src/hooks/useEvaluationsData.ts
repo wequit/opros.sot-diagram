@@ -218,7 +218,7 @@ if (!genderAgeData && barData && circleData) {
 if (barData) {
   const trafficQuestion = barData.find((q: any) => q.question_id === 1);
   if (trafficQuestion) {
-    const labels = trafficQuestion.options.map((opt: any) => opt.text_ru);
+    const labels = trafficQuestion.options.map((opt: any) => language === "ru" ? opt.text_ru : opt.text_kg);
     const counts = trafficQuestion.options.map((opt: any) => opt.count);
     setTrafficSourceData({
       labels,
