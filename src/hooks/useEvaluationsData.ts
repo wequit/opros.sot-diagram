@@ -142,7 +142,12 @@ export default function useEvaluationData() {
       if (radarData) {
         const radarLabels = radarData.data?.map((item: any) => (language === "ru" ? item.aspect_ru : item.aspect_kg)) || [];
         const allCourtsAvg = radarData.data?.map((item: any) =>
-          pathname.startsWith("/Home/summary2") ? item.region_avg || 0 : item.all_courts_avg || 0
+          pathname.startsWith("/Home/summary") ||
+          pathname.startsWith("/Home/summary1") ||
+          pathname.startsWith("/Home/summary2")
+  ? item.all_courts_avg || 0
+  : item.court_avg || 0
+
         ) || [];
       const radarLabel = pathname.startsWith("/Home/summary/")
   ? "Средние оценки по республике"
