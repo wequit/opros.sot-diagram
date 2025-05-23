@@ -24,6 +24,8 @@ export default function useEvaluationData() {
   const courtName2 = typeof window !== 'undefined' ? localStorage.getItem("courtName2") : null;
   const matchedCourt = typeof window !== 'undefined' ? localStorage.getItem("matchedCourt") : null;
   const storedCourtName = typeof window !== 'undefined' ? localStorage.getItem("selectedCourtName") : null;
+  const selectedCourtName = localStorage.getItem("selectedCourtName");
+    const courtName = localStorage.getItem("courtName");
   const pathname = usePathname();
   const [disrespectPercentages, setDisrespectPercentages] = useState<(string | null)[]>([]);
 
@@ -142,15 +144,19 @@ export default function useEvaluationData() {
         const allCourtsAvg = radarData.data?.map((item: any) =>
           pathname.startsWith("/Home/summary2") ? item.region_avg || 0 : item.all_courts_avg || 0
         ) || [];
-        const radarLabel = pathname.startsWith("/Home/summary/")
-          ? "Средние оценки по республике"
-          : pathname.startsWith("/Home/supreme-court/")
-          ? "Верховный суд"
-          : pathname.startsWith("/Home/summary2")
-          ? "Средняя оценка по области"
-          : pathname.startsWith("/Home/") && pathname.endsWith("/ratings2")
-          ? matchedCourt || "Неизвестный суд"
-          : courtName2 || "Неизвестный суд";
+      const radarLabel = pathname.startsWith("/Home/summary/")
+  ? "Средние оценки по республике"
+  : pathname.startsWith("/Home/supreme-court/")
+  ? "Верховный суд"
+  : pathname.startsWith("/Home/summary2")
+  ? "Средняя оценка по области"
+  : pathname.startsWith("/Home/second-instance")
+  ? selectedCourtName || "Неизвестный суд"
+  : pathname.startsWith("/Home/first-instance")
+  ? courtName || "Неизвестный суд"
+  : pathname.startsWith("/Home/") && pathname.endsWith("/ratings2")
+  ? matchedCourt || "Неизвестный суд"
+  : courtName2 || "Неизвестный суд";
         setRadarData({
           labels: radarLabels,
           datasets: [

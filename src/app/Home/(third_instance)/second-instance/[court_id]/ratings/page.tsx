@@ -7,7 +7,6 @@ import Evaluations from "@/components/Evaluations/page";
 import CourtDataFetcher from "@/lib/api/CourtAPI";
 import { useCourt } from "@/context/CourtContext";
 import { useChartData } from "@/context/ChartDataContext";
-import { useLanguage } from "@/context/LanguageContext";
 
 const CourtRatingPage = () => {
   const params = useParams();

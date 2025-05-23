@@ -2,14 +2,13 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRemarks } from "@/components/RemarksApi";
 import { getCookie } from "@/lib/api/login";
-import { ArrowLeft, FileSearch, ChevronLeft, ChevronRight, Search, X, Filter } from "lucide-react";
+import { ArrowLeft, FileSearch, Search, X, Filter } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function RemarksPage() {
   const { remarks, isLoading, error } = useRemarks();
-  const [currentPage, setCurrentPage] = useState<number>(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
@@ -22,7 +21,6 @@ export default function RemarksPage() {
   const startXRef = useRef<number>(0);
   const startWidthRef = useRef<number>(0);
   
-  const itemsPerPage = 9;
   const router = useRouter();
   const pathname = usePathname();
   const { language, getTranslation } = useLanguage();
@@ -214,73 +212,6 @@ export default function RemarksPage() {
     });
   }, [localRemarks, courtFilter, courtSearch]);
 
-  const getCurrentPageData = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return filteredRemarks.slice().reverse().slice(startIndex, endIndex);
-  }, [filteredRemarks, currentPage, itemsPerPage]);
-
-  const totalPages = useMemo(() => {
-    return Math.ceil(filteredRemarks.length / itemsPerPage);
-  }, [filteredRemarks.length, itemsPerPage]);
-
-  const goToNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const goToPreviousPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const goToPage = (pageNumber: number) => {
-    if (pageNumber >= 1 && pageNumber <= totalPages) {
-      setCurrentPage(pageNumber);
-    }
-  };
-
-  const getPaginationNumbers = () => {
-    let pages = [];
-    const maxButtons = 5;
-    
-    if (totalPages <= maxButtons) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      if (currentPage <= 3) {
-        for (let i = 1; i <= 4; i++) {
-          pages.push(i);
-        }
-        pages.push(null);
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 2) {
-        pages.push(1);
-        pages.push(null);
-        for (let i = totalPages - 3; i <= totalPages; i++) {
-          pages.push(i);
-        }
-      } else {
-        pages.push(1);
-        pages.push(null);
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
-          pages.push(i);
-        }
-        pages.push(null);
-        pages.push(totalPages);
-      }
-    }
-    
-    return pages;
-  };
-
-  const paginationNumbers = useMemo(() => {
-    return getPaginationNumbers();
-  }, [currentPage, totalPages]);
-
   const handleMessageClick = (item: any) => {
     setSelectedItem(item);
     setIsViewModalOpen(true);
@@ -294,7 +225,6 @@ export default function RemarksPage() {
   const resetFilters = () => {
     setCourtFilter("all");
     setCourtSearch("");
-    setCurrentPage(1);
   };
 
   if (isLoading) {
@@ -357,7 +287,6 @@ export default function RemarksPage() {
                 value={courtFilter}
                 onChange={(e) => {
                   setCourtFilter(e.target.value);
-                  setCurrentPage(1);
                 }}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 text-sm transition-all duration-200"
               >
@@ -374,7 +303,6 @@ export default function RemarksPage() {
                   value={courtSearch}
                   onChange={(e) => {
                     setCourtSearch(e.target.value);
-                    setCurrentPage(1);
                   }}
                   placeholder={getTranslation("RemarksLogic_SearchCourt", language)}
                   className="pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 text-sm w-full transition-all duration-200"
@@ -423,10 +351,10 @@ export default function RemarksPage() {
                   </tr>
                 </thead>
                 <tbody className="min-h-[320px]">
-                  {getCurrentPageData.map((item: any, index: number) => (
+                  {filteredRemarks.slice().reverse().map((item: any, index: number) => (
                     <tr key={index} className="hover:bg-gray-50 h-16 border-b border-gray-100 transition-colors duration-150">
                       <td className="px-6 py-4 text-sm text-gray-700 text-center border-r border-gray-200">
-                        {(currentPage - 1) * itemsPerPage + index + 1}
+                        {index + 1}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-900 border-r border-gray-200" style={{ width: `${courtColumnWidth}px` }}>
                         <div className="whitespace-normal break-words" title={item.court || "Не указано"}>
@@ -466,28 +394,6 @@ export default function RemarksPage() {
               </table>
             </div>
           </div>
-
-          {filteredRemarks.length > itemsPerPage ? (
-            <div className="flex justify-center items-center mt-6 gap-2 sm:gap-3">
-              <button
-                onClick={goToPreviousPage}
-                disabled={currentPage === 1}
-                className="px-3 py-1 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 disabled:bg-gray-100 disabled:text-gray-400 transition-all duration-200 text-sm"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span className="px-3 py-1 sm:px-4 sm:py-2 bg-blue-600 text-white font-medium rounded-lg shadow-sm text-sm">
-                {currentPage}
-              </span>
-              <button
-                onClick={goToNextPage}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-all duration-200 text-sm"
-              >
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          ) : null}
 
           <CommentModal
             isOpen={isModalOpen}
