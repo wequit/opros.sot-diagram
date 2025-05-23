@@ -24,8 +24,15 @@ export default function useEvaluationData() {
   const courtName2 = typeof window !== 'undefined' ? localStorage.getItem("courtName2") : null;
   const matchedCourt = typeof window !== 'undefined' ? localStorage.getItem("matchedCourt") : null;
   const storedCourtName = typeof window !== 'undefined' ? localStorage.getItem("selectedCourtName") : null;
-  const selectedCourtName = localStorage.getItem("selectedCourtName");
-    const courtName = localStorage.getItem("courtName");
+  
+   const [courtName, setCourtName] = useState("");
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("courtName");
+    if (storedName) {
+      setCourtName(storedName);
+    }
+  }, []);
   const pathname = usePathname();
   const [disrespectPercentages, setDisrespectPercentages] = useState<(string | null)[]>([]);
 
@@ -89,6 +96,14 @@ export default function useEvaluationData() {
       { label: "Женский", data: [0, 0, 0, 0], backgroundColor: "rgb(255, 99, 132)" },
     ],
   });
+  const [selectedCourtName, setSelectedCourtName] = useState<string | null>(null);
+
+ useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedName = localStorage.getItem("selectedCourtName");
+      setSelectedCourtName(storedName);
+    }
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;
