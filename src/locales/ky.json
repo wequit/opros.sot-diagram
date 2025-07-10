@@ -145,5 +145,6 @@
   "RemarksLogic_FilterByCourt": "Сот боюнча чыпка",
   "RemarksLogic_AllCourts": "Бардык соттор",
   "RemarksLogic_SearchCourt": "Сот боюнча издөө",
-  "RemarksLogic_ClearFilters": "Чыпкаларды тазалоо"
+  "RemarksLogic_ClearFilters": "Чыпкаларды тазалоо",
+  "RemarksLogic_DueDate": "Аткаруу мөөнөтү"
 }

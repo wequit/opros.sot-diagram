@@ -145,5 +145,6 @@
     "RemarksLogic_FilterByCourt": "Фильтр по суду",
     "RemarksLogic_AllCourts": "Все суды",
     "RemarksLogic_SearchCourt": "Поиск по суду",
-    "RemarksLogic_ClearFilters": "Очистить фильтры"
+    "RemarksLogic_ClearFilters": "Очистить фильтры",
+    "RemarksLogic_DueDate": "Срок выполнения"
 }

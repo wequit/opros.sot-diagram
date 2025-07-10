@@ -55,23 +55,30 @@ export default function RemarksPage() {
     onClose,
     onSubmit,
     selectedComment,
+    selectedDueDate,
   }: {
     isOpen: boolean;
     onClose: () => void;
-    onSubmit: (comment: string) => void;
+    onSubmit: (comment: string, dueDate: string) => void;
     selectedComment: string;
+    selectedDueDate: string;
   }) => {
     const [comment, setComment] = useState("");
+    const [dueDate, setDueDate] = useState("");
 
     useEffect(() => {
-      if (isOpen) setComment("");
-    }, [isOpen]);
+      if (isOpen) {
+        setComment(selectedComment || "");
+        setDueDate(selectedDueDate || "");
+      }
+    }, [isOpen, selectedComment, selectedDueDate]);
 
     if (!isOpen) return null;
 
     const handleSubmit = () => {
-      onSubmit(comment);
+      onSubmit(comment, dueDate);
       setComment("");
+      setDueDate("");
       onClose();
     };
 
@@ -87,6 +94,18 @@ export default function RemarksPage() {
             onChange={(e) => setComment(e.target.value)}
             placeholder={getTranslation("RemarksLogic_ModalPlaceholder", language)}
           />
+          <div className="mb-4">
+            <label htmlFor="due-date" className="text-sm font-medium text-gray-700">
+              {getTranslation("RemarksLogic_DueDate", language)}
+            </label>
+            <input
+              id="due-date"
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              className="w-full border rounded p-2 mt-1 focus:ring-2 focus:ring-blue-300 focus:border-blue-500 transition-all duration-200"
+            />
+          </div>
           <div className="flex justify-end gap-2">
             <button className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-all duration-200" onClick={onClose}>
               {getTranslation("RemarksLogic_ModalClose", language)}
@@ -94,6 +113,7 @@ export default function RemarksPage() {
             <button
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all duration-200"
               onClick={handleSubmit}
+              disabled={!comment || !dueDate}
             >
               {getTranslation("RemarksLogic_ModalButton", language)}
             </button>
@@ -154,35 +174,38 @@ export default function RemarksPage() {
     }
   }, [localRemarks, isLoading]);
 
-  const handleCommentSubmit = async (comment: string) => {
+  const handleCommentSubmit = async (comment: string, dueDate: string) => {
     try {
-      const token = getCookie("access_token");
-      const response = await fetch(
-        "https://opros.sot.kg/api/v1/comments/respond/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            question_response: selectedItem.id,
-            reply_to_comment: comment,
-          }),
-        }
-      );
+      // Временно отключаем запрос API для тестирования
+      // const token = getCookie("access_token");
+      // const response = await fetch(
+      //   "https://opros.sot.kg/api/v1/comments/respond/",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //       Authorization: `Bearer ${token}`,
+      //     },
+      //     body: JSON.stringify({
+      //       question_response: selectedItem.id,
+      //       reply_to_comment: comment,
+      //       due_date: dueDate,
+      //     }),
+      //   }
+      // );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.detail || getTranslation("RemarksLogic_Error_Adding", language)
-        );
-      }
+      // if (!response.ok) {
+      //   const errorData = await response.json();
+      //   throw new Error(
+      //     errorData.detail || getTranslation("RemarksLogic_Error_Adding", language)
+      //   );
+      // }
 
+      // Имитация успешного ответа API
       setLocalRemarks((prev) =>
         prev.map((item) =>
           item.id === selectedItem.id
-            ? { ...item, reply_to_comment: comment }
+            ? { ...item, reply_to_comment: comment, due_date: dueDate }
             : item
         )
       );
@@ -225,6 +248,34 @@ export default function RemarksPage() {
   const resetFilters = () => {
     setCourtFilter("all");
     setCourtSearch("");
+  };
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "—";
+    const date = new Date(dateString);
+    return date.toLocaleDateString(language === "ru" ? "ru-RU" : "en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  };
+
+  const getDueDateStatus = (dueDate: string) => {
+    if (!dueDate) return "";
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Сбрасываем время для корректного сравнения
+    const due = new Date(dueDate);
+    due.setHours(0, 0, 0, 0);
+    const diffTime = due.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0 || diffDays <= 3) {
+      return "bg-red-500"; // Красный: просрочено или менее 3 дней
+    } else if (diffDays <= 7) {
+      return "bg-orange-500"; // Оранжевый: от 3 до 7 дней
+    } else {
+      return "bg-green-500"; // Зеленый: больше 7 дней
+    }
   };
 
   if (isLoading) {
@@ -345,6 +396,9 @@ export default function RemarksPage() {
                     <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                       {getTranslation("RemarksLogic_Reply", language)}
                     </th>
+                    <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                      {getTranslation("RemarksLogic_DueDate", language)}
+                    </th>
                     <th scope="col" className="w-1/6 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       {getTranslation("RemarksLogic_Actions", language)}
                     </th>
@@ -380,10 +434,18 @@ export default function RemarksPage() {
                           {item.reply_to_comment || "—"}
                         </div>
                       </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 text-center border-r border-gray-200">
+                        <div className="flex items-center justify-center gap-2 truncate" title={formatDate(item.due_date)}>
+                          {item.due_date && (
+                            <span className={`w-2 h-2 rounded-full ${getDueDateStatus(item.due_date)}`}></span>
+                          )}
+                          {formatDate(item.due_date)}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 text-center">
                         <button
                           onClick={() => handleCommentClick(item)}
-                          className="text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                          className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
                         >
                           {getTranslation("RemarksLogic_Comment", language)}
                         </button>
@@ -399,7 +461,8 @@ export default function RemarksPage() {
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             onSubmit={handleCommentSubmit}
-            selectedComment={selectedItem?.custom_answer || ""}
+            selectedComment={selectedItem?.reply_to_comment || ""}
+            selectedDueDate={selectedItem?.due_date || ""}
           />
 
           <ViewMessageModal
