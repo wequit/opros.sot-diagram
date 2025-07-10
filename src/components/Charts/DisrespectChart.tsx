@@ -88,8 +88,10 @@ export default function DisrespectChart({
         </h2>
       </div>
       <div className="p-6">
-        <div className="h-[300px] w-full">
-          <Bar data={disrespectData} options={disrespectOptions} />
+        <div className="chart-container">
+          <div className="h-[300px] w-full">
+            <Bar data={disrespectData} options={disrespectOptions} />
+          </div>
         </div>
       </div>
     </div>

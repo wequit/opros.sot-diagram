@@ -114,7 +114,6 @@ body::after {
   }
 }
 
-/* Updated print styles */
 @media print {
   @page {
     size: A4;
@@ -132,7 +131,6 @@ body::after {
     padding: 0 !important;
   }
 
-  /* Minimize header size */
   header,
   .app-header {
     height: 30px !important;
@@ -145,6 +143,32 @@ body::after {
     gap: 5px !important;
     background: white !important;
     border-bottom: 1px solid #ddd !important;
+    /* Только для первой страницы */
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    page-break-after: avoid !important;
+  }
+
+  header, .app-header {
+    display: block !important;
+  }
+  @media print {
+    header, .app-header {
+      display: none !important;
+    }
+    header.print-first-header, .app-header.print-first-header {
+      display: flex !important;
+    }
+  }
+  @page {
+    @top-center {
+      content: element(headerBlock);
+    }
+  }
+  @media print {
+    header:not(:first-child), .app-header:not(:first-child) {
+      display: none !important;
+    }
   }
 
   header *,
@@ -174,16 +198,13 @@ body::after {
     display: none !important;
   }
 
-  /* Optimize chart containers for two per page */
-  .chart-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: 300px !important; /* Adjust height to fit two per page */
-    margin: 5mm 0 !important;
-    padding: 0 !important;
+
+  .print-break {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-    box-sizing: border-box !important;
+    page-break-after: auto !important;
+    break-after: auto !important;
+    display: block !important;
   }
 
   /* Ensure canvas fits within container */
@@ -194,7 +215,6 @@ body::after {
     object-fit: contain !important;
   }
 
-  /* Main content container */
   .container,
   .main-content,
   .print-container {
@@ -204,13 +224,7 @@ body::after {
     margin: 0 !important;
   }
 
-  /* Group charts to fit two per page */
-  .chart-container:nth-child(2n) {
-    page-break-after: always !important;
-    break-after: always !important;
-  }
 
-  /* Table styles unchanged */
   table {
     width: 100% !important;
     max-width: 100% !important;
@@ -252,5 +266,46 @@ body::after {
   table th:not(:first-child):not(:nth-child(2)),
   table td:not(:first-child):not(:nth-child(2)) {
     width: 10% !important;
+  }
+
+  .print-header-only {
+    display: flex !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 1250px !important;
+    margin: 0 auto !important;
+    padding: 2mm 6mm !important;
+    background: white !important;
+    border-bottom: 1px solid #ddd !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    page-break-after: avoid !important;
+  }
+  @media print {
+    .print-header-only {
+      display: flex !important;
+      position: static !important;
+      width: 100% !important;
+      max-width: 1250px !important;
+      margin: 0 auto !important;
+      padding: 2mm 6mm !important;
+      background: white !important;
+      border-bottom: 1px solid #ddd !important;
+      font-size: 16px !important;
+      font-weight: bold !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      page-break-after: avoid !important;
+    }
+    header, .app-header {
+      display: none !important;
+    }
+  }
+  @media screen {
+    .print-header-only {
+      display: none !important;
+    }
   }
 }

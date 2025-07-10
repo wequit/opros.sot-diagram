@@ -73,8 +73,10 @@ export default function CategoryJudgeChart({
         </h2>
       </div>
       <div className="p-6">
-        <div className="h-[300px]">
-          <Pie data={caseTypesData} options={caseTypesOptions} />
+        <div className="chart-container">
+          <div className="h-[300px]">
+            <Pie data={caseTypesData} options={caseTypesOptions} />
+          </div>
         </div>
       </div>
     </div>

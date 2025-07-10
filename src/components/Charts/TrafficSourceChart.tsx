@@ -67,8 +67,10 @@ export default function TrafficSourceChart({
         </h2>
       </div>
       <div className="p-6">
-        <div className="h-[300px]">
-          <Bar data={trafficSourceData} options={trafficSourceOptions} />
+        <div className="chart-container">
+          <div className="h-[300px]">
+            <Bar data={trafficSourceData} options={trafficSourceOptions} />
+          </div>
         </div>
       </div>
     </div>

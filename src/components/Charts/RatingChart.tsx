@@ -47,7 +47,7 @@ export default function RatingChart({
       <div className="px-6 py-4 border-b">
         <h2 className="text-xl font-medium">{getTranslation(translationKey, language)}</h2>
       </div>
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-6 chart-container">
         {Object.entries(ratings).map(([title, rating]) => (
           <div key={title} className="space-y-2">
             <div className="flex justify-between items-center">

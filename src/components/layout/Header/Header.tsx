@@ -17,16 +17,22 @@ const Header: React.FC = () => {
 
   return (
     <>
-    <header
-  className={`
-    fixed top-0 left-0 right-0 z-[100] 
-    ${isSticky
-      ? "backdrop-blur-lg bg-white/60 border-b border-gray-200 shadow-md"
-      : "bg-white shadow-sm"}
-    h-[4.5rem] flex items-center transition-all duration-500 
-    ${isSidebarOpen ? "backdrop-blur-lg" : ""}
-  `}
->
+      <div className="print-header-only w-full max-w-[1250px] mx-auto px-6 py-2 flex items-center justify-between" style={{display: 'none'}}>
+        <div className="flex items-center gap-4">
+          <span style={{fontWeight: 'bold', fontSize: '18px'}}>Диограмма</span>
+        </div>
+      </div>
+      <header
+        className={`
+          fixed top-0 left-0 right-0 z-[100] 
+          ${isSticky
+            ? "backdrop-blur-lg bg-white/60 border-b border-gray-200 shadow-md"
+            : "bg-white shadow-sm"}
+          h-[4.5rem] flex items-center transition-all duration-500 
+          ${isSidebarOpen ? "backdrop-blur-lg" : ""}
+          print-first-header
+        `}
+      >
         <div className="w-full max-w-[1250px] mx-auto flex items-center justify-between px-6">
           <div className="flex items-center gap-4">
             <HeaderLogo windowWidth={windowWidth} toggleSidebar={toggleSidebar} />

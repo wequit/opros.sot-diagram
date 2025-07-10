@@ -145,35 +145,37 @@ export default function DemographicsChart({
         </h2>
       </div>
       <div className="p-6 flex flex-col items-center">
-        <div className="flex justify-center gap-4 mb-6 w-full">
-          {['Пол', 'Пол и возраст', 'Возраст'].map((tab) => (
-            <button
-              key={tab}
-              className={`px-6 py-2 rounded-lg transition-colors AgeGenderButtons ${
-                demographicsView === tab.toLowerCase()
-                  ? 'bg-blue-600 text-white AgeGenderButtons'
-                  : 'bg-gray-100'
-              }`}
-              onClick={() => setDemographicsView(tab.toLowerCase())}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-        <div className="h-[300px] w-full flex justify-center items-center">
-          {demographicsView === 'пол' && (
-            <Pie data={genderData} options={pieOptions} />
-          )}
-          {demographicsView === 'пол и возраст' && (
-            <Bar
-              data={ageGenderData}
-              options={ageGenderOptions}
-              plugins={[ChartDataLabels]}
-            />
-          )}
-          {demographicsView === 'возраст' && ageData && (
-            <Bar data={ageData} options={ageOptions} />
-          )}
+        <div className="chart-container">
+          <div className="flex justify-center gap-4 mb-6 w-full">
+            {['Пол', 'Пол и возраст', 'Возраст'].map((tab) => (
+              <button
+                key={tab}
+                className={`px-6 py-2 rounded-lg transition-colors AgeGenderButtons ${
+                  demographicsView === tab.toLowerCase()
+                    ? 'bg-blue-600 text-white AgeGenderButtons'
+                    : 'bg-gray-100'
+                }`}
+                onClick={() => setDemographicsView(tab.toLowerCase())}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+          <div className="h-[300px] w-full flex justify-center items-center">
+            {demographicsView === 'пол' && (
+              <Pie data={genderData} options={pieOptions} />
+            )}
+            {demographicsView === 'пол и возраст' && (
+              <Bar
+                data={ageGenderData}
+                options={ageGenderOptions}
+                plugins={[ChartDataLabels]}
+              />
+            )}
+            {demographicsView === 'возраст' && ageData && (
+              <Bar data={ageData} options={ageOptions} />
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -53,8 +53,10 @@ export default function ReusablePieChart({
         </h2>
       </div>
       <div className="p-6">
-        <div className={`h-[300px] w-[350px] mx-auto ${className}`}>
-          <Pie data={data} options={pieOptions} />
+        <div className="chart-container">
+          <div className={`h-[300px] w-[350px] mx-auto ${className}`}>
+            <Pie data={data} options={pieOptions} />
+          </div>
         </div>
       </div>
     </div>

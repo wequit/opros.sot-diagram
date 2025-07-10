@@ -86,8 +86,10 @@ export default function RadarChart({ radarData, windowWidth, totalResponses }: R
         </div>
       </div>
       <div className="p-6">
-        <div className="h-[400px] RadarHeight">
-          <Radar data={radarData} options={radarOptions} />
+        <div className="chart-container">
+          <div className="h-[400px] RadarHeight">
+            <Radar data={radarData} options={radarOptions} />
+          </div>
         </div>
       </div>
     </div>

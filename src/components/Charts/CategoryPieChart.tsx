@@ -100,8 +100,10 @@ export default function CategoryPieChart({ categoryData, windowWidth }: Category
         </h2>
       </div>
       <div className="p-6 relative overflow-visible">
-        <div className="w-[350px] h-[400px] EvaluationsCategoryRespond mx-auto">
-          <Pie data={categoryData} options={categoryOptions} />
+        <div className="chart-container">
+          <div className="w-[350px] h-[400px] EvaluationsCategoryRespond mx-auto">
+            <Pie data={categoryData} options={categoryOptions} />
+          </div>
         </div>
       </div>
     </div>
