@@ -66,7 +66,7 @@ export default function CategoryJudgeChart({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+    <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 min-h-[300px] flex flex-col">
       <div className="px-6 py-4 border-b">
         <h2 className="text-xl font-medium DiagrammSixName">
           {getTranslation('DiagrammSix', language)}

@@ -42,7 +42,7 @@ export default function RatingChart({
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 ${className}`}
+      className={`bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 min-h-[300px] flex flex-col ${className}`}
     >
       <div className="px-6 py-4 border-b">
         <h2 className="text-xl font-medium">{getTranslation(translationKey, language)}</h2>

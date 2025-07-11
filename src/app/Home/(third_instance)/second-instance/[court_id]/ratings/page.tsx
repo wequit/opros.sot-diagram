@@ -88,7 +88,7 @@ const CourtRatingPage = () => {
       <h2 className="text-3xl font-bold mb-4 mt-4">{selectedCourtName}</h2>
       <div className="space-y-6">
         <Dates />
-        <CourtDataFetcher courtId={courtId} /> {/* Передаем динамический courtId */}
+        <CourtDataFetcher courtId={courtId} /> 
         {isLoading ? <div>Loading data...</div> : <Evaluations selectedCourtId={selectedCourtId} />}
       </div>
     </div>

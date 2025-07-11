@@ -138,7 +138,7 @@ export default function DemographicsChart({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200">
+    <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 h-[500px]">
       <div className="px-6 py-4 border-b">
         <h2 className="text-xl font-medium text-start DiagrammFourName">
           {getTranslation('DiagrammFour', language)}

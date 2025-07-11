@@ -46,7 +46,7 @@ export default function ReusablePieChart({
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200`}>
+    <div className={`bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 min-h-[300px] flex flex-col ${className}`}>
       <div className="px-6 py-4 border-b min-h-[90px]">
         <h2 className="text-xl font-medium">
           {getTranslation(translationKey, language)}

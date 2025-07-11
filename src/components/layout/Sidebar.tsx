@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import logo from '../../../public/logo.webp'
 import { useLanguage } from "@/context/LanguageContext";
+import courtData from '../../../public/courtIds.json';
 
 interface SidebarProps {
   onClose: () => void;
@@ -17,6 +18,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
   const { getTranslation } = useLanguage();
 
   const isActivePath = (path: string) => pathname.startsWith(path) 
+
+  const getCourtSlug = (courtName: string): string => {
+    const court = courtData.courts.find((item: any) => item.court === courtName);
+    return court ? court.slug : "court-id";
+  };
+  const userCourt = user?.court || null;
 
   return (
     <div className="h-full flex flex-col ">
@@ -38,27 +45,48 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
       {/* Навигация */}
       <nav className="flex flex-col p-4 space-y-2">
-        <Link
-          href="/Home/summary/ratings"
-          onClick={onClose}
-          className={`
-            flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
-            ${
-              isActivePath("/Home/summary/")
-                ? "bg-green-50 text-green-700 font-medium shadow-sm"
-                : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-            }
-          `}
-        >
-          <span>
-            {user?.role === "Председатель 3 инстанции"
-              ? getTranslation("HeaderNavOne")
-              : "Оценки по судам"}
-          </span>
-        </Link>
-
-        {user?.role !== "Председатель 2 инстанции" &&
-        user?.role !== "Председатель 1 инстанции" ? (
+        {user?.role === "Председатель 2 инстанции" ? (
+          <>
+            <Link
+              href="/Home/summary2/ratings"
+              onClick={onClose}
+              className={
+                `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ` +
+                (isActivePath("/Home/summary2/")
+                  ? "bg-green-50 text-green-700 font-medium shadow-sm"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")
+              }
+            >
+              <span>{getTranslation("HeaderNavOne")}</span>
+            </Link>
+            <Link
+              href="/Home/first_instance/ratings"
+              onClick={onClose}
+              className={
+                `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ` +
+                (isActivePath("/Home/first_instance/")
+                  ? "bg-green-50 text-green-700 font-medium shadow-sm"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")
+              }
+            >
+              <span>{getTranslation("HeaderNavRegionalRatings")}</span>
+            </Link>
+            {userCourt && (
+              <Link
+                href={`/Home/${getCourtSlug(userCourt)}/ratings2`}
+                onClick={onClose}
+                className={
+                  `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ` +
+                  (isActivePath(`/Home/${getCourtSlug(userCourt)}/ratings2`)
+                    ? "bg-green-50 text-green-700 font-medium shadow-sm"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900")
+                }
+              >
+                <span>{userCourt}</span>
+              </Link>
+            )}
+          </>
+        ) : user?.role !== "Председатель 1 инстанции" ? (
           <>
             <Link
               href="/Home/supreme-court/ratings"
