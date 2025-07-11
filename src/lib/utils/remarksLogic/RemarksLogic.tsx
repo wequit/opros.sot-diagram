@@ -417,9 +417,8 @@ export default function RemarksPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700 border-r border-gray-200">
                         <div 
-                          className="line-clamp-2 h-10 overflow-hidden cursor-pointer hover:text-blue-600 transition-colors duration-200" 
+                          className="whitespace-pre-line break-words" 
                           title={item.custom_answer || "—"}
-                          onClick={() => handleMessageClick(item)}
                         >
                           {item.custom_answer || "—"}
                         </div>
@@ -465,11 +464,6 @@ export default function RemarksPage() {
             selectedDueDate={selectedItem?.due_date || ""}
           />
 
-          <ViewMessageModal
-            isOpen={isViewModalOpen}
-            onClose={() => setIsViewModalOpen(false)}
-            message={selectedItem?.custom_answer || ""}
-          />
         </div>
       )}
     </>
