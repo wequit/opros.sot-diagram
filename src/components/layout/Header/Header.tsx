@@ -19,7 +19,7 @@ const Header: React.FC = () => {
     <>
       <div className="print-header-only w-full max-w-[1250px] mx-auto px-6 py-2 flex items-center justify-between" style={{display: 'none'}}>
         <div className="flex items-center gap-4">
-          <span style={{fontWeight: 'bold', fontSize: '18px'}}>Диограмма</span>
+          <span style={{fontWeight: 'bold', fontSize: '18px'}}>{userCourt || 'Диограмма'}</span>
         </div>
       </div>
       <header

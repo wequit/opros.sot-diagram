@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useChartData } from "@/context/ChartDataContext";
 import { useLanguage } from "@/context/LanguageContext";
 import { useCourt } from "@/context/CourtContext";
+import { getCurrentUser } from "@/lib/api/login";
 
 export default function useEvaluationData() {
   const {
@@ -26,12 +27,25 @@ export default function useEvaluationData() {
   const storedCourtName = typeof window !== 'undefined' ? localStorage.getItem("selectedCourtName") : null;
   
    const [courtName, setCourtName] = useState("");
+  const [userCourt, setUserCourt] = useState<string | null>(null);
 
   useEffect(() => {
     const storedName = localStorage.getItem("courtName");
     if (storedName) {
       setCourtName(storedName);
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchUserCourt = async () => {
+      try {
+        const userData = await getCurrentUser();
+        setUserCourt(userData.court || null);
+      } catch (error) {
+        setUserCourt(null);
+      }
+    };
+    fetchUserCourt();
   }, []);
   const pathname = usePathname();
   const [disrespectPercentages, setDisrespectPercentages] = useState<(string | null)[]>([]);
@@ -171,8 +185,8 @@ export default function useEvaluationData() {
   ? "Средняя оценка по области"
   : pathname.startsWith("/Home/second-instance")
   ? selectedCourtName || "Неизвестный суд"
-  : pathname.startsWith("/Home/first-instance")
-  ? courtName || "Неизвестный суд"
+  : pathname.startsWith("/Home/first-instance") || pathname.startsWith("/Home/summary1")
+  ? (userCourt || courtName || "Неизвестный суд")
   : pathname.startsWith("/Home/") && pathname.endsWith("/ratings2")
   ? matchedCourt || "Неизвестный суд"
   : courtName2 || "Неизвестный суд";
@@ -390,6 +404,8 @@ if (barData) {
     storedCourtName,
     pathname,
     isLoading,
+    userCourt,
+    courtName,
   ]);
 
   useEffect(() => {

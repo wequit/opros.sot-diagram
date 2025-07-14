@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRemarks } from "@/components/RemarksApi";
 import { getCookie } from "@/lib/api/login";
 import { ArrowLeft, FileSearch, Search, X, Filter } from "lucide-react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 

@@ -92,7 +92,7 @@ export default function Evaluations({
   }
 
   return (
-    <div className="min-h-screen mb-4">
+    <div className="min-h-screen mb-4 print-content-padding">
       <div className="max-w-[1250px] mx-auto">
         <div className="grid grid-cols-2 gap-4 EvalutionCols">
           {radarData && radarData.datasets.length > 0 && (
