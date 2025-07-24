@@ -27,7 +27,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
   return (
     <div className="h-full flex flex-col ">
-      {/* Шапка сайдбара */}
       <div className="p-4 border-b flex justify-between items-center">
         <Image
           src={logo}
@@ -43,7 +42,6 @@ export default function Sidebar({ onClose }: SidebarProps) {
         </button>
       </div>
 
-      {/* Навигация */}
       <nav className="flex flex-col p-4 space-y-2">
         {user?.role === "Председатель 2 инстанции" ? (
           <>

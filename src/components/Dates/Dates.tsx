@@ -128,7 +128,6 @@ const DateRangePicker: React.FC = () => {
   return (
     <div className="w-full bg-gradient-to-r from-blue-700 to-indigo-400 p-4 rounded-2xl mb-4 shadow-lg">
       <div className="flex flex-wrap items-center gap-3">
-        {/* Date input */}
         <div className="relative">
           <div
             onClick={() => {
@@ -156,7 +155,6 @@ const DateRangePicker: React.FC = () => {
             </div>
           )}
         </div>
-        {/* Year selector */}
         <YearSelector
           years={years}
           selected={dateRange.year}
@@ -164,9 +162,7 @@ const DateRangePicker: React.FC = () => {
           toggle={() => setShowYear(v => !v)}
           onSelect={handleYear}
         />
-        {/* Quarters */}
         <PeriodSelector periods={periods} active={activePeriod} onClick={handlePeriod} />
-        {/* Month selector */}
         <MonthSelector
           months={months}
           selected={selMonth}
@@ -174,7 +170,6 @@ const DateRangePicker: React.FC = () => {
           onToggle={() => setShowMonth(v => !v)}
           onSelect={handleMonth}
         />
-        {/* Reset */}
         <ResetButton onReset={reset} label={getTranslation('Reset_Button', language)} />
       </div>
     </div>

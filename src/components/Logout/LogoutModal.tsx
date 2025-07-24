@@ -48,7 +48,6 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onConfirm })
         zIndex: 999999,
       }}
     >
-      {/* Затемнение */}
       <div 
         style={{
           position: 'fixed',
@@ -62,7 +61,6 @@ const LogoutModal: React.FC<LogoutModalProps> = ({ isOpen, onClose, onConfirm })
         onClick={onClose}
       />
       
-      {/* Модальное окно */}
       <div 
         style={{
           position: 'relative',

@@ -432,7 +432,7 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
         setSelectedCourtName(null);
         setSurveyData(null);
       }
-      event.preventDefault(); // Предотвращаем стандартное поведение
+      event.preventDefault(); 
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -800,7 +800,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
             {renderRegionMap()}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100">
               <div className="overflow-x-auto">
-                {/* Таблица для десктопа (≥ 640px) */}
                 <div className="hidden sm:block overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
@@ -973,7 +972,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                   </table>
                 </div>
 
-                {/* Карточки для мобильных (< 640px) */}
                 <div className="block sm:hidden p-3">
                   {filteredCourts.length === 0 ? (
                     <div className="text-center text-gray-500 py-8">
@@ -986,7 +984,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                         className="mb-3 p-3 border border-gray-100 rounded-lg bg-white hover:shadow-md transition-shadow duration-200 cursor-pointer"
                         onClick={() => handleCourtClick(court.id, court.name)}
                       >
-                        {/* Заголовок карточки */}
                         <div className="flex justify-between items-center mb-2">
                           <div className="text-sm font-semibold text-gray-800 hover:text-blue-600 truncate">
                             {index + 1}. {court.name}
@@ -1001,7 +998,6 @@ const RegionDetails: React.FC<RegionDetailsProps> = ({
                           </div>
                         </div>
 
-                        {/* Данные в виде компактного списка */}
                         <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 text-xs text-gray-600">
                           <div className="flex items-center gap-1">
                             <span className="font-medium">Здание:</span>

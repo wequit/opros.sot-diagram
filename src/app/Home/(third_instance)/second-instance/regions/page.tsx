@@ -250,7 +250,6 @@ export default function RegionalCourts() {
           </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-            {/* Таблица для десктопа (≥ 640px) */}
             <div className="hidden sm:block overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
@@ -389,7 +388,6 @@ export default function RegionalCourts() {
               </table>
             </div>
 
-            {/* Карточки для мобильных (< 640px) */}
             <div className="block sm:hidden p-3">
               {sortedData.map((oblast) => (
                 <div

@@ -1,58 +1,44 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { Chart, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, Title } from "chart.js";
+Chart.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, Title);
+
 import SkeletonDashboard from "@/lib/utils/SkeletonLoader/SkeletonLoader";
-import useEvaluationData from "@/hooks/useEvaluationsData";
+import useEvaluationData, { getPieData, getBarData, Question, Option } from "@/hooks/useEvaluationsData";
 import NoData from "../NoData/NoData";
+import CategoryPieChart from "../Charts/CategoryPieChart";
+import UniversalBarChart from "../Charts/UniversalBarChart";
+import CommentsSection from "../Charts/CommentsSection";
+import {
+  SquareGanttChart,
+  CircleUser,       
+  LockKeyhole,       
+  Users,            
+  Hammer,            
+  Building,          
+  Sparkles,          
+  MessageSquare      
+} from 'lucide-react'; 
 
-interface RegionSummaryData {
-  overall_rating: number;
-  total_responses: number;
-  courts_count: number;
-  ratings_by_category: { [key: string]: number };
-}
+const sections = [
+  { title: "Все ответы", icon: <SquareGanttChart size={20} />, type: "all" },
+  { title: "Респонденты", icon: <CircleUser size={20} />, questionIds: [1, 2, 3, 4] },
+  { title: "Доступ", icon: <LockKeyhole size={20} />, questionIds: [5, 6] },
+  { title: "Сотрудники", icon: <Users size={20} />, questionIds: [7, 8] },
+  { title: "Судьи", icon: <Hammer size={20} />, questionIds: [9, 10, 11, 12, 13] },
+  { title: "Здание", icon: <Building size={20} />, questionIds: [14, 15, 16] },
+  { title: "Оценка", icon: <Sparkles size={20} />, questionIds: [17, 18, 19, 20] },
+  { title: "Замечания", icon: <MessageSquare size={20} />, type: "comments" }
+];
 
-const RadarChart = React.lazy(() => import("../Charts/RadarChart"));
-const CommentsSection = React.lazy(() => import("../Charts/CommentsSection"));
-const CategoryPieChart = React.lazy(() => import("../Charts/CategoryPieChart"));
-const DemographicsChart = React.lazy(() => import("../Charts/DemographicsChart"));
-const CategoryJudgeChart = React.lazy(() => import("../Charts/CategoryJudgeChart"));
-const TrafficSourceChart = React.lazy(() => import("../Charts/TrafficSourceChart"));
-const RatingChart = React.lazy(() => import("../Charts/RatingChart"));
-const ReusablePieChart = React.lazy(() => import("../Charts/ReusablePieChart"));
-const DisrespectChart = React.lazy(() => import("../Charts/DisrespectChart"));
-//courtNameId
-export default function Evaluations({
-  selectedCourtId,
-  courtNameId,
-  summaryData,
-}: {
-  selectedCourtId?: number | null;
-  courtNameId?: string | null;
-  summaryData?: RegionSummaryData | null;
-}) {
+
+const textQuestionIds = [6, 13, 20];
+
+export default function Evaluations() {
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0
   );
-  const pathname = usePathname();
-  const [demographicsView, setDemographicsView] = useState("пол");
-
-  let remarksPath = "/Home/summary/feedbacks";
-  if (pathname.includes("/Home/supreme-court/rating")) {
-    remarksPath = "/Home/supreme-court/feedbacks";
-  } else if (pathname.startsWith("/Home/second-instance/")) {
-    remarksPath = `/Home/second-instance${selectedCourtId ? `/${selectedCourtId}` : ""}/feedbacks`;
-  } else if (pathname.startsWith("/Home/first_instance/court/")) {
-    remarksPath = `/Home/first_instance/feedbacks/${courtNameId}`;
-  } else if (pathname.startsWith("/Home/first-instance/") && pathname.endsWith("/rating")) {
-    remarksPath = `/Home/first-instance/feedbacks/${courtNameId}`;
-  } else if (pathname.startsWith("/Home/") && pathname.endsWith("/ratings2")) {
-    const parts = pathname.split("/");
-    const slug = parts[2];
-    remarksPath = `/Home/${slug}/feedbacks2`;
-  } else if (courtNameId) {
-    remarksPath += `/${courtNameId}`;
-  }
+  const [activeTab, setActiveTab] = useState<number>(0);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -60,86 +46,91 @@ export default function Evaluations({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const {
-    categoryData,
-    genderData,
-    trafficSourceData,
-    caseTypesData,
-    audioVideoData,
-    judgeRatings,
-    staffRatings,
-    processRatings,
-    accessibilityRatings,
-    officeRatings,
-    startTimeData,
-    radarData,
-    totalResponses,
-    totalResponsesAnswer,
-    disrespectData,
-    ageData,
-    ageGenderData,
-    comments,
-    isLoading,
-    disrespectPercentages
-  } = useEvaluationData();
+  const { isLoading, totalResponses, questionsById } = useEvaluationData();
 
-  if (isLoading) {
-    return <SkeletonDashboard />;
-  }
-  
-  if (!isLoading && totalResponses === 0) {
-    return <NoData />;
-  }
+  if (isLoading) return <SkeletonDashboard />;
+  if (!isLoading && totalResponses === 0) return <NoData />;
+
+  const comments: { text: string }[] = [];
+  const totalResponsesAnswer = totalResponses || 0;
+  const remarksPath = "/feedbacks";
+
+  const allQuestions = sections
+    .filter(s => s.questionIds)
+    .flatMap(s => s.questionIds!.map(qid => questionsById[qid]))
+    .filter(Boolean);
+  const allCommentsQuestions = allQuestions.filter(q => textQuestionIds.includes(q.question_id));
+  const allDiagramQuestions = allQuestions.filter(q => !textQuestionIds.includes(q.question_id));
 
   return (
-    <div className="min-h-screen mb-4 print-content-padding">
+    <div className="min-h-screen rounded-xl mb-4 p-2 md:p-6 print-content-padding bg-gray-50"> 
       <div className="max-w-[1250px] mx-auto">
-        <div className="grid grid-cols-2 gap-4 EvalutionCols">
-          {radarData && radarData.datasets.length > 0 && (
-            <div className="print-break"><RadarChart radarData={radarData} windowWidth={windowWidth} totalResponses={totalResponses} /></div>
-          )}
-          <div className="print-break"><CommentsSection totalResponsesAnswer={totalResponsesAnswer} remarksPath={remarksPath} comments={comments} /></div>
-          {categoryData && categoryData.datasets[0].data.length > 0 && (
-            <div className="print-break"><CategoryPieChart categoryData={categoryData} windowWidth={windowWidth} /></div>
-          )}
-          <div className="print-break">
-            <DemographicsChart
-              genderData={genderData}
-              ageGenderData={ageGenderData}
-              ageData={ageData}
-              demographicsView={demographicsView}
-              setDemographicsView={setDemographicsView}
-              windowWidth={windowWidth}
-            />
-          </div>
-          <div className="print-break"><TrafficSourceChart trafficSourceData={trafficSourceData} windowWidth={windowWidth} /></div>
-          {caseTypesData && caseTypesData.datasets[0].data.length > 0 && (
-            <div className="print-break"><CategoryJudgeChart caseTypesData={caseTypesData} windowWidth={windowWidth} /></div>
-          )}
-          {judgeRatings && Object.keys(judgeRatings).length > 0 && (
-            <div className="print-break"><RatingChart ratings={judgeRatings} translationKey="DiagrammSeven" /></div>
-          )}
-          {disrespectData && disrespectData.datasets[0].data.length > 0 && (
-            <div className="print-break"><DisrespectChart disrespectData={disrespectData} windowWidth={windowWidth} percentages={disrespectPercentages} /></div>
-          )}
-          {staffRatings && Object.keys(staffRatings).length > 0 && (
-            <div className="print-break"><RatingChart ratings={staffRatings} translationKey="DiagrammNine" /></div>
-          )}
-          {processRatings && Object.keys(processRatings).length > 0 && (
-            <div className="print-break"><RatingChart ratings={processRatings} translationKey="DiagrammTen" /></div>
-          )}
-          {audioVideoData && audioVideoData.datasets[0].data.length > 0 && (
-            <div className="print-break"><ReusablePieChart data={audioVideoData} translationKey="DiagrammEleven" windowWidth={windowWidth} className="EvaluationsAudio" /></div>
-          )}
-          {startTimeData && startTimeData.datasets[0].data.length > 0 && (
-            <div className="print-break"><ReusablePieChart data={startTimeData} translationKey="DiagrammTwelve" windowWidth={windowWidth} className="EvaluationsTime" /></div>
-          )}
-          {officeRatings && Object.keys(officeRatings).length > 0 && (
-            <div className="print-break"><RatingChart ratings={officeRatings} translationKey="DiagrammThirteen" /></div>
-          )}
-          {accessibilityRatings && Object.keys(accessibilityRatings).length > 0 && (
-            <div className="print-break"><RatingChart ratings={accessibilityRatings} translationKey="DiagrammFourteen" /></div>
-          )}
+      <div className="flex overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide mb-8 border-b border-gray-200 dark:border-gray-700"> 
+        <div className="flex -mb-px"> 
+          {sections.map((section, idx) => (
+            <button
+              key={section.title}
+              className={
+                `flex items-center gap-2 px-5 py-3 font-semibold text-sm md:text-base cursor-pointer relative ` +
+                `transition-all duration-250 ease-in-out ` +
+                (activeTab === idx
+                  ? "text-indigo-700 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:border-b-2 hover:border-gray-300 dark:hover:border-gray-600") 
+              }
+              onClick={() => setActiveTab(idx)}
+            >
+              {section.icon}
+              <span>{section.title}</span>
+              {activeTab !== idx && (
+                <span className="absolute bottom-0 left-0 w-full h-0.5 bg-transparent group-hover:bg-indigo-300 dark:group-hover:bg-indigo-700 transition-colors duration-200"></span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+        <div className="mt-6">
+          {sections.map((section, idx) => (
+            <div
+              key={section.title}
+              className={activeTab === idx ? "block" : "hidden"}
+              role="tabpanel"
+            >
+              {section.type === "all" && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {allDiagramQuestions.map(question => (
+                      question._type === 'bar' ? (
+                        <UniversalBarChart key={question.question_id} barData={getBarData(question)} windowWidth={windowWidth} title={question.question_text_ru} />
+                      ) : (
+                        <CategoryPieChart key={question.question_id} categoryData={getPieData(question)} windowWidth={windowWidth} title={question.question_text_ru} />
+                      )
+                    ))}
+                  </div>
+                 
+                </>
+              )}
+              {!section.type && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {section.questionIds && section.questionIds
+                      .map(qid => questionsById[qid])
+                      .filter(q => q && !textQuestionIds.includes(q.question_id))
+                      .map(question => (
+                        question._type === 'bar' ? (
+                          <UniversalBarChart key={question.question_id} barData={getBarData(question)} windowWidth={windowWidth} title={question.question_text_ru} />
+                        ) : (
+                          <CategoryPieChart key={question.question_id} categoryData={getPieData(question)} windowWidth={windowWidth} title={question.question_text_ru} />
+                        )
+                      ))}
+                  </div>
+                  
+                </>
+              )}
+              {section.type === "comments" && (
+                <CommentsSection comments={comments} totalResponsesAnswer={totalResponsesAnswer} remarksPath={remarksPath} />
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>

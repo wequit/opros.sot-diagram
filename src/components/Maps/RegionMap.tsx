@@ -41,10 +41,10 @@ const getRegionColor = (rating: number, properties?: any): string => {
 };
 
 const getRatingBorderColor = (rating: number) => {
-  if (rating === 0) return "#9CA3AF"; // gray-400
-  if (rating <= 2) return "#EF4444"; // red-500
-  if (rating <= 3.5) return "#F59E0B"; // yellow-500
-  return "#22C55E"; // green-500
+  if (rating === 0) return "#9CA3AF"; 
+  if (rating <= 2) return "#EF4444"; 
+  if (rating <= 3.5) return "#F59E0B"; 
+  return "#22C55E";
 };
 
 function getRatingBgColor(rating: number): string {

@@ -329,7 +329,6 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
     <div ref={containerRef} className="relative w-full">
       <svg ref={svgRef} className="w-full h-auto"></svg>
 
-      {/* Кнопка информации */}
       <button
   onClick={() => {
     if (showLegend) {
@@ -354,7 +353,6 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
 </button>
 
 
-      {/* Информационное окно */}
       {showInfo && !showLegend && (
         <div
           className="absolute top-16 left-4 z-[40] bg-white p-4 rounded-lg shadow-lg border border-gray-200"
@@ -394,7 +392,6 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
         </div>
       )}
 
-      {/* Кнопки управления зумом */}
       <div className="absolute bottom-4 right-4 z-[60] flex flex-col gap-2">
         <button
           onClick={() => {
@@ -427,7 +424,6 @@ export default function Map_oblast({ oblastData }: { oblastData: OblastData[] })
         </button>
       </div>
 
-      {/* Тултип */}
       <div
         ref={tooltipRef}
         className="hidden absolute bg-white shadow-lg rounded-md p-2 z-[50] pointer-events-none"

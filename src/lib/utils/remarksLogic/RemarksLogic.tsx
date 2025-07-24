@@ -1,15 +1,13 @@
 "use client";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useRemarks } from "@/components/RemarksApi";
-import { getCookie } from "@/lib/api/login";
 import { ArrowLeft, FileSearch, Search, X, Filter } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function RemarksPage() {
   const { remarks, isLoading, error } = useRemarks();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [localRemarks, setLocalRemarks] = useState<any[]>([]);
   const [courtColumnWidth, setCourtColumnWidth] = useState<number>(250);
@@ -21,7 +19,6 @@ export default function RemarksPage() {
   const startWidthRef = useRef<number>(0);
   
   const router = useRouter();
-  const pathname = usePathname();
   const { language, getTranslation } = useLanguage();
 
   const startResize = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -122,37 +119,6 @@ export default function RemarksPage() {
     );
   };
 
-  const ViewMessageModal = ({
-    isOpen,
-    onClose,
-    message,
-  }: {
-    isOpen: boolean;
-    onClose: () => void;
-    message: string;
-  }) => {
-    if (!isOpen) return null;
-
-    return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 animate-fade-in">
-        <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-          <h3 className="text-lg font-semibold mb-4">{getTranslation("RemarksLogic_ViewMessageTitle", language)}</h3>
-          <div className="border rounded p-4 mb-4 bg-gray-50 max-h-60 overflow-auto">
-            <p className="text-gray-700 whitespace-pre-wrap">{message || "—"}</p>
-          </div>
-          <div className="flex justify-end">
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all duration-200"
-              onClick={onClose}
-            >
-              {getTranslation("RemarksLogic_ModalClose", language)}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   useEffect(() => {
     try {
       if (remarks) {
@@ -175,7 +141,6 @@ export default function RemarksPage() {
 
   const handleCommentSubmit = async (comment: string, dueDate: string) => {
     try {
-      // Временно отключаем запрос API для тестирования
       // const token = getCookie("access_token");
       // const response = await fetch(
       //   "https://opros.sot.kg/api/v1/comments/respond/",
@@ -200,7 +165,6 @@ export default function RemarksPage() {
       //   );
       // }
 
-      // Имитация успешного ответа API
       setLocalRemarks((prev) =>
         prev.map((item) =>
           item.id === selectedItem.id
@@ -234,11 +198,6 @@ export default function RemarksPage() {
     });
   }, [localRemarks, courtFilter, courtSearch]);
 
-  const handleMessageClick = (item: any) => {
-    setSelectedItem(item);
-    setIsViewModalOpen(true);
-  };
-
   const handleCommentClick = (item: any) => {
     setSelectedItem(item);
     setIsModalOpen(true);
@@ -262,18 +221,18 @@ export default function RemarksPage() {
   const getDueDateStatus = (dueDate: string) => {
     if (!dueDate) return "";
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Сбрасываем время для корректного сравнения
+    today.setHours(0, 0, 0, 0);
     const due = new Date(dueDate);
     due.setHours(0, 0, 0, 0);
     const diffTime = due.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0 || diffDays <= 3) {
-      return "bg-red-500"; // Красный: просрочено или менее 3 дней
+      return "bg-red-500"; 
     } else if (diffDays <= 7) {
-      return "bg-orange-500"; // Оранжевый: от 3 до 7 дней
+      return "bg-orange-500"; 
     } else {
-      return "bg-green-500"; // Зеленый: больше 7 дней
+      return "bg-green-500";
     }
   };
 
@@ -323,7 +282,6 @@ export default function RemarksPage() {
             </button>
           </div>
 
-          {/* Filter and Search Section */}
           <div className="mb-6 bg-white shadow-md rounded-lg p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="flex items-center gap-4 w-full sm:w-auto">
               <div className="flex items-center gap-2">

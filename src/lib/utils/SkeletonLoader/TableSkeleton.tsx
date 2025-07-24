@@ -126,21 +126,17 @@ export const MapSkeleton: React.FC = () => {
 export const PageSkeleton: React.FC = () => {
   return (
     <div className="max-w-[1250px] mx-auto container px-4 py-8">
-      {/* Хлебные крошки и заголовок */}
       <div className="mb-4 flex justify-between items-center">
         <div className="h-5 bg-gray-200 animate-pulse rounded w-48"></div>
         <div className="h-6 bg-gray-200 animate-pulse rounded w-64"></div>
       </div>
       
-      {/* Карта */}
       <MapSkeleton />
       
-      {/* Таблица */}
       <div className="mt-8">
         <TableSkeleton />
       </div>
       
-      {/* Мобильные карточки */}
       <MobileCardsSkeleton />
     </div>
   );

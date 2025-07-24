@@ -109,7 +109,6 @@ const LoginForm: React.FC = () => {
       data-testid="login-form-container"
     >
 
-      {/* Переключатель языка */}
       <div className="absolute top-2 right-2 flex animate-fadeIn">
         <div className="bg-blue-100/50 backdrop-blur-sm rounded-md border border-blue-200/50 shadow-sm flex">
           <button
@@ -133,7 +132,6 @@ const LoginForm: React.FC = () => {
         </div>
       </div>
 
-      {/* Основной контент - форма входа */}
       <div className="flex-grow flex items-center justify-center py-4 px-4">
         <div className="w-full max-w-sm">
           <div className="relative bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-200/50">
@@ -264,7 +262,6 @@ const LoginForm: React.FC = () => {
         </div>
       </div>
 
-      {/* CSS для анимаций (упрощены для мобильных) */}
       <style jsx global>{`
         @keyframes fadeIn {
           0% {

@@ -571,7 +571,6 @@ export default function Map_rayon({
     <div ref={containerRef} className="relative w-full h-full">
       <svg ref={svgRef} className="w-full h-auto"></svg>
 
-      {/* Кнопки зума */}
       <div className="absolute bottom-4 right-4 flex flex-col gap-2 z-30 ContainerZoomButtons">
         <button
           onClick={() => {

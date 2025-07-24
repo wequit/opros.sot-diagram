@@ -1,16 +1,17 @@
 import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { ChartOptions, ChartData, LegendItem } from 'chart.js';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface CategoryPieChartProps {
   categoryData: ChartData<'pie'>;
   windowWidth: number;
+  title: string;
 }
 
-export default function CategoryPieChart({ categoryData, windowWidth }: CategoryPieChartProps) {
-  const { language, getTranslation} = useLanguage();
-
+export default function CategoryPieChart({ categoryData, windowWidth, title }: CategoryPieChartProps) {
+  const { language } = useLanguage();
   const getMaxLabelLength = (width: number): number => {
     if (width < 440) return 38; 
     return 55;                  
@@ -62,10 +63,18 @@ export default function CategoryPieChart({ categoryData, windowWidth }: Category
       datalabels: {
         color: '#FFFFFF',
         font: {
-          size: 14,
+          size: 16,
           weight: 'bold',
         },
-        formatter: (value: number) => `${value}%`,
+        formatter: (value: number, context: any) => {
+          const total = context.chart.data.datasets[0].data.reduce((sum: number, v: number) => sum + v, 0);
+          const percent = total ? Math.round((value / total) * 100) : 0;
+          return percent > 0 ? percent + '%' : '';
+        },
+        display: true,
+        anchor: 'center',
+        align: 'center',
+        clamp: true,
       },
       tooltip: {
         bodyFont: {
@@ -93,16 +102,16 @@ export default function CategoryPieChart({ categoryData, windowWidth }: Category
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 min-h-[300px] flex flex-col">
+    <div className="bg-white rounded-lg   min-h-[300px] flex flex-col">
       <div className="px-6 py-4 border-b">
         <h2 className="text-xl font-medium DiagrammThreeName">
-          {getTranslation("DiagrammThree", language)}
+          {title.replace(/^\d+\.\s*/, "")}
         </h2>
       </div>
       <div className="p-6 relative overflow-visible">
         <div className="chart-container">
           <div className="w-[350px] h-[400px] EvaluationsCategoryRespond mx-auto">
-            <Pie data={categoryData} options={categoryOptions} />
+            <Pie data={categoryData} options={categoryOptions} plugins={[ChartDataLabels]} />
           </div>
         </div>
       </div>

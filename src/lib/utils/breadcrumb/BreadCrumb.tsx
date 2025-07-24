@@ -44,7 +44,6 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
   return (
     <nav className="flex items-center space-x-2 text-sm text-gray-600" aria-label="Breadcrumb">
       <ol className="flex items-center space-x-2 BreadCrumbText">
-        {/*"Главная" */}
         {user?.role !== "Председатель 2 инстанции" ? (
           <li className="flex items-center">
             <Link
@@ -59,7 +58,6 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
           </li>
         ) : null}
 
-        {/*  (BreadCrumb_CourtName или BreadCrumb_RegionName) */}
         {showHome && (
           <li className="flex items-center">
             <button
@@ -75,7 +73,6 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
           </li>
         )}
 
-        {/* Название региона */}
         {regionName && (
           <li className="flex items-center">
             {onCourtBackClick ? (
@@ -92,7 +89,6 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({
           </li>
         )}
 
-        {/* Название суда */}
         {courtName && (
           <li className="flex items-center">
             <span className="text-gray-800 font-medium md:truncate-none md:max-w-none truncate max-w-[15ch]">
