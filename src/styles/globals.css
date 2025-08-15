@@ -170,7 +170,6 @@ body::after {
       display: none !important;
     }
   }
-
   header *,
   .app-header * {
     font-size: 10px !important;
@@ -207,11 +206,8 @@ body::after {
     display: block !important;
   }
 
-  /* Ensure canvas fits within container */
+  /* Позволяем canvas расти согласно размерам контейнера */
   canvas {
-    width: 100% !important;
-    max-width: 100% !important;
-    height: 100% !important;
     object-fit: contain !important;
   }
 
@@ -224,56 +220,20 @@ body::after {
     margin: 0 !important;
   }
 
-
-  table {
-    width: 100% !important;
+  /* Убираем ограничения max-width для всех основных контейнеров */
+  .max-w-\[1250px\],
+  [class*="max-w-"] {
     max-width: 100% !important;
-    table-layout: fixed !important;
-    border-collapse: collapse !important;
-  }
-
-  table th {
-    font-size: 8px !important;
-    padding: 1px 2px !important;
-    line-height: 1 !important;
-    height: auto !important;
-    vertical-align: middle !important;
-    word-break: break-word !important;
-    white-space: normal !important;
-    hyphens: auto !important;
-    border: 0.5px solid #ddd !important;
-  }
-
-  table td {
-    font-size: 12px !important;
-    padding: 2px !important;
-    word-wrap: break-word !important;
-    overflow-wrap: break-word !important;
-    white-space: normal !important;
-    border: 0.5px solid #ddd !important;
-  }
-
-  table th:first-child,
-  table td:first-child {
-    width: 5% !important;
-  }
-
-  table th:nth-child(2),
-  table td:nth-child(2) {
-    width: 25% !important;
-  }
-
-  table th:not(:first-child):not(:nth-child(2)),
-  table td:not(:first-child):not(:nth-child(2)) {
-    width: 10% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
   .print-header-only {
     display: flex !important;
     position: static !important;
     width: 100% !important;
-    max-width: 1250px !important;
-    margin: 0 auto !important;
+    max-width: 100% !important;
+    margin: 0 !important;
     padding: 2mm 6mm !important;
     background: white !important;
     border-bottom: 1px solid #ddd !important;
@@ -288,8 +248,8 @@ body::after {
       display: flex !important;
       position: static !important;
       width: 100% !important;
-      max-width: 1250px !important;
-      margin: 0 auto !important;
+      max-width: 100% !important;
+      margin: 0 !important;
       padding: 2mm 6mm !important;
       background: white !important;
       border-bottom: 1px solid #ddd !important;
