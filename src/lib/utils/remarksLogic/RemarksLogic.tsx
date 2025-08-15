@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useRemarks } from "@/components/RemarksApi";
 import { ArrowLeft, FileSearch, Search, X, Filter } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -14,6 +15,7 @@ export default function RemarksPage() {
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const [courtFilter, setCourtFilter] = useState<string>("all");
   const [courtSearch, setCourtSearch] = useState<string>("");
+  const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
   const resizingRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef<number>(0);
   const startWidthRef = useRef<number>(0);
@@ -198,6 +200,28 @@ export default function RemarksPage() {
     });
   }, [localRemarks, courtFilter, courtSearch]);
 
+  // Функция для получения полного текста вопроса для tooltip
+  const getQuestionTooltip = (questionId: number, questionText: string) => {
+    if (!questionId) return null;
+    
+    // Если есть текст вопроса, показываем его
+    if (questionText) {
+      return `Вопрос ${questionId}: ${questionText}`;
+    }
+    
+    // Если нет текста, показываем базовое описание
+    switch (questionId) {
+      case 6:
+        return `Вопрос ${questionId}: Замечания и предложения`;
+      case 13:
+        return `Вопрос ${questionId}: Дополнительные замечания`;
+      case 20:
+        return `Вопрос ${questionId}: Общие комментарии`;
+      default:
+        return `Вопрос ${questionId}`;
+    }
+  };
+
   const handleCommentClick = (item: any) => {
     setSelectedItem(item);
     setIsModalOpen(true);
@@ -234,6 +258,21 @@ export default function RemarksPage() {
     } else {
       return "bg-green-500";
     }
+  };
+
+  const handleMessageMouseEnter = (e: React.MouseEvent<HTMLDivElement>, item: any) => {
+    const text = getQuestionTooltip(item?.question_id, item?.question_text_ru);
+    if (!text) return;
+    setTooltip({ text, x: e.clientX + 12, y: e.clientY + 12 });
+  };
+
+  const handleMessageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!tooltip) return;
+    setTooltip((prev) => (prev ? { ...prev, x: e.clientX + 12, y: e.clientY + 12 } : prev));
+  };
+
+  const handleMessageMouseLeave = () => {
+    setTooltip(null);
   };
 
   if (isLoading) {
@@ -374,8 +413,10 @@ export default function RemarksPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-700 border-r border-gray-200">
                         <div 
-                          className="whitespace-pre-line break-words" 
-                          title={item.custom_answer || "—"}
+                          className="whitespace-pre-line break-words cursor-text"
+                          onMouseEnter={(e) => handleMessageMouseEnter(e, item)}
+                          onMouseMove={handleMessageMouseMove}
+                          onMouseLeave={handleMessageMouseLeave}
                         >
                           {item.custom_answer || "—"}
                         </div>
@@ -420,6 +461,18 @@ export default function RemarksPage() {
             selectedComment={selectedItem?.reply_to_comment || ""}
             selectedDueDate={selectedItem?.due_date || ""}
           />
+
+          {typeof document !== "undefined" && tooltip && createPortal(
+            <div
+              className="pointer-events-none fixed z-[1000]"
+              style={{ left: tooltip.x, top: tooltip.y }}
+            >
+              <div className="max-w-[360px] rounded-md bg-gray-900 px-3 py-2 text-xs text-white shadow-lg">
+                {tooltip.text}
+              </div>
+            </div>,
+            document.body
+          )}
 
         </div>
       )}

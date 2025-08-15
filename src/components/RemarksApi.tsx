@@ -12,7 +12,9 @@ export interface Remark {
   comment_created_at: string;
   author?: string;
   question_id?: number;
+  question_text_ru?: string;
   court: string;
+  due_date?: string;
 }
 
 export interface AddCommentParams {
@@ -46,7 +48,7 @@ export function useRemarks() {
       const isValid = 
         item.custom_answer !== null &&
         item.custom_answer !== "Необязательный вопрос";
-    
+  
       if (user.role === "Председатель 3 инстанции") {
         if (
           pathname === "/Home/summary/ratings" ||
@@ -98,13 +100,6 @@ export function useRemarks() {
         if (pathname.startsWith("/Home/") && pathname.endsWith("/feedbacks2")) {
           return isValid && item.court === matchedCourt;
         }
-    
-        // if (
-        //   pathname === "/Home/summary2/ratings" ||
-        //   pathname === "/Home/summary2/feedbacks"
-        // ) {
-        //   return isValid;
-        // }
       }
     
       return isValid;
@@ -141,22 +136,30 @@ export function useRemarks() {
 
       const data = await response.json();
 
+      const rawItems: Remark[] = Array.isArray(data) && data.length > 0 && ("answers" in data[0])
+        ? (data as any[]).flatMap((group: any) =>
+            (group.answers || []).map((ans: any) => ({
+              id: ans.id,
+              custom_answer: ans.custom_answer,
+              reply_to_comment: ans.reply_to_comment,
+              comment_created_at: ans.comment_created_at,
+              author: ans.author,
+              court: ans.court,
+              due_date: ans.due_date,
+              question_id: ans.question_id ?? group.question_id,
+              question_text_ru: group.question_text_ru,
+            }))
+          )
+        : (data as Remark[]);
+
       const filteredData = filterRemarks(
-        data,
+        rawItems,
         user,
         pathname,
         selectedCourtName,
         courtId,
         selectedCourtId
-      ).map((item: Remark) => ({
-        id: item.id,
-        custom_answer: item.custom_answer,
-        reply_to_comment: item.reply_to_comment,
-        comment_created_at: item.comment_created_at,
-        author: item.author,
-        question_id: item.question_id,
-        court: item.court,
-      }));
+      );
 
       setRemarks(filteredData);
     } catch (err) {

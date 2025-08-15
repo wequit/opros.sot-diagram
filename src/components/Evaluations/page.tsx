@@ -9,6 +9,7 @@ import NoData from "../NoData/NoData";
 import CategoryPieChart from "../Charts/CategoryPieChart";
 import UniversalBarChart from "../Charts/UniversalBarChart";
 import CommentsSection from "../Charts/CommentsSection";
+import { usePathname } from "next/navigation";
 import {
   SquareGanttChart,
   CircleUser,       
@@ -20,16 +21,6 @@ import {
   MessageSquare      
 } from 'lucide-react'; 
 
-const sections = [
-  { title: "Все ответы", icon: <SquareGanttChart size={20} />, type: "all" },
-  { title: "Респонденты", icon: <CircleUser size={20} />, questionIds: [1, 2, 3, 4] },
-  { title: "Доступ", icon: <LockKeyhole size={20} />, questionIds: [5, 6] },
-  { title: "Сотрудники", icon: <Users size={20} />, questionIds: [7, 8] },
-  { title: "Судьи", icon: <Hammer size={20} />, questionIds: [9, 10, 11, 12, 13] },
-  { title: "Здание", icon: <Building size={20} />, questionIds: [14, 15, 16] },
-  { title: "Оценка", icon: <Sparkles size={20} />, questionIds: [17, 18, 19, 20] },
-  { title: "Замечания", icon: <MessageSquare size={20} />, type: "comments" }
-];
 
 
 const textQuestionIds = [6, 13, 20];
@@ -47,13 +38,36 @@ export default function Evaluations() {
   }, []);
 
   const { isLoading, totalResponses, questionsById } = useEvaluationData();
+  const pathname = usePathname();
 
   if (isLoading) return <SkeletonDashboard />;
   if (!isLoading && totalResponses === 0) return <NoData />;
 
+  const sections = [
+    { title: `Все ответы (${totalResponses})`, icon: <SquareGanttChart size={20} />, type: "all" },
+    { title: "Респонденты", icon: <CircleUser size={20} />, questionIds: [1, 2, 3, 4] },
+    { title: "Доступ", icon: <LockKeyhole size={20} />, questionIds: [5, 6] },
+    { title: "Сотрудники", icon: <Users size={20} />, questionIds: [7, 8] },
+    { title: "Судьи", icon: <Hammer size={20} />, questionIds: [9, 10, 11, 12, 13] },
+    { title: "Здание", icon: <Building size={20} />, questionIds: [14, 15, 16] },
+    { title: "Оценка", icon: <Sparkles size={20} />, questionIds: [17, 18, 19, 20] },
+    { title: "Замечания", icon: <MessageSquare size={20} />, type: "comments" }
+  ];
+
   const comments: { text: string }[] = [];
   const totalResponsesAnswer = totalResponses || 0;
-  const remarksPath = "/feedbacks";
+  
+  // Правильно формируем путь для feedbacks в зависимости от текущей страницы
+  let remarksPath = "/Home/summary/feedbacks";
+  if (pathname.includes("/Home/supreme-court/ratings")) {
+    remarksPath = "/Home/supreme-court/feedbacks";
+  } else if (pathname.startsWith("/Home/second-instance/")) {
+    remarksPath = pathname.replace("/ratings", "/feedbacks");
+  } else if (pathname.startsWith("/Home/first-instance/")) {
+    remarksPath = pathname.replace("/ratings", "/feedbacks");
+  } else if (pathname.startsWith("/Home/summary")) {
+    remarksPath = "/Home/summary/feedbacks";
+  }
 
   const allQuestions = sections
     .filter(s => s.questionIds)
