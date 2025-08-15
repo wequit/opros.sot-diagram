@@ -1,6 +1,7 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
+import { getCookie } from "@/lib/api/login";
 
 interface CommentsSectionProps {
   comments: { text: string }[];
@@ -14,6 +15,58 @@ export default function CommentsSection({
   remarksPath,
 }: CommentsSectionProps) {
   const { language, getTranslation } = useLanguage();
+  const [lastComments, setLastComments] = useState<{ text: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const token = getCookie("access_token");
+        const response = await fetch("https://opros.sot.kg/api/v1/comments/", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Извлекаем все answers из групп
+          const allAnswers: any[] = [];
+          if (Array.isArray(data)) {
+            data.forEach((group: any) => {
+              if (group.answers && Array.isArray(group.answers)) {
+                allAnswers.push(...group.answers);
+              }
+            });
+          }
+          
+          // Фильтруем и берем последние 5 комментариев
+          const filtered = allAnswers
+            .filter((item: any) => 
+              item && 
+              item.custom_answer && 
+              item.custom_answer.trim() !== "" && 
+              item.custom_answer !== "Необязательный вопрос"
+            )
+            .slice(-5) // последние 5
+            .reverse() // новые сверху
+            .map((item: any) => ({ text: item.custom_answer }));
+          
+          setLastComments(filtered);
+        }
+      } catch (error) {
+        console.error("Ошибка загрузки комментариев:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchComments();
+  }, []);
+
+  const displayedComments = lastComments;
 
   return (
     <div className="bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-200 flex flex-col justify-between h-full">
@@ -29,15 +82,21 @@ export default function CommentsSection({
         </div>
       </div>
       <div className="p-6 flex-1 DiagrammTwoComments">
-        {comments.length > 0 ? (
+        {loading ? (
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            <p className="text-gray-500 text-sm mt-2">Загрузка комментариев...</p>
+          </div>
+        ) : displayedComments.length > 0 ? (
           <div className="space-y-3">
-            {comments.map((comment, index) => {
+            {displayedComments.map((comment, index) => {
+              const rowNumber = index + 1;
               return (
                 <div
                   key={index}
                   className="flex gap-4 p-3 border rounded bg-gray-50"
                 >
-                  <div key={index}>{totalResponsesAnswer - index}</div>
+                  <div>{rowNumber}</div>
                   <span>{comment.text}</span>
                 </div>
               );
