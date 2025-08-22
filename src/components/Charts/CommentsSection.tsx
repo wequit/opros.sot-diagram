@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useLanguage } from "@/context/LanguageContext";
-import { getCookie } from "@/lib/api/login";
+import { fetchWithAuth } from "@/lib/api/login";
 
 interface CommentsSectionProps {
   comments: { text: string }[];
@@ -16,23 +16,21 @@ export default function CommentsSection({
 }: CommentsSectionProps) {
   const { language, getTranslation } = useLanguage();
   const [lastComments, setLastComments] = useState<{ text: string }[]>([]);
+  const [totalComments, setTotalComments] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const token = getCookie("access_token");
-        const response = await fetch("https://opros.sot.kg/api/v1/comments/", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const data = await fetchWithAuth("comments/");
         
-        if (response.ok) {
-          const data = await response.json();
+        if (data) {
+          let totalCommentsFromAPI = 0;
+          if (Array.isArray(data) && data.length > 0 && data[0].total_comments) {
+            totalCommentsFromAPI = data[0].total_comments;
+          }
+          setTotalComments(totalCommentsFromAPI);
           
-          // Извлекаем все answers из групп
           const allAnswers: any[] = [];
           if (Array.isArray(data)) {
             data.forEach((group: any) => {
@@ -42,7 +40,6 @@ export default function CommentsSection({
             });
           }
           
-          // Фильтруем и берем последние 5 комментариев
           const filtered = allAnswers
             .filter((item: any) => 
               item && 
@@ -50,8 +47,8 @@ export default function CommentsSection({
               item.custom_answer.trim() !== "" && 
               item.custom_answer !== "Необязательный вопрос"
             )
-            .slice(-5) // последние 5
-            .reverse() // новые сверху
+            .slice(-5)
+            .reverse()
             .map((item: any) => ({ text: item.custom_answer }));
           
           setLastComments(filtered);
@@ -77,7 +74,7 @@ export default function CommentsSection({
           </h2>
           <span className="text-gray-600 DiagrammTwoTotal">
             {getTranslation("DiagrammTwoTotal", language)}{" "}
-            {totalResponsesAnswer}
+            {totalComments}
           </span>
         </div>
       </div>

@@ -114,7 +114,13 @@ export default function Evaluations() {
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {allDiagramQuestions.map(question => (
-                      <UniversalBarChart key={question.question_id} barData={getBarData(question)} windowWidth={windowWidth} title={question.question_text_ru} />
+                      <UniversalBarChart 
+                        key={question.question_id} 
+                        barData={getBarData(question)} 
+                        windowWidth={windowWidth} 
+                        title={question.question_text_ru}
+                        originalQuestion={question}
+                      />
                     ))}
                   </div>
                  
@@ -127,7 +133,13 @@ export default function Evaluations() {
                       .map(qid => questionsById[qid])
                       .filter(q => q && !textQuestionIds.includes(q.question_id))
                       .map(question => (
-                        <UniversalBarChart key={question.question_id} barData={getBarData(question)} windowWidth={windowWidth} title={question.question_text_ru} />
+                        <UniversalBarChart 
+                          key={question.question_id} 
+                          barData={getBarData(question)} 
+                          windowWidth={windowWidth} 
+                          title={question.question_text_ru}
+                          originalQuestion={question}
+                        />
                       ))}
           </div>
                   

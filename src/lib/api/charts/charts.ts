@@ -36,3 +36,12 @@ export const getColumnCourtData = async (courtId: string, params: { startDate?: 
   }
   return await cache[cacheKey];
 };
+
+export const getAnswerCourtsData = async (answerId: number) => {
+  const cacheKey = `answer_courts_${answerId}`;
+  if (!cache[cacheKey]) {
+    cache[cacheKey] = fetchWithAuth(`answers/${answerId}/courts/`);
+  }
+  
+  return await cache[cacheKey];
+};
