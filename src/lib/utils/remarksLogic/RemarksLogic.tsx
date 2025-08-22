@@ -126,7 +126,52 @@ export default function RemarksPage() {
   useEffect(() => {
     try {
       if (remarks) {
-        setLocalRemarks(remarks);
+                if (Array.isArray(remarks) && remarks.length >= 4) {
+          const groupsToProcess = remarks.slice(1, 4);
+          
+          const allProcessedRemarks: any[] = [];
+          
+          groupsToProcess.forEach((group: any, index: number) => {
+            if (group && 'answers' in group && group.answers) {
+              let questionId: number;
+              if (group.question_text_ru?.includes("предложения по улучшению работы судей")) {
+                questionId = 13;
+              } else if (group.question_text_ru?.includes("доступность суда")) {
+                questionId = 6;
+              } else if (group.question_text_ru?.includes("предложения по улучшению судебной системы")) {
+                questionId = 20;
+              } else {
+                questionId = [13, 6, 20][index] || 13;
+              }
+              
+              const processedAnswers = group.answers
+                .filter((ans: any) => 
+                  ans && 
+                  ans.custom_answer && 
+                  ans.custom_answer.trim() !== "" && 
+                  ans.custom_answer !== "Необязательный вопрос"
+                )
+                .map((ans: any) => ({
+                  id: ans.id,
+                  custom_answer: ans.custom_answer,
+                  reply_to_comment: ans.reply_to_comment,
+                  comment_created_at: ans.comment_created_at,
+                  author: ans.author,
+                  court: ans.court,
+                  due_date: ans.due_date,
+                  question_id: questionId,
+                  question_text_ru: group.question_text_ru,
+                }));
+              
+              allProcessedRemarks.push(...processedAnswers);
+            }
+          });
+          
+          console.log("Processed remarks from groups 1-3:", allProcessedRemarks);
+          setLocalRemarks(allProcessedRemarks);
+        } else {
+          setLocalRemarks(remarks);
+        }
       }
     } catch (error) {
       console.error("Ошибка при обработке данных замечаний:", error);

@@ -31,16 +31,16 @@ export default function CommentsSection({
           }
           setTotalComments(totalCommentsFromAPI);
           
-          const allAnswers: any[] = [];
-          if (Array.isArray(data)) {
-            data.forEach((group: any) => {
-              if (group.answers && Array.isArray(group.answers)) {
-                allAnswers.push(...group.answers);
-              }
-            });
+          const remarksAnswers: any[] = [];
+          if (Array.isArray(data) && data.length > 1 && data[1].answers) {
+            const secondGroup = data[1];
+            if (secondGroup.question_text_ru && 
+                secondGroup.question_text_ru.includes("предложения по улучшению работы судей")) {
+              remarksAnswers.push(...secondGroup.answers);
+            }
           }
           
-          const filtered = allAnswers
+          const filtered = remarksAnswers
             .filter((item: any) => 
               item && 
               item.custom_answer && 
