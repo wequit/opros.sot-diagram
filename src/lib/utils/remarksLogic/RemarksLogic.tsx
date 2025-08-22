@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useRemarks } from "@/components/RemarksApi";
-import { ArrowLeft, FileSearch, Search, X, Filter } from "lucide-react";
+import { ArrowLeft, FileSearch, Search, X, Filter, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -15,6 +15,8 @@ export default function RemarksPage() {
   const [isResizing, setIsResizing] = useState<boolean>(false);
   const [courtFilter, setCourtFilter] = useState<string>("all");
   const [courtSearch, setCourtSearch] = useState<string>("");
+  const [questionFilter, setQuestionFilter] = useState<string>("all");
+  const [isQuestionDropdownOpen, setIsQuestionDropdownOpen] = useState<boolean>(false);
   const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number } | null>(null);
   const resizingRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef<number>(0);
@@ -141,6 +143,20 @@ export default function RemarksPage() {
     }
   }, [localRemarks, isLoading]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isQuestionDropdownOpen && !target.closest('[data-dropdown="question-filter"]')) {
+        setIsQuestionDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isQuestionDropdownOpen]);
+
   const handleCommentSubmit = async (comment: string, dueDate: string) => {
     try {
       // const token = getCookie("access_token");
@@ -189,16 +205,40 @@ export default function RemarksPage() {
     return ["all", ...Array.from(courts).sort()];
   }, [localRemarks]);
 
+    const uniqueQuestions = useMemo(() => {
+      const questions = localRemarks
+        .filter((item) => {
+          const hasText = !!item.question_text_ru;
+          const questionId = parseInt(item.question_id) || item.question_id;
+          const hasValidId = [6, 13, 20].includes(questionId);
+          return hasText && hasValidId;
+        })
+        .map((item) => ({
+          id: parseInt(item.question_id) || item.question_id,
+          text: item.question_text_ru.replace(/^\d+\.\s*/, "")
+        }))
+        .filter((question, index, array) => 
+          array.findIndex(q => q.id === question.id) === index
+        )
+        .sort((a, b) => a.id - b.id);
+      
+      return [{ id: "all", text: "Все ответы" }, ...questions];
+    }, [localRemarks]);
+
   const filteredRemarks = useMemo(() => {
     return localRemarks.filter((item) => {
       const court = item.court || "Не указано";
       const normalizedCourt = normalizeString(court);
       const normalizedSearch = normalizeString(courtSearch);
-      const matchesFilter = courtFilter === "all" || court === courtFilter;
-      const matchesSearch = courtSearch === "" || normalizedCourt.includes(normalizedSearch);
-      return matchesFilter && matchesSearch;
+      const matchesCourtFilter = courtFilter === "all" || court === courtFilter;
+      const matchesCourtSearch = courtSearch === "" || normalizedCourt.includes(normalizedSearch);
+      const matchesQuestionFilter = questionFilter === "all" || 
+        item.question_id?.toString() === questionFilter.toString() ||
+        item.question_id === parseInt(questionFilter);
+      
+      return matchesCourtFilter && matchesCourtSearch && matchesQuestionFilter;
     });
-  }, [localRemarks, courtFilter, courtSearch]);
+  }, [localRemarks, courtFilter, courtSearch, questionFilter]);
 
   // Функция для получения полного текста вопроса для tooltip
   const getQuestionTooltip = (questionId: number, questionText: string) => {
@@ -230,6 +270,19 @@ export default function RemarksPage() {
   const resetFilters = () => {
     setCourtFilter("all");
     setCourtSearch("");
+    setQuestionFilter("all");
+    setIsQuestionDropdownOpen(false);
+  };
+
+  const handleQuestionSelect = (questionId: string) => {
+    setQuestionFilter(questionId);
+    setIsQuestionDropdownOpen(false);
+  };
+
+  const getSelectedQuestionText = () => {
+    if (questionFilter === "all") return "Все ответы";
+    const selectedQuestion = uniqueQuestions.find(q => q.id.toString() === questionFilter.toString());
+    return selectedQuestion?.text || "Все ответы";
   };
 
   const formatDate = (dateString: string) => {
@@ -309,9 +362,16 @@ export default function RemarksPage() {
       ) : (
         <div className="w-full px-4 sm:px-6 lg:px-8 py-6 mx-auto">
           <div className="flex sm:flex-row items-center justify-between mb-6 gap-4 sm:gap-0">
-            <h1 className="text-2xl max-sm:text-xl font-bold text-gray-800 tracking-tight text-center sm:text-left RemarksText">
-              {getTranslation("RemarksLogic_Remarks", language)}
-            </h1>
+            <div>
+              <h1 className="text-2xl max-sm:text-xl font-bold text-gray-800 tracking-tight text-center sm:text-left RemarksText">
+                {getTranslation("RemarksLogic_Remarks", language)}
+              </h1>
+              {questionFilter !== "all" && (
+                <p className="text-sm text-gray-600 mt-1">
+                  Фильтр: {getSelectedQuestionText()}
+                </p>
+              )}
+            </div>
             <button
               onClick={() => router.back()}
               className="max-sm:px-2 max-sm:py-2 flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-lg shadow-md hover:from-blue-600 hover:to-blue-700 transition-all duration-200"
@@ -322,7 +382,7 @@ export default function RemarksPage() {
           </div>
 
           <div className="mb-6 bg-white shadow-md rounded-lg p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="flex items-center gap-4 w-full sm:w-auto flex-wrap">
               <div className="flex items-center gap-2">
                 <Filter className="w-4 h-4 text-gray-500" />
                 <label htmlFor="court-filter" className="text-sm font-medium text-gray-700">
@@ -343,7 +403,7 @@ export default function RemarksPage() {
                   </option>
                 ))}
               </select>
-              <div className="flex-1 sm:flex-initial relative">
+              <div className="relative w-64">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
@@ -355,16 +415,50 @@ export default function RemarksPage() {
                   className="pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 text-sm w-full transition-all duration-200"
                 />
               </div>
+                              <div className="relative" data-dropdown="question-filter">
+                  <button
+                    onClick={() => setIsQuestionDropdownOpen(!isQuestionDropdownOpen)}
+                    className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 text-sm transition-all duration-200 bg-white hover:bg-gray-50 min-w-[300px]"
+                  >
+                    <span className="truncate">{getSelectedQuestionText()}</span>
+                    <div className="flex items-center gap-2">
+                      {(courtFilter !== "all" || courtSearch || questionFilter !== "all") && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            resetFilters();
+                          }}
+                          className="flex items-center justify-center w-6 h-6 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-all duration-200"
+                          title={getTranslation("RemarksLogic_ClearFilters", language)}
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                      <ChevronDown 
+                        size={16} 
+                        className={`transition-transform duration-200 ${isQuestionDropdownOpen ? 'rotate-180' : ''}`} 
+                      />
+                    </div>
+                  </button>
+                  
+                  {isQuestionDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-1 w-full min-w-[400px] bg-white border border-gray-300 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                      {uniqueQuestions.map((question) => (
+                        <button
+                          key={question.id}
+                          onClick={() => handleQuestionSelect(question.id.toString())}
+                          className={`w-full text-left px-3 py-3 text-sm hover:bg-gray-100 transition-colors duration-150 whitespace-normal break-words ${
+                            questionFilter === question.id ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
+                          }`}
+                          title={question.text}
+                        >
+                          {question.text}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
             </div>
-            {(courtFilter !== "all" || courtSearch) && (
-              <button
-                onClick={resetFilters}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-300 transition-all duration-200"
-              >
-                <X size={16} />
-                {getTranslation("RemarksLogic_ClearFilters", language)}
-              </button>
-            )}
           </div>
 
           <div className="bg-white shadow-md rounded-lg w-full overflow-hidden">
@@ -383,6 +477,7 @@ export default function RemarksPage() {
                         onMouseDown={startResize}
                       ></div>
                     </th>
+
                     <th scope="col" className="w-1/3 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                       {getTranslation("RemarksLogic_Message", language)}
                     </th>
@@ -411,7 +506,8 @@ export default function RemarksPage() {
                           {item.court || "Не указано"}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 border-r border-gray-200">
+
+                        <td className="px-6 py-4 text-sm text-gray-700 border-r border-gray-200">
                         <div 
                           className="whitespace-pre-line break-words cursor-text"
                           onMouseEnter={(e) => handleMessageMouseEnter(e, item)}

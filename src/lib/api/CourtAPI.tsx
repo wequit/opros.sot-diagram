@@ -2,14 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { getCookie } from "@/lib/api/login";
-import {
-  getCircleCourtData,
-  getRadarCourtData,
-  getBarCourtData,
-  getProgressCourtData,
-  getColumnCourtData,
-  getGenderAgeCourtData,
-} from "@/lib/api/charts/charts";
+import { getColumnCourtData } from "@/lib/api/charts/charts";
 import { useChartData } from "@/context/ChartDataContext";
 import { useDateParams } from "@/context/DateParamsContext";
 
@@ -40,22 +33,35 @@ export default function CourtApi({ courtId }: CourtApiProps) {
       const token = getCookie("access_token");
       if (!token) throw new Error("Token is null");
 
-      const [circleData, radarData, barData, progressData, columnData, genderAgeData] = await Promise.all([
-        getCircleCourtData(effectiveCourtId, dateParams),
-        getRadarCourtData(effectiveCourtId, dateParams),
-        getBarCourtData(effectiveCourtId, dateParams),
-        getProgressCourtData(effectiveCourtId, dateParams),
-        getColumnCourtData(effectiveCourtId, dateParams),
-        getGenderAgeCourtData(effectiveCourtId, dateParams), 
-      ]);
+      // Загружаем только column для суда
+      const columnData = await getColumnCourtData(effectiveCourtId, dateParams);
 
-      setCircleData(circleData || null);
-      setRadarData(radarData || null);
-      setBarData(barData || null);
-      setProgressData(progressData || null);
       setColumnData(columnData || null);
-      setGenderAgeData(genderAgeData || null); 
-      setSurveyResponsesCount(radarData?.survey_responses_count || 0);
+
+      // total_responses может быть отдельным объектом
+      const totalObj = Array.isArray(columnData)
+        ? columnData.find((item: any) => typeof item === "object" && item && "total_responses" in item)
+        : undefined;
+      if (totalObj?.total_responses) {
+        setSurveyResponsesCount(totalObj.total_responses);
+      } else if (Array.isArray(columnData)) {
+        const q1 = columnData.find((q: any) => q && q.question_id === 1);
+        const sum = q1?.options?.reduce((acc: number, opt: any) => acc + (opt?.count || 0), 0) || 0;
+        setSurveyResponsesCount(sum);
+      } else {
+        setSurveyResponsesCount(0);
+      }
+
+      const questions = Array.isArray(columnData)
+        ? columnData.filter((q: any) => q && typeof q === "object" && "question_id" in q)
+        : [];
+
+      setCircleData(null);
+      setBarData(questions || null);
+
+      setRadarData(null as any);
+      setProgressData(null as any);
+      setGenderAgeData(null as any);
 
       setError(null);
     } catch (err) {

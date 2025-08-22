@@ -1,14 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import {
-  getCircleRegionData,
-  getRadarRegionData,
-  getBarRegionData,
-  getProgressRegionData,
-  getColumnRegionData,
-  getGenderAgeRegionData,
-} from "@/lib/api/charts/charts";
+import { getColumnRegionData } from "@/lib/api/charts/charts";
 import { useChartData } from "@/context/ChartDataContext";
 import { useDateParams } from "@/context/DateParamsContext";
 
@@ -30,34 +23,23 @@ export default function SummaryAPI2() {
     try {
       setIsLoading(true);
 
-      const circlePromise = getCircleRegionData(dateParams).then((data) => {
-        setCircleData(data);
-      });
-      const radarPromise = getRadarRegionData(dateParams).then((data) => {
-        setRadarData(data);
-        setSurveyResponsesCount(data.survey_responses_count || 0);
-      });
-      const barPromise = getBarRegionData(dateParams).then((data) => {
-        setBarData(data);
-      });
-      const progressPromise = getProgressRegionData(dateParams).then((data) => {
-        setProgressData(data);
-      });
-      const columnPromise = getColumnRegionData(dateParams).then((data) => {
-        setColumnData(data);
-      });
-      const genderAgePromise = getGenderAgeRegionData(dateParams).then((data) => {
-        setGenderAgeData(data);
-      });
+      const column = await getColumnRegionData(dateParams);
+      setColumnData(column);
 
-      await Promise.all([
-        circlePromise,
-        radarPromise,
-        barPromise,
-        progressPromise,
-        columnPromise,
-        genderAgePromise,
-      ]);
+      const totalObj = Array.isArray(column)
+        ? column.find((item: any) => typeof item === "object" && item && "total_responses" in item)
+        : undefined;
+      setSurveyResponsesCount(totalObj?.total_responses || 0);
+
+      const questions = Array.isArray(column)
+        ? column.filter((q: any) => q && typeof q === "object" && "question_id" in q)
+        : [];
+
+      setCircleData(null);
+      setBarData(questions);
+      setRadarData(null as any);
+      setProgressData(null as any);
+      setGenderAgeData(null as any);
 
       setError(null);
     } catch (err) {
@@ -66,17 +48,7 @@ export default function SummaryAPI2() {
     } finally {
       setIsLoading(false);
     }
-  }, [
-    dateParams,
-    setCircleData,
-    setRadarData,
-    setBarData,
-    setProgressData,
-    setColumnData,
-    setIsLoading,
-    setSurveyResponsesCount,
-    setGenderAgeData,
-  ]);
+  }, [dateParams, setBarData, setCircleData, setColumnData, setGenderAgeData, setIsLoading, setProgressData, setRadarData, setSurveyResponsesCount]);
 
   useEffect(() => {
     fetchData();

@@ -57,10 +57,15 @@ export default function UniversalBarChart({ barData, windowWidth, title }: Unive
         align: 'center',   
         color: 'white',
         font: {
-          size: 14,
+          size: 12,
           weight: 'bold',
         },
-        formatter: (value: number) => value,
+        formatter: (value: number, context: any) => {
+          const dataset = context.dataset;
+          const percentages = dataset.percentages;
+          const percentage = percentages ? percentages[context.dataIndex] : '';
+          return `${value} (${percentage})`;
+        },
         display: true,
         clamp: true,
       },
@@ -70,7 +75,10 @@ export default function UniversalBarChart({ barData, windowWidth, title }: Unive
         intersect: false,
         callbacks: {
           label: function(context) {
-            return `Значение: ${context.parsed.y}`;
+            const dataset = context.dataset as any;
+            const percentages = dataset.percentages;
+            const percentage = percentages ? percentages[context.dataIndex] : '';
+            return `Количество: ${context.parsed.y} (${percentage})`;
           },
           title: function(context) {
             return context[0].label;
@@ -82,7 +90,6 @@ export default function UniversalBarChart({ barData, windowWidth, title }: Unive
         titleFont: {
           size: 10,
         },
-        
       }
     },
     scales: {

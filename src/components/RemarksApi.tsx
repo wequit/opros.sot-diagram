@@ -137,8 +137,21 @@ export function useRemarks() {
       const data = await response.json();
 
       const rawItems: Remark[] = Array.isArray(data) && data.length > 0 && ("answers" in data[0])
-        ? (data as any[]).flatMap((group: any) =>
-            (group.answers || []).map((ans: any) => ({
+        ? (data as any[]).flatMap((group: any, groupIndex: number) => {
+            // Определяем question_id на основе индекса группы и текста вопроса
+            let questionId: number;
+            if (group.question_text_ru?.includes("доступность суда")) {
+              questionId = 6;
+            } else if (group.question_text_ru?.includes("предложения по улучшению работы судей")) {
+              questionId = 13;
+            } else if (group.question_text_ru?.includes("предложения по улучшению судебной системы")) {
+              questionId = 20;
+            } else {
+              // Fallback на основе индекса: 0->6, 1->13, 2->20
+              questionId = [6, 13, 20][groupIndex] || (6 + groupIndex * 7);
+            }
+            
+            return (group.answers || []).map((ans: any) => ({
               id: ans.id,
               custom_answer: ans.custom_answer,
               reply_to_comment: ans.reply_to_comment,
@@ -146,10 +159,10 @@ export function useRemarks() {
               author: ans.author,
               court: ans.court,
               due_date: ans.due_date,
-              question_id: ans.question_id ?? group.question_id,
+              question_id: questionId,
               question_text_ru: group.question_text_ru,
-            }))
-          )
+            }));
+          })
         : (data as Remark[]);
 
       const filteredData = filterRemarks(

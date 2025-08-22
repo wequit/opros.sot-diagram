@@ -1,14 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import {
-  getCircleRepublicData,
-  getRadarRepublicData,
-  getBarRepublicData,
-  getProgressRepublicData,
-  getColumnRepublicData,
-  getGenderAgeRepublicData,
-} from "@/lib/api/charts/charts";
+import { getColumnRepublicData } from "@/lib/api/charts/charts";
 import { useChartData } from "@/context/ChartDataContext";
 import { useDateParams } from "@/context/DateParamsContext";
 
@@ -30,50 +23,30 @@ export default function SummaryAPI() {
     setIsLoading(true);
 
     try {
-      const circlePromise = getCircleRepublicData(dateParams).then((data) => {
-        setCircleData(data);
-      });
-      const radarPromise = getRadarRepublicData(dateParams).then((data) => {
-        setRadarData(data);
-        setSurveyResponsesCount(data.survey_responses_count || 0);
-      });
-      const barPromise = getBarRepublicData(dateParams).then((data) => {
-        setBarData(data);
-      });
-      const progressPromise = getProgressRepublicData(dateParams).then((data) => {
-        setProgressData(data);
-      });
-      const columnPromise = getColumnRepublicData(dateParams).then((data) => {
-        setColumnData(data);
-      });
-      const genderAgePromise = getGenderAgeRepublicData(dateParams).then((data) => {
-        setGenderAgeData(data);
-      });
+      const column = await getColumnRepublicData(dateParams);
+      setColumnData(column);
 
-      await Promise.all([
-        circlePromise,
-        radarPromise,
-        barPromise,
-        progressPromise,
-        columnPromise,
-        genderAgePromise,
-      ]);
+      const totalObj = Array.isArray(column)
+        ? column.find((item: any) => typeof item === "object" && item && "total_responses" in item)
+        : undefined;
+      setSurveyResponsesCount(totalObj?.total_responses || 0);
+
+      const questions = Array.isArray(column)
+        ? column.filter((q: any) => q && typeof q === "object" && "question_id" in q)
+        : [];
+
+      // Все диаграммы теперь столбчатые
+      setCircleData(null);
+      setBarData(questions);
+      setRadarData(null as any);
+      setProgressData(null as any);
+      setGenderAgeData(null as any);
     } catch (err) {
       console.error("Ошибка при получении данных:", err);
     } finally {
       setIsLoading(false);
     }
-  }, [
-    dateParams,
-    setCircleData,
-    setRadarData,
-    setBarData,
-    setProgressData,
-    setColumnData,
-    setIsLoading,
-    setSurveyResponsesCount,
-    setGenderAgeData,
-  ]);
+  }, [dateParams, setBarData, setCircleData, setColumnData, setGenderAgeData, setIsLoading, setProgressData, setRadarData, setSurveyResponsesCount]);
 
   useEffect(() => {
     fetchData();
