@@ -32,12 +32,14 @@ export default function CommentsSection({
           setTotalComments(totalCommentsFromAPI);
           
           const remarksAnswers: any[] = [];
-          if (Array.isArray(data) && data.length > 1 && data[1].answers) {
-            const secondGroup = data[1];
-            if (secondGroup.question_text_ru && 
-                secondGroup.question_text_ru.includes("предложения по улучшению работы судей")) {
-              remarksAnswers.push(...secondGroup.answers);
-            }
+          if (Array.isArray(data) && data.length >= 4) {
+            const groupsToProcess = data.slice(1, 4);
+            
+            groupsToProcess.forEach((group: any) => {
+              if (group && 'answers' in group && group.answers) {
+                remarksAnswers.push(...group.answers);
+              }
+            });
           }
           
           const filtered = remarksAnswers
