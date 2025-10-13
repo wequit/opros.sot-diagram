@@ -3,6 +3,7 @@ import { Bar } from "react-chartjs-2";
 import { ChartOptions, ChartData } from "chart.js";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import AnswerDetailsModal from './AnswerDetailsModal';
+import { useLanguage } from '../../context/LanguageContext';
 
 interface UniversalBarChartProps {
   barData: ChartData<"bar">;
@@ -12,6 +13,7 @@ interface UniversalBarChartProps {
 }
 
 export default function UniversalBarChart({ barData, windowWidth, title, originalQuestion }: UniversalBarChartProps) {
+  const { language } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<{
     answerId: number;
@@ -20,6 +22,13 @@ export default function UniversalBarChart({ barData, windowWidth, title, origina
     percentage: string;
   } | null>(null);
 
+  const getQuestionText = () => {
+    if (originalQuestion) {
+      return language === 'ky' ? originalQuestion.question_text_kg : originalQuestion.question_text_ru;
+    }
+    return title;
+  };
+
   const handleBarClick = (dataIndex: number, datasetIndex: number, value: number, percentage: string) => {
     if (originalQuestion && originalQuestion.options && originalQuestion.options[dataIndex]) {
       const option = originalQuestion.options[dataIndex];
@@ -27,7 +36,7 @@ export default function UniversalBarChart({ barData, windowWidth, title, origina
       if (option && option.answer_option_id) {
         setSelectedAnswer({
           answerId: option.answer_option_id,
-          answerText: option.text_ru || 'Без названия',
+          answerText: language === 'ky' ? (option.text_kg || option.text_ru || 'Без названия') : (option.text_ru || 'Без названия'),
           count: value,
           percentage: percentage
         });
@@ -174,10 +183,10 @@ export default function UniversalBarChart({ barData, windowWidth, title, origina
   return (
     <>
       <div className="bg-white rounded-lg min-h-[300px] flex flex-col shadow-sm">
-        {title && (
+        {getQuestionText() && (
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-medium text-gray-800">
-              {title.replace(/^\d+\.\s*/, "")}
+              {getQuestionText().replace(/^\d+\.\s*/, "")}
             </h2>
           </div>
         )}

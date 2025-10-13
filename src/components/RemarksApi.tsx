@@ -140,11 +140,17 @@ export function useRemarks() {
         ? (data as any[]).flatMap((group: any, groupIndex: number) => {
             // Определяем question_id на основе индекса группы и текста вопроса
             let questionId: number;
-            if (group.question_text_ru?.includes("доступность суда")) {
+            const questionTextRu = group.question_text_ru || '';
+            const questionTextKg = group.question_text_kg || '';
+            
+            if (questionTextRu.includes("доступность суда") || 
+                questionTextKg.includes("сотко жеткиликтүүлүк")) {
               questionId = 6;
-            } else if (group.question_text_ru?.includes("предложения по улучшению работы судей")) {
+            } else if (questionTextRu.includes("предложения по улучшению работы судей") || 
+                       questionTextKg.includes("судьялардын ишин жакшыртуу боюнча сунуштар")) {
               questionId = 13;
-            } else if (group.question_text_ru?.includes("предложения по улучшению судебной системы")) {
+            } else if (questionTextRu.includes("предложения по улучшению судебной системы") || 
+                       questionTextKg.includes("сот системасын жакшыртуу боюнча сунуштар")) {
               questionId = 20;
             } else {
               // Fallback на основе индекса: 0->6, 1->13, 2->20
@@ -161,6 +167,7 @@ export function useRemarks() {
               due_date: ans.due_date,
               question_id: questionId,
               question_text_ru: group.question_text_ru,
+              question_text_kg: group.question_text_kg,
             }));
           })
         : (data as Remark[]);

@@ -62,14 +62,14 @@ function generateDistinctColors(count: number, questionId: number): string[] {
   return shuffledColors.slice(0, count);
 }
 
-export function getBarData(question: Question) {
+export function getBarData(question: Question, language: 'ru' | 'ky' = 'ru') {
   const backgroundColor = generateDistinctColors(question.options.length, question.question_id);
   
   return {
-    labels: question.options.map((opt: Option) => opt.text_ru),
+    labels: question.options.map((opt: Option) => language === 'ky' ? opt.text_kg : opt.text_ru),
     datasets: [
       {
-        label: 'Количество ответов',
+        label: language === 'ky' ? 'Жооптордун саны' : 'Количество ответов',
         data: question.options.map((opt: Option) => opt.count),
         backgroundColor,
         percentages: question.options.map((opt: Option) => opt.percentage),

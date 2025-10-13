@@ -9,6 +9,7 @@ import NoData from "../NoData/NoData";
 import UniversalBarChart from "../Charts/UniversalBarChart";
 import CommentsSection from "../Charts/CommentsSection";
 import { usePathname } from "next/navigation";
+import { useLanguage } from "../../context/LanguageContext";
 import {
   SquareGanttChart,
   CircleUser,       
@@ -25,6 +26,7 @@ import {
 
 
 export default function Evaluations() {
+  const { language } = useLanguage();
   const [windowWidth, setWindowWidth] = useState<number>(
     typeof window !== "undefined" ? window.innerWidth : 0
   );
@@ -116,9 +118,9 @@ export default function Evaluations() {
                     {allDiagramQuestions.map(question => (
                       <UniversalBarChart 
                         key={question.question_id} 
-                        barData={getBarData(question)} 
+                        barData={getBarData(question, language)} 
                         windowWidth={windowWidth} 
-                        title={question.question_text_ru}
+                        title={language === 'ky' ? question.question_text_kg : question.question_text_ru}
                         originalQuestion={question}
                       />
                     ))}
@@ -135,9 +137,9 @@ export default function Evaluations() {
                       .map(question => (
                         <UniversalBarChart 
                           key={question.question_id} 
-                          barData={getBarData(question)} 
+                          barData={getBarData(question, language)} 
                           windowWidth={windowWidth} 
-                          title={question.question_text_ru}
+                          title={language === 'ky' ? question.question_text_kg : question.question_text_ru}
                           originalQuestion={question}
                         />
                       ))}

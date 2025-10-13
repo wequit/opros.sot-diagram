@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useRemarks } from "@/components/RemarksApi";
-import { ArrowLeft, FileSearch, Search, X, Filter, ChevronDown } from "lucide-react";
+import { ArrowLeft, FileSearch, Search, X, Filter, ChevronDown, MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -134,11 +134,18 @@ export default function RemarksPage() {
           groupsToProcess.forEach((group: any, index: number) => {
             if (group && 'answers' in group && group.answers) {
               let questionId: number;
-              if (group.question_text_ru?.includes("предложения по улучшению работы судей")) {
+              // Проверяем как русский, так и кыргызский текст вопроса
+              const questionTextRu = group.question_text_ru || '';
+              const questionTextKg = group.question_text_kg || '';
+              
+              if (questionTextRu.includes("предложения по улучшению работы судей") || 
+                  questionTextKg.includes("судьялардын ишин жакшыртуу боюнча сунуштар")) {
                 questionId = 13;
-              } else if (group.question_text_ru?.includes("доступность суда")) {
+              } else if (questionTextRu.includes("доступность суда") || 
+                         questionTextKg.includes("сотко жеткиликтүүлүк")) {
                 questionId = 6;
-              } else if (group.question_text_ru?.includes("предложения по улучшению судебной системы")) {
+              } else if (questionTextRu.includes("предложения по улучшению судебной системы") || 
+                         questionTextKg.includes("сот системасын жакшыртуу боюнча сунуштар")) {
                 questionId = 20;
               } else {
                 questionId = [13, 6, 20][index] || 13;
@@ -161,6 +168,7 @@ export default function RemarksPage() {
                   due_date: ans.due_date,
                   question_id: questionId,
                   question_text_ru: group.question_text_ru,
+                  question_text_kg: group.question_text_kg,
                 }));
               
               allProcessedRemarks.push(...processedAnswers);
@@ -253,22 +261,25 @@ export default function RemarksPage() {
     const uniqueQuestions = useMemo(() => {
       const questions = localRemarks
         .filter((item) => {
-          const hasText = !!item.question_text_ru;
+          const hasText = !!(item.question_text_ru || item.question_text_kg);
           const questionId = parseInt(item.question_id) || item.question_id;
           const hasValidId = [6, 13, 20].includes(questionId);
           return hasText && hasValidId;
         })
         .map((item) => ({
           id: parseInt(item.question_id) || item.question_id,
-          text: item.question_text_ru.replace(/^\d+\.\s*/, "")
+          text: language === 'ky' 
+            ? (item.question_text_kg || item.question_text_ru || '').replace(/^\d+\.\s*/, "")
+            : (item.question_text_ru || item.question_text_kg || '').replace(/^\d+\.\s*/, "")
         }))
         .filter((question, index, array) => 
           array.findIndex(q => q.id === question.id) === index
         )
         .sort((a, b) => a.id - b.id);
       
-      return [{ id: "all", text: "Все ответы" }, ...questions];
-    }, [localRemarks]);
+      const allText = language === 'ky' ? 'Бардык жооптор' : 'Все ответы';
+      return [{ id: "all", text: allText }, ...questions];
+    }, [localRemarks, language]);
 
   const filteredRemarks = useMemo(() => {
     return localRemarks.filter((item) => {
@@ -291,19 +302,24 @@ export default function RemarksPage() {
     
     // Если есть текст вопроса, показываем его
     if (questionText) {
-      return `Вопрос ${questionId}: ${questionText}`;
+      const questionLabel = language === 'ky' ? 'Суроо' : 'Вопрос';
+      return `${questionLabel} ${questionId}: ${questionText}`;
     }
     
     // Если нет текста, показываем базовое описание
+    const questionLabel = language === 'ky' ? 'Суроо' : 'Вопрос';
     switch (questionId) {
       case 6:
-        return `Вопрос ${questionId}: Замечания и предложения`;
+        const text6 = language === 'ky' ? 'Эскертүүлөр жана сунуштар' : 'Замечания и предложения';
+        return `${questionLabel} ${questionId}: ${text6}`;
       case 13:
-        return `Вопрос ${questionId}: Дополнительные замечания`;
+        const text13 = language === 'ky' ? 'Кошумча эскертүүлөр' : 'Дополнительные замечания';
+        return `${questionLabel} ${questionId}: ${text13}`;
       case 20:
-        return `Вопрос ${questionId}: Общие комментарии`;
+        const text20 = language === 'ky' ? 'Жалпы комментарийлер' : 'Общие комментарии';
+        return `${questionLabel} ${questionId}: ${text20}`;
       default:
-        return `Вопрос ${questionId}`;
+        return `${questionLabel} ${questionId}`;
     }
   };
 
@@ -340,6 +356,18 @@ export default function RemarksPage() {
     });
   };
 
+  const formatDateTime = (dateString: string) => {
+    if (!dateString) return "—";
+    const date = new Date(dateString);
+    return date.toLocaleString(language === "ru" ? "ru-RU" : "en-US", {
+      year: "2-digit",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const getDueDateStatus = (dueDate: string) => {
     if (!dueDate) return "";
     const today = new Date();
@@ -359,7 +387,8 @@ export default function RemarksPage() {
   };
 
   const handleMessageMouseEnter = (e: React.MouseEvent<HTMLDivElement>, item: any) => {
-    const text = getQuestionTooltip(item?.question_id, item?.question_text_ru);
+    const questionText = language === 'ky' ? item?.question_text_kg : item?.question_text_ru;
+    const text = getQuestionTooltip(item?.question_id, questionText);
     if (!text) return;
     setTooltip({ text, x: e.clientX + 12, y: e.clientY + 12 });
   };
@@ -535,8 +564,11 @@ export default function RemarksPage() {
                     <th scope="col" className="w-1/6 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
                       {getTranslation("RemarksLogic_DueDate", language)}
                     </th>
-                    <th scope="col" className="w-1/6 px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      {getTranslation("RemarksLogic_Actions", language)}
+                    <th scope="col" className="w-32 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-r border-gray-200">
+                      {getTranslation("RemarksLogic_CreatedDate", language)}
+                    </th>
+                    <th scope="col" className="w-24 px-2 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      {language === 'ky' ? 'АКЦИЯ' : 'ДЕЙСТВИЯ'}
                     </th>
                   </tr>
                 </thead>
@@ -580,12 +612,18 @@ export default function RemarksPage() {
                           {formatDate(item.due_date)}
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-center">
+                      <td className="w-32 px-6 py-4 text-sm text-gray-700 text-center border-r border-gray-200">
+                        <div className="whitespace-nowrap text-xs" title={formatDateTime(item.comment_created_at)}>
+                          {formatDateTime(item.comment_created_at)}
+                        </div>
+                      </td>
+                      <td className="w-24 px-2 py-4 text-center">
                         <button
                           onClick={() => handleCommentClick(item)}
-                          className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200"
+                          className="flex items-center justify-center w-full text-blue-600 hover:text-blue-800 transition-colors duration-200"
+                          title={getTranslation("RemarksLogic_Comment", language)}
                         >
-                          {getTranslation("RemarksLogic_Comment", language)}
+                          <MessageSquare size={16} />
                         </button>
                       </td>
                     </tr>
